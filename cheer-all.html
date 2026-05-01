@@ -1,0 +1,1119 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>All hands present — Noon Academy</title>
+<style>
+/* ─── INLINED Noon brand tokens (subset used by this file) ─────────────
+   Original lives at noon-academy-design-system-main/project/colors_and_type.css.
+   Inlined here so the file is portable when moved.                       */
+@import url('https://fonts.googleapis.com/css2?family=Crimson+Pro:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500&family=Work+Sans:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap');
+
+:root {
+  /* core palette */
+  --void:      #0a0f1a;
+  --void-2:    #10172a;
+  --void-3:    #1a2236;
+  --ink:       #0a0f1a;
+
+  /* gold (signal — arrival moments only) */
+  --gold:      #c9a227;
+  --gold-2:    #e0b83a;
+
+  /* foreground (chalk on void) */
+  --chalk:     #e8e4dc;
+  --fg-1:      rgba(232,228,220,1.00);
+  --fg-2:      rgba(232,228,220,0.70);
+  --fg-3:      rgba(232,228,220,0.45);
+
+  /* rules (border opacities) */
+  --rule:      rgba(232,228,220,0.08);
+  --rule-2:    rgba(232,228,220,0.14);
+  --rule-gold: rgba(201,162,39,0.35);
+
+  /* semantic surfaces (default = void) */
+  --bg:        var(--void);
+  --bg-2:      var(--void-2);
+  --bg-3:      var(--void-3);
+  --fg:        var(--fg-1);
+  --fg-muted:  var(--fg-2);
+  --fg-faint:  var(--fg-3);
+
+  /* heritage brand */
+  --noon:       #64D8AE;
+  --noon-2:     #7FE3BE;
+  --noon-deep:  #3FAE87;
+  --noon-ink:   #0a3326;
+  --iris:       #B08AF9;
+  --focus:      #6BA3FF;
+
+  /* type stacks */
+  --font-serif: 'Crimson Pro', 'GT Super', Georgia, serif;
+  --font-sans:  'Work Sans', 'Inter', ui-sans-serif, system-ui, sans-serif;
+  --font-mono:  'JetBrains Mono', ui-monospace, 'SF Mono', Menlo, monospace;
+
+  --tracking-caps: 0.14em;
+
+  /* motion */
+  --ease: cubic-bezier(0.22, 0.61, 0.36, 1);
+}
+
+html, body {
+  background: var(--bg);
+  color: var(--fg);
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+  margin: 0;
+}
+
+/* ─── PAGE FRAME ─────────────────────────────────────────────────────── */
+*,*::before,*::after { margin:0; padding:0; box-sizing:border-box; }
+body {
+  background: #06080f;                     /* one shade deeper than --void, for the plate to sit on */
+  display:flex; align-items:center; justify-content:center;
+  min-height:100vh; overflow:hidden;
+  font-family: var(--font-sans);
+}
+
+/* ─── STAGE — the atlas plate ───────────────────────────────────────── */
+.stage {
+  position:relative;
+  width:960px; height:540px;
+  background: var(--void);
+  /* faint cartographic gold grid, major-lines only — the surveyor's paper */
+  background-image:
+    linear-gradient(to right,  rgba(201,162,39,0.05) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(201,162,39,0.05) 1px, transparent 1px);
+  background-size: 64px 64px, 64px 64px;
+  border-radius: 4px;                      /* engineered corner, never soft */
+  box-shadow: 0 0 0 1px var(--rule-2), 0 40px 80px -30px rgba(0,0,0,0.85);
+  overflow:hidden;
+  opacity:0; animation: stageFadeIn 600ms var(--ease) forwards;
+  color: var(--chalk);
+}
+@keyframes stageFadeIn { from{opacity:0;transform:translateY(6px)} to{opacity:1;transform:none} }
+
+/* faint dashed atlas frame inside the stage */
+.stage::before {
+  content:""; position:absolute; inset:14px;
+  border:1px dashed var(--rule-2);
+  pointer-events:none;
+}
+
+/* ─── TOPOGRAPHIC CONTOUR LANDSCAPE ──────────────────────────────────
+   Stroke-only contour lines forming an abstract dune topography
+   behind the cluster. Five rings around A (innermost gold = summit
+   highlight), three each around B/C, single low horizon sweep.
+   No fills, no blur, no glow — pure cartographic line work. */
+.topo-layer {
+  position:absolute; inset:0;
+  width:100%; height:100%;
+  pointer-events:none;
+  opacity:0;
+  animation: topoFadeIn 1800ms 200ms ease forwards;
+}
+@keyframes topoFadeIn { to { opacity: 1; } }
+
+.topo-layer ellipse,
+.topo-layer path {
+  fill: none;
+  stroke-width: 1;
+  vector-effect: non-scaling-stroke;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+/* Terrain bands — dense topographic contours sharing one 3-peak
+   dune profile. Gap spacing follows the design system pattern:
+   denser at elevation transitions, sparser on flats. Per-band
+   opacity baked into the stroke alpha (computed from gap-to-next).   */
+.topo-band {
+  fill: none;
+  stroke-width: 0.8;
+  vector-effect: non-scaling-stroke;
+  stroke-linecap: round;
+  opacity: 0;
+  animation: terrainFadeIn 1400ms 400ms ease forwards;
+}
+@keyframes terrainFadeIn { to { opacity: 1; } }
+
+/* Waypoint route — gold dashed meander connecting the 3 ranks */
+.waypoint-route {
+  fill: none;
+  stroke: var(--gold-2);
+  stroke-width: 1;
+  stroke-dasharray: 4 3;
+  vector-effect: non-scaling-stroke;
+  stroke-linecap: round;
+  opacity: 0;
+  animation: routeFadeIn 1200ms 1800ms ease forwards;
+}
+@keyframes routeFadeIn { to { opacity: 0.42; } }
+
+/* Waypoint markers — diamond shapes at each rank position.
+   B/C are 'passed' (filled gold + small inner dot); A is 'current'
+   (filled gold + 4 surrounding crosshair tick marks). Each pops in
+   200ms before its avatar drops.                                   */
+.waypoint-marker {
+  opacity: 0;
+  transform-box: fill-box;
+  transform-origin: center;
+  transform: scale(0);
+}
+.waypoint-marker-a { animation: markerPop 420ms 2000ms cubic-bezier(0.34, 1.6, 0.64, 1) forwards; }
+.waypoint-marker-b { animation: markerPop 420ms 2220ms cubic-bezier(0.34, 1.6, 0.64, 1) forwards; }
+.waypoint-marker-c { animation: markerPop 420ms 2440ms cubic-bezier(0.34, 1.6, 0.64, 1) forwards; }
+@keyframes markerPop {
+  0%   { opacity: 0; transform: scale(0); }
+  60%  { opacity: 1; transform: scale(1.18); }
+  100% { opacity: 1; transform: scale(1); }
+}
+
+/* ─── PARTICLES CANVAS (replaces confetti) ──────────────────────────── */
+#particleCanvas { position:absolute; inset:0; pointer-events:none; z-index:60; }
+
+/* ─── MAST: PLATE TITLE + SKIP ──────────────────────────────────────── */
+.mast {
+  position:absolute; top:24px; left:32px; right:32px;
+  display:flex; align-items:center; justify-content:space-between;
+  z-index:80;
+}
+.mast-id {
+  display:inline-flex; align-items:center; gap:10px;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: var(--tracking-caps);
+  text-transform: uppercase;
+  color: var(--fg-3);
+}
+.mast-id .dot { width:4px; height:4px; background: var(--gold-2); transform: rotate(45deg); }
+.mast-id b   { color: var(--fg-2); font-weight:500; }
+
+/* secondary button (matches components-buttons.html .secondary) */
+.skip-btn {
+  font-family: var(--font-sans); font-size: 12px; font-weight:600;
+  letter-spacing: var(--tracking-caps); text-transform: uppercase;
+  height: 30px; padding: 0 14px;
+  background: transparent;
+  color: var(--fg-2);
+  box-shadow: inset 0 0 0 1px var(--rule-2);
+  border: 0; border-radius: 3px; cursor: pointer;
+  display:inline-flex; align-items:center; gap:8px;
+  transition: all 160ms var(--ease);
+  opacity:0; animation: fadeIn 320ms 200ms var(--ease) forwards;
+}
+.skip-btn:hover { color: var(--chalk); box-shadow: inset 0 0 0 1px rgba(232,228,220,.5); }
+.skip-btn svg { width:10px; height:10px; stroke: currentColor; stroke-width:1.5; fill:none; }
+
+/* ─── MAIN STAT BLOCK ───────────────────────────────────────────────── */
+.stat-block {
+  position:absolute; left:56px; top:96px;
+  opacity:0; transform:scale(.85);
+  animation: statReveal 520ms 500ms cubic-bezier(0.34,1.45,0.64,1) forwards;
+}
+@keyframes statReveal {
+  0%   { opacity:0; transform:scale(.85); }
+  60%  { opacity:1; transform:scale(1.04); }
+  100% { opacity:1; transform:scale(1); }
+}
+.stat-eyebrow {
+  font-family: var(--font-sans); font-size: 11px;
+  letter-spacing: var(--tracking-caps); text-transform: uppercase;
+  font-weight:600; color: var(--gold-2);
+  display:inline-flex; align-items:center; gap:10px;
+  margin-bottom: 18px;
+}
+.stat-eyebrow::before { content:""; width:24px; height:1px; background:var(--gold-2); }
+
+.stat-percent {
+  font-family: var(--font-serif);
+  font-weight:500; font-size: 72px;
+  letter-spacing: -0.02em; line-height: .94;
+  color: var(--noon);
+}
+.stat-percent .pct {
+  font-family: var(--font-serif);
+  font-style: italic;
+  font-size: 42px;
+  color: var(--noon-2);
+  letter-spacing:0;
+  vertical-align: 16px;
+  margin-left: 4px;
+}
+.stat-subtext {
+  font-family: var(--font-serif);
+  font-style: italic;
+  font-weight: 400; font-size: 16px;
+  color: var(--fg-2);
+  margin-top: 16px;
+  max-width: 18ch;
+  opacity:0; animation: fadeIn 400ms 950ms ease forwards;
+}
+
+/* ─── TERRAIN COLUMNS (replaces 3D podiums) ─────────────────────────── */
+/* Each column is a vertical band of dashed contour lines + a solid
+   "elevation" cap at the top where the avatar lands. Heights differ
+   so the silhouette still reads as 1-2-3 ranking.                    */
+.podium-wrap { position:absolute; inset:0; pointer-events:none; }
+.terrain {
+  position:absolute;
+  display:flex; flex-direction:column; align-items:center;
+  opacity:0;
+  width: 160px;
+}
+/* INSIDE-TERRAIN class label — sits between avatar and ground line */
+.terrain .class-label {
+  display:flex; flex-direction:column; align-items:center; gap:4px;
+  margin-bottom: 10px;
+  opacity: 0;
+}
+.terrain .ground {
+  width: 160px; height: 1px;
+  background: var(--rule-2);
+  position:relative;
+}
+.terrain .ground::before,
+.terrain .ground::after {
+  content:""; position:absolute; top:-3px; width:1px; height:6px; background: var(--rule-2);
+}
+.terrain .ground::before { left:0; }
+.terrain .ground::after  { right:0; }
+
+.terrain .stripes {
+  width: 160px;
+  display:flex; flex-direction:column; gap:6px;
+  margin-top: 8px;
+}
+.terrain .stripe {
+  height:1px; background: var(--rule);
+  transform-origin:center; transform:scaleX(0);
+}
+.terrain .stripes .stripe:nth-child(1){ width:88%;  align-self:center; }
+.terrain .stripes .stripe:nth-child(2){ width:60%;  align-self:center; }
+.terrain .stripes .stripe:nth-child(3){ width:32%;  align-self:center; }
+
+/* Coord text overlaps the stripes — like a topographic contour label
+   punching through the contour line. The label has a void background
+   so it visually "breaks" the stripe behind it. */
+.terrain .stripes { position: relative; }
+.terrain .coord {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  font-family: var(--font-mono); font-size: 9.5px;
+  letter-spacing: .10em; text-transform: uppercase;
+  color: var(--fg-3);
+  white-space: nowrap;
+  background: var(--void);
+  padding: 0 6px;
+  pointer-events: none;
+}
+.terrain .coord b { color: var(--fg-2); font-weight:500; }
+
+/* Anchored 14px below each avatar, centered on the avatar.
+   Three groups packed close as the central focus of the screen. */
+.terrain-1 { left: 400px; top: 276px;
+  animation: terrainRise 700ms 1200ms cubic-bezier(0.34,1.2,0.64,1) forwards; }
+.terrain-2 { left: 217px; top: 332px;
+  animation: terrainRise 700ms 1500ms cubic-bezier(0.34,1.2,0.64,1) forwards; }
+.terrain-3 { left: 583px; top: 346px;
+  animation: terrainRise 700ms 1750ms cubic-bezier(0.34,1.2,0.64,1) forwards; }
+
+@keyframes terrainRise {
+  0%   { opacity:0; transform: translateY(20px); }
+  60%  { opacity:1; }
+  100% { opacity:1; transform: translateY(0); }
+}
+/* ── Medal palette: gold / silver / bronze ──
+   Gold is a brand signal token. Silver + bronze are tuned to sit
+   alongside it — cool muted for silver, warm earthy for bronze. */
+:root {
+  --silver:      #c5cad6;
+  --silver-2:    #8e96a8;
+  --silver-deep: #5e6678;
+  --bronze:      #c98a4a;
+  --bronze-2:    #a86c30;
+  --bronze-deep: #6d4318;
+}
+
+.terrain-1 .ground { height:1.5px; background: var(--gold); box-shadow: 0 0 12px rgba(224,184,58,0.35); }
+.terrain-1 .stripe { background: rgba(201,162,39,.22); }
+.terrain-2 .ground { height:1.5px; background: var(--silver-2); box-shadow: 0 0 8px rgba(142,150,168,0.24); }
+.terrain-2 .stripe { background: rgba(142,150,168,.22); }
+.terrain-3 .ground { height:1.5px; background: var(--bronze-2); box-shadow: 0 0 8px rgba(168,108,48,0.24); }
+.terrain-3 .stripe { background: rgba(168,108,48,.22); }
+
+/* dashed gold "you are here" indicator on the gold ground line */
+.you-are-here {
+  position:absolute; top:-9px; left:50%;
+  transform: translateX(-50%);
+  width: 1px; height: 12px;
+  background: var(--gold-2);
+}
+.you-are-here::after {
+  content:""; position:absolute; left:-3px; top:-3px;
+  width:7px; height:7px;
+  border:1px solid var(--gold-2);
+  transform: rotate(45deg);
+  background: var(--void);
+}
+
+/* stripe reveal animation, staggered per terrain */
+.terrain-1 .stripe { animation: stripeIn 320ms cubic-bezier(.22,.61,.36,1) forwards; }
+.terrain-2 .stripe { animation: stripeIn 320ms cubic-bezier(.22,.61,.36,1) forwards; }
+.terrain-3 .stripe { animation: stripeIn 320ms cubic-bezier(.22,.61,.36,1) forwards; }
+.terrain-1 .stripe:nth-child(1){ animation-delay:1300ms; }
+.terrain-1 .stripe:nth-child(2){ animation-delay:1380ms; }
+.terrain-1 .stripe:nth-child(3){ animation-delay:1460ms; }
+.terrain-1 .stripe:nth-child(4){ animation-delay:1540ms; }
+.terrain-1 .stripe:nth-child(5){ animation-delay:1620ms; }
+.terrain-2 .stripe:nth-child(1){ animation-delay:1600ms; }
+.terrain-2 .stripe:nth-child(2){ animation-delay:1680ms; }
+.terrain-2 .stripe:nth-child(3){ animation-delay:1760ms; }
+.terrain-2 .stripe:nth-child(4){ animation-delay:1840ms; }
+.terrain-2 .stripe:nth-child(5){ animation-delay:1920ms; }
+.terrain-3 .stripe:nth-child(1){ animation-delay:1850ms; }
+.terrain-3 .stripe:nth-child(2){ animation-delay:1930ms; }
+.terrain-3 .stripe:nth-child(3){ animation-delay:2010ms; }
+.terrain-3 .stripe:nth-child(4){ animation-delay:2090ms; }
+.terrain-3 .stripe:nth-child(5){ animation-delay:2170ms; }
+@keyframes stripeIn { from{transform:scaleX(0)} to{transform:scaleX(1)} }
+
+/* ─── AVATARS ───────────────────────────────────────────────────────── */
+.avatar { position:absolute; opacity:0; transform: translateY(-50px) scale(.85); overflow: visible; }
+.avatar-a { animation: avatarDrop 550ms 2200ms cubic-bezier(0.34,1.4,0.64,1) forwards; }
+.avatar-b { animation: avatarDrop 550ms 2420ms cubic-bezier(0.34,1.4,0.64,1) forwards; }
+.avatar-c { animation: avatarDrop 550ms 2640ms cubic-bezier(0.34,1.4,0.64,1) forwards; }
+@keyframes avatarDrop {
+  0%   { opacity:0; transform: translateY(-50px) scale(.85); }
+  55%  { opacity:1; transform: translateY(6px) scale(1.04); }
+  78%  { transform: translateY(-3px) scale(.99); }
+  100% { opacity:1; transform: translateY(0) scale(1); }
+}
+@keyframes avatarBreathe {
+  0%,100% { transform: translateY(0) scale(1); }
+  45%     { transform: translateY(-3px) scale(1.015); }
+}
+
+/* Identity disk — circular paper portrait with a medal-colored
+   outer ring. The line-art figure inside is tinted by its medal. */
+.identity {
+  position:relative; z-index:1;
+  display:flex; align-items:center; justify-content:center;
+  border-radius: 999px;
+  background: #fffcf2;                 /* warm paper, not pure white */
+  overflow: hidden;
+}
+.identity svg.figure { width:100%; height:100%; display:block; }
+
+.identity-1 {
+  width:118px; height:118px;
+  box-shadow:
+    inset 0 0 0 4px var(--gold-2),
+    inset 0 0 0 6px rgba(255,240,180,0.7),
+    0 18px 36px -18px rgba(201,162,39,0.55);
+}
+.identity-2 {
+  width: 88px; height: 88px;
+  box-shadow:
+    inset 0 0 0 3.5px var(--silver),
+    inset 0 0 0 5px rgba(255,255,255,0.65),
+    0 14px 28px -14px rgba(94,102,120,0.45);
+}
+.identity-3 {
+  width: 88px; height: 88px;
+  box-shadow:
+    inset 0 0 0 3.5px var(--bronze),
+    inset 0 0 0 5px rgba(255,224,190,0.6),
+    0 14px 28px -14px rgba(168,108,48,0.45);
+}
+
+/* Gold rank ring around 01 — dashed, slow rotation, follows the disk shape */
+.rank-ring {
+  position:absolute; inset:-14px;
+  border: 1px dashed var(--gold-2);
+  border-radius: 999px;
+  opacity:0; pointer-events:none; z-index:0;
+  box-shadow: 0 0 36px rgba(224,184,58,0.22), inset 0 0 16px rgba(224,184,58,0.10);
+}
+.rank-ring.active { animation: ringIn 320ms 3300ms ease forwards, ringSpin 26s 3700ms linear infinite; }
+@keyframes ringIn { to { opacity:1 } }
+@keyframes ringSpin { to { transform: rotate(360deg); } }
+
+/* ─── RANK PLATES ────────────────────────────────────────────────────
+   Replaces the gold/silver/bronze pill badges. Mono numerals "01/02/03"
+   set in surveyor caps on a chalk plate — gold for 1st (arrival), chalk
+   for the rest.                                                        */
+.rank-plate {
+  position:absolute; z-index:20;
+  font-family: var(--font-mono);
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  display:flex; align-items:center; justify-content:center;
+  border-radius: 999px;
+  opacity:0; pointer-events:none;
+}
+.rank-plate-1 {
+  width: 36px; height: 36px;
+  font-size: 14px;
+  color: var(--void);
+  background: radial-gradient(circle at 35% 30%, #ffe98a 0%, var(--gold-2) 60%, var(--gold) 100%);
+  box-shadow: inset 0 0 0 2px rgba(255,240,180,0.6), 0 4px 10px rgba(201,162,39,0.45);
+  right:-10px; top:-6px;
+  animation: badgePop 460ms 2300ms cubic-bezier(0.34,1.6,0.64,1) forwards;
+}
+.rank-plate-2 {
+  width: 30px; height: 30px;
+  font-size: 12px;
+  color: var(--void);
+  background: radial-gradient(circle at 35% 30%, #eef0f5 0%, var(--silver) 60%, var(--silver-2) 100%);
+  box-shadow: inset 0 0 0 2px rgba(255,255,255,0.5), 0 4px 10px rgba(94,102,120,0.40);
+  right:-8px; top:-6px;
+  animation: badgeFade 380ms 2530ms ease forwards;
+}
+.rank-plate-3 {
+  width: 30px; height: 30px;
+  font-size: 12px;
+  color: var(--void);
+  background: radial-gradient(circle at 35% 30%, #ecbf90 0%, var(--bronze) 60%, var(--bronze-2) 100%);
+  box-shadow: inset 0 0 0 2px rgba(255,224,190,0.5), 0 4px 10px rgba(168,108,48,0.40);
+  right:-8px; top:-6px;
+  animation: badgeFade 380ms 2750ms ease forwards;
+}
+@keyframes badgePop {
+  0%   { opacity:0; transform: scale(.5) translateY(-6px); }
+  55%  { opacity:1; transform: scale(1.18) translateY(0); }
+  100% { opacity:1; transform: scale(1); }
+}
+@keyframes badgeFade {
+  from { opacity:0; transform: translateY(-6px); }
+  to   { opacity:1; transform: translateY(0); }
+}
+
+/* ─── CLASS LABELS (now nested inside .terrain) ─────────────────────── */
+.class-pct {
+  font-family: var(--font-serif);
+  font-weight: 500;
+  letter-spacing: -0.02em;
+  line-height: 1;
+}
+.class-pct sup {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: .06em;
+  vertical-align: top;
+  margin-left: 2px;
+}
+.class-name {
+  font-family: var(--font-sans);
+  font-weight: 600;
+  letter-spacing: var(--tracking-caps);
+  text-transform: uppercase;
+  color: var(--fg-2);
+  font-size: 11px;
+}
+/* Bigger pct + medal color, scoped per terrain */
+.terrain-1 .class-pct { font-size: 28px; color: var(--gold-2); }
+.terrain-2 .class-pct { font-size: 22px; color: var(--silver); }
+.terrain-3 .class-pct { font-size: 22px; color: var(--bronze); }
+
+/* Stagger the class-label fade-in slightly after each terrain rises */
+.terrain-1 .class-label { animation: fadeIn 400ms 2380ms ease forwards; }
+.terrain-2 .class-label { animation: fadeIn 400ms 2580ms ease forwards; }
+.terrain-3 .class-label { animation: fadeIn 400ms 2780ms ease forwards; }
+
+/* ─── SURVEYOR FLAGS (replaces pennant emoji flags) ─────────────────── */
+.flag { position:absolute; opacity:0; animation: fadeIn 500ms 2500ms ease forwards; }
+.flag svg { display:block; stroke: currentColor; stroke-width:1.5; fill:none;
+  stroke-linecap: square; stroke-linejoin: miter; }
+.flag-a { left:556px; top:128px; color: var(--gold-2); animation-delay:2500ms; }
+.flag-c { left:738px; top:230px; color: var(--bronze); animation-delay:2900ms; }
+.flag .triangle { transform-origin: 1px 1px; }
+.flag-a .triangle { animation: flagWave 3.2s 3600ms ease-in-out infinite; }
+.flag-b .triangle { animation: flagWave 3.6s 3800ms ease-in-out infinite; }
+.flag-c .triangle { animation: flagWave 4.0s 4000ms ease-in-out infinite; }
+@keyframes flagWave {
+  0%,100% { transform: rotate(0deg) skewX(0deg); }
+  30%     { transform: rotate(6deg) skewX(2deg); }
+  70%     { transform: rotate(-3deg) skewX(-1deg); }
+}
+
+/* ─── CARTOGRAPHIC TICK MARKS (replaces ✦ sparkles) ─────────────────── */
+.tick {
+  position:absolute; pointer-events:none; opacity:0;
+  width:10px; height:10px;
+  animation: tickPulse var(--sp-dur) var(--sp-delay) ease-in-out infinite;
+}
+.tick svg { display:block; width:100%; height:100%;
+  stroke: currentColor; stroke-width:1.5; fill:none;
+  stroke-linecap: square; stroke-linejoin: miter; }
+@keyframes tickPulse {
+  0%,100% { opacity:0; transform: scale(.6); }
+  20%,80% { opacity:.85; transform: scale(1); }
+  50%     { opacity:.55; transform: scale(1.25); }
+}
+
+/* ─── BOTTOM CLASSROOM CARDS ───────────────────────────────────────── */
+.cards-row {
+  position:absolute; left:50%; bottom:22px;
+  transform: translateX(-50%) translateY(20px);
+  display:flex; gap: 14px; align-items:center;
+  opacity:0; animation: cardsUp 500ms 3100ms var(--ease) forwards;
+}
+@keyframes cardsUp {
+  from { opacity:0; transform: translateX(-50%) translateY(20px); }
+  to   { opacity:1; transform: translateX(-50%) translateY(0); }
+}
+.card {
+  display:flex; align-items:center; gap:10px;
+  padding: 5px 14px 5px 5px;
+  background: var(--bg-3);
+  box-shadow: inset 0 0 0 1px var(--rule-2);
+  border-radius: 999px;
+  min-width: 140px;
+}
+.card .ident {
+  width: 28px; height: 28px;
+  border-radius: 50%;
+  display:flex; align-items:center; justify-content:center;
+  font-family: var(--font-serif); font-size: 14px; font-weight: 500;
+  color: var(--void);
+  background: var(--chalk);
+  box-shadow: inset 0 0 0 1px rgba(232,228,220,0.4);
+  flex-shrink: 0;
+}
+/* assorted brand-tinted card avatars so they don't all feel identical */
+.card:nth-child(1) .ident { background: radial-gradient(circle at 30% 30%, #c1efdc, var(--noon)); }
+.card:nth-child(2) .ident { background: radial-gradient(circle at 30% 30%, #d6c5fb, var(--iris)); }
+.card:nth-child(3) .ident { background: radial-gradient(circle at 30% 30%, #f5d670, var(--gold-2)); color: var(--void); }
+.card:nth-child(4) .ident { background: radial-gradient(circle at 30% 30%, #b0d8ff, var(--focus)); }
+.card:nth-child(5) .ident { background: radial-gradient(circle at 30% 30%, #ecbf90, var(--bronze)); }
+.card-info { display:flex; flex-direction:column; gap: 3px; }
+.card-name {
+  font-family: var(--font-sans);
+  font-size: 11px; font-weight: 600;
+  letter-spacing: var(--tracking-caps);
+  text-transform: uppercase;
+  color: var(--fg-2);
+  line-height: 1;
+}
+.card-score {
+  font-family: var(--font-mono);
+  font-size: 13px;
+  color: var(--noon-2);
+  letter-spacing: .04em;
+  line-height: 1;
+}
+
+/* ─── COORDINATES STRIP (atlas footer) ──────────────────────────────── */
+.coords-strip {
+  position:absolute; bottom:14px; left:32px; right:32px;
+  display:flex; justify-content:space-between;
+  font-family: var(--font-mono); font-size: 10px;
+  letter-spacing: var(--tracking-caps); text-transform: uppercase;
+  color: var(--fg-3);
+  opacity:0; animation: fadeIn 500ms 3300ms ease forwards;
+  pointer-events:none;
+}
+
+/* ─── UTILITY ────────────────────────────────────────────────────────── */
+@keyframes fadeIn { from{opacity:0} to{opacity:1} }
+</style>
+</head>
+<body>
+<div class="stage" id="stage">
+
+  <!-- ── DUNE LANDSCAPE — TerrainPattern bands + Waypoints route ──
+       14 contour bands sharing a 3-peak dune profile (B,A,C), with
+       gap-driven density (denser at elevation transitions, sparser
+       on flats). Plus a gold dashed waypoint route across the dune
+       valleys with diamond markers at each rank position.            -->
+  <svg class="topo-layer" viewBox="0 0 960 540"
+       xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="none" aria-hidden="true">
+
+    <!-- ────── TERRAIN BANDS (14, generated from one base shape) ── -->
+    <path class="topo-band" d="M-20,450 C5.0,450 5.0,450 30,450 C55.0,450 55.0,450 80,450 C105.0,450 105.0,450 130,450 C155.0,450 155.0,448 180,448 C197.5,448 197.5,442 215,442 C237.5,442 237.5,432 260,432 C278.5,432 278.5,428 297,428 C318.5,428 318.5,434 340,434 C360.0,434 360.0,445 380,445 C400.0,445 400.0,440 420,440 C440.0,440 440.0,422 460,422 C470.0,422 470.0,412 480,412 C490.0,412 490.0,418 500,418 C520.0,418 520.0,432 540,432 C560.0,432 560.0,442 580,442 C600.0,442 600.0,438 620,438 C641.5,438 641.5,430 663,430 C681.5,430 681.5,436 700,436 C720.0,436 720.0,445 740,445 C765.0,445 765.0,449 790,449 C815.0,449 815.0,450 840,450 C865.0,450 865.0,450 890,450 C910.0,450 910.0,450 930,450 C955.0,450 955.0,450 980,450" stroke="rgba(232,228,220,0.108)"/>
+    <path class="topo-band" d="M-20,457 C5.0,457 5.0,457 30,457 C55.0,457 55.0,457 80,457 C105.0,457 105.0,457 130,457 C155.0,457 155.0,455 180,455 C197.5,455 197.5,449 215,449 C237.5,449 237.5,439 260,439 C278.5,439 278.5,435 297,435 C318.5,435 318.5,441 340,441 C360.0,441 360.0,452 380,452 C400.0,452 400.0,447 420,447 C440.0,447 440.0,429 460,429 C470.0,429 470.0,419 480,419 C490.0,419 490.0,425 500,425 C520.0,425 520.0,439 540,439 C560.0,439 560.0,449 580,449 C600.0,449 600.0,445 620,445 C641.5,445 641.5,437 663,437 C681.5,437 681.5,443 700,443 C720.0,443 720.0,452 740,452 C765.0,452 765.0,456 790,456 C815.0,456 815.0,457 840,457 C865.0,457 865.0,457 890,457 C910.0,457 910.0,457 930,457 C955.0,457 955.0,457 980,457" stroke="rgba(232,228,220,0.125)"/>
+    <path class="topo-band" d="M-20,466 C5.0,466 5.0,466 30,466 C55.0,466 55.0,466 80,466 C105.0,466 105.0,466 130,466 C155.0,466 155.0,464 180,464 C197.5,464 197.5,458 215,458 C237.5,458 237.5,448 260,448 C278.5,448 278.5,444 297,444 C318.5,444 318.5,450 340,450 C360.0,450 360.0,461 380,461 C400.0,461 400.0,456 420,456 C440.0,456 440.0,438 460,438 C470.0,438 470.0,428 480,428 C490.0,428 490.0,434 500,434 C520.0,434 520.0,448 540,448 C560.0,448 560.0,458 580,458 C600.0,458 600.0,454 620,454 C641.5,454 641.5,446 663,446 C681.5,446 681.5,452 700,452 C720.0,452 720.0,461 740,461 C765.0,461 765.0,465 790,465 C815.0,465 815.0,466 840,466 C865.0,466 865.0,466 890,466 C910.0,466 910.0,466 930,466 C955.0,466 955.0,466 980,466" stroke="rgba(232,228,220,0.100)"/>
+    <path class="topo-band" d="M-20,472 C5.0,472 5.0,472 30,472 C55.0,472 55.0,472 80,472 C105.0,472 105.0,472 130,472 C155.0,472 155.0,470 180,470 C197.5,470 197.5,464 215,464 C237.5,464 237.5,454 260,454 C278.5,454 278.5,450 297,450 C318.5,450 318.5,456 340,456 C360.0,456 360.0,467 380,467 C400.0,467 400.0,462 420,462 C440.0,462 440.0,444 460,444 C470.0,444 470.0,434 480,434 C490.0,434 490.0,440 500,440 C520.0,440 520.0,454 540,454 C560.0,454 560.0,464 580,464 C600.0,464 600.0,460 620,460 C641.5,460 641.5,452 663,452 C681.5,452 681.5,458 700,458 C720.0,458 720.0,467 740,467 C765.0,467 765.0,471 790,471 C815.0,471 815.0,472 840,472 C865.0,472 865.0,472 890,472 C910.0,472 910.0,472 930,472 C955.0,472 955.0,472 980,472" stroke="rgba(232,228,220,0.092)"/>
+    <path class="topo-band" d="M-20,477 C5.0,477 5.0,477 30,477 C55.0,477 55.0,477 80,477 C105.0,477 105.0,477 130,477 C155.0,477 155.0,475 180,475 C197.5,475 197.5,469 215,469 C237.5,469 237.5,459 260,459 C278.5,459 278.5,455 297,455 C318.5,455 318.5,461 340,461 C360.0,461 360.0,472 380,472 C400.0,472 400.0,467 420,467 C440.0,467 440.0,449 460,449 C470.0,449 470.0,439 480,439 C490.0,439 490.0,445 500,445 C520.0,445 520.0,459 540,459 C560.0,459 560.0,469 580,469 C600.0,469 600.0,465 620,465 C641.5,465 641.5,457 663,457 C681.5,457 681.5,463 700,463 C720.0,463 720.0,472 740,472 C765.0,472 765.0,476 790,476 C815.0,476 815.0,477 840,477 C865.0,477 865.0,477 890,477 C910.0,477 910.0,477 930,477 C955.0,477 955.0,477 980,477" stroke="rgba(232,228,220,0.083)"/>
+    <path class="topo-band" d="M-20,481 C5.0,481 5.0,481 30,481 C55.0,481 55.0,481 80,481 C105.0,481 105.0,481 130,481 C155.0,481 155.0,479 180,479 C197.5,479 197.5,473 215,473 C237.5,473 237.5,463 260,463 C278.5,463 278.5,459 297,459 C318.5,459 318.5,465 340,465 C360.0,465 360.0,476 380,476 C400.0,476 400.0,471 420,471 C440.0,471 440.0,453 460,453 C470.0,453 470.0,443 480,443 C490.0,443 490.0,449 500,449 C520.0,449 520.0,463 540,463 C560.0,463 560.0,473 580,473 C600.0,473 600.0,469 620,469 C641.5,469 641.5,461 663,461 C681.5,461 681.5,467 700,467 C720.0,467 720.0,476 740,476 C765.0,476 765.0,480 790,480 C815.0,480 815.0,481 840,481 C865.0,481 865.0,481 890,481 C910.0,481 910.0,481 930,481 C955.0,481 955.0,481 980,481" stroke="rgba(232,228,220,0.075)"/>
+    <path class="topo-band" d="M-20,484 C5.0,484 5.0,484 30,484 C55.0,484 55.0,484 80,484 C105.0,484 105.0,484 130,484 C155.0,484 155.0,482 180,482 C197.5,482 197.5,476 215,476 C237.5,476 237.5,466 260,466 C278.5,466 278.5,462 297,462 C318.5,462 318.5,468 340,468 C360.0,468 360.0,479 380,479 C400.0,479 400.0,474 420,474 C440.0,474 440.0,456 460,456 C470.0,456 470.0,446 480,446 C490.0,446 490.0,452 500,452 C520.0,452 520.0,466 540,466 C560.0,466 560.0,476 580,476 C600.0,476 600.0,472 620,472 C641.5,472 641.5,464 663,464 C681.5,464 681.5,470 700,470 C720.0,470 720.0,479 740,479 C765.0,479 765.0,483 790,483 C815.0,483 815.0,484 840,484 C865.0,484 865.0,484 890,484 C910.0,484 910.0,484 930,484 C955.0,484 955.0,484 980,484" stroke="rgba(232,228,220,0.075)"/>
+    <path class="topo-band" d="M-20,487 C5.0,487 5.0,487 30,487 C55.0,487 55.0,487 80,487 C105.0,487 105.0,487 130,487 C155.0,487 155.0,485 180,485 C197.5,485 197.5,479 215,479 C237.5,479 237.5,469 260,469 C278.5,469 278.5,465 297,465 C318.5,465 318.5,471 340,471 C360.0,471 360.0,482 380,482 C400.0,482 400.0,477 420,477 C440.0,477 440.0,459 460,459 C470.0,459 470.0,449 480,449 C490.0,449 490.0,455 500,455 C520.0,455 520.0,469 540,469 C560.0,469 560.0,479 580,479 C600.0,479 600.0,475 620,475 C641.5,475 641.5,467 663,467 C681.5,467 681.5,473 700,473 C720.0,473 720.0,482 740,482 C765.0,482 765.0,486 790,486 C815.0,486 815.0,487 840,487 C865.0,487 865.0,487 890,487 C910.0,487 910.0,487 930,487 C955.0,487 955.0,487 980,487" stroke="rgba(232,228,220,0.075)"/>
+    <path class="topo-band" d="M-20,490 C5.0,490 5.0,490 30,490 C55.0,490 55.0,490 80,490 C105.0,490 105.0,490 130,490 C155.0,490 155.0,488 180,488 C197.5,488 197.5,482 215,482 C237.5,482 237.5,472 260,472 C278.5,472 278.5,468 297,468 C318.5,468 318.5,474 340,474 C360.0,474 360.0,485 380,485 C400.0,485 400.0,480 420,480 C440.0,480 440.0,462 460,462 C470.0,462 470.0,452 480,452 C490.0,452 490.0,458 500,458 C520.0,458 520.0,472 540,472 C560.0,472 560.0,482 580,482 C600.0,482 600.0,478 620,478 C641.5,478 641.5,470 663,470 C681.5,470 681.5,476 700,476 C720.0,476 720.0,485 740,485 C765.0,485 765.0,489 790,489 C815.0,489 815.0,490 840,490 C865.0,490 865.0,490 890,490 C910.0,490 910.0,490 930,490 C955.0,490 955.0,490 980,490" stroke="rgba(232,228,220,0.083)"/>
+    <path class="topo-band" d="M-20,494 C5.0,494 5.0,494 30,494 C55.0,494 55.0,494 80,494 C105.0,494 105.0,494 130,494 C155.0,494 155.0,492 180,492 C197.5,492 197.5,486 215,486 C237.5,486 237.5,476 260,476 C278.5,476 278.5,472 297,472 C318.5,472 318.5,478 340,478 C360.0,478 360.0,489 380,489 C400.0,489 400.0,484 420,484 C440.0,484 440.0,466 460,466 C470.0,466 470.0,456 480,456 C490.0,456 490.0,462 500,462 C520.0,462 520.0,476 540,476 C560.0,476 560.0,486 580,486 C600.0,486 600.0,482 620,482 C641.5,482 641.5,474 663,474 C681.5,474 681.5,480 700,480 C720.0,480 720.0,489 740,489 C765.0,489 765.0,493 790,493 C815.0,493 815.0,494 840,494 C865.0,494 865.0,494 890,494 C910.0,494 910.0,494 930,494 C955.0,494 955.0,494 980,494" stroke="rgba(232,228,220,0.092)"/>
+    <path class="topo-band" d="M-20,499 C5.0,499 5.0,499 30,499 C55.0,499 55.0,499 80,499 C105.0,499 105.0,499 130,499 C155.0,499 155.0,497 180,497 C197.5,497 197.5,491 215,491 C237.5,491 237.5,481 260,481 C278.5,481 278.5,477 297,477 C318.5,477 318.5,483 340,483 C360.0,483 360.0,494 380,494 C400.0,494 400.0,489 420,489 C440.0,489 440.0,471 460,471 C470.0,471 470.0,461 480,461 C490.0,461 490.0,467 500,467 C520.0,467 520.0,481 540,481 C560.0,481 560.0,491 580,491 C600.0,491 600.0,487 620,487 C641.5,487 641.5,479 663,479 C681.5,479 681.5,485 700,485 C720.0,485 720.0,494 740,494 C765.0,494 765.0,498 790,498 C815.0,498 815.0,499 840,499 C865.0,499 865.0,499 890,499 C910.0,499 910.0,499 930,499 C955.0,499 955.0,499 980,499" stroke="rgba(232,228,220,0.108)"/>
+    <path class="topo-band" d="M-20,506 C5.0,506 5.0,506 30,506 C55.0,506 55.0,506 80,506 C105.0,506 105.0,506 130,506 C155.0,506 155.0,504 180,504 C197.5,504 197.5,498 215,498 C237.5,498 237.5,488 260,488 C278.5,488 278.5,484 297,484 C318.5,484 318.5,490 340,490 C360.0,490 360.0,501 380,501 C400.0,501 400.0,496 420,496 C440.0,496 440.0,478 460,478 C470.0,478 470.0,468 480,468 C490.0,468 490.0,474 500,474 C520.0,474 520.0,488 540,488 C560.0,488 560.0,498 580,498 C600.0,498 600.0,494 620,494 C641.5,494 641.5,486 663,486 C681.5,486 681.5,492 700,492 C720.0,492 720.0,501 740,501 C765.0,501 765.0,505 790,505 C815.0,505 815.0,506 840,506 C865.0,506 865.0,506 890,506 C910.0,506 910.0,506 930,506 C955.0,506 955.0,506 980,506" stroke="rgba(232,228,220,0.133)"/>
+    <path class="topo-band" d="M-20,516 C5.0,516 5.0,516 30,516 C55.0,516 55.0,516 80,516 C105.0,516 105.0,516 130,516 C155.0,516 155.0,514 180,514 C197.5,514 197.5,508 215,508 C237.5,508 237.5,498 260,498 C278.5,498 278.5,494 297,494 C318.5,494 318.5,500 340,500 C360.0,500 360.0,511 380,511 C400.0,511 400.0,506 420,506 C440.0,506 440.0,488 460,488 C470.0,488 470.0,478 480,478 C490.0,478 490.0,484 500,484 C520.0,484 520.0,498 540,498 C560.0,498 560.0,508 580,508 C600.0,508 600.0,504 620,504 C641.5,504 641.5,496 663,496 C681.5,496 681.5,502 700,502 C720.0,502 720.0,511 740,511 C765.0,511 765.0,515 790,515 C815.0,515 815.0,516 840,516 C865.0,516 865.0,516 890,516 C910.0,516 910.0,516 930,516 C955.0,516 955.0,516 980,516" stroke="rgba(232,228,220,0.183)"/>
+    <path class="topo-band" d="M-20,532 C5.0,532 5.0,532 30,532 C55.0,532 55.0,532 80,532 C105.0,532 105.0,532 130,532 C155.0,532 155.0,530 180,530 C197.5,530 197.5,524 215,524 C237.5,524 237.5,514 260,514 C278.5,514 278.5,510 297,510 C318.5,510 318.5,516 340,516 C360.0,516 360.0,527 380,527 C400.0,527 400.0,522 420,522 C440.0,522 440.0,504 460,504 C470.0,504 470.0,494 480,494 C490.0,494 490.0,500 500,500 C520.0,500 520.0,514 540,514 C560.0,514 560.0,524 580,524 C600.0,524 600.0,520 620,520 C641.5,520 641.5,512 663,512 C681.5,512 681.5,518 700,518 C720.0,518 720.0,527 740,527 C765.0,527 765.0,531 790,531 C815.0,531 815.0,532 840,532 C865.0,532 865.0,532 890,532 C910.0,532 910.0,532 930,532 C955.0,532 955.0,532 980,532" stroke="rgba(232,228,220,0.183)"/>
+
+    <!-- ────── WAYPOINT ROUTE — rises over each peak summit ──────
+         Single meandering cubic-bezier path. Starts in left valley,
+         curves up to B summit, dips to valley, climbs to A summit
+         (highest), dips again, climbs to C summit, descends right.   -->
+    <path class="waypoint-route"
+          d="M -20 490
+             C 80 485, 200 460, 297 428
+             C 350 470, 410 460, 480 412
+             C 540 462, 600 470, 663 430
+             C 770 460, 880 488, 980 490"/>
+
+    <!-- ────── WAYPOINT MARKERS — diamonds at each peak summit ──
+         A is 'current' (gold + crosshairs), B/C are 'passed' (filled
+         gold diamonds with small inner dots).                        -->
+
+    <!-- B passed marker at (297, 428) -->
+    <g class="waypoint-marker waypoint-marker-b">
+      <rect x="293" y="424" width="8" height="8"
+            transform="rotate(45 297 428)" fill="#e0b83a"/>
+      <circle cx="297" cy="428" r="1.5" fill="#0a0f1a"/>
+    </g>
+
+    <!-- C passed marker at (663, 430) -->
+    <g class="waypoint-marker waypoint-marker-c">
+      <rect x="659" y="426" width="8" height="8"
+            transform="rotate(45 663 430)" fill="#e0b83a"/>
+      <circle cx="663" cy="430" r="1.5" fill="#0a0f1a"/>
+    </g>
+
+    <!-- A current marker at (480, 412) — gold diamond + 4 crosshair ticks -->
+    <g class="waypoint-marker waypoint-marker-a">
+      <rect x="476" y="408" width="8" height="8"
+            transform="rotate(45 480 412)" fill="#e0b83a"/>
+      <line x1="480" y1="400" x2="480" y2="405" stroke="#e0b83a" stroke-width="0.75"/>
+      <line x1="480" y1="419" x2="480" y2="424" stroke="#e0b83a" stroke-width="0.75"/>
+      <line x1="468" y1="412" x2="473" y2="412" stroke="#e0b83a" stroke-width="0.75"/>
+      <line x1="487" y1="412" x2="492" y2="412" stroke="#e0b83a" stroke-width="0.75"/>
+    </g>
+  </svg>
+
+  <!-- particles canvas (subtle brand confetti) -->
+  <canvas id="particleCanvas" width="960" height="540"></canvas>
+
+  <!-- ── MAST ───────────────────────────────────────────────── -->
+  <div class="mast">
+    <div class="mast-id">
+      <span class="dot"></span>
+      <span>Plate 14 ·</span>
+      <b>All hands present</b>
+    </div>
+    <button class="skip-btn" id="skipBtn">
+      <span>Skip</span>
+      <svg viewBox="0 0 14 14"><path d="M3 7h8M8 4l3 3-3 3"/></svg>
+    </button>
+  </div>
+
+  <!-- ── STAT ─────────────────────────────────────────────── -->
+  <div class="stat-block">
+    <div class="stat-eyebrow">Crew average</div>
+    <div class="stat-percent">90<span class="pct">%</span></div>
+    <div class="stat-subtext">All crews arrived.</div>
+  </div>
+
+  <!-- ── TERRAIN COLUMNS — 1st (center), 2nd (left), 3rd (right) ─ -->
+  <div class="podium-wrap">
+    <div class="terrain terrain-1">
+      <div class="class-label">
+        <span class="class-pct">97<sup>%</sup></span>
+        <span class="class-name">Class A</span>
+      </div>
+      <div class="ground"></div>
+      <div class="stripes">
+        <div class="stripe"></div>
+        <div class="stripe"></div>
+        <div class="stripe"></div>
+        <div class="coord"><b>N 24°28′</b> · 97 of 100</div>
+      </div>
+    </div>
+
+    <div class="terrain terrain-2">
+      <div class="class-label">
+        <span class="class-pct">94<sup>%</sup></span>
+        <span class="class-name">Class B</span>
+      </div>
+      <div class="ground"></div>
+      <div class="stripes">
+        <div class="stripe"></div>
+        <div class="stripe"></div>
+        <div class="stripe"></div>
+        <div class="coord"><b>N 24°22′</b> · 94 of 100</div>
+      </div>
+    </div>
+
+    <div class="terrain terrain-3">
+      <div class="class-label">
+        <span class="class-pct">91<sup>%</sup></span>
+        <span class="class-name">Class C</span>
+      </div>
+      <div class="ground"></div>
+      <div class="stripes">
+        <div class="stripe"></div>
+        <div class="stripe"></div>
+        <div class="stripe"></div>
+        <div class="coord"><b>N 24°19′</b> · 91 of 100</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── AVATAR A — 1st / center / GOLD keffiyeh + peace sign ─ -->
+  <div class="avatar avatar-a" id="avatarA" style="left:421px; top:144px;">
+    <div class="rank-ring active"></div>
+    <div class="identity identity-1">
+      <svg class="figure" viewBox="0 0 128 128" xmlns="http://www.w3.org/2000/svg">
+        <!-- left arm + peace sign hand -->
+        <path d="M30 110 Q22 80 26 56" stroke="#0a0f1a" stroke-width="2" fill="none" stroke-linecap="round"/>
+        <path d="M22 56 Q22 46 26 46 Q30 46 30 54" stroke="#0a0f1a" stroke-width="2" fill="none" stroke-linecap="round"/>
+        <path d="M28 50 Q28 40 32 40 Q36 40 36 50" stroke="#0a0f1a" stroke-width="2" fill="none" stroke-linecap="round"/>
+        <!-- right arm + coffee cup -->
+        <path d="M98 110 Q104 90 100 70" stroke="#0a0f1a" stroke-width="2" fill="none" stroke-linecap="round"/>
+        <rect x="92" y="56" width="14" height="16" rx="1" fill="#fff" stroke="#0a0f1a" stroke-width="1.8"/>
+        <path d="M93 60 L105 60" stroke="#0a0f1a" stroke-width="1.5" fill="none"/>
+        <!-- thobe (white robe) -->
+        <path d="M30 132 Q30 92 52 82 L76 82 Q98 92 98 132 Z"
+              fill="#fff" stroke="#0a0f1a" stroke-width="2"/>
+        <!-- collar slit -->
+        <path d="M64 82 L60 96 Q62 100 64 96 Q66 100 68 96 L64 82 Z" fill="#0a0f1a"/>
+        <!-- head -->
+        <ellipse cx="64" cy="48" rx="18" ry="20" fill="#fff" stroke="#0a0f1a" stroke-width="2"/>
+        <!-- keffiyeh drape (gold) -->
+        <path d="M46 38 Q46 22 64 22 Q82 22 82 38 L86 84 Q70 92 64 92 Q58 92 42 84 Z"
+              fill="#e0b83a" stroke="#0a0f1a" stroke-width="2"/>
+        <!-- iqal (black double headband) -->
+        <path d="M46 36 Q46 24 64 24 Q82 24 82 36" stroke="#0a0f1a" stroke-width="3" fill="none"/>
+        <path d="M46 40 Q46 28 64 28 Q82 28 82 40" stroke="#0a0f1a" stroke-width="1.5" fill="none"/>
+        <!-- small floating heart accent -->
+        <path d="M30 38 Q28 35 32 34 Q34 36 36 34 Q40 35 38 38 L34 42 Z" fill="#e0b83a" stroke="#0a0f1a" stroke-width="1.2"/>
+      </svg>
+    </div>
+    <div class="rank-plate rank-plate-1">01</div>
+  </div>
+
+  <!-- ── AVATAR B — 2nd / left / SILVER (red-pink) keffiyeh ─ -->
+  <div class="avatar avatar-b" id="avatarB" style="left:253px; top:230px;">
+    <div class="identity identity-2">
+      <svg class="figure" viewBox="0 0 128 128" xmlns="http://www.w3.org/2000/svg">
+        <!-- left arm raised in greeting -->
+        <path d="M30 108 Q24 80 28 60" stroke="#0a0f1a" stroke-width="2" fill="none" stroke-linecap="round"/>
+        <ellipse cx="24" cy="56" rx="6" ry="8" fill="#fff" stroke="#0a0f1a" stroke-width="1.8"/>
+        <!-- right arm raised -->
+        <path d="M98 108 Q104 80 100 58" stroke="#0a0f1a" stroke-width="2" fill="none" stroke-linecap="round"/>
+        <ellipse cx="104" cy="54" rx="6" ry="8" fill="#fff" stroke="#0a0f1a" stroke-width="1.8"/>
+        <!-- thobe -->
+        <path d="M30 132 Q30 92 52 82 L76 82 Q98 92 98 132 Z"
+              fill="#fff" stroke="#0a0f1a" stroke-width="2"/>
+        <!-- collar slit -->
+        <path d="M64 82 L60 96 Q62 100 64 96 Q66 100 68 96 L64 82 Z" fill="#0a0f1a"/>
+        <!-- head -->
+        <ellipse cx="64" cy="48" rx="18" ry="20" fill="#fff" stroke="#0a0f1a" stroke-width="2"/>
+        <!-- ghutra drape (red shemagh) -->
+        <path d="M46 38 Q46 22 64 22 Q82 22 82 38 L86 84 Q70 92 64 92 Q58 92 42 84 Z"
+              fill="#d97b85" stroke="#0a0f1a" stroke-width="2"/>
+        <!-- subtle shemagh pattern stripes -->
+        <path d="M48 44 L84 44 M48 52 L84 52 M48 60 L86 60 M48 68 L86 68"
+              stroke="rgba(10,15,26,0.18)" stroke-width="0.8" fill="none"/>
+        <!-- iqal -->
+        <path d="M46 36 Q46 24 64 24 Q82 24 82 36" stroke="#0a0f1a" stroke-width="3" fill="none"/>
+        <path d="M46 40 Q46 28 64 28 Q82 28 82 40" stroke="#0a0f1a" stroke-width="1.5" fill="none"/>
+      </svg>
+    </div>
+    <div class="rank-plate rank-plate-2">02</div>
+  </div>
+
+  <!-- ── AVATAR C — 3rd / right / BRONZE (orange) keffiyeh ─ -->
+  <div class="avatar avatar-c" id="avatarC" style="left:619px; top:244px;">
+    <div class="identity identity-3">
+      <svg class="figure" viewBox="0 0 128 128" xmlns="http://www.w3.org/2000/svg">
+        <!-- left arm peace sign -->
+        <path d="M30 108 Q22 80 26 58" stroke="#0a0f1a" stroke-width="2" fill="none" stroke-linecap="round"/>
+        <path d="M22 58 Q22 48 26 48 Q30 48 30 56" stroke="#0a0f1a" stroke-width="2" fill="none" stroke-linecap="round"/>
+        <path d="M28 52 Q28 42 32 42 Q36 42 36 52" stroke="#0a0f1a" stroke-width="2" fill="none" stroke-linecap="round"/>
+        <!-- right arm + coffee cup -->
+        <path d="M98 108 Q104 90 100 72" stroke="#0a0f1a" stroke-width="2" fill="none" stroke-linecap="round"/>
+        <rect x="92" y="58" width="14" height="16" rx="1" fill="#fff" stroke="#0a0f1a" stroke-width="1.8"/>
+        <path d="M93 62 L105 62" stroke="#0a0f1a" stroke-width="1.5" fill="none"/>
+        <!-- thobe -->
+        <path d="M30 132 Q30 92 52 82 L76 82 Q98 92 98 132 Z"
+              fill="#fff" stroke="#0a0f1a" stroke-width="2"/>
+        <!-- collar slit -->
+        <path d="M64 82 L60 96 Q62 100 64 96 Q66 100 68 96 L64 82 Z" fill="#0a0f1a"/>
+        <!-- head -->
+        <ellipse cx="64" cy="48" rx="18" ry="20" fill="#fff" stroke="#0a0f1a" stroke-width="2"/>
+        <!-- keffiyeh drape (orange) -->
+        <path d="M46 38 Q46 22 64 22 Q82 22 82 38 L86 84 Q70 92 64 92 Q58 92 42 84 Z"
+              fill="#e88c3c" stroke="#0a0f1a" stroke-width="2"/>
+        <!-- iqal -->
+        <path d="M46 36 Q46 24 64 24 Q82 24 82 36" stroke="#0a0f1a" stroke-width="3" fill="none"/>
+        <path d="M46 40 Q46 28 64 28 Q82 28 82 40" stroke="#0a0f1a" stroke-width="1.5" fill="none"/>
+        <!-- small floating heart accent -->
+        <path d="M30 38 Q28 35 32 34 Q34 36 36 34 Q40 35 38 38 L34 42 Z" fill="#e88c3c" stroke="#0a0f1a" stroke-width="1.2"/>
+      </svg>
+    </div>
+    <div class="rank-plate rank-plate-3">03</div>
+  </div>
+
+  <!-- ── SURVEYOR FLAGS — sparse: gold near 1st, bronze near 3rd ─ -->
+  <div class="flag flag-a">
+    <svg viewBox="0 0 28 60" width="28" height="60">
+      <line x1="1" y1="2" x2="1" y2="60"/>
+      <polyline class="triangle" points="1,4 22,10 1,16"/>
+    </svg>
+  </div>
+  <div class="flag flag-c">
+    <svg viewBox="0 0 22 44" width="22" height="44">
+      <line x1="1" y1="2" x2="1" y2="44"/>
+      <polyline class="triangle" points="1,4 16,8 1,12"/>
+    </svg>
+  </div>
+
+  <!-- ── CARTOGRAPHIC TICK MARKS (replaces sparkles) ─────────
+       Sparse scatter, gold-weighted near the 1st-place arrival   -->
+  <span class="tick" style="left:830px; top:165px; color: var(--noon-2); --sp-dur:2.8s; --sp-delay:3.3s;">
+    <svg viewBox="0 0 10 10"><path d="M5 1v8M1 5h8"/></svg>
+  </span>
+  <span class="tick" style="left:600px; top:96px; color: var(--gold-2); --sp-dur:2.2s; --sp-delay:3.5s;">
+    <svg viewBox="0 0 10 10"><path d="M5 1v8M1 5h8M2.5 2.5l5 5M2.5 7.5l5-5"/></svg>
+  </span>
+  <span class="tick" style="left:404px; top:130px; color: var(--gold); --sp-dur:3.0s; --sp-delay:4.6s;">
+    <svg viewBox="0 0 10 10"><path d="M5 1v8M1 5h8"/></svg>
+  </span>
+  <span class="tick" style="left:80px;  top:240px; color: var(--fg-3); --sp-dur:3.1s; --sp-delay:5.0s;">
+    <svg viewBox="0 0 10 10"><path d="M5 1v8M1 5h8"/></svg>
+  </span>
+
+  <!-- ── BOTTOM CLASSROOM CARDS ─────────────────────────────── -->
+  <div class="cards-row">
+    <div class="card"><div class="ident">D</div><div class="card-info"><div class="card-name">Crew Dune</div><div class="card-score">88%</div></div></div>
+    <div class="card"><div class="ident">E</div><div class="card-info"><div class="card-name">Crew Echo</div><div class="card-score">87%</div></div></div>
+    <div class="card"><div class="ident">F</div><div class="card-info"><div class="card-name">Crew Falaj</div><div class="card-score">85%</div></div></div>
+    <div class="card"><div class="ident">G</div><div class="card-info"><div class="card-name">Crew Gulf</div><div class="card-score">83%</div></div></div>
+    <div class="card"><div class="ident">H</div><div class="card-info"><div class="card-name">Crew Hejaz</div><div class="card-score">81%</div></div></div>
+  </div>
+
+
+</div><!-- /stage -->
+
+<script>
+/* =========================================================================
+   PARTICLE FIELD
+   Replaces the rainbow confetti with a subdued surveyor's-page particle:
+   chalk dots, faint gold dots, occasional cross-marks. Brand-only colors.
+   ========================================================================= */
+const canvas = document.getElementById('particleCanvas');
+const ctx    = canvas.getContext('2d');
+/* Brand-palette confetti: noon green + gold + silver + bronze + iris +
+   focus blue + chalk. Dense enough to read as celebration; shapes vary
+   between rectangles, circles, and surveyor cross-marks. */
+const COLORS = [
+  '#64D8AE',  '#7FE3BE',     /* noon green / hover  */
+  '#c9a227',  '#e0b83a',     /* gold / gold-2       */
+  '#c5cad6',  '#8e96a8',     /* silver              */
+  '#c98a4a',  '#a86c30',     /* bronze              */
+  '#B08AF9',                 /* iris                */
+  '#6BA3FF',                 /* focus blue          */
+  '#e8e4dc',                 /* chalk               */
+];
+let particles = [];
+let rafId;
+const t0 = performance.now();
+
+function mkP(x, intense) {
+  const s = intense ? Math.random()*9 + 4 : Math.random()*5 + 3;
+  return {
+    x: x ?? Math.random()*960,
+    y: -12,
+    vx: (Math.random()-0.5) * (intense ? 5 : 2.4),
+    vy: Math.random() * (intense ? 3.5 : 1.8) + (intense ? 1.4 : 0.6),
+    s,
+    ar: Math.random()*0.6 + 0.4,           /* aspect ratio for rectangle confetti */
+    col: COLORS[Math.random()*COLORS.length|0],
+    shape: Math.random(),                  /* <0.55 rect, <0.85 circle, else cross */
+    rot: Math.random()*Math.PI*2,
+    rv: (Math.random()-0.5)*0.18,
+    life: 1,
+    decay: Math.random()*0.005 + (intense ? 0.004 : 0.0022)
+  };
+}
+
+let lastSpawn = 0;
+function tick(now) {
+  const e = now - t0;
+  ctx.clearRect(0,0,960,540);
+
+  /* OPENING SHOWER — visible right when the stat lands */
+  if (e>200 && e<700  && now-lastSpawn>90)  { for(let i=0;i<5;i++) particles.push(mkP(null,false)); lastSpawn=now; }
+  /* ARRIVAL BURST — big shower around the 01 podium reveal */
+  if (e>2200 && e<4500 && now-lastSpawn>50) { for(let i=0;i<9;i++) particles.push(mkP(null,true));  lastSpawn=now; }
+  /* AMBIENT DRIFT afterwards */
+  if (e>4500 && now-lastSpawn>260)           { for(let i=0;i<2;i++) particles.push(mkP(null,false)); lastSpawn=now; }
+
+  particles = particles.filter(p => p.life>0.02 && p.y<560);
+  for (const p of particles) {
+    p.x += p.vx; p.y += p.vy;
+    p.vy += 0.045;                          /* gravity matches original */
+    p.rot += p.rv; p.life -= p.decay;
+    ctx.save();
+    ctx.globalAlpha = Math.max(0, p.life);
+    ctx.translate(p.x, p.y); ctx.rotate(p.rot);
+    ctx.strokeStyle = p.col;
+    ctx.fillStyle   = p.col;
+    if (p.shape < 0.55) {
+      /* rectangle confetti — the workhorse */
+      ctx.fillRect(-p.s/2, -p.s*p.ar/2, p.s, p.s*p.ar);
+    } else if (p.shape < 0.85) {
+      /* round confetti */
+      ctx.beginPath();
+      ctx.arc(0, 0, p.s/2, 0, Math.PI*2);
+      ctx.fill();
+    } else {
+      /* surveyor cross — keeps the cartographic accent */
+      const r = p.s * 0.55;
+      ctx.lineWidth = 1.4;
+      ctx.beginPath();
+      ctx.moveTo(-r, 0); ctx.lineTo(r, 0);
+      ctx.moveTo(0, -r); ctx.lineTo(0, r);
+      ctx.stroke();
+    }
+    ctx.restore();
+  }
+  rafId = requestAnimationFrame(tick);
+}
+requestAnimationFrame(tick);
+
+/* =========================================================================
+   AVATAR BREATHING (after drop completes)
+   ========================================================================= */
+function breathe(el, dur, delay) {
+  setTimeout(() => {
+    el.style.animation = `avatarBreathe ${dur}s ease-in-out infinite`;
+    el.style.opacity   = '1';
+    el.style.transform = 'translateY(0) scale(1)';
+  }, delay);
+}
+breathe(document.getElementById('avatarA'), 3.2, 2200+550);
+breathe(document.getElementById('avatarB'), 3.6, 2420+550);
+breathe(document.getElementById('avatarC'), 2.9, 2640+550);
+
+/* =========================================================================
+   AUDIO — Web Audio API only. Same scheduling shape as the original;
+   tones tightened to match the brand's institutional voice.
+   ========================================================================= */
+let audioCtx = null;
+const ANIM_START = performance.now();
+function getCtx() {
+  if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+  return audioCtx;
+}
+
+function playStatReveal() {
+  const ctx = getCtx(); if (!ctx || ctx.state==='closed') return;
+  const now = ctx.currentTime;
+
+  /* soft wood-tap pop */
+  const pop = ctx.createOscillator(), popG = ctx.createGain();
+  pop.type = 'triangle';
+  pop.frequency.setValueAtTime(280, now);
+  pop.frequency.exponentialRampToValueAtTime(140, now+0.10);
+  popG.gain.setValueAtTime(0, now);
+  popG.gain.linearRampToValueAtTime(0.34, now+0.008);
+  popG.gain.exponentialRampToValueAtTime(0.001, now+0.12);
+  pop.connect(popG); popG.connect(ctx.destination);
+  pop.start(now); pop.stop(now+0.14);
+
+  /* serene chime — D6, A6 (open fifth, austere) */
+  [1175, 1760].forEach((f, i) => {
+    const o = ctx.createOscillator(), g = ctx.createGain();
+    const t = now + 0.05 + i*0.09;
+    o.type = 'sine'; o.frequency.value = f;
+    g.gain.setValueAtTime(0, t);
+    g.gain.linearRampToValueAtTime(0.30 - i*0.06, t+0.02);
+    g.gain.exponentialRampToValueAtTime(0.001, t+0.95);
+    o.connect(g); g.connect(ctx.destination);
+    o.start(t); o.stop(t+1.0);
+  });
+}
+
+function playTerrainRise() {
+  const ctx = getCtx(); if (!ctx || ctx.state==='closed') return;
+  const now = ctx.currentTime;
+
+  /* low filtered-noise rise — the wind across the plate */
+  const len = ctx.sampleRate * 0.50;
+  const buf = ctx.createBuffer(1, len, ctx.sampleRate);
+  const d = buf.getChannelData(0);
+  for (let i=0;i<len;i++) d[i] = Math.random()*2-1;
+  const src = ctx.createBufferSource(); src.buffer = buf;
+
+  const bp = ctx.createBiquadFilter();
+  bp.type='bandpass'; bp.Q.value=1.4;
+  bp.frequency.setValueAtTime(110, now);
+  bp.frequency.exponentialRampToValueAtTime(520, now+0.40);
+
+  const g = ctx.createGain();
+  g.gain.setValueAtTime(0, now);
+  g.gain.linearRampToValueAtTime(0.22, now+0.06);
+  g.gain.setValueAtTime(0.18, now+0.30);
+  g.gain.exponentialRampToValueAtTime(0.001, now+0.50);
+
+  src.connect(bp); bp.connect(g); g.connect(ctx.destination);
+  src.start(now); src.stop(now+0.55);
+}
+
+function playArrival() {
+  const ctx = getCtx(); if (!ctx || ctx.state==='closed') return;
+  const now = ctx.currentTime;
+  /* austere arpeggio: D5 A5 D6 — perfect-fifth open intervals */
+  const notes = [587, 880, 1175];
+  const vols  = [0.26, 0.24, 0.30];
+  notes.forEach((f, i) => {
+    const t = now + i*0.10;
+    const o = ctx.createOscillator(), g = ctx.createGain();
+    o.type = 'sine'; o.frequency.value = f;
+    g.gain.setValueAtTime(0, t);
+    g.gain.linearRampToValueAtTime(vols[i], t+0.018);
+    g.gain.exponentialRampToValueAtTime(0.001, t+0.55);
+    o.connect(g); g.connect(ctx.destination);
+    o.start(t); o.stop(t+0.6);
+  });
+}
+
+const SOUND_CUES = [
+  { at: 500,  fn: playStatReveal,  fired:false },
+  { at: 1200, fn: playTerrainRise, fired:false },
+  { at: 2300, fn: playArrival,     fired:false },
+];
+function scheduleCues() {
+  const ctx = getCtx();
+  const elapsed = performance.now() - ANIM_START;
+  if (ctx.state === 'suspended') return;
+  SOUND_CUES.forEach(c => {
+    if (c.fired) return;
+    c.fired = true;
+    setTimeout(c.fn, Math.max(0, c.at - elapsed));
+  });
+}
+getCtx().resume().then(scheduleCues).catch(()=>{});
+function onFirstGesture(){ getCtx().resume().then(scheduleCues).catch(()=>{}); }
+document.addEventListener('pointerdown', onFirstGesture, { once:true });
+document.addEventListener('keydown',     onFirstGesture, { once:true });
+document.addEventListener('touchstart',  onFirstGesture, { once:true });
+
+/* =========================================================================
+   SKIP — fade and remove
+   ========================================================================= */
+document.getElementById('skipBtn').addEventListener('click', () => {
+  const stage = document.getElementById('stage');
+  try { window.parent && window.parent.postMessage('cheer-skip', '*'); } catch(e){}
+  try { if (audioCtx) audioCtx.close(); } catch(e){}
+  if (rafId) cancelAnimationFrame(rafId);
+  particles = [];
+  stage.style.transition = 'opacity 240ms ease, transform 240ms ease';
+  stage.style.opacity = '0';
+  stage.style.transform = 'scale(0.99)';
+  setTimeout(() => { stage.style.display = 'none'; }, 260);
+});
+</script>
+</body>
+</html>

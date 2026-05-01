@@ -1,0 +1,2111 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Hybrid Classroom — Presenter</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Crimson+Pro:wght@400;500;600&family=JetBrains+Mono:wght@400;500&family=Vazirmatn:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  /* ──────────────────────────────────────────────────────────────────────
+     TWEAK KNOBS — set as data-attributes on .app to adjust at runtime.
+     Edit the .app element in the HTML or via DevTools.
+
+     STAGE VIEW
+       data-stage-waypoint="off|on"                            (default: on)
+       data-stage-shape="circle|squircle"                      (default: circle)
+
+     DEFAULT VIEW
+       data-default-grid="off|subtle|both"                     (default: both)
+       data-default-canvas="paper|void"                        (default: paper)
+       data-default-roster="photo|initials"                    (default: photo)
+
+     BACKGROUND
+       data-bg-stars="sparse|medium|dense"                     (default: dense — all 65)
+       data-bg-star-glow="off|subtle|strong"                   (default: strong)
+       data-bg-northstar="off|on"                              (default: on)
+       data-bg-tone="void|iris|gold"                           (default: void)
+       data-bg-light="off|blue|gold"                           (default: blue)
+       data-bg-outlines="off|subtle|strong"                    (default: off)
+       data-bg-landscape="off|faceted|topo"                    (default: faceted)
+     ────────────────────────────────────────────────────────────────────── */
+
+  /* ──────────────────────────────────────────────────────────────────────
+     Noon Academy design tokens — void theme (translated from rn/tokens.ts)
+     ────────────────────────────────────────────────────────────────────── */
+  :root {
+    /* surfaces */
+    --bg: #0a0f1a;
+    --bg-sunken: #060913;
+    --bg-raised: #10172a;
+    --bg-overlay: #1a2236;
+
+    /* paper (used inside slide canvas) */
+    --paper-100: #fbf8ef;
+    --paper-200: #f2ece0;
+    --paper-300: #e8e1d2;
+
+    /* foreground */
+    --fg: rgba(232, 228, 220, 1);
+    --fg-muted: rgba(232, 228, 220, 0.70);
+    --fg-subtle: rgba(232, 228, 220, 0.55);
+    --fg-faint: rgba(232, 228, 220, 0.35);
+
+    /* lines */
+    --border: rgba(232, 228, 220, 0.10);
+    --border-strong: rgba(232, 228, 220, 0.22);
+    --divider: rgba(232, 228, 220, 0.06);
+    --hover-overlay: rgba(232, 228, 220, 0.04);
+    --active-overlay: rgba(232, 228, 220, 0.08);
+
+    /* accents */
+    --accent: #64D8AE;
+    --accent-soft: rgba(100, 216, 174, 0.14);
+    --accent-border: rgba(100, 216, 174, 0.35);
+    --accent-glow: rgba(100, 216, 174, 0.15);
+
+    /* signal — gold (waypoints, time) */
+    --signal: #c9a227;
+    --signal-dim: #8e7019;
+    --signal-bright: #e0b83a;
+    --signal-soft: rgba(201, 162, 39, 0.12);
+    --signal-border: rgba(201, 162, 39, 0.35);
+
+    /* danger */
+    --danger: #c55a4e;
+    --danger-soft: rgba(197, 90, 78, 0.10);
+    --danger-border: rgba(197, 90, 78, 0.40);
+
+    /* terra (warmth — used on teacher tile chrome) */
+    --terra-soft: rgba(138, 78, 42, 0.10);
+    --terra-border: rgba(138, 78, 42, 0.35);
+
+    /* coral — active-speaker semantic. Sits between terra-400 and danger-300:
+       warm and bright, distinct from danger so semantics stay clean. */
+    --coral: #E8755A;
+    --coral-soft: rgba(232, 117, 90, 0.14);
+    --coral-border: rgba(232, 117, 90, 0.55);
+    --coral-glow: rgba(232, 117, 90, 0.35);
+
+    /* spacing */
+    --sp-1: 4px;
+    --sp-2: 8px;
+    --sp-3: 12px;
+    --sp-4: 16px;
+    --sp-5: 20px;
+    --sp-6: 24px;
+    --sp-7: 32px;
+    --sp-8: 40px;
+
+    /* radii */
+    --r-2: 4px;
+    --r-3: 6px;
+    --r-4: 8px;
+    --r-pill: 999px;
+
+    /* type */
+    --font-sans: 'Vazirmatn', system-ui, sans-serif;
+    --font-serif: 'Crimson Pro', Georgia, serif;
+    --font-mono: 'JetBrains Mono', ui-monospace, monospace;
+  }
+
+  * { box-sizing: border-box; }
+  html, body { height: 100%; }
+  body {
+    margin: 0;
+    font-family: var(--font-sans);
+    color: var(--fg);
+    background: var(--bg-sunken);
+    -webkit-font-smoothing: antialiased;
+    overflow: hidden;
+  }
+
+  /* ──────────────────────────────────────────────────────────────────────
+     App shell
+     ────────────────────────────────────────────────────────────────────── */
+  .app {
+    height: 100vh;
+    display: grid;
+    grid-template-rows: 64px 1fr;
+    background: var(--bg);
+    position: relative;
+    overflow: hidden;
+  }
+  .stage-view { overflow: hidden; }
+
+  /* terrain pattern, behind everything — the brand cartographic backdrop */
+  .terrain {
+    position: absolute; inset: 0;
+    display: block;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    opacity: 0.75;
+    z-index: 0;
+    transition: opacity 320ms ease;
+  }
+  /* ──────────────────────────────────────────────────────────────────────
+     BACKGROUND TWEAK SYSTEM — defaults + per-attribute overrides on .app
+     ────────────────────────────────────────────────────────────────────── */
+
+  /* Facet color palette — design system tokens; swap via data-bg-tone */
+  .app {
+    --bg-facet-back:   rgb(35, 44, 67);   /* void-50 */
+    --bg-facet-front:  rgb(6,  9,  19);   /* void-400 */
+    --bg-facet-light:  rgb(72, 129, 224); /* blue-500 */
+  }
+  .app[data-bg-tone="iris"] {
+    --bg-facet-back:   rgb(92, 61,  143); /* iris-700 */
+    --bg-facet-front:  rgb(36, 22,  58);  /* iris-deeper */
+    --bg-facet-light:  rgb(107, 63, 168); /* iris-600 */
+  }
+  .app[data-bg-tone="gold"] {
+    --bg-facet-back:   rgb(142, 112, 25); /* gold-500 */
+    --bg-facet-front:  rgb(74,  40,  18); /* terra-800 */
+    --bg-facet-light:  rgb(224, 184, 58); /* gold-300 */
+  }
+
+  /* Landscape polygon fills (read from CSS variables above).
+     Accent fills bumped so the Facets and Light-accent knobs produce a
+     visibly different result when toggled. */
+  .landscape-back-main    { fill: var(--bg-facet-back);  fill-opacity: 0.50; }
+  .landscape-front-main   { fill: var(--bg-facet-front); fill-opacity: 0.85; }
+  .landscape-light        { fill: var(--bg-facet-light); fill-opacity: 0.18; }
+
+  /* Star density — toggle tier visibility */
+  .app[data-bg-stars="sparse"] .stars-medium,
+  .app[data-bg-stars="sparse"] .stars-dim    { display: none; }
+  .app[data-bg-stars="medium"] .stars-dim    { display: none; }
+
+  /* Stars — rendered as HTML divs (positioned by %) so they stay round
+     when the parent SVG stretches with preserveAspectRatio="none". */
+  .sky-stars {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    z-index: 0;
+    /* Default star glow */
+    filter:
+      brightness(1.6)
+      drop-shadow(0 0 1.5px rgba(240, 207, 90, 0.85))
+      drop-shadow(0 0 4px   rgba(240, 207, 90, 0.40));
+  }
+  .sky-stars .star {
+    position: absolute;
+    border-radius: 50%;
+    background: rgb(224, 184, 58);
+    /* offset by half size so (left,top) marks the star's centre */
+    transform: translate(-50%, -50%);
+  }
+  .app[data-bg-star-glow="off"] .sky-stars { filter: none; }
+  .app[data-bg-star-glow="subtle"] .sky-stars {
+    filter: brightness(1.25) drop-shadow(0 0 1px rgba(240, 207, 90, 0.45));
+  }
+
+  /* North star visibility */
+  .app[data-bg-northstar="off"] .north-star { display: none; }
+
+  /* Faceted-only background controls — hide when landscape is topo or off */
+  .app[data-bg-landscape="topo"] .bg-controls__row--faceted,
+  .app[data-bg-landscape="off"]  .bg-controls__row--faceted { display: none; }
+
+
+  /* Light side — color of the illuminated facets across ALL three ridges.
+     Each ridge has one .landscape-light polygon; the rule applies uniformly. */
+  .app[data-bg-light="off"] .landscape-light { display: none; }
+  .app[data-bg-light="blue"] .landscape-light {
+    fill: rgb(72, 129, 224);  /* blue-500 */
+    fill-opacity: 0.18;
+  }
+  .app[data-bg-light="gold"] .landscape-light {
+    fill: rgb(224, 184, 58);  /* gold-300 */
+    fill-opacity: 0.32;
+  }
+
+
+  /* Outlines — gold strokes only on the visible top + side edges of each
+     lit polygon (the bottom edge is skipped — it represents the back of the
+     facet, hidden in 3D). Drawn as separate polylines so the polygon's
+     fill and the outline are independently controllable. */
+  .landscape-outline {
+    fill: none;
+    stroke: rgb(224, 184, 58); /* gold-300 */
+    stroke-width: 0;
+    stroke-opacity: 0;
+    stroke-linejoin: round;
+    stroke-linecap: round;
+    vector-effect: non-scaling-stroke;
+    transition: stroke-width 200ms ease, stroke-opacity 200ms ease;
+  }
+  .app[data-bg-outlines="subtle"] .landscape-outline {
+    stroke-width: 1;
+    stroke-opacity: 0.55;
+  }
+  .app[data-bg-outlines="strong"] .landscape-outline {
+    stroke-width: 1.6;
+    stroke-opacity: 0.95;
+  }
+
+
+  /* ──────────────────────────────────────────────────────────────────────
+     Floating background-tweak control panel (bottom-left)
+     ────────────────────────────────────────────────────────────────────── */
+  .bg-controls {
+    position: fixed;
+    bottom: var(--sp-5); left: var(--sp-5);
+    z-index: 100;
+    font-family: var(--font-mono);
+    color: var(--fg);
+  }
+  .bg-controls__handle {
+    display: inline-flex; align-items: center; gap: var(--sp-2);
+    padding: 6px 12px;
+    background: var(--bg-overlay);
+    border: 1px solid var(--border);
+    border-radius: var(--r-2);
+    color: var(--fg-muted);
+    font-family: var(--font-mono);
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.18em;
+    cursor: pointer;
+    transition: color 160ms ease, background 160ms ease;
+  }
+  .bg-controls__handle:hover {
+    color: var(--fg);
+    background: var(--bg-raised);
+  }
+  .bg-controls__diamond {
+    width: 6px; height: 6px;
+    background: var(--signal-bright);
+    transform: rotate(45deg);
+  }
+  .bg-controls__panel {
+    display: none;
+    margin-top: var(--sp-2);
+    padding: var(--sp-3) var(--sp-4);
+    background: rgba(10, 15, 26, 0.92);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border: 1px solid var(--border);
+    border-radius: var(--r-3);
+    min-width: 220px;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.45);
+  }
+  .bg-controls.is-open .bg-controls__panel { display: block; }
+  .bg-controls__row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--sp-3);
+    padding: 4px 0;
+    font-size: 11px;
+    color: var(--fg-muted);
+    letter-spacing: 0;
+    text-transform: none;
+  }
+  .bg-controls__divider {
+    height: 1px;
+    background: var(--divider);
+    margin: var(--sp-2) 0;
+  }
+
+  /* Segmented tabs (3 options) + toggle pill (2 options) — same chrome */
+  .bg-tabs {
+    display: inline-flex;
+    border: 1px solid var(--border);
+    border-radius: var(--r-2);
+    background: var(--hover-overlay);
+    padding: 2px;
+    gap: 1px;
+  }
+  .bg-tabs button {
+    padding: 4px 8px;
+    border: none;
+    background: transparent;
+    color: var(--fg-faint);
+    font-family: var(--font-mono);
+    font-size: 9px;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    cursor: pointer;
+    border-radius: 3px;
+    transition: background 160ms ease, color 160ms ease;
+    min-width: 26px;
+  }
+  .bg-tabs button:hover { color: var(--fg-muted); }
+  .bg-tabs button.is-active {
+    background: var(--bg-overlay);
+    color: var(--fg);
+  }
+  .bg-tabs--toggle button { min-width: 32px; }
+
+  /* Color swatches for the tone picker */
+  .bg-swatches {
+    display: inline-flex;
+    gap: 6px;
+    align-items: center;
+  }
+  .bg-swatches button {
+    width: 18px; height: 18px;
+    border-radius: 50%;
+    border: 1.5px solid var(--border);
+    cursor: pointer;
+    padding: 0;
+    transition: border-color 160ms ease, transform 160ms ease;
+  }
+  .bg-swatches button:hover { transform: scale(1.1); }
+  .bg-swatches button.is-active {
+    border-color: var(--fg);
+    box-shadow: 0 0 0 2px var(--bg-overlay);
+  }
+
+  /* landscape anchored to viewport bottom — full width, height scales with
+     viewport so the mountain proportions stay reasonable across screen sizes.
+     Hidden by default; the data-bg-landscape attribute below picks one. */
+  .terrain-landscape,
+  .terrain-topo {
+    position: absolute;
+    bottom: 0; left: 0; right: 0;
+    width: 100%;
+    height: clamp(180px, 24vh, 320px);
+    pointer-events: none;
+    z-index: 0;
+    /* Container alpha — multiplies all contour & route opacities. 0.88
+       gives a ~10% brightness lift over the previous 0.8 so the lines read
+       more decisively without becoming UI-loud. */
+    opacity: 0.88;
+    transition: opacity 320ms ease;
+    display: none;
+  }
+  /* Landscape variants — exactly one visible at a time */
+  .app[data-bg-landscape="faceted"] .terrain-landscape { display: block; }
+  .app[data-bg-landscape="topo"]    .terrain-topo      { display: block; }
+  /* Topographic terrain — every white contour AND the gold route are
+     <use> instances of the same #topo-ridge path defined in <defs>, so
+     they share identical curvature. Contours are translated copies, the
+     gold route is the master curve made visible. */
+  .terrain-topo .contour {
+    fill: none;
+    stroke: rgb(232, 228, 220); /* chalk-100 */
+    stroke-linecap: round;
+    stroke-linejoin: round;
+    stroke-width: 0.6;
+    vector-effect: non-scaling-stroke;
+  }
+  /* Signal Gold route — same curve as the contours, painted with a
+     linearGradient stroke for atmospheric brightness across the ridge.
+     Brighter near the apex, fading toward the slopes. */
+  .terrain-topo .topo-route {
+    fill: none;
+    stroke: url(#route-glow);
+    stroke-width: 1;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+    vector-effect: non-scaling-stroke;
+  }
+  .app[data-view="stage"] .terrain-landscape { opacity: 1; }
+
+  /* North star — HTML version. Sibling of .terrain so it sits over the
+     stretched sky SVG but doesn't get distorted by preserveAspectRatio="none".
+     The container is positioned at the same anchor as the old SVG glyph
+     (1240/1440 = 86.11%, 138/900 = 15.33%) and each child uses fixed pixel
+     dimensions so circles stay round at every aspect ratio. */
+  .north-star {
+    position: absolute;
+    left: 86.111%;
+    top:  15.333%;
+    width: 0; height: 0;
+    pointer-events: none;
+    z-index: 0;
+    animation: star-twinkle 8s ease-in-out infinite;
+  }
+  .north-star > * {
+    position: absolute;
+    left: 50%; top: 50%;
+    transform: translate(-50%, -50%);
+  }
+  .north-star__halo { border-radius: 50%; }
+  .north-star__halo--1 { width: 52px; height: 52px; background: rgba(201,162,39,0.06); }
+  .north-star__halo--2 { width: 32px; height: 32px; background: rgba(201,162,39,0.14); }
+  .north-star__halo--3 { width: 18px; height: 18px; background: rgba(201,162,39,0.30); }
+  .north-star__shimmer { background: rgba(232,184,58,0.55); }
+  .north-star__shimmer--h { width: 44px; height: 1px; }
+  .north-star__shimmer--v { width: 1px;  height: 44px; }
+  .north-star__core {
+    width: 7px; height: 7px; border-radius: 50%;
+    background: rgba(240,207,90,1);
+  }
+  @keyframes star-twinkle {
+    0%, 100% { opacity: 0.65; }
+    50%      { opacity: 1.0; }
+  }
+
+  /* ──────────────────────────────────────────────────────────────────────
+     Top bar
+     ────────────────────────────────────────────────────────────────────── */
+  .topbar {
+    position: relative; z-index: 2;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 var(--sp-6);
+    border-bottom: 1px solid var(--divider);
+  }
+
+  .session-meta {
+    display: flex; align-items: center; gap: var(--sp-4);
+  }
+
+  /* time pill — surveyor's notebook feel: mono, tracking, gold waypoint dot */
+  .time {
+    display: flex; align-items: center; gap: var(--sp-3);
+    padding: var(--sp-2) var(--sp-3);
+    border: 1px solid var(--border);
+    border-radius: var(--r-2);
+    background: var(--hover-overlay);
+  }
+  .time__diamond {
+    width: 8px; height: 8px;
+    background: var(--signal-bright);
+    transform: rotate(45deg);
+    box-shadow: 0 0 10px var(--signal-soft);
+    position: relative;
+  }
+  /* lighthouse ping on the live waypoint */
+  .time__diamond::after {
+    content: '';
+    position: absolute; inset: 0;
+    background: var(--signal-bright);
+    animation: ping 2.5s ease-out infinite;
+    transform-origin: center;
+  }
+  @keyframes ping {
+    0%   { transform: scale(1); opacity: 0.6; }
+    20%  { opacity: 0.25; }
+    100% { transform: scale(2.8); opacity: 0; }
+  }
+  @keyframes live {
+    0%   { box-shadow: 0 0 0 0 rgba(100, 216, 174, 0.5); }
+    70%  { box-shadow: 0 0 0 8px rgba(100, 216, 174, 0); }
+    100% { box-shadow: 0 0 0 0 rgba(100, 216, 174, 0); }
+  }
+  .time__value {
+    font-family: var(--font-mono);
+    font-size: 14px;
+    letter-spacing: 0.04em;
+    color: var(--fg);
+    font-variant-numeric: tabular-nums;
+    min-width: 44px;
+  }
+  .session-title {
+    font-family: var(--font-serif);
+    font-size: 16px;
+    font-weight: 500;
+    color: var(--fg-muted);
+    letter-spacing: -0.005em;
+  }
+  .session-title em {
+    font-style: italic;
+    color: var(--fg);
+    margin-right: 4px;
+  }
+
+  /* top-right controls */
+  .controls {
+    display: flex; align-items: center; gap: var(--sp-3);
+  }
+  .icon-btn {
+    width: 40px; height: 40px;
+    border-radius: var(--r-pill);
+    border: 1px solid var(--border);
+    background: var(--hover-overlay);
+    color: var(--fg-muted);
+    display: inline-flex; align-items: center; justify-content: center;
+    cursor: pointer;
+    transition: background 120ms ease, color 120ms ease, border-color 120ms ease, transform 120ms ease;
+    position: relative;
+  }
+  .icon-btn:hover {
+    background: var(--active-overlay);
+    color: var(--fg);
+    border-color: var(--border-strong);
+  }
+  .icon-btn:active { transform: translateY(0.5px); }
+  .icon-btn[aria-pressed="true"] {
+    background: var(--danger-soft);
+    border-color: var(--danger-border);
+    color: var(--danger);
+  }
+  .icon-btn[aria-pressed="true"] .strike {
+    display: block;
+  }
+  .strike { display: none; }
+
+  .me-avatar {
+    width: 40px; height: 40px;
+    border-radius: 50%;
+    background: var(--accent);
+    display: inline-flex; align-items: center; justify-content: center;
+    color: var(--accentFg, #0a3326);
+    font-family: var(--font-serif);
+    font-weight: 500;
+    font-size: 16px;
+    border: 1px solid var(--border-strong);
+    cursor: pointer;
+    position: relative;
+  }
+
+  /* ──────────────────────────────────────────────────────────────────────
+     Main: layout depends on data-view (default = slides + sidebar, stage = full-bleed cameras)
+     ────────────────────────────────────────────────────────────────────── */
+  .main {
+    position: relative; z-index: 2;
+    padding: var(--sp-5);
+    min-height: 0;
+  }
+  .app[data-view="default"] .main {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 320px;
+    gap: var(--sp-5);
+  }
+  .app[data-view="stage"] .main {
+    display: flex;
+  }
+  .app[data-view="default"] .stage-view { display: none; }
+  .app[data-view="stage"]   .stage-wrap,
+  .app[data-view="stage"]   .sidebar,
+  .app[data-view="stage"]   .focus,
+  .app[data-view="stage"]   .focus__bg,
+  .app[data-view="stage"]   .focus__pip { display: none; }
+
+  /* ── slide stage (paper canvas, locked to 16:9, scale-to-fit) ── */
+  .stage-wrap {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 0;
+    min-height: 0;
+    overflow: hidden;
+  }
+  .stage {
+    position: relative;
+    aspect-ratio: 16 / 9;
+    width: 100%;
+    max-width: 100%;
+    max-height: 100%;
+    border-radius: var(--r-4);
+    background: var(--paper-100);
+    overflow: hidden;
+    box-shadow:
+      inset 0 0 0 1px rgba(10, 15, 26, 0.10),
+      0 1px 0 rgba(232, 228, 220, 0.04),
+      0 8px 32px rgba(0, 0, 0, 0.35);
+  }
+  /* faint grid paper texture inside the canvas — surveyor's notebook */
+  .stage::before {
+    content: '';
+    position: absolute; inset: 0;
+    background-image:
+      linear-gradient(to right, rgba(10, 15, 26, 0.045) 1px, transparent 1px),
+      linear-gradient(to bottom, rgba(10, 15, 26, 0.045) 1px, transparent 1px);
+    background-size: 24px 24px;
+    pointer-events: none;
+  }
+  /* major gold gridlines every 96px */
+  .stage::after {
+    content: '';
+    position: absolute; inset: 0;
+    background-image:
+      linear-gradient(to right, rgba(201, 162, 39, 0.10) 1px, transparent 1px),
+      linear-gradient(to bottom, rgba(201, 162, 39, 0.10) 1px, transparent 1px);
+    background-size: 96px 96px;
+    pointer-events: none;
+  }
+  /* default-grid tweak */
+  .app[data-default-grid="off"]    .stage::before,
+  .app[data-default-grid="off"]    .stage::after,
+  .app[data-default-grid="subtle"] .stage::after { display: none; }
+  /* default-canvas tweak — paper (default) or void with grid */
+  .app[data-default-canvas="void"] .stage { background: var(--bg-overlay); }
+  .app[data-default-canvas="void"] .stage::before {
+    background-image:
+      linear-gradient(to right, rgba(232, 228, 220, 0.06) 1px, transparent 1px),
+      linear-gradient(to bottom, rgba(232, 228, 220, 0.06) 1px, transparent 1px);
+  }
+  .app[data-default-canvas="void"] .stage::after {
+    background-image:
+      linear-gradient(to right, rgba(201, 162, 39, 0.18) 1px, transparent 1px),
+      linear-gradient(to bottom, rgba(201, 162, 39, 0.18) 1px, transparent 1px);
+  }
+
+  /* ── sidebar ── */
+  .sidebar {
+    display: flex; flex-direction: column;
+    gap: var(--sp-4);
+    min-height: 0;
+  }
+
+  /* ── focus tile — auto-cycles between teacher / classroom A / classroom B ── */
+  .focus {
+    position: relative;
+    border-radius: var(--r-4);
+    overflow: hidden;
+    aspect-ratio: 16 / 9;
+    background: var(--bg-overlay);
+    border: 2px solid var(--border-strong);
+    transition: border-color 500ms cubic-bezier(0.4, 0, 0.2, 1),
+                box-shadow   500ms cubic-bezier(0.4, 0, 0.2, 1);
+  }
+  /* Main tile speaking signal — static coral border + a soft aura halo
+     behind. Same voice-tutor "listening" motion as stage view: aura scales
+     0.85 → 1.15 over 3s. The aura sits behind the tile (in .focus-wrap),
+     so it can extend past the tile's overflow:hidden boundary. */
+  .focus-wrap {
+    position: relative;
+  }
+  .focus__aura {
+    position: absolute;
+    inset: -10%;
+    border-radius: 14px;
+    background: radial-gradient(ellipse 80% 70% at 50% 50%,
+                                var(--coral-soft) 0%,
+                                transparent 70%);
+    pointer-events: none;
+    z-index: 0;
+    opacity: 0;
+    transform: scale(0.85);
+    transition: opacity 600ms ease;
+  }
+  .focus { z-index: 1; }
+  /* aura visible when focus shows a student (not teacher) speaking */
+  .focus-wrap:has(> .focus:not([data-speaker="teacher"])) .focus__aura {
+    opacity: 1;
+    animation: focus-aura-pulse 3s ease-in-out infinite;
+  }
+  @keyframes focus-aura-pulse {
+    0%, 100% { transform: scale(0.85); }
+    50%      { transform: scale(1.15); }
+  }
+  /* static coral border when student speaking (no animation on the tile) */
+  .focus:not([data-speaker="teacher"]) {
+    border-color: var(--coral-border);
+  }
+
+  .focus__bg {
+    position: absolute; inset: 0;
+    background-size: cover;
+    background-position: center;
+    filter: saturate(0.95) contrast(1.02);
+    transition: opacity 500ms cubic-bezier(0.4, 0, 0.2, 1);
+  }
+  .focus__bg.is-leaving { opacity: 0; }
+
+  .focus__overlay {
+    position: absolute; inset: 0;
+    background: linear-gradient(to top, rgba(10, 15, 26, 0.88) 0%, rgba(10, 15, 26, 0) 50%);
+  }
+
+  /* teacher PiP — top-left, always visible while students are on stage */
+  .focus__pip {
+    position: absolute;
+    top: var(--sp-3); left: var(--sp-3);
+    width: 56px; height: 56px;
+    border-radius: var(--r-3);
+    background: #1a1a1a center/cover no-repeat
+      url('assets/teacher-ali.jpg.png');
+    background-position: center 20%;
+    box-shadow: 0 0 0 1.5px rgba(232, 228, 220, 0.30), 0 4px 12px rgba(0, 0, 0, 0.4);
+    transition: box-shadow 500ms ease, opacity 350ms ease, transform 350ms ease;
+  }
+  /* teacher speaking — voice-tutor "listening" pulse on the PiP, coral */
+  .focus[data-speaker="teacher"] .focus__pip {
+    animation: breath-pip 3s ease-in-out infinite;
+  }
+  @keyframes breath-pip {
+    0%, 100% {
+      box-shadow: 0 0 0 1.5px rgba(232, 117, 90, 0.45),
+                  0 0 10px rgba(232, 117, 90, 0.18),
+                  0 4px 12px rgba(0, 0, 0, 0.4);
+    }
+    50% {
+      box-shadow: 0 0 0 2.5px rgba(232, 117, 90, 0.85),
+                  0 0 22px rgba(232, 117, 90, 0.42),
+                  0 4px 12px rgba(0, 0, 0, 0.4);
+    }
+  }
+  /* (future) when no students are on stage, the teacher fills the main view */
+  .focus[data-classroom="none"] .focus__pip {
+    opacity: 0;
+    transform: scale(0.85);
+    pointer-events: none;
+  }
+
+  /* bottom label */
+  .focus__label {
+    position: absolute;
+    left: var(--sp-4); right: var(--sp-4);
+    bottom: var(--sp-3);
+    color: var(--fg);
+    display: flex; align-items: flex-end; justify-content: space-between;
+    gap: var(--sp-3);
+  }
+  .focus__name {
+    font-family: var(--font-sans);
+    font-size: 13px;
+    font-weight: 600;
+    letter-spacing: -0.005em;
+    line-height: 1.25;
+  }
+  .focus__sub {
+    font-family: var(--font-mono);
+    font-size: 9px;
+    text-transform: uppercase;
+    letter-spacing: 0.16em;
+    color: var(--fg-faint);
+    margin-top: 3px;
+  }
+  /* Sub-label color = identity (which classroom is in main view).
+     When teacher speaks, fall back to default neutral. */
+  .focus[data-classroom="A"]:not([data-speaker="teacher"]) .focus__sub { color: #D4956E; }
+  .focus[data-classroom="B"]:not([data-speaker="teacher"]) .focus__sub { color: #6BA3FF; }
+
+
+  /* ── stage roster ── */
+  .roster {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: var(--sp-2);
+    padding: 0 var(--sp-2);
+  }
+  .roster__item {
+    display: flex; flex-direction: column;
+    align-items: center;
+    gap: 4px;
+    flex: 1;
+    min-width: 0;
+    cursor: pointer;
+    transition: opacity 200ms ease;
+  }
+  .roster__avatar {
+    width: 32px; height: 32px;
+    border-radius: 50%;
+    background-size: cover; background-position: center;
+    background-color: var(--bg-overlay);
+    border: 1px solid var(--border-strong);
+    transition: box-shadow 200ms ease, border-color 200ms ease;
+  }
+  .roster__name {
+    font-family: var(--font-sans);
+    font-size: 10px;
+    color: var(--fg-faint);
+    text-align: center;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 100%;
+    transition: color 200ms ease;
+  }
+  /* Speaker signal in the roster is text-only — no ring on the avatar.
+     The video tile owns the visual claim of "who's speaking"; the roster
+     just nudges identity. */
+  .roster__item.is-speaking .roster__name {
+    color: var(--coral);
+    font-weight: 700;
+  }
+  /* default-roster tweak — initials (squircle) instead of photo circles */
+  .app[data-default-roster="initials"] .roster__avatar {
+    border-radius: var(--r-3);
+  }
+  /* ── chat ── */
+  .chat {
+    display: flex; flex-direction: column;
+    min-height: 0;
+    flex: 1;
+  }
+  .chat__head {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 0 var(--sp-1) var(--sp-3);
+  }
+  .chat__title {
+    font-family: var(--font-mono);
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.18em;
+    color: var(--fg-faint);
+  }
+  .messages {
+    overflow-y: auto;
+    overflow-x: hidden;
+    display: flex; flex-direction: column;
+    gap: var(--sp-3);
+    padding: var(--sp-1) var(--sp-1) var(--sp-4);
+    scrollbar-width: thin;
+    scrollbar-color: var(--border) transparent;
+  }
+  .messages::-webkit-scrollbar { width: 6px; }
+  .messages::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+  .messages::-webkit-scrollbar-thumb:hover { background: var(--border-strong); }
+
+  /* chat bubble — neutral chrome; identity comes from avatar + name */
+  .msg {
+    display: flex; gap: var(--sp-3);
+    align-items: flex-start;
+    padding: var(--sp-3) var(--sp-3);
+    background: var(--hover-overlay);
+    border-radius: var(--r-2);
+  }
+  .msg__avatar {
+    width: 28px; height: 28px;
+    border-radius: 50%;
+    background: var(--bg-overlay);
+    flex-shrink: 0;
+    background-image: url('https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&w=120&q=80');
+    background-size: cover;
+    background-position: center;
+    border: 1px solid var(--border-strong);
+  }
+  .msg__body { min-width: 0; flex: 1; }
+  .msg__name {
+    font-family: var(--font-sans);
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--fg);
+    letter-spacing: -0.005em;
+    margin-bottom: 2px;
+    display: flex; align-items: center; gap: 6px;
+  }
+  .msg__time {
+    margin-left: auto;
+    font-family: var(--font-mono);
+    font-size: 9px;
+    color: var(--fg-faint);
+    letter-spacing: 0.06em;
+    font-weight: 400;
+  }
+  .msg__text {
+    font-family: var(--font-sans);
+    font-size: 13px;
+    line-height: 1.5;
+    color: var(--fg-muted);
+  }
+
+  /* ──────────────────────────────────────────────────────────────────────
+     Tooltip (used on icon buttons)
+     ────────────────────────────────────────────────────────────────────── */
+  .icon-btn[data-tip]:hover::before {
+    content: attr(data-tip);
+    position: absolute;
+    top: calc(100% + 8px);
+    left: 50%;
+    transform: translateX(-50%);
+    padding: 4px 8px;
+    background: var(--bg-overlay);
+    border: 1px solid var(--border);
+    border-radius: var(--r-2);
+    font-family: var(--font-mono);
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    color: var(--fg-muted);
+    white-space: nowrap;
+    pointer-events: none;
+    z-index: 10;
+  }
+
+  /* ──────────────────────────────────────────────────────────────────────
+     STAGE VIEW — all cameras as circular waypoints on the survey map.
+     Lead party (3 large circles) on top, outposts (smaller) below.
+     ────────────────────────────────────────────────────────────────────── */
+  .stage-view {
+    flex: 1;
+    position: relative;
+    display: flex; flex-direction: column;
+    min-width: 0; min-height: 0;
+  }
+
+  .stage-view__body {
+    flex: 1;
+    position: relative;
+    display: flex;
+    align-items: center; justify-content: center;
+    min-height: 0;
+    padding: var(--sp-4) 0;
+  }
+
+  /* stage cluster: big teacher circle + classrooms grid, centered as a unit */
+  .stage-cluster {
+    display: flex;
+    align-items: center;
+    gap: 80px; /* sp-11, generous breathing room */
+    position: relative;
+    z-index: 2;
+  }
+  /* 2x2 grid of equal-sized classroom circles */
+  .classrooms-grid {
+    display: grid;
+    grid-template-columns: repeat(2, auto);
+    gap: var(--sp-7) var(--sp-8);
+  }
+
+  /* boost terrain backdrop in stage view — the "map" metaphor most belongs here */
+  .app[data-view="stage"] .terrain { opacity: 1; }
+
+  /* member = teacher or classroom camera tile.
+     Gap below the circle clears the speaker rim (which extends 5% of
+     diameter below the photo) so it never crosses the name label. */
+  .member {
+    display: flex; flex-direction: column;
+    align-items: center; gap: var(--sp-4);
+    cursor: pointer;
+  }
+  .member--teacher { gap: var(--sp-6); }
+  .member__circle {
+    --member-size: 180px;
+    position: relative;
+    width: var(--member-size); height: var(--member-size);
+    border-radius: 50%;
+    flex-shrink: 0;
+  }
+  .app[data-stage-shape="squircle"] .member__circle { border-radius: 32%; }
+
+  /* teacher: large circle, dominant on the left
+     classroom: smaller, equal-sized circles in the right grid */
+  .member--teacher .member__circle   { --member-size: 380px; }
+  .member--classroom .member__circle { --member-size: 180px; }
+
+  .member__photo {
+    position: absolute; inset: 0;
+    border-radius: inherit;
+    background-size: cover;
+    background-position: center;
+    box-shadow: 0 0 0 1.5px rgba(232, 228, 220, 0.20),
+                0 12px 32px rgba(0, 0, 0, 0.45);
+    transition: box-shadow 500ms cubic-bezier(0.4, 0, 0.2, 1);
+    z-index: 1;
+  }
+  .member--classroom .member__photo {
+    box-shadow: 0 0 0 1px rgba(232, 228, 220, 0.18),
+                0 8px 20px rgba(0, 0, 0, 0.4);
+  }
+
+  /* gold waypoint diamond — sits centered on the rim's resting top edge.
+     Static (no pulse) so it stays anchored while the rim breathes. */
+  .member__waypoint {
+    position: absolute;
+    top: calc(-5% - 6px); left: 50%;
+    width: 12px; height: 12px;
+    background: var(--signal-bright);
+    transform: translateX(-50%) rotate(45deg) scale(0);
+    opacity: 0;
+    transition: opacity 240ms ease, transform 320ms cubic-bezier(0.4, 0, 0.2, 1);
+    pointer-events: none;
+    box-shadow: 0 0 14px var(--signal-soft);
+  }
+  .member--classroom .member__waypoint { top: calc(-5% - 5px); width: 10px; height: 10px; }
+  .member--teacher .member__waypoint   { top: calc(-5% - 7px); width: 14px; height: 14px; }
+  .member.is-speaking .member__waypoint {
+    opacity: 1;
+    transform: translateX(-50%) rotate(45deg) scale(1);
+  }
+  .app[data-stage-waypoint="off"] .member__waypoint { display: none; }
+
+  /* mute pip — small dark circle bottom-right with a slashed-mic icon.
+     z-index pinned above the photo (which is z-index: 1) so the pip stays
+     visible — without this it gets covered by the circular photo. */
+  .member__mute {
+    position: absolute;
+    right: 6%; bottom: 6%;
+    width: 28px; height: 28px;
+    background: rgba(10, 15, 26, 0.85);
+    border-radius: 50%;
+    border: 1px solid var(--border-strong);
+    backdrop-filter: blur(6px);
+    display: inline-flex; align-items: center; justify-content: center;
+    color: var(--danger);
+    z-index: 2;
+  }
+  .member--classroom .member__mute {
+    width: 30px; height: 30px;
+    right: 4%; bottom: 4%;
+  }
+  .member__mute svg { width: 60%; height: 60%; }
+  .member.is-unmuted .member__mute { display: none; }
+
+  /* speaker rim — thin coral outline ring sitting just outside the photo.
+     Pulses with the voice-tutor "listening" cadence (3s ease-in-out). The
+     waypoint diamond is nested inside the rim so it scales in sync. */
+  .member__rim {
+    position: absolute;
+    inset: -5%;
+    border-radius: 50%;
+    border: 2px solid var(--coral);
+    pointer-events: none;
+    z-index: 0;
+    opacity: 0;
+    transition: opacity 600ms cubic-bezier(0.4, 0, 0.2, 1);
+  }
+  .member.is-speaking .member__rim {
+    opacity: 1;
+    animation: rim-pulse 3s ease-in-out infinite;
+  }
+  @keyframes rim-pulse {
+    0%, 100% { transform: scale(0.995); }
+    50%      { transform: scale(1.005); }
+  }
+
+  /* Muted state — thin dashed gray rim, static, always visible on muted
+     classrooms. Brand language: dashed = "broken / closed transmission" in
+     surveyor's-notebook terms. Sits at the same diameter as the speaker rim. */
+  .member__circle::before {
+    content: '';
+    position: absolute;
+    inset: -5%;
+    border-radius: 50%;
+    border: 1.5px dashed rgba(232, 228, 220, 0.32);
+    pointer-events: none;
+    z-index: 0;
+    opacity: 0;
+    transition: opacity 400ms ease;
+  }
+  .member:not(.is-unmuted) .member__circle::before { opacity: 1; }
+
+
+  .member__label {
+    text-align: center;
+    line-height: 1.2;
+    color: var(--fg);
+  }
+  .member__name {
+    font-family: var(--font-sans);
+    font-size: 14px;
+    font-weight: 600;
+    letter-spacing: -0.005em;
+  }
+  .member--classroom .member__name { font-size: 13px; }
+  .member__sub {
+    font-family: var(--font-mono);
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    color: var(--fg-faint);
+    margin-top: 4px;
+    transition: color 240ms ease;
+  }
+  .member--classroom .member__sub { display: none; }
+  .member.is-speaking .member__sub { color: var(--coral); }
+
+
+  .stage-view__foot {
+    position: relative;
+    display: flex; align-items: flex-end;
+    justify-content: space-between;
+    padding-top: var(--sp-3);
+  }
+
+  /* people count — bottom-right, mono numerals, gold dim diamond marker */
+  .people-count {
+    display: inline-flex; align-items: center; gap: 8px;
+    font-family: var(--font-mono);
+    font-size: 11px;
+    color: var(--fg-faint);
+    letter-spacing: 0.04em;
+    font-variant-numeric: tabular-nums;
+    margin-left: auto;
+  }
+  .people-count__diamond {
+    width: 6px; height: 6px;
+    background: var(--signal-dim);
+    transform: rotate(45deg);
+  }
+
+  /* ──────────────────────────────────────────────────────────────────────
+     Floating chat overlay — shown only in stage view.
+     Bottom-left, max 2 stacked, transient toast-style messages.
+     ────────────────────────────────────────────────────────────────────── */
+  /* floating chat — anchored bottom-right, just above the people-count */
+  .floating-chat {
+    position: absolute;
+    bottom: 44px; right: 0;
+    width: 280px;
+    display: none; flex-direction: column;
+    gap: var(--sp-2);
+    pointer-events: none;
+    z-index: 5;
+  }
+  .app[data-view="stage"] .floating-chat { display: flex; }
+
+  .floating-msg {
+    background: rgba(10, 15, 26, 0.55);
+    backdrop-filter: blur(14px);
+    -webkit-backdrop-filter: blur(14px);
+    border: 1px solid var(--border);
+    border-radius: var(--r-3);
+    padding: var(--sp-2) var(--sp-3);
+    display: flex; gap: var(--sp-2);
+    align-items: flex-start;
+    pointer-events: auto;
+  }
+  .floating-msg__avatar {
+    width: 24px; height: 24px;
+    border-radius: 50%;
+    background-size: cover;
+    background-position: center;
+    flex-shrink: 0;
+    border: 1px solid var(--border-strong);
+  }
+  .floating-msg__body { min-width: 0; flex: 1; }
+  .floating-msg__name {
+    font-family: var(--font-sans);
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--fg);
+    letter-spacing: -0.005em;
+  }
+  .floating-msg__text {
+    font-family: var(--font-sans);
+    font-size: 12px;
+    line-height: 1.4;
+    color: var(--fg-muted);
+    margin-top: 2px;
+  }
+  .floating-msg.is-entering {
+    animation: float-enter 320ms cubic-bezier(0.4, 0, 0.2, 1) backwards;
+  }
+  .floating-msg.is-exiting {
+    animation: float-exit 240ms cubic-bezier(0.4, 0, 0.2, 1) forwards;
+  }
+  @keyframes float-enter {
+    from { opacity: 0; transform: translateY(20px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+  @keyframes float-exit {
+    from { opacity: 1; transform: translateY(0); }
+    to   { opacity: 0; transform: translateY(-30px); }
+  }
+
+  /* responsive — stack sidebar below stage on narrow screens (default view).
+     Stage view scales the cluster down on small viewports. */
+  @media (max-width: 1100px) {
+    .member--teacher .member__circle   { --member-size: 280px; }
+    .member--classroom .member__circle { --member-size: 140px; }
+    .stage-cluster { gap: var(--sp-7); }
+  }
+  @media (max-width: 880px) {
+    .app[data-view="default"] .main { grid-template-columns: 1fr; grid-template-rows: 1fr auto; }
+    .focus { aspect-ratio: 16 / 9; }
+    .member--teacher .member__circle   { --member-size: 220px; }
+    .member--classroom .member__circle { --member-size: 110px; }
+    .stage-cluster { gap: var(--sp-5); }
+  }
+</style>
+</head>
+<body>
+
+<div class="app" id="app" data-view="default"
+     data-stage-waypoint="on"
+     data-stage-shape="circle"
+     data-default-grid="both"
+     data-default-canvas="paper"
+     data-default-roster="photo"
+     data-bg-stars="dense"
+     data-bg-star-glow="strong"
+     data-bg-northstar="on"
+     data-bg-tone="void"
+     data-bg-light="blue"
+     data-bg-outlines="off"
+     data-bg-landscape="faceted">
+
+  <!-- Brand backdrop — sky (stars + north star) + landscape (faceted ridges).
+       Tweaks are on .app via data-bg-* attributes; see <style> docs. -->
+  <svg class="terrain" preserveAspectRatio="none" viewBox="0 0 1440 900" aria-hidden="true">
+
+    <!-- Stars are HTML divs in a sibling container (see .sky-stars below the SVG)
+         so they stay perfectly round when the SVG is stretched. North star
+         stays inside the SVG because its proportions read as cartographic
+         crosshair lines and benefit from being SVG primitives. -->
+
+
+    <!-- North star is HTML now (see below) — for the same reason the field
+         stars are: SVG primitives deform when preserveAspectRatio="none". -->
+
+  </svg>
+
+  <!-- HTML star field — divs are rendered into the three tier groups by JS at the
+       bottom of the file. Sits as a sibling of .terrain so it covers the same
+       inset:0 area, but each star uses fixed pixel dimensions with percentage
+       (left, top) — so positions scale with the viewport but circles stay round. -->
+  <div class="sky-stars" aria-hidden="true">
+    <div class="stars-bright"></div>
+    <div class="stars-medium"></div>
+    <div class="stars-dim"></div>
+  </div>
+
+  <!-- ◇ North star — HTML, anchored at (86.11%, 15.33%) with fixed-px children. -->
+  <div class="north-star" aria-hidden="true">
+    <span class="north-star__halo north-star__halo--1"></span>
+    <span class="north-star__halo north-star__halo--2"></span>
+    <span class="north-star__halo north-star__halo--3"></span>
+    <span class="north-star__shimmer north-star__shimmer--h"></span>
+    <span class="north-star__shimmer north-star__shimmer--v"></span>
+    <span class="north-star__core"></span>
+  </div>
+
+  <!-- Bottom-anchored landscape — two-layer dune (back + front).
+       Polygons take their fill from CSS variables so the tone can be swapped
+       via data-bg-tone. Outlines are drawn as separate top-edge contour paths
+       (not closed-polygon strokes) for a refined topographic look. -->
+  <svg class="terrain-landscape" preserveAspectRatio="none" viewBox="0 0 1440 240" aria-hidden="true">
+    <!-- BACK ridge — distant peaks. Full-width zigzag silhouette + lit
+         slopes on every right-facing descent (upper-right light source).
+         Lit polygons are clipped to y≤150 so they stay clear of the front
+         ridge above and remain fully visible when Light side is toggled. -->
+    <polygon class="landscape-back-main"
+             points="0,80 220,55 460,80 720,45 980,75 1240,55 1440,70 1440,240 0,240"/>
+    <polygon class="landscape-light" points="220,55 460,80 380,150 270,150"/>
+    <polygon class="landscape-light" points="720,45 980,75 900,150 780,150"/>
+    <polygon class="landscape-light" points="1240,55 1440,70 1440,150 1340,150"/>
+
+    <!-- FRONT silhouette — closest, darkest. Spans full width 0 → 1440. -->
+    <polygon class="landscape-front-main"
+             points="0,200 200,175 460,210 720,170 970,200 1240,175 1440,195 1440,240 0,240"/>
+    <polygon class="landscape-light" points="200,175 460,210 380,240 250,240"/>
+    <polygon class="landscape-light" points="720,170 970,200 870,240 760,240"/>
+    <polygon class="landscape-light" points="1240,175 1440,195 1440,240 1320,240"/>
+
+    <!-- Outlines — only the left side + top ridge of each lit facet.
+         Each polyline traces V4 → V1 → V2 (lower-left → peak → next valley).
+         Right-slope (V2 → V3) and bottom (V3 → V4) edges are skipped. -->
+    <polyline class="landscape-outline" points="270,150 220,55 460,80"/>
+    <polyline class="landscape-outline" points="780,150 720,45 980,75"/>
+    <polyline class="landscape-outline" points="1340,150 1240,55 1440,70"/>
+    <polyline class="landscape-outline" points="250,240 200,175 460,210"/>
+    <polyline class="landscape-outline" points="760,240 720,170 970,200"/>
+    <polyline class="landscape-outline" points="1320,240 1240,175 1440,195"/>
+  </svg>
+
+  <!-- Topographic landscape variant — single continuous mountain ridge.
+       Asymmetric profile: gradual rise on the left, sharper drop on the
+       right. Five stacked contour lines, each tracing the same ridge at a
+       different elevation, with depth via opacity fade. Plus a Signal Gold
+       route line along the ridge crest. -->
+  <svg class="terrain-topo" preserveAspectRatio="none" viewBox="0 0 1440 240" aria-hidden="true">
+    <defs>
+      <!-- ◇ Master ridge curve. Peak at (240, 50), horizontal tangents on
+           both sides for a rounded summit. Asymmetric profile: short rise
+           from the left, long shallow descent to the right edge. Every
+           white contour AND the gold route are <use> instances of this
+           path, so the global curvature is identical across all lines.
+           pathLength=100 normalizes the curve so dasharrays/offsets are
+           expressible as percentages. -->
+      <path id="topo-ridge" pathLength="100"
+            d="M0,180 C80,160 160,50 240,50 C320,50 600,160 900,180 C1100,186 1300,190 1440,192"/>
+
+      <!-- Per-contour displacement filters — same fractalNoise base, but
+           each has a different seed and slightly different scale, so the
+           five contours pick up subtle, distinct organic variation. The
+           horizontal baseFrequency (~0.011-0.014) keeps the wavelength
+           long, ~70-90 viewBox units, so the wobble reads as natural
+           weathering, not noise. The vertical frequency is higher (0.04-
+           0.05) so the displacement lifts/dips along the line rather than
+           stretching it sideways. -->
+      <filter id="org-c1"><feTurbulence type="fractalNoise" baseFrequency="0.012 0.05"  numOctaves="2" seed="2"/><feDisplacementMap in="SourceGraphic" scale="1.6"/></filter>
+      <filter id="org-c2"><feTurbulence type="fractalNoise" baseFrequency="0.014 0.05"  numOctaves="2" seed="7"/><feDisplacementMap in="SourceGraphic" scale="2.0"/></filter>
+      <filter id="org-c3"><feTurbulence type="fractalNoise" baseFrequency="0.011 0.045" numOctaves="2" seed="13"/><feDisplacementMap in="SourceGraphic" scale="2.4"/></filter>
+      <filter id="org-c4"><feTurbulence type="fractalNoise" baseFrequency="0.013 0.05"  numOctaves="2" seed="19"/><feDisplacementMap in="SourceGraphic" scale="2.6"/></filter>
+      <filter id="org-c5"><feTurbulence type="fractalNoise" baseFrequency="0.010 0.04"  numOctaves="2" seed="29"/><feDisplacementMap in="SourceGraphic" scale="3.0"/></filter>
+
+      <!-- Stroke paint for the route. Stops bumped ~10% brighter overall.
+           Path bbox spans x=0..1440, so the peak at x=240 maps to ≈16.7%.
+           Asymmetric: short rise, long shallow tail. -->
+      <linearGradient id="route-glow" x1="0%" y1="0" x2="100%" y2="0">
+        <stop offset="0%"    stop-color="rgb(201,162,39)" stop-opacity="0.20"/>
+        <stop offset="16.7%" stop-color="rgb(224,184,58)" stop-opacity="0.60"/>
+        <stop offset="35%"   stop-color="rgb(201,162,39)" stop-opacity="0.31"/>
+        <stop offset="65%"   stop-color="rgb(201,162,39)" stop-opacity="0.15"/>
+        <stop offset="100%"  stop-color="rgb(201,162,39)" stop-opacity="0.09"/>
+      </linearGradient>
+    </defs>
+
+    <!-- Contour stack — each line is the master ridge translated down by a
+         growing gap (6 → 14 → 25 → 39 → 56). Spacing compresses near the
+         peak and expands toward the slopes, the way real topography draws
+         steep summits with packed contours and gentler bases with wider
+         intervals. Each <use> goes through its own displacement filter so
+         the lines aren't mathematically identical anymore — they pick up
+         a unique organic wobble while keeping the master curvature.
+         Two of the lines are truncated via stroke-dasharray for length
+         variation; the others run full-width. -->
+    <use class="contour" href="#topo-ridge" transform="translate(0, 6)"
+         filter="url(#org-c1)" stroke-opacity="0.26"/>
+
+    <!-- Right tail trimmed — fades before reaching the edge -->
+    <use class="contour" href="#topo-ridge" transform="translate(0, 14)"
+         filter="url(#org-c2)" stroke-opacity="0.21"
+         stroke-dasharray="64 100"/>
+
+    <use class="contour" href="#topo-ridge" transform="translate(0, 25)"
+         filter="url(#org-c3)" stroke-opacity="0.16"/>
+
+    <!-- Mid-segment only — both ends fade -->
+    <use class="contour" href="#topo-ridge" transform="translate(0, 39)"
+         filter="url(#org-c4)" stroke-opacity="0.12"
+         stroke-dasharray="42 100" stroke-dashoffset="18"
+         stroke-width="0.5"/>
+
+    <use class="contour" href="#topo-ridge" transform="translate(0, 56)"
+         filter="url(#org-c5)" stroke-opacity="0.09"
+         stroke-width="0.5"/>
+
+    <!-- Signal Gold route — same master curve, no organic filter (it stays
+         clean as the canonical line). Brightness comes from the gradient
+         stops above, lifted ~10%. -->
+    <use class="topo-route" href="#topo-ridge"/>
+
+  </svg>
+
+  <!-- ───────── Topbar ───────── -->
+  <header class="topbar">
+    <div class="session-meta">
+      <div class="time" title="Class is live">
+        <span class="time__diamond" aria-hidden="true"></span>
+        <span class="time__value" id="timer">04:23</span>
+      </div>
+      <span class="session-title"><em>Algebra II</em> · Quadratic functions, lesson 3</span>
+    </div>
+
+    <div class="controls">
+      <button class="icon-btn" id="mic" aria-pressed="false" aria-label="Toggle microphone" data-tip="Mute">
+        <!-- mic icon -->
+        <svg width="18" height="18" viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+          <rect x="6.5" y="2" width="5" height="9" rx="2.5"/>
+          <path d="M3.5 8.5a5.5 5.5 0 0 0 11 0"/>
+          <line x1="9" y1="14" x2="9" y2="16.5"/>
+          <line x1="6.5" y1="16.5" x2="11.5" y2="16.5"/>
+          <line class="strike" x1="2.5" y1="2.5" x2="15.5" y2="15.5"/>
+        </svg>
+      </button>
+
+      <button class="icon-btn" id="cam" aria-pressed="false" aria-label="Toggle camera" data-tip="Stop video">
+        <!-- camera icon -->
+        <svg width="18" height="18" viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+          <rect x="2" y="5" width="10" height="8" rx="1.5"/>
+          <path d="M12 8.2 16 6v6l-4-2.2z"/>
+          <line class="strike" x1="2.5" y1="2.5" x2="15.5" y2="15.5"/>
+        </svg>
+      </button>
+
+      <div class="me-avatar" title="You" aria-label="Your profile">JI</div>
+    </div>
+  </header>
+
+  <!-- ───────── Main: stage + sidebar (default view) | cameras (stage view) ───────── -->
+  <main class="main">
+
+    <!-- slide canvas — locked 16:9, scales to fit available area -->
+    <div class="stage-wrap">
+      <section class="stage" aria-label="Slide canvas"></section>
+    </div>
+
+    <!-- sidebar -->
+    <aside class="sidebar">
+
+      <!-- focus tile — main view always shows a classroom; teacher pinned in PiP.
+           Wrapped in .focus-wrap so the speaking aura can extend beyond the
+           tile's overflow:hidden boundary. -->
+      <div class="focus-wrap">
+        <div class="focus__aura" aria-hidden="true"></div>
+        <div class="focus" id="focus" data-classroom="A" data-speaker="teacher" aria-label="Active speaker">
+          <div class="focus__bg" id="focus-bg"></div>
+          <div class="focus__overlay"></div>
+          <div class="focus__pip" id="focus-pip" role="img" aria-label="Teacher camera"></div>
+          <div class="focus__label">
+            <div>
+              <div class="focus__name" id="focus-name">Sara Al-Otaibi</div>
+              <div class="focus__sub" id="focus-sub">Teacher</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- stage roster — invited students from both classrooms -->
+      <div class="roster" id="roster" role="list" aria-label="On stage"></div>
+
+      <!-- chat -->
+      <div class="chat">
+        <div class="chat__head">
+          <span class="chat__title">Class chat</span>
+        </div>
+
+        <div class="messages" id="messages"></div>
+      </div>
+    </aside>
+
+    <!-- ───────── Stage view: cameras as waypoints ───────── -->
+    <section class="stage-view" id="stage-view" aria-label="Stage view">
+
+      <div class="stage-view__body">
+        <!-- Stage cluster: big teacher circle on the left + 2x2 grid of classrooms.
+             Populated by JS so we control aspect, photos, speaker state. -->
+        <div class="stage-cluster" id="stage-cluster" role="list" aria-label="Stage participants"></div>
+      </div>
+
+      <!-- floating chat overlay — sits just above the people-count -->
+      <div class="floating-chat" id="floating-chat" aria-live="polite" aria-label="Class chat"></div>
+
+      <div class="stage-view__foot">
+        <div class="people-count" aria-label="Total participants">
+          <span class="people-count__diamond"></span>
+          <svg width="12" height="12" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.4" aria-hidden="true">
+            <circle cx="7" cy="4.5" r="2.2"/>
+            <path d="M2.5 12c0-2 2-3.5 4.5-3.5s4.5 1.5 4.5 3.5"/>
+          </svg>
+          <span>108</span>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- ───────── Background tweak controls — floating dev panel ───────── -->
+  <aside class="bg-controls is-open" id="bg-controls" aria-label="Background controls">
+    <button class="bg-controls__handle" id="bg-controls-toggle" aria-label="Toggle">
+      <span class="bg-controls__diamond"></span> Background
+    </button>
+    <div class="bg-controls__panel">
+      <div class="bg-controls__row">
+        <span>View</span>
+        <div class="bg-tabs" data-attr="data-view">
+          <button data-value="default">Slides</button>
+          <button data-value="stage">Stage</button>
+        </div>
+      </div>
+
+      <div class="bg-controls__divider"></div>
+
+      <div class="bg-controls__row">
+        <span>Stars</span>
+        <div class="bg-tabs" data-attr="data-bg-stars">
+          <button data-value="sparse">Sparse</button>
+          <button data-value="medium">Medium</button>
+          <button data-value="dense">Dense</button>
+        </div>
+      </div>
+      <div class="bg-controls__row">
+        <span>Star glow</span>
+        <div class="bg-tabs" data-attr="data-bg-star-glow">
+          <button data-value="off">Off</button>
+          <button data-value="subtle">Subtle</button>
+          <button data-value="strong">Strong</button>
+        </div>
+      </div>
+      <div class="bg-controls__row">
+        <span>North star</span>
+        <div class="bg-tabs bg-tabs--toggle" data-attr="data-bg-northstar">
+          <button data-value="off">Off</button>
+          <button data-value="on">On</button>
+        </div>
+      </div>
+
+      <div class="bg-controls__divider"></div>
+
+      <div class="bg-controls__row">
+        <span>Landscape</span>
+        <div class="bg-tabs" data-attr="data-bg-landscape">
+          <button data-value="off">Off</button>
+          <button data-value="faceted">Faceted</button>
+          <button data-value="topo">Topo</button>
+        </div>
+      </div>
+      <!-- Faceted-only knobs — hidden when landscape is topo or off -->
+      <div class="bg-controls__row bg-controls__row--faceted">
+        <span>Tone</span>
+        <div class="bg-swatches" data-attr="data-bg-tone">
+          <button data-value="void" data-tone-color="rgb(35,44,67)" title="Void"></button>
+          <button data-value="iris" data-tone-color="rgb(92,61,143)" title="Iris"></button>
+          <button data-value="gold" data-tone-color="rgb(142,112,25)" title="Gold"></button>
+        </div>
+      </div>
+      <div class="bg-controls__row bg-controls__row--faceted">
+        <span>Light side</span>
+        <div class="bg-tabs" data-attr="data-bg-light">
+          <button data-value="off">Off</button>
+          <button data-value="blue">Blue</button>
+          <button data-value="gold">Gold</button>
+        </div>
+      </div>
+      <div class="bg-controls__row bg-controls__row--faceted">
+        <span>Outlines</span>
+        <div class="bg-tabs" data-attr="data-bg-outlines">
+          <button data-value="off">Off</button>
+          <button data-value="subtle">Subtle</button>
+          <button data-value="strong">Strong</button>
+        </div>
+      </div>
+    </div>
+  </aside>
+</div>
+
+<script>
+  // ── ticking timer ──
+  (function () {
+    const el = document.getElementById('timer');
+    let [m, s] = el.textContent.split(':').map(Number);
+    setInterval(() => {
+      s += 1;
+      if (s >= 60) { s = 0; m += 1; }
+      el.textContent =
+        String(m).padStart(2, '0') + ':' + String(s).padStart(2, '0');
+    }, 1000);
+  })();
+
+  // ── render sky stars as HTML divs ──
+  // Coordinates here are in the original 1440x900 sky frame — same numbers
+  // as the old SVG circles. We convert them to (left%, top%) so they scale
+  // with the viewport, and pick a fixed pixel diameter so each star stays
+  // perfectly round even when the parent stretches to wide aspect ratios.
+  (function () {
+    const stars = {
+      bright: [
+        [300,  90, 2.2, 0.85],
+        [1180, 70, 2.0, 0.80],
+        [740, 270, 2.4, 0.75],
+        [540, 180, 1.8, 0.70],
+      ],
+      medium: [
+        [1340, 450, 2.0, 0.70],
+        [980,  160, 1.6, 0.62],
+        [120,  280, 1.6, 0.60],
+        [320,   80, 1.0, 0.45],
+        [580,  130, 1.2, 0.50],
+        [1180, 340, 1.0, 0.40],
+        [1020, 110, 0.9, 0.35],
+        [240,  250, 0.8, 0.32],
+      ],
+      dim: [
+        [120,  60, 0.8, 0.30], [180, 180, 0.7, 0.25], [440,  50, 0.6, 0.20],
+        [660, 160, 0.7, 0.28], [720,  90, 0.7, 0.25], [1100,200, 0.6, 0.20],
+        [1180, 40, 0.6, 0.20], [100, 240, 0.5, 0.20], [180, 320, 0.7, 0.28],
+        [480, 230, 0.6, 0.22], [540, 280, 0.6, 0.22], [1080,280, 0.7, 0.26],
+        [1240,220, 0.6, 0.20], [80,  420, 0.6, 0.22], [560, 320, 0.6, 0.22],
+        [1280,440, 0.7, 0.25], [1340,500, 0.6, 0.20], [60,  540, 0.6, 0.22],
+        [1240,540, 0.7, 0.28], [1320,500, 0.6, 0.20],
+        [60,  100, 0.7, 0.32], [380, 100, 0.6, 0.26], [380, 160, 0.6, 0.28],
+        [640,  60, 0.6, 0.28], [760, 200, 0.7, 0.32], [800, 140, 0.7, 0.32],
+        [880,  70, 0.6, 0.28], [940,  40, 0.7, 0.32], [1280, 80, 0.6, 0.28],
+        [1400, 60, 0.6, 0.28], [20,  220, 0.7, 0.32], [320, 340, 0.7, 0.32],
+        [700, 360, 0.7, 0.32], [880, 320, 0.6, 0.30], [940, 220, 0.6, 0.28],
+        [1140,220, 0.6, 0.28], [1340,280, 0.6, 0.30], [40,  380, 0.7, 0.30],
+        [140, 480, 0.7, 0.32], [200, 400, 0.6, 0.26], [360, 460, 0.6, 0.24],
+        [460, 480, 0.6, 0.28], [600, 540, 0.6, 0.28], [720, 440, 0.7, 0.32],
+        [820, 380, 0.6, 0.28], [880, 480, 0.7, 0.30], [1000,460, 0.7, 0.30],
+        [1280,380, 0.6, 0.26], [1380,380, 0.7, 0.30], [1380,460, 0.7, 0.30],
+        [40,  500, 0.7, 0.30], [340, 540, 0.6, 0.28], [1100,510, 0.7, 0.32],
+      ],
+    };
+    const W = 1440, H = 900;
+    // Pixel diameter from SVG radius. The factor keeps the visual size close
+    // to the old SVG render at typical desktop widths while still rounding to
+    // a whole pixel — sub-pixel sizes anti-alias to mush.
+    const sizePx = (r) => Math.max(2, Math.round(r * 2.4));
+
+    for (const tier of Object.keys(stars)) {
+      const wrap = document.querySelector('.sky-stars .stars-' + tier);
+      if (!wrap) continue;
+      for (const [cx, cy, r, op] of stars[tier]) {
+        const d = document.createElement('div');
+        d.className = 'star';
+        const px = sizePx(r);
+        const xp = (cx / W) * 100;
+        const yp = (cy / H) * 100;
+        d.style.left    = xp.toFixed(3) + '%';
+        d.style.top     = yp.toFixed(3) + '%';
+        d.style.width   = px + 'px';
+        d.style.height  = px + 'px';
+        d.style.opacity = String(op);
+        wrap.appendChild(d);
+      }
+    }
+  })();
+
+  // ── mic / cam toggles ──
+  function toggleBtn(id, tipOn, tipOff) {
+    const btn = document.getElementById(id);
+    btn.addEventListener('click', () => {
+      const pressed = btn.getAttribute('aria-pressed') === 'true';
+      btn.setAttribute('aria-pressed', String(!pressed));
+      btn.dataset.tip = !pressed ? tipOn : tipOff;
+    });
+  }
+  toggleBtn('mic', 'Unmute', 'Mute');
+  toggleBtn('cam', 'Start video', 'Stop video');
+
+  // ── stage roster + focus tile auto-cycle ──
+  // Two classrooms, five invited students. The focus tile shifts every ~4s
+  // between the teacher and a student speaker; the roster highlights whoever
+  // is speaking with a gold ring.
+  (function () {
+    // Teacher: local photo of Mr. Ali. Classroom photos pulled from the
+    // Hybrid Classroom Foundation Figma file (Figma MCP URLs expire in ~7d).
+    const TEACHER_BG  = "assets/teacher-ali.jpg.png";
+    const CLASSROOM_A = "https://www.figma.com/api/mcp/asset/a9c974d5-20c7-466f-9850-8b8798206b9c";
+    const CLASSROOM_B = "https://www.figma.com/api/mcp/asset/dd782a2b-5fa2-44d3-ab45-9a100ee12f63";
+
+    // Avatar swatch — returns a CSS background-image value. The SVG is
+    // URL-encoded so the resulting value is safe to set via JS .style.* (and
+    // does NOT need to be safe for inline style="…" attributes — we never
+    // splice it into innerHTML).
+    function avatar(letter, hue) {
+      // Letter-only — no per-student bg color. Each avatar container has its
+      // own neutral bg from CSS (bg-overlay), so the result is a uniform dark
+      // circle with a white letter. Reduces visual noise across roster + chat.
+      // hue is kept in the signature for potential future re-tinting.
+      const svg =
+        `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">` +
+        `<text x="32" y="40" text-anchor="middle" font-family="Crimson Pro, Georgia, serif" font-size="28" font-weight="600" fill="white">${letter}</text>` +
+        `</svg>`;
+      return `url("data:image/svg+xml;utf8,${encodeURIComponent(svg)}")`;
+    }
+
+    // 5 students across 2 classrooms. Each gets a uniform SVG-letter avatar:
+    // colored gradient circle with the first letter of their name. The hue
+    // gives each student a distinct identity color.
+    const roster = [
+      { id: "alwaleed", name: "Alwaleed", classroom: "A", hue: 16  },
+      { id: "faris",    name: "Faris",    classroom: "A", hue: 28  },
+      { id: "maheer",   name: "Maheer",   classroom: "A", hue: 348 },
+      { id: "saad",     name: "Saad",     classroom: "B", hue: 215 },
+      { id: "rakan",    name: "Rakan",    classroom: "B", hue: 200 },
+    ];
+    const byId = Object.fromEntries(roster.map(s => [s.id, s]));
+
+    // Helper: prefers the photoUrl portrait, falls back to the generated
+    // SVG-letter avatar. Returns a CSS background-image value.
+    function studentAvatar(s) {
+      if (s.photoUrl) return `url("${s.photoUrl}")`;
+      return avatar(s.name[0], s.hue);
+    }
+
+    // ── render roster (DOM API — never splice URLs into HTML) ──
+    const rosterEl = document.getElementById("roster");
+    rosterEl.replaceChildren(...roster.map(s => {
+      const item = document.createElement("div");
+      item.className = "roster__item";
+      item.setAttribute("role", "listitem");
+      item.dataset.id = s.id;
+      item.title = `${s.name} · Classroom ${s.classroom}`;
+
+      const av = document.createElement("div");
+      av.className = "roster__avatar";
+      av.style.backgroundImage = studentAvatar(s);
+
+      const nm = document.createElement("div");
+      nm.className = "roster__name";
+      nm.textContent = s.name;
+
+      item.append(av, nm);
+      return item;
+    }));
+
+    // ── focus tile state ──
+    // Model: main view always shows a classroom (the last/active one); teacher
+    // is pinned in the PiP corner. Speaking indicator floats between PiP and
+    // main depending on who is currently talking.
+    const focus     = document.getElementById("focus");
+    const focusBg   = document.getElementById("focus-bg");
+    const focusName = document.getElementById("focus-name");
+    const focusSub  = document.getElementById("focus-sub");
+
+    const ROOM_BG = { A: CLASSROOM_A, B: CLASSROOM_B };
+
+    let mainClassroom = "A";      // which room is in the main view
+    let lastSpeakerId = "teacher"; // for scheduler weighting
+
+    function crossfadeBg(url) {
+      // 500ms crossfade — change the source mid-fade
+      focusBg.classList.add("is-leaving");
+      setTimeout(() => {
+        focusBg.style.backgroundImage = `url("${url}")`;
+        focusBg.classList.remove("is-leaving");
+      }, 280);
+    }
+
+    function setMainClassroom(room) {
+      if (room === mainClassroom) return;
+      mainClassroom = room;
+      focus.dataset.classroom = room;
+      crossfadeBg(ROOM_BG[room]);
+    }
+
+    // listeners notified whenever the active speaker changes — drives stage view
+    const speakerListeners = [];
+    function onSpeaker(fn) { speakerListeners.push(fn); }
+
+    function setSpeaker(speaker) {
+      // speaker is either "teacher" or a roster student object
+      if (speaker === "teacher") {
+        focus.dataset.speaker = "teacher";
+        focusName.textContent = "Sara Al-Otaibi";
+        focusSub.textContent  = "Teacher";
+      } else {
+        focus.dataset.speaker = speaker.id;
+        // student speaking implies their classroom is the main view
+        setMainClassroom(speaker.classroom);
+        focusName.textContent = speaker.name;
+        focusSub.textContent  = `Classroom ${speaker.classroom}`;
+      }
+      // highlight roster pill
+      document.querySelectorAll(".roster__item").forEach(el => {
+        const isSpeaking = speaker !== "teacher" && el.dataset.id === speaker.id;
+        el.classList.toggle("is-speaking", isSpeaking);
+      });
+      // notify subscribers (e.g., stage view)
+      speakerListeners.forEach(fn => fn(speaker));
+    }
+
+    // Initial: classroom A in main view, teacher speaking
+    focus.dataset.classroom = mainClassroom;
+    focusBg.style.backgroundImage = `url("${ROOM_BG[mainClassroom]}")`;
+    setSpeaker("teacher");
+
+    // Click a roster pill to jump focus to that student
+    rosterEl.addEventListener("click", e => {
+      const item = e.target.closest(".roster__item");
+      if (!item) return;
+      const s = byId[item.dataset.id];
+      stopScheduler();
+      setSpeaker(s);
+      lastSpeakerId = s.id;
+      // resume scheduler after the manual turn ends
+      schedulerId = setTimeout(scheduleNext, 6000);
+    });
+
+    // ── classroom-rhythm scheduler ──
+    // Teacher is the conversational anchor. Most turns are teacher (8-12s);
+    // every now and then a student "answers" for 5-7s, then we return to
+    // teacher. Same-classroom student-to-student transitions don't re-trigger
+    // the bg crossfade — only label + roster highlight update.
+    function pickNextSpeaker() {
+      const teacherWeight = lastSpeakerId === "teacher" ? 0.30 : 0.65;
+      if (Math.random() < teacherWeight) return "teacher";
+      // pick a student, ideally someone different from last
+      const pool = roster.filter(s => s.id !== lastSpeakerId);
+      return pool[Math.floor(Math.random() * pool.length)];
+    }
+
+    function turnDuration(speaker) {
+      // teacher: 8-12s, student: 5-7s
+      return speaker === "teacher"
+        ? 8000 + Math.random() * 4000
+        : 5000 + Math.random() * 2000;
+    }
+
+    let schedulerId = null;
+    function scheduleNext() {
+      const next = pickNextSpeaker();
+      setSpeaker(next);
+      lastSpeakerId = next === "teacher" ? "teacher" : next.id;
+      schedulerId = setTimeout(scheduleNext, turnDuration(next));
+    }
+    function stopScheduler() {
+      if (schedulerId) { clearTimeout(schedulerId); schedulerId = null; }
+    }
+
+    // Hold initial teacher state for ~3s before the first turn
+    schedulerId = setTimeout(scheduleNext, 3000);
+
+    // Expose for chat firehose + stage view
+    window.__roster = roster;
+    window.__avatar = avatar;
+    window.__studentAvatar = studentAvatar;
+    window.__onSpeaker = onSpeaker;
+    window.__teacherBg = TEACHER_BG;
+    window.__roomBg = ROOM_BG;
+  })();
+
+  // ── stage view: render lead party + outposts, sync speaker state ──
+  (function () {
+    const roster   = window.__roster;
+    const avatar   = window.__avatar;
+    const onSpeaker= window.__onSpeaker;
+    const ROOM_BG  = window.__roomBg;
+    const TEACHER_BG = window.__teacherBg;
+
+    const clusterEl = document.getElementById("stage-cluster");
+
+    // member factory — DOM only, no innerHTML splicing
+    function makeMember({ id, name, sub, kind, photoUrl, photoSeed, muted }) {
+      const item = document.createElement("div");
+      item.className = `member member--${kind}`;
+      item.dataset.id = id;
+      item.setAttribute("role", "listitem");
+
+      const circle = document.createElement("div");
+      circle.className = "member__circle";
+
+      // speaker rim — thin coral outline ring, pulses when speaking
+      const rim = document.createElement("div");
+      rim.className = "member__rim";
+      circle.appendChild(rim);
+
+      // waypoint diamond — sibling of rim so it stays static during the pulse
+      const wp = document.createElement("div");
+      wp.className = "member__waypoint";
+      circle.appendChild(wp);
+
+      const photo = document.createElement("div");
+      photo.className = "member__photo";
+      if (photoUrl) {
+        photo.style.backgroundImage = `url("${photoUrl}")`;
+      } else if (photoSeed) {
+        photo.style.backgroundImage = avatar(photoSeed.letter, photoSeed.hue);
+      }
+      circle.appendChild(photo);
+
+      if (muted) {
+        const mute = document.createElement("div");
+        mute.className = "member__mute";
+        mute.innerHTML =
+          '<svg viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round">' +
+          '<rect x="6.5" y="3" width="5" height="8" rx="2.5"/>' +
+          '<path d="M4 9a5 5 0 0 0 10 0"/>' +
+          '<line x1="3" y1="3" x2="15" y2="15"/>' +
+          '</svg>';
+        circle.appendChild(mute);
+      } else {
+        item.classList.add("is-unmuted");
+      }
+
+      const label = document.createElement("div");
+      label.className = "member__label";
+
+      const nm = document.createElement("div");
+      nm.className = "member__name";
+      nm.textContent = name;
+
+      const sb = document.createElement("div");
+      sb.className = "member__sub";
+      sb.textContent = sub;
+
+      label.append(nm, sb);
+      item.append(circle, label);
+      return item;
+    }
+
+    // Stage cluster: big teacher on the left + 2x2 grid of classrooms.
+    // A and B are unmuted (have students who can speak); D and E are present
+    // but muted. All classrooms are visually equal-sized.
+    // outpost classroom photos — re-use the Saudi classroom photo for visual consistency
+    const OTHER_CLASSROOM_1 = "https://www.figma.com/api/mcp/asset/dd782a2b-5fa2-44d3-ab45-9a100ee12f63";
+    const OTHER_CLASSROOM_2 = "https://www.figma.com/api/mcp/asset/a9c974d5-20c7-466f-9850-8b8798206b9c";
+
+    const teacherMember = { id: "teacher", name: "Sara Al-Otaibi", sub: "Teacher", kind: "teacher", photoUrl: TEACHER_BG, muted: false };
+    const classroomMembers = [
+      { id: "classroomA", name: "Classroom A", kind: "classroom", photoUrl: ROOM_BG.A, muted: false },
+      { id: "classroomB", name: "Classroom B", kind: "classroom", photoUrl: ROOM_BG.B, muted: false },
+      { id: "classroomD", name: "Classroom D", kind: "classroom", photoUrl: OTHER_CLASSROOM_1, muted: true },
+      { id: "classroomE", name: "Classroom E", kind: "classroom", photoUrl: OTHER_CLASSROOM_2, muted: true },
+    ];
+
+    const grid = document.createElement("div");
+    grid.className = "classrooms-grid";
+    classroomMembers.forEach(m => grid.appendChild(makeMember(m)));
+
+    clusterEl.replaceChildren(makeMember(teacherMember), grid);
+
+    // Click any classroom to briefly highlight (placeholder for "promote/spotlight" affordance)
+    grid.addEventListener("click", e => {
+      const item = e.target.closest(".member");
+      if (!item || item.classList.contains("is-speaking")) return;
+      item.classList.add("is-speaking");
+      setTimeout(() => item.classList.remove("is-speaking"), 1200);
+    });
+
+    // ── sync speaker state from the focus tile's scheduler ──
+    onSpeaker(speaker => {
+      const speakerMemberId = speaker === "teacher"
+        ? "teacher"
+        : (speaker.classroom === "A" ? "classroomA" : "classroomB");
+      clusterEl.querySelectorAll(".member").forEach(el => {
+        el.classList.toggle("is-speaking", el.dataset.id === speakerMemberId);
+      });
+    });
+  })();
+
+  // ── background tweak panel — tabs/toggles/swatches bound to data-* attrs ──
+  (function () {
+    const panel = document.getElementById("bg-controls");
+    if (!panel) return;
+    const app = document.getElementById("app");
+
+    // collapse / expand
+    document.getElementById("bg-controls-toggle").addEventListener("click", () => {
+      panel.classList.toggle("is-open");
+    });
+
+    // Color swatches: paint the buttons from data-tone-color
+    panel.querySelectorAll(".bg-swatches button[data-tone-color]").forEach(btn => {
+      btn.style.backgroundColor = btn.dataset.toneColor;
+    });
+
+    // Initialize active states + wire clicks for tabs / toggles / swatches
+    panel.querySelectorAll(".bg-tabs, .bg-swatches").forEach(group => {
+      const attr = group.dataset.attr;
+      const current = app.getAttribute(attr);
+
+      group.querySelectorAll("button").forEach(btn => {
+        btn.classList.toggle("is-active", btn.dataset.value === current);
+      });
+
+      group.addEventListener("click", e => {
+        const btn = e.target.closest("button");
+        if (!btn || !btn.dataset.value) return;
+        const value = btn.dataset.value;
+        app.setAttribute(attr, value);
+        group.querySelectorAll("button").forEach(b => {
+          b.classList.toggle("is-active", b === btn);
+        });
+      });
+    });
+  })();
+
+
+  // ── chat firehose — named students post messages.
+  // Cadence varies with view: 2s in default (sidebar absorbs them), 3.5s in
+  // stage (floating overlay shows max 2 transient toasts).
+  (function () {
+    const list   = document.getElementById("messages");
+    const overlay= document.getElementById("floating-chat");
+    const roster = window.__roster;
+    const avatar = window.__avatar;
+    const studentAvatar = window.__studentAvatar;
+    const app    = document.getElementById("app");
+
+    const lines = [
+      { who: "maheer",   text: "Hi Sir, looking forward to learning this class" },
+      { who: "alwaleed", text: "Sir, can you repeat the formula?" },
+      { who: "saad",     text: "Got it, thank you" },
+      { who: "faris",    text: "Is x = -b/2a the vertex?" },
+      { who: "rakan",    text: "Yes, I have understood" },
+      { who: "maheer",   text: "Could you do another example please" },
+      { who: "alwaleed", text: "I think the discriminant is 16" },
+      { who: "saad",     text: "Wait, where did the +4 come from?" },
+      { who: "faris",    text: "On it" },
+      { who: "rakan",    text: "Sir my mic isn't working, sorry" },
+      { who: "maheer",   text: "So roots are 2 and -2, right?" },
+      { who: "alwaleed", text: "Yes Sir" },
+      { who: "saad",     text: "Got the answer: x² + 4x + 4 = (x+2)²" },
+      { who: "faris",    text: "Done with question 3" },
+      { who: "rakan",    text: "Can we get the slides afterwards?" },
+    ];
+
+    const byId = Object.fromEntries(roster.map(s => [s.id, s]));
+    let idx = 0;
+    let initialBatch = 3; // pre-seed a few so the chat doesn't start empty
+
+    // ── sidebar bubble (persistent in scrollback) ──
+    function appendSidebar(line, label) {
+      const s = byId[line.who];
+
+      const node = document.createElement("div");
+      node.className = "msg";
+
+      const av = document.createElement("div");
+      av.className = "msg__avatar";
+      av.style.backgroundImage = studentAvatar(s);
+      av.style.backgroundSize = "cover";
+
+      const body = document.createElement("div");
+      body.className = "msg__body";
+
+      const nameRow = document.createElement("div");
+      nameRow.className = "msg__name";
+
+      const time = document.createElement("span");
+      time.className = "msg__time";
+      time.textContent = label;
+
+      nameRow.append(document.createTextNode(s.name), time);
+
+      const text = document.createElement("div");
+      text.className = "msg__text";
+      text.textContent = line.text;
+
+      body.append(nameRow, text);
+      node.append(av, body);
+      list.appendChild(node);
+
+      while (list.children.length > 30) list.removeChild(list.firstChild);
+      list.scrollTop = list.scrollHeight;
+    }
+
+    // ── floating toast (transient, max 2 stacked, ~7s persistence) ──
+    const FLOAT_PERSIST_MS = 7000;
+    const FLOAT_MAX = 2;
+
+    function appendFloat(line) {
+      const s = byId[line.who];
+
+      const node = document.createElement("div");
+      node.className = "floating-msg is-entering";
+
+      const av = document.createElement("div");
+      av.className = "floating-msg__avatar";
+      av.style.backgroundImage = studentAvatar(s);
+
+      const body = document.createElement("div");
+      body.className = "floating-msg__body";
+
+      const nm = document.createElement("div");
+      nm.className = "floating-msg__name";
+      nm.textContent = s.name;
+
+      const text = document.createElement("div");
+      text.className = "floating-msg__text";
+      text.textContent = line.text;
+
+      body.append(nm, text);
+      node.append(av, body);
+      overlay.appendChild(node);
+
+      // remove the entering class once the animation completes
+      setTimeout(() => node.classList.remove("is-entering"), 320);
+
+      // schedule exit
+      setTimeout(() => {
+        node.classList.add("is-exiting");
+        setTimeout(() => node.remove(), 260);
+      }, FLOAT_PERSIST_MS);
+
+      // enforce max stack — kick the oldest if too many on screen
+      const live = overlay.querySelectorAll(".floating-msg:not(.is-exiting)");
+      if (live.length > FLOAT_MAX) {
+        live[0].classList.add("is-exiting");
+        setTimeout(() => live[0].remove(), 260);
+      }
+    }
+
+    // pre-seed a few sidebar messages so the chat isn't empty on load
+    for (let i = 0; i < initialBatch; i++) {
+      appendSidebar(lines[idx % lines.length], `${initialBatch - i}m`);
+      idx++;
+    }
+
+    // pacing changes with the active view
+    function nextDelay() {
+      return app.dataset.view === "stage" ? 3500 : 2000;
+    }
+    function tick() {
+      const line = lines[idx % lines.length];
+      idx++;
+      appendSidebar(line, "just now");
+      appendFloat(line);
+      setTimeout(tick, nextDelay());
+    }
+    setTimeout(tick, nextDelay());
+  })();
+</script>
+
+</body>
+</html>

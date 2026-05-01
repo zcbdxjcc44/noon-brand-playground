@@ -1,0 +1,591 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Sign in — Noon Academy</title>
+  <link rel="stylesheet" href="assets/colors_and_type.css">
+  <style>
+    /* ---- Page-level: paper specimen, surveyor's notebook ---------------- */
+    html, body { height: 100%; }
+    body {
+      background: var(--bg);
+      color: var(--fg);
+      font-family: var(--font-sans);
+      /* faint cartographic grid only on paper */
+      background-image:
+        linear-gradient(to right, rgba(10,15,26,0.05) 1px, transparent 1px),
+        linear-gradient(to bottom, rgba(10,15,26,0.05) 1px, transparent 1px);
+      background-size: 32px 32px, 32px 32px;
+    }
+    body.paper-mode { /* class applied below to opt in */ }
+
+    /* page split: left = atlas plate, right = sign-in card */
+    .page {
+      min-height: 100vh;
+      display: grid;
+      grid-template-columns: 1.1fr 1fr;
+    }
+    @media (max-width: 880px) { .page { grid-template-columns: 1fr; } .plate { display: none; } }
+
+    /* ---- Atlas plate (left) ----------------------------------------- */
+    .plate {
+      position: relative;
+      background: var(--void);
+      color: var(--chalk);
+      overflow: hidden;
+      padding: var(--s-7);
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+    }
+    .plate::before {
+      content: "";
+      position: absolute; inset: 0;
+      background:
+        linear-gradient(to right, rgba(201,162,39,0.05) 1px, transparent 1px) 0 0 / 64px 64px,
+        linear-gradient(to bottom, rgba(201,162,39,0.05) 1px, transparent 1px) 0 0 / 64px 64px;
+      pointer-events: none;
+    }
+    .plate::after {
+      /* a single drawn arc — the "proven route" hint */
+      content: "";
+      position: absolute;
+      inset: auto -120px -120px auto;
+      width: 480px; height: 480px;
+      border-radius: 50%;
+      border: 1px dashed rgba(201,162,39,0.35);
+      pointer-events: none;
+    }
+    .plate-mast {
+      position: relative; z-index: 1;
+      display: flex; align-items: center; gap: 12px;
+      color: rgba(232,228,220,.65);
+      font-family: var(--font-mono);
+      font-size: 11px;
+      letter-spacing: var(--tracking-caps);
+      text-transform: uppercase;
+    }
+    .plate-mast .dot { width: 4px; height: 4px; background: var(--gold-2); transform: rotate(45deg); }
+
+    .plate-body { position: relative; z-index: 1; max-width: 32ch; }
+    .plate-eyebrow {
+      font-family: var(--font-mono);
+      font-size: 11px;
+      letter-spacing: var(--tracking-caps);
+      text-transform: uppercase;
+      color: var(--gold-2);
+      margin-bottom: 18px;
+      display: inline-flex; align-items: center; gap: 10px;
+    }
+    .plate-eyebrow::before {
+      content: ""; width: 22px; height: 1px; background: var(--gold-2);
+    }
+    .plate-title {
+      font-family: var(--font-serif);
+      font-weight: 500;
+      font-size: clamp(40px, 5vw, 60px);
+      line-height: .98;
+      letter-spacing: -0.02em;
+      color: var(--chalk);
+      margin: 0 0 18px;
+    }
+    .plate-title em { font-style: italic; color: var(--gold-2); font-weight: 500; }
+    .plate-sub {
+      font-family: var(--font-serif);
+      font-style: italic;
+      font-size: 17px;
+      color: rgba(232,228,220,.7);
+      max-width: 30ch;
+      margin: 0;
+    }
+    body.rtl .plate-title,
+    body.rtl .plate-sub { font-family: var(--font-arabic); font-style: normal; }
+    body.rtl .plate-eyebrow,
+    body.rtl .plate-mast { font-family: var(--font-arabic); letter-spacing: 0; text-transform: none; font-size: 13px; }
+
+    .plate-foot {
+      position: relative; z-index: 1;
+      font-family: var(--font-mono);
+      font-size: 10px;
+      color: rgba(232,228,220,.4);
+      letter-spacing: var(--tracking-caps);
+      text-transform: uppercase;
+      display: flex; gap: 28px;
+    }
+    .plate-foot span b { color: rgba(232,228,220,.7); font-weight: 500; }
+
+    /* ---- Sign-in card (right) ------------------------------------------- */
+    .signin {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: var(--s-7) var(--s-6);
+      position: relative;
+    }
+    .topbar {
+      position: absolute;
+      top: 22px; right: 22px;
+      display: flex; gap: 6px; align-items: center;
+    }
+    body.rtl .topbar { right: auto; left: 22px; }
+    .lang {
+      display: inline-flex; align-items: center;
+      background: transparent;
+      box-shadow: inset 0 0 0 1px var(--rule-2);
+      border-radius: 3px;
+      padding: 2px;
+      font-family: var(--font-mono);
+    }
+    .lang button {
+      background: transparent; border: 0;
+      color: var(--fg-faint);
+      font: 600 10px/1 var(--font-mono);
+      letter-spacing: .08em;
+      padding: 7px 10px; cursor: pointer;
+      border-radius: 2px;
+    }
+    .lang button.on { background: rgba(100,216,174,0.14); color: var(--noon-deep); }
+
+    .card { width: 100%; max-width: 408px; }
+
+    .brand { display: flex; align-items: center; gap: 12px; margin-bottom: 36px; }
+    .brand img { height: 28px; width: auto; }
+    .brand .divider { width: 1px; height: 18px; background: var(--rule-2); }
+    .brand .seal {
+      font-family: var(--font-mono);
+      font-size: 10px;
+      letter-spacing: var(--tracking-caps);
+      text-transform: uppercase;
+      color: var(--fg-faint);
+    }
+    body.rtl .brand .seal { font-family: var(--font-arabic); letter-spacing: 0; text-transform: none; font-size: 13px; }
+
+    .heading {
+      font-family: var(--font-serif);
+      font-size: 36px;
+      font-weight: 500;
+      letter-spacing: -0.015em;
+      line-height: 1.05;
+      color: var(--ink);
+      margin: 0 0 8px;
+    }
+    .subhead {
+      font-family: var(--font-serif);
+      font-style: italic;
+      font-size: 16px;
+      color: var(--fg-muted);
+      margin: 0 0 32px;
+      max-width: 36ch;
+    }
+    body.rtl .heading,
+    body.rtl .subhead { font-family: var(--font-arabic); font-style: normal; }
+
+    /* ---- Form fields (paper-tuned variant of components-inputs.html) ---- */
+    .stack { display: flex; flex-direction: column; gap: 18px; }
+    .field { display: flex; flex-direction: column; gap: 6px; }
+    .field label {
+      font-family: var(--font-sans);
+      font-size: 10px;
+      letter-spacing: var(--tracking-caps);
+      text-transform: uppercase;
+      font-weight: 600;
+      color: var(--fg-faint);
+      display: flex; justify-content: space-between; align-items: baseline;
+    }
+    body.rtl .field label {
+      font-family: var(--font-arabic); font-size: 13px;
+      letter-spacing: 0; text-transform: none; font-weight: 700;
+    }
+    .field label a {
+      font-family: var(--font-mono);
+      font-size: 10px;
+      letter-spacing: .04em;
+      text-transform: none;
+      color: var(--fg-muted);
+      text-decoration: none;
+      border-bottom: 1px solid var(--rule-2);
+      padding-bottom: 1px;
+    }
+    .field label a:hover { color: var(--ink); border-bottom-color: var(--ink); }
+    body.rtl .field label a { font-family: var(--font-arabic); font-size: 13px; }
+
+    .input-wrap { position: relative; }
+    .input-wrap .glyph {
+      position: absolute;
+      top: 50%; transform: translateY(-50%);
+      left: 14px;
+      width: 14px; height: 14px;
+      stroke: var(--fg-faint); stroke-width: 1.5;
+      fill: none;
+      pointer-events: none;
+      stroke-linecap: square; stroke-linejoin: miter;
+    }
+    body.rtl .input-wrap .glyph { left: auto; right: 14px; }
+
+    input[type=email],
+    input[type=password],
+    input[type=text] {
+      font-family: var(--font-sans);
+      font-size: 14px;
+      width: 100%;
+      box-sizing: border-box;
+      height: 46px;
+      padding: 0 14px 0 38px;
+      background: var(--bg-3);
+      color: var(--ink);
+      border: 0;
+      box-shadow: inset 0 0 0 1px var(--rule-2);
+      border-radius: 4px;
+      outline: none;
+      transition: box-shadow 120ms var(--ease);
+    }
+    body.rtl input[type=email],
+    body.rtl input[type=password],
+    body.rtl input[type=text] {
+      font-family: var(--font-arabic); font-size: 15px;
+      padding: 0 38px 0 14px;
+    }
+    input:hover { box-shadow: inset 0 0 0 1px rgba(10,15,26,0.32); }
+    input:focus { box-shadow: inset 0 0 0 1px var(--focus), 0 0 0 3px var(--focus-soft); }
+    input::placeholder { color: var(--fg-faint); }
+
+    .toggle-pw {
+      position: absolute; top: 50%; transform: translateY(-50%);
+      right: 12px;
+      background: transparent; border: 0;
+      cursor: pointer;
+      font: 600 10px/1 var(--font-mono);
+      color: var(--fg-faint);
+      letter-spacing: .08em;
+      text-transform: uppercase;
+      padding: 6px 8px;
+      border-radius: 2px;
+    }
+    .toggle-pw:hover { color: var(--ink); background: rgba(10,15,26,0.04); }
+    body.rtl .toggle-pw { right: auto; left: 12px; font-family: var(--font-arabic); letter-spacing: 0; text-transform: none; font-size: 12px; }
+
+    /* ---- Remember row ------------------------------------- */
+    .remember {
+      display: flex; align-items: center; gap: 10px;
+      font-family: var(--font-sans);
+      font-size: 13px;
+      color: var(--fg-muted);
+      margin-top: 4px;
+    }
+    body.rtl .remember { font-family: var(--font-arabic); font-size: 14px; }
+    .remember input { display: none; }
+    .remember .box {
+      width: 16px; height: 16px;
+      box-shadow: inset 0 0 0 1px var(--rule-2);
+      border-radius: 2px;
+      display: inline-flex; align-items: center; justify-content: center;
+      transition: all 120ms var(--ease);
+      background: var(--bg-3);
+    }
+    .remember input:checked + .box {
+      background: var(--noon);
+      box-shadow: inset 0 0 0 1px var(--noon-deep);
+    }
+    .remember input:checked + .box::after {
+      content: "";
+      width: 8px; height: 4px;
+      border-left: 1.5px solid var(--noon-ink);
+      border-bottom: 1.5px solid var(--noon-ink);
+      transform: rotate(-45deg) translate(1px, -1px);
+    }
+
+    /* ---- Primary button (matches components-buttons.html) -------------- */
+    .submit {
+      margin-top: 8px;
+      font-family: var(--font-sans);
+      font-size: 14px; font-weight: 600;
+      letter-spacing: -.005em;
+      border: 0;
+      cursor: pointer;
+      height: 48px;
+      width: 100%;
+      padding: 0 22px;
+      border-radius: 4px;
+      display: inline-flex; align-items: center; justify-content: center; gap: 10px;
+      transition: all 160ms var(--ease);
+      background: var(--noon);
+      color: var(--noon-ink);
+    }
+    .submit:hover { background: var(--noon-2); }
+    .submit:active { background: var(--noon-deep); color: var(--chalk); }
+    body.rtl .submit { font-family: var(--font-arabic); font-size: 15px; }
+    .submit svg.arrow { width: 14px; height: 14px; stroke: currentColor; stroke-width: 1.5; fill: none; }
+
+    /* ---- Footer notes -------------------------------------- */
+    .meta {
+      margin-top: 28px;
+      display: flex; flex-direction: column; gap: 10px;
+      font-family: var(--font-mono);
+      font-size: 11px;
+      color: var(--fg-faint);
+      letter-spacing: .04em;
+    }
+    body.rtl .meta { font-family: var(--font-arabic); font-size: 13px; letter-spacing: 0; }
+    .meta a {
+      color: var(--fg-muted);
+      text-decoration: none;
+      border-bottom: 1px solid var(--rule-2);
+    }
+    .meta a:hover { color: var(--ink); border-bottom-color: var(--ink); }
+
+    .new-here {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 14px 16px;
+      background: var(--bg-3);
+      box-shadow: inset 0 0 0 1px var(--rule-2);
+      border-radius: 4px;
+      margin-top: 32px;
+    }
+    .new-here .lhs {
+      display: flex; flex-direction: column;
+    }
+    .new-here .label-caps {
+      font-family: var(--font-mono);
+      font-size: 10px;
+      letter-spacing: var(--tracking-caps);
+      text-transform: uppercase;
+      color: var(--fg-faint);
+    }
+    .new-here .copy {
+      font-family: var(--font-serif);
+      font-style: italic;
+      font-size: 14px;
+      color: var(--fg-muted);
+    }
+    body.rtl .new-here .label-caps,
+    body.rtl .new-here .copy { font-family: var(--font-arabic); font-style: normal; letter-spacing: 0; text-transform: none; }
+    .new-here a.cta {
+      font-family: var(--font-sans);
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--ink);
+      text-decoration: none;
+      box-shadow: inset 0 0 0 1px var(--rule-2);
+      border-radius: 3px;
+      padding: 8px 12px;
+      transition: all 120ms var(--ease);
+      display: inline-flex; align-items: center; gap: 8px;
+      white-space: nowrap;
+    }
+    .new-here a.cta:hover { box-shadow: inset 0 0 0 1px var(--ink); }
+    body.rtl .new-here a.cta { font-family: var(--font-arabic); font-size: 14px; }
+    .new-here a.cta svg { width: 12px; height: 12px; stroke: currentColor; stroke-width: 1.5; fill: none; }
+
+    /* ---- Coordinates strip (footer) ------------------------ */
+    .coords {
+      position: absolute;
+      bottom: 22px; left: 0; right: 0;
+      display: flex; justify-content: space-between;
+      padding: 0 var(--s-7);
+      font-family: var(--font-mono);
+      font-size: 10px;
+      letter-spacing: var(--tracking-caps);
+      text-transform: uppercase;
+      color: var(--fg-faint);
+    }
+    body.rtl .coords { font-family: var(--font-arabic); letter-spacing: 0; text-transform: none; font-size: 12px; }
+  </style>
+</head>
+<body class="paper-mode">
+  <main class="page">
+    <!-- ===================== LEFT: ATLAS PLATE ===================== -->
+    <aside class="plate" aria-hidden="true">
+      <div class="plate-mast">
+        <span class="dot"></span>
+        <span data-en="Plate 14 · Proven Routes" data-ar="اللوحة ١٤ · المسارات المعتمدة">Plate 14 · Proven Routes</span>
+      </div>
+
+      <div class="plate-body">
+        <div class="plate-eyebrow">
+          <span data-en="Welcome back, surveyor" data-ar="أهلًا بعودتك، أيها المساح">Welcome back, surveyor</span>
+        </div>
+        <h1 class="plate-title">
+          <span data-en="The route is" data-ar="المسار" >The route is</span>
+          <em data-en="where you left it." data-ar="حيث تركته.">where you left it.</em>
+        </h1>
+        <p class="plate-sub" data-en="Sign in to pick up your atlas, your crew, and the next waypoint."
+           data-ar="سجّل الدخول لتستأنف أطلسك، فريقك، والمحطة التالية.">
+          Sign in to pick up your atlas, your crew, and the next waypoint.
+        </p>
+      </div>
+
+      <div class="plate-foot">
+        <span><b data-en="N 24°28′" data-ar="ش ٢٤°٢٨′">N 24°28′</b><br><span data-en="Latitude" data-ar="خط العرض">Latitude</span></span>
+        <span><b data-en="E 39°36′" data-ar="ق ٣٩°٣٦′">E 39°36′</b><br><span data-en="Longitude" data-ar="خط الطول">Longitude</span></span>
+        <span><b data-en="Bearing 094°" data-ar="الاتجاه ٠٩٤°">Bearing 094°</b><br><span data-en="Heading" data-ar="السمت">Heading</span></span>
+      </div>
+    </aside>
+
+    <!-- ===================== RIGHT: SIGN-IN CARD ===================== -->
+    <section class="signin">
+      <div class="topbar">
+        <div class="lang" role="group" aria-label="Language">
+          <button data-dir="ltr" class="on">EN</button>
+          <button data-dir="rtl">AR</button>
+        </div>
+      </div>
+
+      <form class="card" autocomplete="on" novalidate>
+        <div class="brand">
+          <img src="assets/noon-logo.svg" alt="Noon Academy">
+          <span class="divider"></span>
+          <span class="seal" data-en="Academy" data-ar="أكاديمية">Academy</span>
+        </div>
+
+        <h2 class="heading" data-en="Sign in to continue your route" data-ar="سجّل الدخول لمتابعة مسارك">
+          Sign in to continue your route
+        </h2>
+        <p class="subhead" data-en="Use the email your facilitator has on file." data-ar="استخدم البريد المسجّل لدى ميسّرك.">
+          Use the email your facilitator has on file.
+        </p>
+
+        <div class="stack">
+          <!-- EMAIL -->
+          <div class="field">
+            <label for="email">
+              <span data-en="Email" data-ar="البريد الإلكتروني">Email</span>
+            </label>
+            <div class="input-wrap">
+              <svg class="glyph" viewBox="0 0 14 14"><rect x="1.5" y="3" width="11" height="8"/><path d="M2 3.5l5 4 5-4"/></svg>
+              <input id="email" type="email" name="email"
+                     placeholder="surveyor@noon.school"
+                     data-en-placeholder="surveyor@noon.school"
+                     data-ar-placeholder="surveyor@noon.school"
+                     autocomplete="email" required>
+            </div>
+          </div>
+
+          <!-- PASSWORD -->
+          <div class="field">
+            <label for="password">
+              <span data-en="Password" data-ar="كلمة المرور">Password</span>
+              <a href="#" data-en="Forgot?" data-ar="نسيتها؟">Forgot?</a>
+            </label>
+            <div class="input-wrap">
+              <svg class="glyph" viewBox="0 0 14 14"><rect x="2" y="6" width="10" height="6"/><path d="M4 6V4a3 3 0 0 1 6 0v2"/></svg>
+              <input id="password" type="password" name="password"
+                     placeholder="••••••••"
+                     autocomplete="current-password" required minlength="8">
+              <button type="button" class="toggle-pw" id="togglePw" data-en="Show" data-ar="إظهار">Show</button>
+            </div>
+          </div>
+
+          <!-- REMEMBER -->
+          <label class="remember">
+            <input type="checkbox" name="remember">
+            <span class="box" aria-hidden="true"></span>
+            <span data-en="Keep this device signed in for 30 days"
+                  data-ar="أبقِ هذا الجهاز مسجّلًا لمدة ٣٠ يومًا">
+              Keep this device signed in for 30 days
+            </span>
+          </label>
+
+          <!-- SUBMIT -->
+          <button class="submit" type="submit">
+            <span data-en="Begin today's route" data-ar="ابدأ مسار اليوم">Begin today's route</span>
+            <svg class="arrow flip-rtl" viewBox="0 0 14 14"><path d="M3 7h8M8 4l3 3-3 3"/></svg>
+          </button>
+        </div>
+
+        <!-- NEW-HERE PANEL -->
+        <div class="new-here">
+          <div class="lhs">
+            <span class="label-caps" data-en="New crew member" data-ar="عضو فريق جديد">New crew member</span>
+            <span class="copy" data-en="Joining a cohort for the first time?"
+                  data-ar="هل تنضمّ إلى فوج لأول مرة؟">Joining a cohort for the first time?</span>
+          </div>
+          <a href="#" class="cta">
+            <span data-en="Claim invite" data-ar="استلام الدعوة">Claim invite</span>
+            <svg class="flip-rtl" viewBox="0 0 14 14"><path d="M3 7h8M8 4l3 3-3 3"/></svg>
+          </a>
+        </div>
+
+        <div class="meta">
+          <span data-en="By signing in you accept Noon Academy's facilitator-attested data policy."
+                data-ar="بتسجيل الدخول، فإنك تقبل سياسة بيانات أكاديمية نون الموثّقة من الميسّرين.">
+            By signing in you accept Noon Academy's facilitator-attested data policy.
+          </span>
+          <span>
+            <a href="#" data-en="Terms" data-ar="الشروط">Terms</a>
+            &nbsp;·&nbsp;
+            <a href="#" data-en="Privacy" data-ar="الخصوصية">Privacy</a>
+            &nbsp;·&nbsp;
+            <a href="#" data-en="Help" data-ar="المساعدة">Help</a>
+          </span>
+        </div>
+      </form>
+    </section>
+  </main>
+
+  <script>
+    /* --------- Direction toggle (adapted from preview/dir-toggle.js) --------- */
+    (function () {
+      const KEY = 'noon.dir';
+      const saved = localStorage.getItem(KEY) || 'ltr';
+
+      function apply(dir) {
+        document.documentElement.dir = dir;
+        document.documentElement.lang = dir === 'rtl' ? 'ar' : 'en';
+        document.body.classList.toggle('rtl', dir === 'rtl');
+
+        document.querySelectorAll('.lang button').forEach(b =>
+          b.classList.toggle('on', b.dataset.dir === dir));
+
+        document.querySelectorAll('[data-en]').forEach(el => {
+          const t = dir === 'rtl' ? el.dataset.ar : el.dataset.en;
+          if (t != null) el.textContent = t;
+        });
+        document.querySelectorAll('[data-en-placeholder]').forEach(el => {
+          const p = dir === 'rtl' ? el.dataset.arPlaceholder : el.dataset.enPlaceholder;
+          if (p != null) el.placeholder = p;
+        });
+        document.querySelectorAll('.flip-rtl').forEach(el => {
+          el.style.transform = dir === 'rtl' ? 'scaleX(-1)' : '';
+        });
+
+        try { localStorage.setItem(KEY, dir); } catch (_) {}
+      }
+
+      document.addEventListener('click', e => {
+        const b = e.target.closest('.lang button[data-dir]');
+        if (b) apply(b.dataset.dir);
+      });
+
+      document.addEventListener('DOMContentLoaded', () => apply(saved));
+    })();
+
+    /* --------- Show/hide password --------- */
+    document.addEventListener('DOMContentLoaded', () => {
+      const btn = document.getElementById('togglePw');
+      const pw = document.getElementById('password');
+      btn.addEventListener('click', () => {
+        const reveal = pw.type === 'password';
+        pw.type = reveal ? 'text' : 'password';
+        const isRtl = document.documentElement.dir === 'rtl';
+        btn.textContent = reveal
+          ? (isRtl ? 'إخفاء' : 'Hide')
+          : (isRtl ? 'إظهار' : 'Show');
+        // keep dataset in sync so direction toggle re-applies correctly
+        btn.dataset.en = reveal ? 'Hide' : 'Show';
+        btn.dataset.ar = reveal ? 'إخفاء' : 'إظهار';
+      });
+
+      /* prevent accidental submit during prototype */
+      document.querySelector('form').addEventListener('submit', e => {
+        e.preventDefault();
+        const btn = e.target.querySelector('.submit');
+        const span = btn.querySelector('span');
+        const original = span.textContent;
+        span.textContent = document.documentElement.dir === 'rtl' ? '...جارٍ التحقق' : 'Verifying...';
+        setTimeout(() => { span.textContent = original; }, 1100);
+      });
+    });
+  </script>
+</body>
+</html>
