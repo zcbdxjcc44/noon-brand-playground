@@ -27,7 +27,8 @@
        data-bg-northstar="off|on"                              (default: on)
        data-bg-tone="void|iris|gold"                           (default: void)
        data-bg-light="off|blue|gold"                           (default: blue)
-       data-bg-outlines="off|subtle|strong"                    (default: off)
+       data-bg-outlines="off|subtle|strong"                    (default: subtle)
+       data-bg-facets="1|2|3"                                  (default: 2)
        data-bg-landscape="off|faceted|topo"                    (default: faceted)
      ────────────────────────────────────────────────────────────────────── */
 
@@ -181,13 +182,33 @@
      do the work. */
   .landscape-shade-back,
   .landscape-shade-front,
-  .landscape-light { pointer-events: none; }
+  .landscape-light,
+  .landscape-facet { pointer-events: none; }
 
   /* Lit-slope gradient stops pull their colour from --bg-facet-light so
      the Light side knob still tones them. Stop-color must come through
      CSS to use var() — it doesn't work as an XML attribute. */
   #lit-slope-back stop,
   #lit-slope-front stop { stop-color: var(--bg-facet-light); }
+
+  /* Soft facet creases — strokes that follow the main silhouette curve at
+     vertical offsets, so each crease echoes the ridge direction exactly.
+     Facets knob (1 / 2 / 3) controls how many are visible. */
+  .landscape-facet {
+    fill: none;
+    stroke: rgb(232, 228, 220); /* chalk-100 */
+    stroke-width: 0.6;
+    stroke-opacity: 0.18;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+    vector-effect: non-scaling-stroke;
+    transition: opacity 200ms ease;
+  }
+  /* Outermost (lowest) creases hide first as the count drops, so the
+     remaining creases stay closest to the ridge — most structural. */
+  .app[data-bg-facets="1"] [data-facet-rank="2"],
+  .app[data-bg-facets="1"] [data-facet-rank="3"],
+  .app[data-bg-facets="2"] [data-facet-rank="3"] { display: none; }
 
   /* Selected structural gold edges — only the main ridge crest of each
      ridge is highlighted. Outlines knob now modulates intensity (off /
@@ -1238,6 +1259,7 @@
      data-bg-tone="void"
      data-bg-light="blue"
      data-bg-outlines="subtle"
+     data-bg-facets="2"
      data-bg-landscape="faceted">
 
   <!-- Brand backdrop — sky (stars + north star) + landscape (faceted ridges).
@@ -1281,11 +1303,16 @@
        (not closed-polygon strokes) for a refined topographic look. -->
   <svg class="terrain-landscape" preserveAspectRatio="none" viewBox="0 0 1440 240" aria-hidden="true">
     <defs>
+      <!-- Master ridge top curves. The silhouette + every facet crease +
+           the gold structural edge are all derived from these, so each
+           crease follows the main ridge direction exactly. -->
+      <path id="back-top" d="M 0,128 C 100,118 220,100 380,82 C 520,66 660,46 820,40 C 960,46 1080,68 1180,92 C 1280,114 1370,128 1440,134"/>
+      <path id="front-top" d="M 0,212 C 140,204 280,198 440,202 C 580,206 720,212 820,182 C 920,160 1060,156 1200,170 C 1320,184 1400,200 1440,206"/>
+
       <!-- Embedded directional lighting on each silhouette. Slight tilt
            (x1=0.65 → x2=0.35) puts the bright stop in the upper-right and
            the dark stop in the lower-left, suggesting a light source from
-           the upper right. Tone-agnostic (white/black alpha) so it layers
-           correctly across void / iris / gold. -->
+           the upper right. Tone-agnostic so it layers across all tones. -->
       <linearGradient id="back-light" x1="0.65" y1="0" x2="0.35" y2="1">
         <stop offset="0"    stop-color="rgb(255,255,255)" stop-opacity="0.15"/>
         <stop offset="0.32" stop-color="rgb(255,255,255)" stop-opacity="0.04"/>
@@ -1314,8 +1341,7 @@
 
     <!-- ============ BACK ridge — distant landmass ============
          One continuous bezier silhouette. Gradual rise to a single main
-         peak around (820, 40); gradual descent to either edge. No hard
-         segments — the curve provides smooth elevation variation. -->
+         peak around (820, 40); gradual descent to either edge. -->
     <path class="landscape-back-main" d="
       M 0,128
       C 100,118 220,100 380,82
@@ -1323,7 +1349,7 @@
       C 960,46 1080,68 1180,92
       C 1280,114 1370,128 1440,134
       L 1440,240 L 0,240 Z"/>
-    <!-- Embedded lighting on back silhouette — same path, gradient fill -->
+    <!-- Embedded directional lighting on back silhouette -->
     <path class="landscape-shade-back" fill="url(#back-light)" d="
       M 0,128
       C 100,118 220,100 380,82
@@ -1332,11 +1358,16 @@
       C 1280,114 1370,128 1440,134
       L 1440,240 L 0,240 Z"/>
 
-    <!-- Lit-slope strip on the right side of the main peak. Top edge
-         traces the silhouette curve from peak (820,40) to right edge
-         (1440,134); bottom edge is inset, so the strip is a wide band
-         hugging the lit slope. Vertical gradient brightens at the ridge
-         and fades downslope. Tinted with --bg-facet-light. -->
+    <!-- ◇ Soft facet creases — translated copies of the master ridge top.
+         Each crease echoes the silhouette direction exactly, so they read
+         as plane transitions following the slope rather than arbitrary
+         lines. The Facets knob (1 / 2 / 3) controls how many are visible. -->
+    <use class="landscape-facet" data-facet-rank="1" href="#back-top" transform="translate(0, 22)"/>
+    <use class="landscape-facet" data-facet-rank="2" href="#back-top" transform="translate(0, 50)"/>
+    <use class="landscape-facet" data-facet-rank="3" href="#back-top" transform="translate(0, 82)"/>
+
+    <!-- Lit-slope strip on right side of main peak. Vertical gradient
+         brightens at the ridge edge, fades downslope. -->
     <path class="landscape-light" fill="url(#lit-slope-back)" d="
       M 820,40
       C 960,46 1080,68 1180,92
@@ -1348,8 +1379,7 @@
 
     <!-- ============ FRONT ridge — closer, broader landmass ============
          Single undulating bezier silhouette with one main hump near
-         (940, 158). Lower amplitude than back ridge, so it reads as
-         foreground without competing with the main mountain. -->
+         (940, 158). Lower amplitude than back, so it reads as foreground. -->
     <path class="landscape-front-main" d="
       M 0,212
       C 140,204 280,198 440,202
@@ -1365,9 +1395,13 @@
       C 1320,184 1400,200 1440,206
       L 1440,240 L 0,240 Z"/>
 
-    <!-- Lit-slope strip on right side of the front hump. Same pattern:
-         the top edge traces the silhouette curve; the bottom edge is
-         inset to form a band of warm light along the lit slope. -->
+    <!-- Front facet creases — same logic, smaller offsets to fit the
+         shorter front silhouette. -->
+    <use class="landscape-facet" data-facet-rank="1" href="#front-top" transform="translate(0, 10)"/>
+    <use class="landscape-facet" data-facet-rank="2" href="#front-top" transform="translate(0, 22)"/>
+    <use class="landscape-facet" data-facet-rank="3" href="#front-top" transform="translate(0, 34)"/>
+
+    <!-- Lit-slope strip on right side of front hump -->
     <path class="landscape-light" fill="url(#lit-slope-front)" d="
       M 940,158
       C 1060,156 1200,170 1320,184
@@ -1377,15 +1411,16 @@
       C 1200,182 1060,178 940,182
       Z"/>
 
-    <!-- ◇ Selected structural gold edges — only the apex segment of each
-         main ridge crest. Knob-controlled intensity (off/subtle/strong)
-         via Outlines knob. -->
+    <!-- ◇ Gold structural edges — aligned EXACTLY with facet crease #1 on
+         each ridge (same vertical offset as crease 1's transform), so the
+         gold lines never float disconnected from a structural transition.
+         Knob-controlled intensity via Outlines knob. -->
     <path class="landscape-edge-key" d="
-      M 660,46 C 740,42 800,40 820,40
-      C 880,42 960,46 1040,58"/>
+      M 660,68 C 740,64 800,62 820,62
+      C 880,64 960,68 1040,80"/>
     <path class="landscape-edge-key" d="
-      M 880,164 C 920,160 980,156 1060,156
-      C 1140,158 1200,164 1240,172"/>
+      M 880,170 C 920,166 980,164 1060,166
+      C 1140,168 1200,174 1240,182"/>
   </svg>
 
   <!-- Topographic landscape variant — single continuous mountain ridge.
@@ -1643,6 +1678,14 @@
           <button data-value="off">Off</button>
           <button data-value="subtle">Subtle</button>
           <button data-value="strong">Strong</button>
+        </div>
+      </div>
+      <div class="bg-controls__row bg-controls__row--faceted">
+        <span>Facets</span>
+        <div class="bg-tabs" data-attr="data-bg-facets">
+          <button data-value="1">1</button>
+          <button data-value="2">2</button>
+          <button data-value="3">3</button>
         </div>
       </div>
     </div>
