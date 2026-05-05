@@ -25,11 +25,7 @@
        data-bg-stars="sparse|medium|dense"                     (default: dense — all 65)
        data-bg-star-glow="off|subtle|strong"                   (default: strong)
        data-bg-northstar="off|on"                              (default: on)
-       data-bg-tone="void|iris|gold"                           (default: void)
-       data-bg-light="off|blue|gold"                           (default: blue)
-       data-bg-outlines="off|subtle|strong"                    (default: subtle)
-       data-bg-facets="1|2|3"                                  (default: 2)
-       data-bg-landscape="off|faceted|topo"                    (default: faceted)
+       data-bg-landscape="off|topo"                            (default: topo)
      ────────────────────────────────────────────────────────────────────── */
 
   /* ──────────────────────────────────────────────────────────────────────
@@ -150,84 +146,6 @@
      BACKGROUND TWEAK SYSTEM — defaults + per-attribute overrides on .app
      ────────────────────────────────────────────────────────────────────── */
 
-  /* Facet color palette — design system tokens; swap via data-bg-tone */
-  .app {
-    --bg-facet-back:   rgb(35, 44, 67);   /* void-50 */
-    --bg-facet-front:  rgb(6,  9,  19);   /* void-400 */
-    --bg-facet-light:  rgb(72, 129, 224); /* blue-500 */
-  }
-  .app[data-bg-tone="iris"] {
-    --bg-facet-back:   rgb(92, 61,  143); /* iris-700 */
-    --bg-facet-front:  rgb(36, 22,  58);  /* iris-deeper */
-    --bg-facet-light:  rgb(107, 63, 168); /* iris-600 */
-  }
-  .app[data-bg-tone="gold"] {
-    --bg-facet-back:   rgb(142, 112, 25); /* gold-500 */
-    --bg-facet-front:  rgb(74,  40,  18); /* terra-800 */
-    --bg-facet-light:  rgb(224, 184, 58); /* gold-300 */
-  }
-
-  /* Landscape polygon fills (read from CSS variables above).
-     Accent fills bumped so the Facets and Light-accent knobs produce a
-     visibly different result when toggled. */
-  .landscape-back-main    { fill: var(--bg-facet-back);  fill-opacity: 0.50; }
-  .landscape-front-main   { fill: var(--bg-facet-front); fill-opacity: 0.85; }
-  .landscape-light        { fill: var(--bg-facet-light); fill-opacity: 0.18; }
-
-  /* ── Faceted terrain — sloped landmasses, embedded lighting ──
-     Each ridge is ONE continuous bezier silhouette with a directional
-     lighting gradient laid into it, plus a curved lit-slope strip that
-     traces the right-facing slope of the main peak. No grain, no focal
-     glow, no decorative subdivision folds — the curve and the lighting
-     do the work. */
-  .landscape-shade-back,
-  .landscape-shade-front,
-  .landscape-light,
-  .landscape-facet { pointer-events: none; }
-
-  /* Lit-slope gradient stops pull their colour from --bg-facet-light so
-     the Light side knob still tones them. Stop-color must come through
-     CSS to use var() — it doesn't work as an XML attribute. */
-  #lit-slope-back stop,
-  #lit-slope-front stop { stop-color: var(--bg-facet-light); }
-
-  /* Soft facet creases — strokes that follow the main silhouette curve at
-     vertical offsets, so each crease echoes the ridge direction exactly.
-     Facets knob (1 / 2 / 3) controls how many are visible. */
-  .landscape-facet {
-    fill: none;
-    stroke: rgb(232, 228, 220); /* chalk-100 */
-    stroke-width: 0.6;
-    stroke-opacity: 0.18;
-    stroke-linecap: round;
-    stroke-linejoin: round;
-    vector-effect: non-scaling-stroke;
-    transition: opacity 200ms ease;
-  }
-  /* Outermost (lowest) creases hide first as the count drops, so the
-     remaining creases stay closest to the ridge — most structural. */
-  .app[data-bg-facets="1"] [data-facet-rank="2"],
-  .app[data-bg-facets="1"] [data-facet-rank="3"],
-  .app[data-bg-facets="2"] [data-facet-rank="3"] { display: none; }
-
-  /* Selected structural gold edges — only the main ridge crest of each
-     ridge is highlighted. Outlines knob now modulates intensity (off /
-     subtle / strong) instead of toggling V4-V1-V2 polylines on every
-     facet (those polylines are gone with the segmented geometry). */
-  .landscape-edge-key {
-    fill: none;
-    stroke: rgb(224, 184, 58); /* gold-300 */
-    stroke-width: 1;
-    stroke-opacity: 0.55;
-    stroke-linecap: round;
-    stroke-linejoin: round;
-    vector-effect: non-scaling-stroke;
-    transition: stroke-width 200ms ease, stroke-opacity 200ms ease;
-  }
-  .app[data-bg-outlines="off"]    .landscape-edge-key { stroke-opacity: 0; stroke-width: 0; }
-  .app[data-bg-outlines="subtle"] .landscape-edge-key { stroke-opacity: 0.55; stroke-width: 1; }
-  .app[data-bg-outlines="strong"] .landscape-edge-key { stroke-opacity: 0.92; stroke-width: 1.4; }
-
   /* Star density — toggle tier visibility */
   .app[data-bg-stars="sparse"] .stars-medium,
   .app[data-bg-stars="sparse"] .stars-dim    { display: none; }
@@ -260,35 +178,6 @@
 
   /* North star visibility */
   .app[data-bg-northstar="off"] .north-star { display: none; }
-
-  /* Faceted-only background controls — visible at all times, but disabled
-     (faded + non-interactive) when landscape isn't 'faceted' so the user
-     can still see what knobs exist for that variant without being able to
-     poke them. */
-  .app[data-bg-landscape="topo"] .bg-controls__row--faceted,
-  .app[data-bg-landscape="off"]  .bg-controls__row--faceted {
-    opacity: 0.4;
-    pointer-events: none;
-    filter: saturate(0.6);
-  }
-
-
-  /* Light side — color of the illuminated facets across ALL three ridges.
-     Each ridge has one .landscape-light polygon; the rule applies uniformly. */
-  .app[data-bg-light="off"] .landscape-light { display: none; }
-  .app[data-bg-light="blue"] .landscape-light {
-    fill: rgb(72, 129, 224);  /* blue-500 */
-    fill-opacity: 0.18;
-  }
-  .app[data-bg-light="gold"] .landscape-light {
-    fill: rgb(224, 184, 58);  /* gold-300 */
-    fill-opacity: 0.32;
-  }
-
-
-  /* The old .landscape-outline polylines (V4-V1-V2 traces on every lit
-     facet) are gone with the segmented geometry; the Outlines knob now
-     drives .landscape-edge-key intensity (see rules above). */
 
 
   /* ──────────────────────────────────────────────────────────────────────
@@ -404,10 +293,9 @@
     box-shadow: 0 0 0 2px var(--bg-overlay);
   }
 
-  /* landscape anchored to viewport bottom — full width, height scales with
-     viewport so the mountain proportions stay reasonable across screen sizes.
-     Hidden by default; the data-bg-landscape attribute below picks one. */
-  .terrain-landscape,
+  /* Topo landscape anchored to viewport bottom — full width, height scales
+     with viewport so the mountain proportions stay reasonable across screen
+     sizes. Hidden by default; data-bg-landscape="topo" reveals it. */
   .terrain-topo {
     position: absolute;
     bottom: 0; left: 0; right: 0;
@@ -422,9 +310,7 @@
     transition: opacity 320ms ease;
     display: none;
   }
-  /* Landscape variants — exactly one visible at a time */
-  .app[data-bg-landscape="faceted"] .terrain-landscape { display: block; }
-  .app[data-bg-landscape="topo"]    .terrain-topo      { display: block; }
+  .app[data-bg-landscape="topo"] .terrain-topo { display: block; }
   /* Topographic terrain — every white contour AND the gold route are
      <use> instances of the same #topo-ridge path defined in <defs>, so
      they share identical curvature. Contours are translated copies, the
@@ -448,7 +334,7 @@
     stroke-linejoin: round;
     vector-effect: non-scaling-stroke;
   }
-  .app[data-view="stage"] .terrain-landscape { opacity: 1; }
+  .app[data-view="stage"] .terrain-topo { opacity: 1; }
 
   /* North star — HTML version. Sibling of .terrain so it sits over the
      stretched sky SVG but doesn't get distorted by preserveAspectRatio="none".
@@ -1256,13 +1142,9 @@
      data-bg-stars="dense"
      data-bg-star-glow="strong"
      data-bg-northstar="on"
-     data-bg-tone="void"
-     data-bg-light="blue"
-     data-bg-outlines="subtle"
-     data-bg-facets="2"
-     data-bg-landscape="faceted">
+     data-bg-landscape="topo">
 
-  <!-- Brand backdrop — sky (stars + north star) + landscape (faceted ridges).
+  <!-- Brand backdrop — sky (stars + north star) + topographic landscape.
        Tweaks are on .app via data-bg-* attributes; see <style> docs. -->
   <svg class="terrain" preserveAspectRatio="none" viewBox="0 0 1440 900" aria-hidden="true">
 
@@ -1296,132 +1178,6 @@
     <span class="north-star__shimmer north-star__shimmer--v"></span>
     <span class="north-star__core"></span>
   </div>
-
-  <!-- Bottom-anchored landscape — two-layer dune (back + front).
-       Polygons take their fill from CSS variables so the tone can be swapped
-       via data-bg-tone. Outlines are drawn as separate top-edge contour paths
-       (not closed-polygon strokes) for a refined topographic look. -->
-  <svg class="terrain-landscape" preserveAspectRatio="none" viewBox="0 0 1440 240" aria-hidden="true">
-    <defs>
-      <!-- Master ridge top curves. The silhouette + every facet crease +
-           the gold structural edge are all derived from these, so each
-           crease follows the main ridge direction exactly. -->
-      <path id="back-top" d="M 0,128 C 100,118 220,100 380,82 C 520,66 660,46 820,40 C 960,46 1080,68 1180,92 C 1280,114 1370,128 1440,134"/>
-      <path id="front-top" d="M 0,212 C 140,204 280,198 440,202 C 580,206 720,212 820,182 C 920,160 1060,156 1200,170 C 1320,184 1400,200 1440,206"/>
-
-      <!-- Embedded directional lighting on each silhouette. Slight tilt
-           (x1=0.65 → x2=0.35) puts the bright stop in the upper-right and
-           the dark stop in the lower-left, suggesting a light source from
-           the upper right. Tone-agnostic so it layers across all tones. -->
-      <linearGradient id="back-light" x1="0.65" y1="0" x2="0.35" y2="1">
-        <stop offset="0"    stop-color="rgb(255,255,255)" stop-opacity="0.15"/>
-        <stop offset="0.32" stop-color="rgb(255,255,255)" stop-opacity="0.04"/>
-        <stop offset="0.55" stop-color="rgb(0,0,0)"       stop-opacity="0"/>
-        <stop offset="1"    stop-color="rgb(0,0,0)"       stop-opacity="0.32"/>
-      </linearGradient>
-      <linearGradient id="front-light" x1="0.6" y1="0" x2="0.4" y2="1">
-        <stop offset="0"    stop-color="rgb(255,255,255)" stop-opacity="0.10"/>
-        <stop offset="0.30" stop-color="rgb(255,255,255)" stop-opacity="0.03"/>
-        <stop offset="0.55" stop-color="rgb(0,0,0)"       stop-opacity="0"/>
-        <stop offset="1"    stop-color="rgb(0,0,0)"       stop-opacity="0.46"/>
-      </linearGradient>
-
-      <!-- Lit-slope gradients. Stop-color is set in CSS (var(--bg-facet-light))
-           so the Light side knob still drives the colour. Opacity stops here
-           shape the falloff: bright at the ridge edge, fading down the slope. -->
-      <linearGradient id="lit-slope-back" x1="0.45" y1="0" x2="0.55" y2="1">
-        <stop offset="0" stop-opacity="0.42"/>
-        <stop offset="1" stop-opacity="0"/>
-      </linearGradient>
-      <linearGradient id="lit-slope-front" x1="0.45" y1="0" x2="0.55" y2="1">
-        <stop offset="0" stop-opacity="0.34"/>
-        <stop offset="1" stop-opacity="0"/>
-      </linearGradient>
-    </defs>
-
-    <!-- ============ BACK ridge — distant landmass ============
-         One continuous bezier silhouette. Gradual rise to a single main
-         peak around (820, 40); gradual descent to either edge. -->
-    <path class="landscape-back-main" d="
-      M 0,128
-      C 100,118 220,100 380,82
-      C 520,66 660,46 820,40
-      C 960,46 1080,68 1180,92
-      C 1280,114 1370,128 1440,134
-      L 1440,240 L 0,240 Z"/>
-    <!-- Embedded directional lighting on back silhouette -->
-    <path class="landscape-shade-back" fill="url(#back-light)" d="
-      M 0,128
-      C 100,118 220,100 380,82
-      C 520,66 660,46 820,40
-      C 960,46 1080,68 1180,92
-      C 1280,114 1370,128 1440,134
-      L 1440,240 L 0,240 Z"/>
-
-    <!-- ◇ Soft facet creases — translated copies of the master ridge top.
-         Each crease echoes the silhouette direction exactly, so they read
-         as plane transitions following the slope rather than arbitrary
-         lines. The Facets knob (1 / 2 / 3) controls how many are visible. -->
-    <use class="landscape-facet" data-facet-rank="1" href="#back-top" transform="translate(0, 22)"/>
-    <use class="landscape-facet" data-facet-rank="2" href="#back-top" transform="translate(0, 50)"/>
-    <use class="landscape-facet" data-facet-rank="3" href="#back-top" transform="translate(0, 82)"/>
-
-    <!-- Lit-slope strip on right side of main peak. Vertical gradient
-         brightens at the ridge edge, fades downslope. -->
-    <path class="landscape-light" fill="url(#lit-slope-back)" d="
-      M 820,40
-      C 960,46 1080,68 1180,92
-      C 1280,114 1370,128 1440,134
-      L 1440,178
-      C 1370,168 1280,148 1180,124
-      C 1080,98 960,76 820,72
-      Z"/>
-
-    <!-- ============ FRONT ridge — closer, broader landmass ============
-         Single undulating bezier silhouette with one main hump near
-         (940, 158). Lower amplitude than back, so it reads as foreground. -->
-    <path class="landscape-front-main" d="
-      M 0,212
-      C 140,204 280,198 440,202
-      C 580,206 720,212 820,182
-      C 920,160 1060,156 1200,170
-      C 1320,184 1400,200 1440,206
-      L 1440,240 L 0,240 Z"/>
-    <path class="landscape-shade-front" fill="url(#front-light)" d="
-      M 0,212
-      C 140,204 280,198 440,202
-      C 580,206 720,212 820,182
-      C 920,160 1060,156 1200,170
-      C 1320,184 1400,200 1440,206
-      L 1440,240 L 0,240 Z"/>
-
-    <!-- Front facet creases — same logic, smaller offsets to fit the
-         shorter front silhouette. -->
-    <use class="landscape-facet" data-facet-rank="1" href="#front-top" transform="translate(0, 10)"/>
-    <use class="landscape-facet" data-facet-rank="2" href="#front-top" transform="translate(0, 22)"/>
-    <use class="landscape-facet" data-facet-rank="3" href="#front-top" transform="translate(0, 34)"/>
-
-    <!-- Lit-slope strip on right side of front hump -->
-    <path class="landscape-light" fill="url(#lit-slope-front)" d="
-      M 940,158
-      C 1060,156 1200,170 1320,184
-      C 1380,194 1420,202 1440,206
-      L 1440,228
-      C 1420,222 1380,212 1320,200
-      C 1200,182 1060,178 940,182
-      Z"/>
-
-    <!-- ◇ Gold structural edges — aligned EXACTLY with facet crease #1 on
-         each ridge (same vertical offset as crease 1's transform), so the
-         gold lines never float disconnected from a structural transition.
-         Knob-controlled intensity via Outlines knob. -->
-    <path class="landscape-edge-key" d="
-      M 660,68 C 740,64 800,62 820,62
-      C 880,64 960,68 1040,80"/>
-    <path class="landscape-edge-key" d="
-      M 880,170 C 920,166 980,164 1060,166
-      C 1140,168 1200,174 1240,182"/>
-  </svg>
 
   <!-- Topographic landscape variant — single continuous mountain ridge.
        Asymmetric profile: gradual rise on the left, sharper drop on the
@@ -1649,43 +1405,9 @@
 
       <div class="bg-controls__row">
         <span>Landscape</span>
-        <div class="bg-tabs" data-attr="data-bg-landscape">
+        <div class="bg-tabs bg-tabs--toggle" data-attr="data-bg-landscape">
           <button data-value="off">Off</button>
-          <button data-value="faceted">Faceted</button>
           <button data-value="topo">Topo</button>
-        </div>
-      </div>
-      <!-- Faceted-only knobs — hidden when landscape is topo or off -->
-      <div class="bg-controls__row bg-controls__row--faceted">
-        <span>Tone</span>
-        <div class="bg-swatches" data-attr="data-bg-tone">
-          <button data-value="void" data-tone-color="rgb(35,44,67)" title="Void"></button>
-          <button data-value="iris" data-tone-color="rgb(92,61,143)" title="Iris"></button>
-          <button data-value="gold" data-tone-color="rgb(142,112,25)" title="Gold"></button>
-        </div>
-      </div>
-      <div class="bg-controls__row bg-controls__row--faceted">
-        <span>Light side</span>
-        <div class="bg-tabs" data-attr="data-bg-light">
-          <button data-value="off">Off</button>
-          <button data-value="blue">Blue</button>
-          <button data-value="gold">Gold</button>
-        </div>
-      </div>
-      <div class="bg-controls__row bg-controls__row--faceted">
-        <span>Outlines</span>
-        <div class="bg-tabs" data-attr="data-bg-outlines">
-          <button data-value="off">Off</button>
-          <button data-value="subtle">Subtle</button>
-          <button data-value="strong">Strong</button>
-        </div>
-      </div>
-      <div class="bg-controls__row bg-controls__row--faceted">
-        <span>Facets</span>
-        <div class="bg-tabs" data-attr="data-bg-facets">
-          <button data-value="1">1</button>
-          <button data-value="2">2</button>
-          <button data-value="3">3</button>
         </div>
       </div>
     </div>
