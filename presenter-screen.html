@@ -25,7 +25,16 @@
        data-bg-stars="sparse|medium|dense"                     (default: dense — all 65)
        data-bg-star-glow="off|subtle|strong"                   (default: strong)
        data-bg-northstar="off|on"                              (default: on)
-       data-bg-landscape="off|topo"                            (default: topo)
+       data-bg-landscape="off|desert|topo"                     (default: desert)
+       —— Desert-specific knobs (only meaningful when landscape="desert") ——
+       data-bg-tone="navy|indigo|purple"                       (default: navy)
+       data-bg-facets="3|4|5|6"                                (default: 5)
+       data-bg-network="sparse|medium|rich"                    (default: medium)
+       data-bg-light="off|soft|warm|bright"                    (default: warm)
+       data-bg-light-pos="left|center|right"                   (default: center)
+       data-bg-grain="off|fine|coarse"                         (default: fine)
+       data-bg-distant="off|subtle|visible"                    (default: subtle)
+       data-bg-foreground="light|medium|dark"                  (default: medium)
      ────────────────────────────────────────────────────────────────────── */
 
   /* ──────────────────────────────────────────────────────────────────────
@@ -335,6 +344,154 @@
     vector-effect: non-scaling-stroke;
   }
   .app[data-view="stage"] .terrain-topo { opacity: 1; }
+
+
+  /* ──────────────────────────────────────────────────────────────────────
+     Desert landscape — stylized night dune with faceted uplifts + golden
+     network. Layered: distant mountains → main dune (smooth) → uplifts
+     (faceted accents) → golden network paths + nodes → warm radial light
+     → foreground darken → grain texture. Eight tuning knobs.
+     ────────────────────────────────────────────────────────────────────── */
+
+  /* Tone palette — desert-specific colour theme. Three options. */
+  .app {
+    --desert-bg-deep:   rgb(8,  11, 22);   /* darkest, foreground band */
+    --desert-bg-mid:    rgb(20, 25, 52);   /* main dune fill */
+    --desert-bg-far:    rgb(28, 32, 65);   /* distant mountains */
+    --desert-warm:      rgb(240, 207, 90); /* warm light source / gold */
+    --desert-facet:     rgb(48, 56, 110);  /* uplift base fill */
+    --desert-facet-hi:  rgb(116,130,200);  /* uplift edge highlight */
+  }
+  .app[data-bg-tone="indigo"] {
+    --desert-bg-deep:   rgb(12, 14, 38);
+    --desert-bg-mid:    rgb(32, 36, 78);
+    --desert-bg-far:    rgb(40, 46, 98);
+    --desert-warm:      rgb(240, 207, 90);
+    --desert-facet:     rgb(60, 68, 130);
+    --desert-facet-hi:  rgb(140,152,218);
+  }
+  .app[data-bg-tone="purple"] {
+    --desert-bg-deep:   rgb(18, 12, 32);
+    --desert-bg-mid:    rgb(48, 30, 78);
+    --desert-bg-far:    rgb(58, 42, 96);
+    --desert-warm:      rgb(248, 188, 90);
+    --desert-facet:     rgb(82, 56, 124);
+    --desert-facet-hi:  rgb(176,152,218);
+  }
+
+  .terrain-desert {
+    position: absolute;
+    bottom: 0; left: 0; right: 0;
+    width: 100%;
+    height: clamp(220px, 32vh, 380px);
+    pointer-events: none;
+    z-index: 0;
+    opacity: 0.92;
+    transition: opacity 320ms ease;
+    display: none;
+  }
+  .app[data-bg-landscape="desert"] .terrain-desert { display: block; }
+  .app[data-view="stage"] .terrain-desert { opacity: 1; }
+
+  /* Sub-element fills — read tone variables so palette knob retones the
+     whole composition without per-class overrides. */
+  .desert-bg-mountain  { fill: var(--desert-bg-far);  fill-opacity: 0.55; }
+  .desert-dune-main    { fill: var(--desert-bg-mid);  fill-opacity: 0.92; }
+  .desert-uplift       { fill: var(--desert-facet);   fill-opacity: 0.78; }
+  .desert-foreground-shade,
+  .desert-grain,
+  .desert-warm-light,
+  .desert-uplift,
+  .desert-bg-mountain,
+  .desert-dune-shade   { pointer-events: none; }
+
+  /* Lighting — radial warm light. Position knob (left/center/right) shifts
+     the group's transform; intensity knob scales opacity. */
+  .desert-warm-light {
+    transition: transform 480ms ease, opacity 320ms ease;
+  }
+  .app[data-bg-light="off"]    .desert-warm-light { opacity: 0; }
+  .app[data-bg-light="soft"]   .desert-warm-light { opacity: 0.45; }
+  .app[data-bg-light="warm"]   .desert-warm-light { opacity: 0.80; }
+  .app[data-bg-light="bright"] .desert-warm-light { opacity: 1.00; }
+  .app[data-bg-light-pos="left"]   .desert-warm-light { transform: translateX(-22%); }
+  .app[data-bg-light-pos="right"]  .desert-warm-light { transform: translateX(22%); }
+
+  /* Uplift edge highlight — gold edge stroke that catches the warm light.
+     Brightens facet apex edges so they read as raised against the dune. */
+  .desert-uplift-edge {
+    fill: none;
+    stroke: var(--desert-facet-hi);
+    stroke-width: 0.8;
+    stroke-opacity: 0.55;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+    vector-effect: non-scaling-stroke;
+  }
+
+  /* Facets count — hide highest-rank uplifts first as count drops. */
+  .app[data-bg-facets="3"] [data-uplift-rank="4"],
+  .app[data-bg-facets="3"] [data-uplift-rank="5"],
+  .app[data-bg-facets="3"] [data-uplift-rank="6"],
+  .app[data-bg-facets="4"] [data-uplift-rank="5"],
+  .app[data-bg-facets="4"] [data-uplift-rank="6"],
+  .app[data-bg-facets="5"] [data-uplift-rank="6"] { display: none; }
+
+  /* Golden network — main route + secondary connectors. Stroke is gold
+     with a soft warm gradient. Network density knob hides higher-tier
+     connectors when sparse/medium. */
+  .desert-route {
+    fill: none;
+    stroke: var(--desert-warm);
+    stroke-width: 1.2;
+    stroke-opacity: 0.72;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+    vector-effect: non-scaling-stroke;
+  }
+  .desert-route--connector {
+    stroke-width: 0.8;
+    stroke-opacity: 0.45;
+  }
+  .app[data-bg-network="sparse"] [data-network-tier="2"],
+  .app[data-bg-network="sparse"] [data-network-tier="3"],
+  .app[data-bg-network="medium"] [data-network-tier="3"] { display: none; }
+
+  /* Intersection nodes — small filled circles at gold-line junctions. */
+  .desert-node {
+    fill: var(--desert-warm);
+    filter: drop-shadow(0 0 3px var(--desert-warm))
+            drop-shadow(0 0 1px var(--desert-warm));
+  }
+
+  /* Distant mountains visibility */
+  .app[data-bg-distant="off"]     .desert-bg-mountain { display: none; }
+  .app[data-bg-distant="subtle"]  .desert-bg-mountain { fill-opacity: 0.32; }
+  .app[data-bg-distant="visible"] .desert-bg-mountain { fill-opacity: 0.62; }
+
+  /* Foreground darkening intensity */
+  .desert-foreground-shade { fill: url(#desert-fg-fade); }
+  .app[data-bg-foreground="light"]  .desert-foreground-shade { opacity: 0.30; }
+  .app[data-bg-foreground="medium"] .desert-foreground-shade { opacity: 0.65; }
+  .app[data-bg-foreground="dark"]   .desert-foreground-shade { opacity: 1.00; }
+
+  /* Grain texture toggle — two variants (fine / coarse) live in the SVG;
+     the knob swaps which one is visible. */
+  .desert-grain {
+    mix-blend-mode: overlay;
+    display: none;
+  }
+  .app[data-bg-grain="fine"]   [data-grain="fine"]   { display: block; opacity: 0.40; }
+  .app[data-bg-grain="coarse"] [data-grain="coarse"] { display: block; opacity: 0.65; }
+
+  /* Desert-only knob rows are visible always, but disabled when the
+     landscape variant isn't 'desert'. */
+  .app:not([data-bg-landscape="desert"]) .bg-controls__row--desert {
+    opacity: 0.4;
+    pointer-events: none;
+    filter: saturate(0.6);
+  }
+
 
   /* North star — HTML version. Sibling of .terrain so it sits over the
      stretched sky SVG but doesn't get distorted by preserveAspectRatio="none".
@@ -1142,7 +1299,15 @@
      data-bg-stars="dense"
      data-bg-star-glow="strong"
      data-bg-northstar="on"
-     data-bg-landscape="topo">
+     data-bg-landscape="desert"
+     data-bg-tone="navy"
+     data-bg-facets="5"
+     data-bg-network="medium"
+     data-bg-light="warm"
+     data-bg-light-pos="center"
+     data-bg-grain="fine"
+     data-bg-distant="subtle"
+     data-bg-foreground="medium">
 
   <!-- Brand backdrop — sky (stars + north star) + topographic landscape.
        Tweaks are on .app via data-bg-* attributes; see <style> docs. -->
@@ -1178,6 +1343,213 @@
     <span class="north-star__shimmer north-star__shimmer--v"></span>
     <span class="north-star__core"></span>
   </div>
+
+  <!-- Desert landscape variant — stylized night dune with faceted uplifts
+       and golden network. ViewBox is taller (360 vs 240) to fit three
+       atmospheric layers: distant mountains → main dune → foreground band. -->
+  <svg class="terrain-desert" preserveAspectRatio="none" viewBox="0 0 1440 360" aria-hidden="true">
+    <defs>
+      <!-- Master dune top curve — referenced by the gold route so the
+           main route follows the dune crest. Ranges from y≈210 at edges
+           to y≈148 at the crest near x=820. -->
+      <path id="dune-top" d="M 0,210 C 120,195 240,185 380,180 C 500,178 620,160 740,150 C 860,142 980,142 1100,158 C 1220,175 1340,195 1440,205"/>
+
+      <!-- Warm radial light — gold + soft falloff. Centered on the dune
+           crest area; the lighting knob shifts/scales it. -->
+      <radialGradient id="warm-light-grad" cx="0.5" cy="0.55" r="0.5">
+        <stop offset="0"   stop-color="rgb(248, 212, 110)" stop-opacity="0.42"/>
+        <stop offset="0.35" stop-color="rgb(232, 184, 58)" stop-opacity="0.18"/>
+        <stop offset="0.65" stop-color="rgb(232, 184, 58)" stop-opacity="0.06"/>
+        <stop offset="1"   stop-color="rgb(232, 184, 58)" stop-opacity="0"/>
+      </radialGradient>
+
+      <!-- Surface-following lighting on the dune body. Slight horizontal
+           tilt reinforces the warm light's directionality. -->
+      <linearGradient id="dune-shade" x1="0.55" y1="0" x2="0.45" y2="1">
+        <stop offset="0"    stop-color="rgb(255,255,255)" stop-opacity="0.10"/>
+        <stop offset="0.25" stop-color="rgb(255,255,255)" stop-opacity="0.03"/>
+        <stop offset="0.55" stop-color="rgb(0,0,0)"       stop-opacity="0"/>
+        <stop offset="1"    stop-color="rgb(0,0,0)"       stop-opacity="0.32"/>
+      </linearGradient>
+
+      <!-- Foreground band fade — darkens the bottom for depth -->
+      <linearGradient id="desert-fg-fade" x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0" stop-color="rgb(0,0,0)" stop-opacity="0"/>
+        <stop offset="1" stop-color="rgb(0,0,0)" stop-opacity="0.55"/>
+      </linearGradient>
+
+      <!-- Soft warm gradient for gold route stroke (atmospheric brightness) -->
+      <linearGradient id="desert-route-glow" x1="0" y1="0" x2="1" y2="0">
+        <stop offset="0"    stop-color="rgb(232, 184, 58)" stop-opacity="0.30"/>
+        <stop offset="0.45" stop-color="rgb(248, 212, 110)" stop-opacity="0.85"/>
+        <stop offset="0.55" stop-color="rgb(248, 212, 110)" stop-opacity="0.85"/>
+        <stop offset="1"    stop-color="rgb(232, 184, 58)" stop-opacity="0.30"/>
+      </linearGradient>
+
+      <!-- Per-uplift gentle shading — adds subtle volume so the polygons
+           don't read as flat panels. -->
+      <linearGradient id="uplift-shade" x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0" stop-color="rgb(255,255,255)" stop-opacity="0.18"/>
+        <stop offset="1" stop-color="rgb(0,0,0)"       stop-opacity="0.22"/>
+      </linearGradient>
+
+      <!-- Grain noise filter — fractalNoise → red→alpha for variable
+           speckle, blended over the terrain via mix-blend-mode in CSS. -->
+      <filter id="desert-grain-fine"   x="0" y="0" width="100%" height="100%">
+        <feTurbulence type="fractalNoise" baseFrequency="2.6" numOctaves="2" seed="11" stitchTiles="stitch"/>
+        <feColorMatrix values="0 0 0 0 1   0 0 0 0 1   0 0 0 0 1   0.55 0 0 0 -0.05"/>
+      </filter>
+      <filter id="desert-grain-coarse" x="0" y="0" width="100%" height="100%">
+        <feTurbulence type="fractalNoise" baseFrequency="1.4" numOctaves="2" seed="23" stitchTiles="stitch"/>
+        <feColorMatrix values="0 0 0 0 1   0 0 0 0 1   0 0 0 0 1   0.70 0 0 0 -0.10"/>
+      </filter>
+    </defs>
+
+    <!-- ============ Layer 1: Distant mountains (background) ============
+         Two soft silhouettes for atmospheric depth. Smooth bezier curves —
+         no zigzag. Visibility controlled by the Distant knob. -->
+    <path class="desert-bg-mountain" d="
+      M 0,170 C 220,148 420,162 620,140
+      C 820,118 1020,142 1240,128
+      C 1340,122 1400,130 1440,134
+      L 1440,360 L 0,360 Z"/>
+    <path class="desert-bg-mountain" d="
+      M 0,200 C 200,182 400,190 600,176
+      C 800,162 1000,184 1200,170
+      C 1320,164 1400,172 1440,176
+      L 1440,360 L 0,360 Z" style="fill-opacity: 0.45"/>
+
+    <!-- ============ Layer 2: Warm radial light ============
+         Group transform handles light position knob; opacity handles
+         intensity. Sits below dune so light "rises from behind" the crest. -->
+    <g class="desert-warm-light">
+      <ellipse cx="820" cy="170" rx="540" ry="180" fill="url(#warm-light-grad)"/>
+    </g>
+
+    <!-- ============ Layer 3: Main dune (smooth midground) ============
+         Single continuous bezier silhouette + same-path shading overlay
+         for surface-following lighting. -->
+    <path class="desert-dune-main" d="
+      M 0,210
+      C 120,195 240,185 380,180
+      C 500,178 620,160 740,150
+      C 860,142 980,142 1100,158
+      C 1220,175 1340,195 1440,205
+      L 1440,360 L 0,360 Z"/>
+    <path class="desert-dune-shade" fill="url(#dune-shade)" d="
+      M 0,210
+      C 120,195 240,185 380,180
+      C 500,178 620,160 740,150
+      C 860,142 980,142 1100,158
+      C 1220,175 1340,195 1440,205
+      L 1440,360 L 0,360 Z"/>
+
+    <!-- ============ Layer 4: Faceted uplifts ============
+         Six trapezoidal uplifts whose bases sit on the dune curve. Apex
+         tilts roughly match the dune slope at each x, so the facets
+         "follow the slope direction." Each uplift has a fill polygon, a
+         subtle shading overlay (uplift-shade), and a top-edge highlight
+         polyline that catches the warm light. Facets knob hides higher
+         ranks first, keeping central uplifts (the most structural). -->
+
+    <!-- Uplift 1 — left, smallest -->
+    <polygon class="desert-uplift" data-uplift-rank="3"
+             points="120,195  155,178  195,176  220,187"/>
+    <polygon class="desert-uplift" data-uplift-rank="3"
+             points="120,195  155,178  195,176  220,187" fill="url(#uplift-shade)"/>
+    <polyline class="desert-uplift-edge" data-uplift-rank="3"
+             points="120,195 155,178 195,176 220,187"/>
+
+    <!-- Uplift 2 -->
+    <polygon class="desert-uplift" data-uplift-rank="5"
+             points="290,182  315,165  365,164  380,180"/>
+    <polygon class="desert-uplift" data-uplift-rank="5"
+             points="290,182  315,165  365,164  380,180" fill="url(#uplift-shade)"/>
+    <polyline class="desert-uplift-edge" data-uplift-rank="5"
+             points="290,182 315,165 365,164 380,180"/>
+
+    <!-- Uplift 3 — center-left, taller -->
+    <polygon class="desert-uplift" data-uplift-rank="2"
+             points="480,178  500,148  560,142  580,170"/>
+    <polygon class="desert-uplift" data-uplift-rank="2"
+             points="480,178  500,148  560,142  580,170" fill="url(#uplift-shade)"/>
+    <polyline class="desert-uplift-edge" data-uplift-rank="2"
+             points="480,178 500,148 560,142 580,170"/>
+
+    <!-- Uplift 4 — main center peak (most prominent) -->
+    <polygon class="desert-uplift" data-uplift-rank="1"
+             points="680,155  710,116  775,110  800,146"/>
+    <polygon class="desert-uplift" data-uplift-rank="1"
+             points="680,155  710,116  775,110  800,146" fill="url(#uplift-shade)"/>
+    <polyline class="desert-uplift-edge" data-uplift-rank="1"
+             points="680,155 710,116 775,110 800,146"/>
+
+    <!-- Uplift 5 — center-right -->
+    <polygon class="desert-uplift" data-uplift-rank="4"
+             points="870,143  895,118  955,118  970,144"/>
+    <polygon class="desert-uplift" data-uplift-rank="4"
+             points="870,143  895,118  955,118  970,144" fill="url(#uplift-shade)"/>
+    <polyline class="desert-uplift-edge" data-uplift-rank="4"
+             points="870,143 895,118 955,118 970,144"/>
+
+    <!-- Uplift 6 — right, smaller -->
+    <polygon class="desert-uplift" data-uplift-rank="6"
+             points="1080,158  1100,135  1160,138  1180,168"/>
+    <polygon class="desert-uplift" data-uplift-rank="6"
+             points="1080,158  1100,135  1160,138  1180,168" fill="url(#uplift-shade)"/>
+    <polyline class="desert-uplift-edge" data-uplift-rank="6"
+             points="1080,158 1100,135 1160,138 1180,168"/>
+
+    <!-- ============ Layer 5: Golden network ============
+         Main route traces the dune crest, passing through the apex of
+         each visible uplift. Connectors network the uplifts to each
+         other and to the dune. Network density knob hides higher tiers. -->
+
+    <!-- Main route (always visible) -->
+    <path class="desert-route" data-network-tier="1" stroke="url(#desert-route-glow)" d="
+      M 0,224
+      Q 90,212 175,177
+      Q 250,178 340,164
+      Q 430,160 530,145
+      Q 640,128 743,112
+      Q 850,118 925,121
+      Q 1020,135 1130,136
+      Q 1280,170 1440,210"/>
+
+    <!-- Tier 2 connectors (medium + rich) -->
+    <path class="desert-route desert-route--connector" data-network-tier="2" d="
+      M 340,164 Q 410,170 480,178"/>
+    <path class="desert-route desert-route--connector" data-network-tier="2" d="
+      M 743,112 L 743,180"/>
+
+    <!-- Tier 3 connectors (rich only) -->
+    <path class="desert-route desert-route--connector" data-network-tier="3" d="
+      M 175,177 Q 250,210 340,232"/>
+    <path class="desert-route desert-route--connector" data-network-tier="3" d="
+      M 925,121 Q 990,180 1130,136"/>
+    <path class="desert-route desert-route--connector" data-network-tier="3" d="
+      M 530,145 L 530,228"/>
+
+    <!-- Intersection nodes — small filled circles at the apex midpoints -->
+    <circle class="desert-node" data-network-tier="1" data-uplift-rank="3" cx="175" cy="177" r="2.4"/>
+    <circle class="desert-node" data-network-tier="1" data-uplift-rank="5" cx="340" cy="164" r="2.4"/>
+    <circle class="desert-node" data-network-tier="1" data-uplift-rank="2" cx="530" cy="145" r="2.6"/>
+    <circle class="desert-node" data-network-tier="1" data-uplift-rank="1" cx="743" cy="112" r="3.2"/>
+    <circle class="desert-node" data-network-tier="1" data-uplift-rank="4" cx="925" cy="121" r="2.6"/>
+    <circle class="desert-node" data-network-tier="1" data-uplift-rank="6" cx="1130" cy="136" r="2.4"/>
+
+    <!-- ============ Layer 6: Foreground darken ============
+         Vertical-fade rect over the bottom half — Foreground knob scales
+         opacity. Adds depth (closest band reads darkest, less detailed). -->
+    <rect class="desert-foreground-shade" x="0" y="180" width="1440" height="180"/>
+
+    <!-- ============ Layer 7: Grain texture ============
+         Two filter variants (fine / coarse). Both are mix-blend-mode:
+         overlay so the noise lightens lights, darkens darks — material,
+         not haze. Off knob hides entirely. -->
+    <rect class="desert-grain" data-grain="fine"   x="0" y="0" width="1440" height="360" filter="url(#desert-grain-fine)"/>
+    <rect class="desert-grain" data-grain="coarse" x="0" y="0" width="1440" height="360" filter="url(#desert-grain-coarse)" style="display:none"/>
+  </svg>
 
   <!-- Topographic landscape variant — single continuous mountain ridge.
        Asymmetric profile: gradual rise on the left, sharper drop on the
@@ -1405,9 +1777,77 @@
 
       <div class="bg-controls__row">
         <span>Landscape</span>
-        <div class="bg-tabs bg-tabs--toggle" data-attr="data-bg-landscape">
+        <div class="bg-tabs" data-attr="data-bg-landscape">
           <button data-value="off">Off</button>
+          <button data-value="desert">Desert</button>
           <button data-value="topo">Topo</button>
+        </div>
+      </div>
+      <!-- Desert-only knobs — visible always, disabled when not desert -->
+      <div class="bg-controls__row bg-controls__row--desert">
+        <span>Tone</span>
+        <div class="bg-swatches" data-attr="data-bg-tone">
+          <button data-value="navy"   data-tone-color="rgb(20,25,52)"  title="Navy"></button>
+          <button data-value="indigo" data-tone-color="rgb(40,46,98)"  title="Indigo"></button>
+          <button data-value="purple" data-tone-color="rgb(58,42,96)"  title="Purple"></button>
+        </div>
+      </div>
+      <div class="bg-controls__row bg-controls__row--desert">
+        <span>Facets</span>
+        <div class="bg-tabs" data-attr="data-bg-facets">
+          <button data-value="3">3</button>
+          <button data-value="4">4</button>
+          <button data-value="5">5</button>
+          <button data-value="6">6</button>
+        </div>
+      </div>
+      <div class="bg-controls__row bg-controls__row--desert">
+        <span>Network</span>
+        <div class="bg-tabs" data-attr="data-bg-network">
+          <button data-value="sparse">Sparse</button>
+          <button data-value="medium">Medium</button>
+          <button data-value="rich">Rich</button>
+        </div>
+      </div>
+      <div class="bg-controls__row bg-controls__row--desert">
+        <span>Light</span>
+        <div class="bg-tabs" data-attr="data-bg-light">
+          <button data-value="off">Off</button>
+          <button data-value="soft">Soft</button>
+          <button data-value="warm">Warm</button>
+          <button data-value="bright">Bright</button>
+        </div>
+      </div>
+      <div class="bg-controls__row bg-controls__row--desert">
+        <span>Light pos</span>
+        <div class="bg-tabs" data-attr="data-bg-light-pos">
+          <button data-value="left">Left</button>
+          <button data-value="center">Center</button>
+          <button data-value="right">Right</button>
+        </div>
+      </div>
+      <div class="bg-controls__row bg-controls__row--desert">
+        <span>Grain</span>
+        <div class="bg-tabs" data-attr="data-bg-grain">
+          <button data-value="off">Off</button>
+          <button data-value="fine">Fine</button>
+          <button data-value="coarse">Coarse</button>
+        </div>
+      </div>
+      <div class="bg-controls__row bg-controls__row--desert">
+        <span>Distant</span>
+        <div class="bg-tabs" data-attr="data-bg-distant">
+          <button data-value="off">Off</button>
+          <button data-value="subtle">Subtle</button>
+          <button data-value="visible">Visible</button>
+        </div>
+      </div>
+      <div class="bg-controls__row bg-controls__row--desert">
+        <span>Foreground</span>
+        <div class="bg-tabs" data-attr="data-bg-foreground">
+          <button data-value="light">Light</button>
+          <button data-value="medium">Medium</button>
+          <button data-value="dark">Dark</button>
         </div>
       </div>
     </div>
