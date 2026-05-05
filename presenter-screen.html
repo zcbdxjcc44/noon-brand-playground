@@ -173,6 +173,65 @@
   .landscape-front-main   { fill: var(--bg-facet-front); fill-opacity: 0.85; }
   .landscape-light        { fill: var(--bg-facet-light); fill-opacity: 0.18; }
 
+  /* ── Faceted terrain refinement (premium / dimensional) ──
+     Gradient shading overlays, subdivision folds, focal glow, structural
+     edge highlights, and a fine grain texture. All purely additive — the
+     base polygons above still drive Tone, Light side, and Outlines. */
+
+  /* Vertical shading overlays — purely visual, no pointer interaction.
+     Tone-agnostic (uses white/black with alpha), so they layer correctly
+     on top of any tone. */
+  .landscape-shade-back,
+  .landscape-shade-front,
+  .landscape-light-fade,
+  .landscape-glow,
+  .landscape-grain { pointer-events: none; }
+
+  /* Subdivision folds — smaller secondary planes on each main ridge for
+     "layered polygon surfaces with different scales." Front fold is darker
+     than back fold (atmospheric perspective). */
+  .landscape-back-fold  { fill: var(--bg-facet-front); fill-opacity: 0.30; }
+  .landscape-front-fold { fill: rgb(0, 0, 0);          fill-opacity: 0.22; }
+
+  /* Lit-face fade overlays (top-edge brightening). Toggle in lockstep with
+     the Light side knob — they brighten the lit polygons, so they should
+     disappear when those polygons disappear. */
+  .app[data-bg-light="off"] .landscape-light-fade { display: none; }
+
+  /* Selected structural edges — ALWAYS on (baseline of the new design),
+     not knob-controlled. Just the focal peak's two crest segments get the
+     gold-300 highlight; the optional Outlines knob still adds full edge
+     highlights on every lit polygon when desired. */
+  .landscape-edge-key {
+    fill: none;
+    stroke: rgb(224, 184, 58); /* gold-300 */
+    stroke-width: 1;
+    stroke-opacity: 0.42;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+    vector-effect: non-scaling-stroke;
+  }
+  /* Soft chalk highlights on the remaining peak crests — provide depth
+     without competing with the gold focal edges. */
+  .landscape-edge-soft {
+    fill: none;
+    stroke: rgb(232, 228, 220); /* chalk-100 */
+    stroke-width: 0.6;
+    stroke-opacity: 0.18;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+    vector-effect: non-scaling-stroke;
+  }
+
+  /* Fine grain — a feTurbulence-driven rect layered over everything with
+     mix-blend-mode: overlay so it lightens lights and darkens darks. The
+     opacity is low enough that the texture reads as material rather than
+     decoration. */
+  .landscape-grain {
+    mix-blend-mode: overlay;
+    opacity: 0.55;
+  }
+
   /* Star density — toggle tier visibility */
   .app[data-bg-stars="sparse"] .stars-medium,
   .app[data-bg-stars="sparse"] .stars-dim    { display: none; }
@@ -1265,32 +1324,129 @@
        via data-bg-tone. Outlines are drawn as separate top-edge contour paths
        (not closed-polygon strokes) for a refined topographic look. -->
   <svg class="terrain-landscape" preserveAspectRatio="none" viewBox="0 0 1440 240" aria-hidden="true">
-    <!-- BACK ridge — distant peaks. Full-width zigzag silhouette + lit
-         slopes on every right-facing descent (upper-right light source).
-         Lit polygons are clipped to y≤150 so they stay clear of the front
-         ridge above and remain fully visible when Light side is toggled. -->
+    <defs>
+      <!-- Vertical shading overlays — neutral white/black alpha, so they
+           layer correctly on any Tone (void / iris / gold). The mid-stop
+           is fully transparent so the upper crest brightens and the base
+           darkens, with no tinting in the middle band. -->
+      <linearGradient id="ridge-shade-back" x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0"   stop-color="rgb(255,255,255)" stop-opacity="0.10"/>
+        <stop offset="0.5" stop-color="rgb(0,0,0)"       stop-opacity="0"/>
+        <stop offset="1"   stop-color="rgb(0,0,0)"       stop-opacity="0.30"/>
+      </linearGradient>
+      <linearGradient id="ridge-shade-front" x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0"   stop-color="rgb(255,255,255)" stop-opacity="0.06"/>
+        <stop offset="0.4" stop-color="rgb(0,0,0)"       stop-opacity="0"/>
+        <stop offset="1"   stop-color="rgb(0,0,0)"       stop-opacity="0.42"/>
+      </linearGradient>
+
+      <!-- Lit-face top-edge fade — adds a bright crest highlight that
+           drops to transparent toward the polygon's base. -->
+      <linearGradient id="lit-fade" x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0" stop-color="rgb(255,255,255)" stop-opacity="0.22"/>
+        <stop offset="1" stop-color="rgb(255,255,255)" stop-opacity="0"/>
+      </linearGradient>
+
+      <!-- Subtle focal glow behind the central peak — gold radial that
+           rises from behind the back ridge. Top half is clipped by the
+           SVG viewBox, leaving a soft "halo over the summit" effect. -->
+      <radialGradient id="peak-glow" cx="0.5" cy="0.6" r="0.5">
+        <stop offset="0"    stop-color="rgb(240,207,90)" stop-opacity="0.32"/>
+        <stop offset="0.45" stop-color="rgb(240,207,90)" stop-opacity="0.10"/>
+        <stop offset="1"    stop-color="rgb(240,207,90)" stop-opacity="0"/>
+      </radialGradient>
+
+      <!-- Fine grain texture. feTurbulence generates fractal noise; the
+           feColorMatrix rebases every pixel to white with alpha driven by
+           the noise's red channel, producing variable-transparency white
+           speckle. mix-blend-mode in CSS handles the overlay blend. -->
+      <filter id="terrain-grain" x="0" y="0" width="100%" height="100%">
+        <feTurbulence type="fractalNoise" baseFrequency="2.6"
+                      numOctaves="2" seed="11" stitchTiles="stitch"/>
+        <feColorMatrix values="0 0 0 0 1
+                               0 0 0 0 1
+                               0 0 0 0 1
+                               0.6 0 0 0 -0.05"/>
+      </filter>
+    </defs>
+
+    <!-- ◇ Focal glow behind central peak — sits beneath all terrain layers -->
+    <ellipse class="landscape-glow"
+             cx="720" cy="55" rx="380" ry="110"
+             fill="url(#peak-glow)"/>
+
+    <!-- ============ BACK ridge — distant silhouette ============ -->
     <polygon class="landscape-back-main"
              points="0,80 220,55 460,80 720,45 980,75 1240,55 1440,70 1440,240 0,240"/>
+    <!-- Vertical shading overlay (brightens crest, darkens base) -->
+    <polygon class="landscape-shade-back"
+             points="0,80 220,55 460,80 720,45 980,75 1240,55 1440,70 1440,240 0,240"
+             fill="url(#ridge-shade-back)"/>
+
+    <!-- Subdivision fold — small secondary plane on the left slope of the
+         central peak. Different scale from the main silhouette, gives the
+         ridge a layered facet rather than a single uninterrupted face. -->
+    <polygon class="landscape-back-fold"
+             points="540,80 600,60 660,80 600,150 540,150"/>
+
+    <!-- Lit faces on right slopes (existing geometry) -->
     <polygon class="landscape-light" points="220,55 460,80 380,150 270,150"/>
     <polygon class="landscape-light" points="720,45 980,75 900,150 780,150"/>
     <polygon class="landscape-light" points="1240,55 1440,70 1440,150 1340,150"/>
 
-    <!-- FRONT silhouette — closest, darkest. Spans full width 0 → 1440. -->
+    <!-- Top-edge brightening on each lit face for depth -->
+    <polygon class="landscape-light-fade" points="220,55 460,80 380,150 270,150"   fill="url(#lit-fade)"/>
+    <polygon class="landscape-light-fade" points="720,45 980,75 900,150 780,150"   fill="url(#lit-fade)"/>
+    <polygon class="landscape-light-fade" points="1240,55 1440,70 1440,150 1340,150" fill="url(#lit-fade)"/>
+
+    <!-- ============ FRONT ridge — closer, deeper silhouette ============ -->
     <polygon class="landscape-front-main"
              points="0,200 200,175 460,210 720,170 970,200 1240,175 1440,195 1440,240 0,240"/>
+    <polygon class="landscape-shade-front"
+             points="0,200 200,175 460,210 720,170 970,200 1240,175 1440,195 1440,240 0,240"
+             fill="url(#ridge-shade-front)"/>
+
+    <!-- Subdivision fold on the front ridge — small darker plane that
+         introduces a smaller-scale facet without making the silhouette busy. -->
+    <polygon class="landscape-front-fold"
+             points="460,210 720,170 600,240 460,240"/>
+
+    <!-- Lit faces on right slopes -->
     <polygon class="landscape-light" points="200,175 460,210 380,240 250,240"/>
     <polygon class="landscape-light" points="720,170 970,200 870,240 760,240"/>
     <polygon class="landscape-light" points="1240,175 1440,195 1440,240 1320,240"/>
 
-    <!-- Outlines — only the left side + top ridge of each lit facet.
-         Each polyline traces V4 → V1 → V2 (lower-left → peak → next valley).
-         Right-slope (V2 → V3) and bottom (V3 → V4) edges are skipped. -->
-    <polyline class="landscape-outline" points="270,150 220,55 460,80"/>
-    <polyline class="landscape-outline" points="780,150 720,45 980,75"/>
+    <!-- Top-edge brightening on front lit faces -->
+    <polygon class="landscape-light-fade" points="200,175 460,210 380,240 250,240"   fill="url(#lit-fade)"/>
+    <polygon class="landscape-light-fade" points="720,170 970,200 870,240 760,240"   fill="url(#lit-fade)"/>
+    <polygon class="landscape-light-fade" points="1240,175 1440,195 1440,240 1320,240" fill="url(#lit-fade)"/>
+
+    <!-- ◇ Selected structural gold edges — ONLY the focal peak's crest on
+         each ridge. These are baseline (always on); the Outlines knob below
+         adds more edge highlights on every lit polygon when desired. -->
+    <polyline class="landscape-edge-key" points="460,80  720,45  980,75"/>
+    <polyline class="landscape-edge-key" points="460,210 720,170 970,200"/>
+
+    <!-- Soft chalk highlights on the remaining peak crests — atmospheric
+         depth without competing with the gold focal edges. -->
+    <polyline class="landscape-edge-soft" points="0,80   220,55  460,80"/>
+    <polyline class="landscape-edge-soft" points="980,75 1240,55 1440,70"/>
+
+    <!-- Optional outlines — knob-controlled (Outlines: off / subtle / strong).
+         Each polyline traces V4 → V1 → V2 of one lit polygon (left + top edges
+         only). Right-slope (V2 → V3) and bottom (V3 → V4) edges are skipped. -->
+    <polyline class="landscape-outline" points="270,150  220,55  460,80"/>
+    <polyline class="landscape-outline" points="780,150  720,45  980,75"/>
     <polyline class="landscape-outline" points="1340,150 1240,55 1440,70"/>
-    <polyline class="landscape-outline" points="250,240 200,175 460,210"/>
-    <polyline class="landscape-outline" points="760,240 720,170 970,200"/>
+    <polyline class="landscape-outline" points="250,240  200,175 460,210"/>
+    <polyline class="landscape-outline" points="760,240  720,170 970,200"/>
     <polyline class="landscape-outline" points="1320,240 1240,175 1440,195"/>
+
+    <!-- Fine grain texture — full-width rect with feTurbulence filter,
+         overlay-blended via CSS so it adds material grain without flattening
+         the underlying gradients. -->
+    <rect class="landscape-grain" x="0" y="0" width="1440" height="240"
+          filter="url(#terrain-grain)"/>
   </svg>
 
   <!-- Topographic landscape variant — single continuous mountain ridge.
