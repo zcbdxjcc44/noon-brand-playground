@@ -25,11 +25,7 @@
        data-bg-stars="sparse|medium|dense"                     (default: dense — all 65)
        data-bg-star-glow="off|subtle|strong"                   (default: strong)
        data-bg-northstar="off|on"                              (default: on)
-       data-bg-landscape="off|desert|topo"                     (default: desert)
-       —— Desert-specific knobs (only meaningful when landscape="desert") ——
-       data-bg-tone="void|iris|twilight|terra|dawn"            (default: twilight)
-       data-bg-network="sparse|medium|rich"                    (default: medium)
-       data-bg-grain="off|fine|coarse"                         (default: fine)
+       data-bg-landscape="off|topo"                            (default: topo)
      ────────────────────────────────────────────────────────────────────── */
 
   /* ──────────────────────────────────────────────────────────────────────
@@ -339,132 +335,6 @@
     vector-effect: non-scaling-stroke;
   }
   .app[data-view="stage"] .terrain-topo { opacity: 1; }
-
-
-  /* ──────────────────────────────────────────────────────────────────────
-     Desert landscape — hand-tessellated polygon mesh anchored to bottom
-     band. ~22 polygons across 3 layers, each polygon shaded with one of
-     5 value ranks (v1 darkest → v5 lightest) sourced from the active tone
-     palette. Adjacent polygons get different values, which is what
-     produces the faceted look — no gradient overlays, no smooth surfaces.
-     Gold network traces selected polygon edges. Three knobs: Tone,
-     Network, Grain.
-     ────────────────────────────────────────────────────────────────────── */
-
-  /* Five-shade value palette per tone (Noon design system colours).
-     Twilight is the default — best matches the reference reference image
-     (deep navy → indigo → lavender). */
-  .app {
-    --desert-v1: rgb(10, 15, 26);   /* void-300 — deepest */
-    --desert-v2: rgb(26, 34, 54);   /* void-100 */
-    --desert-v3: rgb(92, 61, 143);  /* iris-700 */
-    --desert-v4: rgb(142, 99, 224); /* iris-500 */
-    --desert-v5: rgb(176, 138, 249);/* iris-400 — lightest */
-    --desert-gold: rgb(224, 184, 58); /* gold-300 — network ink */
-  }
-  .app[data-bg-tone="void"] {
-    --desert-v1: rgb(6, 9, 19);     /* void-400 */
-    --desert-v2: rgb(10, 15, 26);   /* void-300 */
-    --desert-v3: rgb(26, 34, 54);   /* void-100 */
-    --desert-v4: rgb(92, 61, 143);  /* iris-700 */
-    --desert-v5: rgb(142, 99, 224); /* iris-500 */
-  }
-  .app[data-bg-tone="iris"] {
-    --desert-v1: rgb(61, 36, 96);   /* iris-800 */
-    --desert-v2: rgb(92, 61, 143);  /* iris-700 */
-    --desert-v3: rgb(107, 63, 168); /* iris-600 */
-    --desert-v4: rgb(142, 99, 224); /* iris-500 */
-    --desert-v5: rgb(176, 138, 249);/* iris-400 */
-  }
-  /* twilight is the inherited default; no override needed but listed for clarity */
-  .app[data-bg-tone="twilight"] {
-    --desert-v1: rgb(10, 15, 26);
-    --desert-v2: rgb(26, 34, 54);
-    --desert-v3: rgb(92, 61, 143);
-    --desert-v4: rgb(142, 99, 224);
-    --desert-v5: rgb(176, 138, 249);
-  }
-  .app[data-bg-tone="terra"] {
-    --desert-v1: rgb(74, 40, 18);   /* terra-800 */
-    --desert-v2: rgb(107, 58, 30);  /* terra-700 */
-    --desert-v3: rgb(165, 99, 58);  /* terra-500 */
-    --desert-v4: rgb(192, 122, 78); /* terra-400 */
-    --desert-v5: rgb(212, 149, 110);/* terra-300 */
-  }
-  .app[data-bg-tone="dawn"] {
-    --desert-v1: rgb(16, 23, 42);   /* void-200 */
-    --desert-v2: rgb(74, 40, 18);   /* terra-800 */
-    --desert-v3: rgb(165, 99, 58);  /* terra-500 */
-    --desert-v4: rgb(142, 112, 25); /* gold-500 */
-    --desert-v5: rgb(224, 184, 58); /* gold-300 */
-  }
-
-  .terrain-desert {
-    position: absolute;
-    bottom: 0; left: 0; right: 0;
-    width: 100%;
-    height: clamp(220px, 32vh, 360px);
-    pointer-events: none;
-    z-index: 0;
-    opacity: 0.94;
-    transition: opacity 320ms ease;
-    display: none;
-  }
-  .app[data-bg-landscape="desert"] .terrain-desert { display: block; }
-  .app[data-view="stage"] .terrain-desert { opacity: 1; }
-
-  /* Polygon facet fills — five value classes. fill-opacity slightly under 1
-     so adjacent facets blend at edges, softening the hard-polygon look. */
-  .desert-poly { stroke: none; pointer-events: none; }
-  .desert-poly--v1 { fill: var(--desert-v1); fill-opacity: 0.96; }
-  .desert-poly--v2 { fill: var(--desert-v2); fill-opacity: 0.96; }
-  .desert-poly--v3 { fill: var(--desert-v3); fill-opacity: 0.92; }
-  .desert-poly--v4 { fill: var(--desert-v4); fill-opacity: 0.85; }
-  .desert-poly--v5 { fill: var(--desert-v5); fill-opacity: 0.78; }
-
-  /* Golden network — selectively traces polygon edges. Tier 1 always on
-     (top silhouette), tier 2 (slope connectors) on at medium+, tier 3
-     (cross-mesh + foreground) on at rich. */
-  .desert-route {
-    fill: none;
-    stroke: var(--desert-gold);
-    stroke-width: 1;
-    stroke-opacity: 0.78;
-    stroke-linecap: round;
-    stroke-linejoin: round;
-    vector-effect: non-scaling-stroke;
-    pointer-events: none;
-  }
-  .desert-route--secondary {
-    stroke-width: 0.7;
-    stroke-opacity: 0.50;
-  }
-  .app[data-bg-network="sparse"] [data-network-tier="2"],
-  .app[data-bg-network="sparse"] [data-network-tier="3"],
-  .app[data-bg-network="medium"] [data-network-tier="3"] { display: none; }
-
-  /* Intersection nodes — small gold dots at peaks with subtle glow halo */
-  .desert-node {
-    fill: var(--desert-gold);
-    filter: drop-shadow(0 0 3px var(--desert-gold))
-            drop-shadow(0 0 1px var(--desert-gold));
-    pointer-events: none;
-  }
-
-  /* Grain texture — two filter variants (fine / coarse) live in the SVG;
-     the knob swaps which one renders. mix-blend-mode: overlay so noise
-     lightens lights and darkens darks rather than hazing the whole thing. */
-  .desert-grain { mix-blend-mode: overlay; display: none; pointer-events: none; }
-  .app[data-bg-grain="fine"]   [data-grain="fine"]   { display: block; opacity: 0.45; }
-  .app[data-bg-grain="coarse"] [data-grain="coarse"] { display: block; opacity: 0.65; }
-
-  /* Desert-only knob rows: visible always, disabled when not desert */
-  .app:not([data-bg-landscape="desert"]) .bg-controls__row--desert {
-    opacity: 0.4;
-    pointer-events: none;
-    filter: saturate(0.6);
-  }
-
 
   /* North star — HTML version. Sibling of .terrain so it sits over the
      stretched sky SVG but doesn't get distorted by preserveAspectRatio="none".
@@ -1272,10 +1142,7 @@
      data-bg-stars="dense"
      data-bg-star-glow="strong"
      data-bg-northstar="on"
-     data-bg-landscape="desert"
-     data-bg-tone="twilight"
-     data-bg-network="medium"
-     data-bg-grain="fine">
+     data-bg-landscape="topo">
 
   <!-- Brand backdrop — sky (stars + north star) + topographic landscape.
        Tweaks are on .app via data-bg-* attributes; see <style> docs. -->
@@ -1311,113 +1178,6 @@
     <span class="north-star__shimmer north-star__shimmer--v"></span>
     <span class="north-star__core"></span>
   </div>
-
-  <!-- Desert landscape variant — hand-tessellated polygon mesh anchored
-       to the bottom band. ~22 facets across 3 layers (top zigzag → mid →
-       lower → bottom edge). Each facet is filled with one of 5 value
-       shades (--desert-v1..v5) sourced from the active tone palette.
-       Adjacent facets get different ranks so the depth comes from value
-       differences, not gradients. Gold network traces selected polygon
-       edges. Vertex labels:
-         T0..T8  — top zigzag silhouette  (peaks at T1, T3, T5, T7)
-         M0..M9  — mid layer              (y≈215-245)
-         L0..L6  — lower layer            (y≈280-295)
-         B0..B4  — bottom edge            (y=320)              -->
-  <svg class="terrain-desert" preserveAspectRatio="none" viewBox="0 0 1440 320" aria-hidden="true">
-    <defs>
-      <!-- Grain noise — two variants (fine / coarse). The Grain knob
-           swaps which rect is rendered. Output is variable-alpha white
-           speckle; mix-blend-mode: overlay does the rest. -->
-      <filter id="desert-grain-fine"   x="0" y="0" width="100%" height="100%">
-        <feTurbulence type="fractalNoise" baseFrequency="2.6" numOctaves="2" seed="11" stitchTiles="stitch"/>
-        <feColorMatrix values="0 0 0 0 1   0 0 0 0 1   0 0 0 0 1   0.65 0 0 0 -0.05"/>
-      </filter>
-      <filter id="desert-grain-coarse" x="0" y="0" width="100%" height="100%">
-        <feTurbulence type="fractalNoise" baseFrequency="1.4" numOctaves="2" seed="23" stitchTiles="stitch"/>
-        <feColorMatrix values="0 0 0 0 1   0 0 0 0 1   0 0 0 0 1   0.80 0 0 0 -0.10"/>
-      </filter>
-    </defs>
-
-    <!-- ============ Layer 1: Top mesh (T → M, zigzag down to mid) ============
-         Eight polygons. Adjacent value ranks alternate to create the
-         faceted look. Peak quads (P3, P5, P7) get the brighter values
-         since they catch the lit edge. -->
-    <polygon class="desert-poly desert-poly--v3" points="0,165   180,105  160,215    0,220"/>
-    <polygon class="desert-poly desert-poly--v2" points="180,105 340,140  320,240  160,215"/>
-    <polygon class="desert-poly desert-poly--v4" points="340,140 520,80   480,220  320,240"/>
-    <polygon class="desert-poly desert-poly--v2" points="520,80  700,120  640,245  480,220"/>
-    <polygon class="desert-poly desert-poly--v5" points="700,120 880,65   820,215  640,245"/>
-    <polygon class="desert-poly desert-poly--v3" points="880,65  1060,110 980,240  820,215"/>
-    <polygon class="desert-poly desert-poly--v4" points="1060,110 1240,90 1140,220 980,240"/>
-    <polygon class="desert-poly desert-poly--v2" points="1240,90 1440,140 1440,230 1280,245 1140,220"/>
-
-    <!-- ============ Layer 2: Mid mesh (M → L) ============
-         Nine polygons — alternating quads and triangles for variety. -->
-    <polygon class="desert-poly desert-poly--v3" points="0,220   160,215  240,290    0,280"/>
-    <polygon class="desert-poly desert-poly--v4" points="160,215 320,240  240,290"/>
-    <polygon class="desert-poly desert-poly--v2" points="320,240 480,220  520,280  240,290"/>
-    <polygon class="desert-poly desert-poly--v4" points="480,220 640,245  520,280"/>
-    <polygon class="desert-poly desert-poly--v3" points="640,245 820,215  820,295  520,280"/>
-    <polygon class="desert-poly desert-poly--v5" points="820,215 980,240  820,295"/>
-    <polygon class="desert-poly desert-poly--v2" points="980,240 1140,220 1120,280 820,295"/>
-    <polygon class="desert-poly desert-poly--v3" points="1140,220 1280,245 1120,280"/>
-    <polygon class="desert-poly desert-poly--v4" points="1280,245 1440,230 1440,285 1340,295 1120,280"/>
-
-    <!-- ============ Layer 3: Lower mesh (L → B, foreground) ============
-         Six polygons. Front layer leans toward brighter values (lavender
-         highlights), matching the reference image's foreground feel. -->
-    <polygon class="desert-poly desert-poly--v4" points="0,280   240,290  360,320    0,320"/>
-    <polygon class="desert-poly desert-poly--v2" points="240,290 520,280  360,320"/>
-    <polygon class="desert-poly desert-poly--v5" points="520,280 820,295  720,320  360,320"/>
-    <polygon class="desert-poly desert-poly--v3" points="820,295 1120,280 1080,320 720,320"/>
-    <polygon class="desert-poly desert-poly--v2" points="1120,280 1340,295 1080,320"/>
-    <polygon class="desert-poly desert-poly--v4" points="1340,295 1440,285 1440,320 1080,320"/>
-
-    <!-- ============ Golden network — traces selected polygon edges ============
-         Tier 1 (always): top silhouette T0..T8 — the most prominent line.
-         Tier 2 (medium+): mid connector + 2 slope cross-edges.
-         Tier 3 (rich):    foreground line + cross-mesh connectors. -->
-
-    <!-- Tier 1 — top silhouette (T0 → T1 → ... → T8) -->
-    <polyline class="desert-route" data-network-tier="1"
-              points="0,165 180,105 340,140 520,80 700,120 880,65 1060,110 1240,90 1440,140"/>
-
-    <!-- Tier 2 — mid connector and key slopes -->
-    <polyline class="desert-route desert-route--secondary" data-network-tier="2"
-              points="160,215 480,220 820,215 1140,220"/>
-    <polyline class="desert-route desert-route--secondary" data-network-tier="2"
-              points="520,80  480,220"/>
-    <polyline class="desert-route desert-route--secondary" data-network-tier="2"
-              points="880,65  820,215"/>
-
-    <!-- Tier 3 — foreground line + cross slopes -->
-    <polyline class="desert-route desert-route--secondary" data-network-tier="3"
-              points="0,280 520,280 820,295 1120,280 1440,285"/>
-    <polyline class="desert-route desert-route--secondary" data-network-tier="3"
-              points="180,105 160,215"/>
-    <polyline class="desert-route desert-route--secondary" data-network-tier="3"
-              points="1240,90 1140,220"/>
-    <polyline class="desert-route desert-route--secondary" data-network-tier="3"
-              points="700,120 820,215"/>
-    <polyline class="desert-route desert-route--secondary" data-network-tier="3"
-              points="340,140 480,220"/>
-
-    <!-- ============ Intersection nodes ============
-         Filled gold dots with drop-shadow glow at the four main peaks
-         (always visible) plus three mid-junctions (rich only). -->
-    <circle class="desert-node" data-network-tier="1" cx="180"  cy="105" r="3"/>
-    <circle class="desert-node" data-network-tier="1" cx="520"  cy="80"  r="3.4"/>
-    <circle class="desert-node" data-network-tier="1" cx="880"  cy="65"  r="3.6"/>
-    <circle class="desert-node" data-network-tier="1" cx="1240" cy="90"  r="3.2"/>
-    <circle class="desert-node" data-network-tier="3" cx="480"  cy="220" r="2.4"/>
-    <circle class="desert-node" data-network-tier="3" cx="820"  cy="215" r="2.6"/>
-    <circle class="desert-node" data-network-tier="3" cx="1140" cy="220" r="2.4"/>
-
-    <!-- ============ Grain texture overlays ============
-         Two variants — Grain knob picks one. Mix-blend-mode handled in CSS. -->
-    <rect class="desert-grain" data-grain="fine"   x="0" y="0" width="1440" height="320" filter="url(#desert-grain-fine)"/>
-    <rect class="desert-grain" data-grain="coarse" x="0" y="0" width="1440" height="320" filter="url(#desert-grain-coarse)"/>
-  </svg>
 
   <!-- Topographic landscape variant — single continuous mountain ridge.
        Asymmetric profile: gradual rise on the left, sharper drop on the
@@ -1645,37 +1405,9 @@
 
       <div class="bg-controls__row">
         <span>Landscape</span>
-        <div class="bg-tabs" data-attr="data-bg-landscape">
+        <div class="bg-tabs bg-tabs--toggle" data-attr="data-bg-landscape">
           <button data-value="off">Off</button>
-          <button data-value="desert">Desert</button>
           <button data-value="topo">Topo</button>
-        </div>
-      </div>
-      <!-- Desert-only knobs — visible always, disabled when not desert -->
-      <div class="bg-controls__row bg-controls__row--desert">
-        <span>Tone</span>
-        <div class="bg-swatches" data-attr="data-bg-tone">
-          <button data-value="void"     data-tone-color="rgb(10,15,26)"   title="Void — cool navy"></button>
-          <button data-value="iris"     data-tone-color="rgb(92,61,143)"  title="Iris — purple"></button>
-          <button data-value="twilight" data-tone-color="rgb(45,40,100)"  title="Twilight — navy + iris"></button>
-          <button data-value="terra"    data-tone-color="rgb(107,58,30)"  title="Terra — warm earth"></button>
-          <button data-value="dawn"     data-tone-color="rgb(165,99,58)"  title="Dawn — terra + gold"></button>
-        </div>
-      </div>
-      <div class="bg-controls__row bg-controls__row--desert">
-        <span>Network</span>
-        <div class="bg-tabs" data-attr="data-bg-network">
-          <button data-value="sparse">Sparse</button>
-          <button data-value="medium">Medium</button>
-          <button data-value="rich">Rich</button>
-        </div>
-      </div>
-      <div class="bg-controls__row bg-controls__row--desert">
-        <span>Grain</span>
-        <div class="bg-tabs" data-attr="data-bg-grain">
-          <button data-value="off">Off</button>
-          <button data-value="fine">Fine</button>
-          <button data-value="coarse">Coarse</button>
         </div>
       </div>
     </div>
