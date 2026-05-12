@@ -21,8 +21,11 @@ import { PRESETS } from './presets';
 import { PALETTES } from './charsets';
 import { voidTheme } from '../tokens';
 import Particles from './Particles';
+import Contours from './Contours';
+import Faceted from './Faceted';
 import { GoldenLine } from './GoldenLine';
 import GoldenLineSkia from './GoldenLineSkia';
+import MorningStar from './MorningStar';
 
 export default function Lab() {
   const { width, height } = useWindowDimensions();
@@ -77,6 +80,22 @@ export default function Lab() {
             goldenHead={head}
           />
         )}
+        {config.style === 'contours' && (
+          <Contours
+            config={config}
+            width={width}
+            height={height}
+            time={time}
+          />
+        )}
+        {config.style === 'faceted' && (
+          <Faceted
+            config={config}
+            width={width}
+            height={height}
+            time={time}
+          />
+        )}
         {config.goldenLine.enabled && (
           <GoldenLineSkia
             trail={trail}
@@ -86,7 +105,12 @@ export default function Lab() {
             time={time}
           />
         )}
-        {/* contours + faceted renderers come in subsequent passes */}
+        <MorningStar
+          config={config.morningStar}
+          width={width}
+          height={height}
+          time={time}
+        />
       </Canvas>
 
       {/* preset switcher (temporary, replaces full designer console) */}

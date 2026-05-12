@@ -47,9 +47,9 @@ The web lab is ~2,500 lines. Porting in phases so each step is testable:
 | 1 | `ParticleField` + particles render | ✅ done (Circle stand-in; <Text/> pending font asset bundle) |
 | 1.5 | Bundle a ttf + `useFont` → swap Circle back to <Text/> | ⏳ |
 | 2 | RAF animation + `GoldenLine` trail + Skia render + particle gold tint | ✅ done |
-| 3 | `drawMorningStar` Skia overlay | ⏳ |
-| 4 | `ContourField` (marching squares) + smoothed strokes | ⏳ |
-| 5 | `FacetedField` (jittered mesh + edge particles) | ⏳ |
+| 3 | `MorningStar` Skia overlay (halo + rays + core, twinkle) | ✅ done |
+| 4 | `ContourField` (marching squares) + smoothed strokes | ✅ done (labels still pending font) |
+| 5 | `FacetedField` (jittered mesh + edge particles) | ✅ done |
 | 6 | Designer console UI (sliders, segmented pills, palette/style) | ⏳ |
 | 7 | AsyncStorage persistence (Save / Reset) | ⏳ |
 | 8 | Polish + perf passes (Skia atlas for glyphs, batched paths) | ⏳ |

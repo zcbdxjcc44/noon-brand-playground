@@ -7,7 +7,10 @@ export const CHAR_GROUPS = {
   westernArabic: ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9'],
   math:          ['+', '−', '×', '÷', '=', '∑', '∫', 'π', '√', '∞', '≈', 'θ', 'Δ', 'Ω', 'λ', 'μ', 'φ', '∂'],
   geometry:      ['△', '▽', '○', '□', '◇', '⬡', '⬢', '◆'],
-  stars:         ['·', '·', '·', '·', '·', '·', '∙', '•', '⋅', '◦', '⋆'],
+  // JetBrains Mono lacks ∙ ⋅ ◦ ⋆ glyphs and Noto Naskh Arabic doesn't cover
+  // them either → they'd tofu. Stick to chars both fonts (or the system)
+  // reliably have: middle dot, bullet, asterisk.
+  stars:         ['·', '·', '·', '·', '·', '·', '·', '·', '•', '*', '*'],
 } as const;
 
 export type CharsetKey = keyof typeof CHAR_GROUPS;
