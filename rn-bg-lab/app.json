@@ -1,0 +1,24 @@
+{
+  "expo": {
+    "name": "Noon Background Lab",
+    "slug": "noon-bg-lab",
+    "version": "0.1.0",
+    "orientation": "default",
+    "userInterfaceStyle": "dark",
+    "backgroundColor": "#0a0f1a",
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "academy.noon.bglab"
+    },
+    "android": {
+      "package": "academy.noon.bglab"
+    },
+    "web": {
+      "bundler": "metro"
+    },
+    "plugins": [
+      "expo-asset",
+      "expo-font"
+    ]
+  }
+}

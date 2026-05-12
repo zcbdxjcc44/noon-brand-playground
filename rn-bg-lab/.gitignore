@@ -1,0 +1,15 @@
+node_modules/
+.expo/
+dist/
+web-build/
+*.log
+.DS_Store
+ios/Pods/
+android/build/
+android/app/build/
+android/.gradle/
+.env*.local
+
+# CanvasKit wasm pulled in by `npx setup-skia-web`; we load from CDN at runtime.
+public/canvaskit.wasm
+public/canvaskit.js

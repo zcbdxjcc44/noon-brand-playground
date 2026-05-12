@@ -1,0 +1,95 @@
+/**
+ * Character sets, palettes and color tables — direct port of the web lab.
+ */
+
+export const CHAR_GROUPS = {
+  easternArabic: ['٠', '١', '٢', '٣', '٤', '٥', '٦', '٧', '٨', '٩'],
+  westernArabic: ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9'],
+  math:          ['+', '−', '×', '÷', '=', '∑', '∫', 'π', '√', '∞', '≈', 'θ', 'Δ', 'Ω', 'λ', 'μ', 'φ', '∂'],
+  geometry:      ['△', '▽', '○', '□', '◇', '⬡', '⬢', '◆'],
+  stars:         ['·', '·', '·', '·', '·', '·', '∙', '•', '⋅', '◦', '⋆'],
+} as const;
+
+export type CharsetKey = keyof typeof CHAR_GROUPS;
+
+export const CHAR_LABELS: Record<CharsetKey, { name: string; preview: string }> = {
+  easternArabic: { name: 'Eastern Arabic', preview: '٠١٢٣٤٥٦٧٨٩' },
+  westernArabic: { name: 'Western Arabic', preview: '0123456789' },
+  math:          { name: 'Math',           preview: '∑∫π√∞≈θΔ' },
+  geometry:      { name: 'Geometry',       preview: '△○□◇⬡' },
+  stars:         { name: 'Stars',          preview: '·∙•⋅⋆◦' },
+};
+
+/**
+ * Background-layer palettes (full theme). Brand: Void = pre-dawn desert,
+ * Paper = specimen.
+ */
+export interface BackgroundPalette {
+  name: string;
+  bg: string;
+  fg: string;
+  fgRGB: [number, number, number];
+  fgFaint: string;
+  annotation: string;
+  accent: string;
+  accentSoft: string;
+  accentDeep: string;
+  morningStar: string;
+}
+
+export const PALETTES: Record<'void' | 'paper', BackgroundPalette> = {
+  void: {
+    name: 'Void',
+    bg:          '#0a0f1a',
+    fg:          '#e8e4dc',
+    fgRGB:       [232, 228, 220],
+    fgFaint:     'rgba(232,228,220,0.45)',
+    annotation:  'rgba(232,228,220,0.55)',
+    accent:      '#c9a227',
+    accentSoft:  '#e0b83a',
+    accentDeep:  '#8e7019',
+    morningStar: '#f5e0a0',
+  },
+  paper: {
+    name: 'Paper',
+    bg:          '#f2ece0',
+    fg:          '#0a0f1a',
+    fgRGB:       [10, 15, 26],
+    fgFaint:     'rgba(10,15,26,0.40)',
+    annotation:  'rgba(10,15,26,0.55)',
+    accent:      '#8e7019',
+    accentSoft:  '#c9a227',
+    accentDeep:  '#5a4710',
+    morningStar: '#8e7019',
+  },
+};
+
+/** Brand-curated highlight colors for Faceted style fills / line edges. */
+export const FACET_HIGHLIGHTS: Record<string, string> = {
+  'Chalk':      '#e8e4dc',
+  'Void Step':  '#232c43',
+  'Gold Crest': '#e0b83a',
+  'Noon Wave':  '#64D8AE',
+  'Iris':       '#B08AF9',
+};
+
+/** Particle-glyph colors. Adds Paper/Ink for the Paper background. */
+export const PARTICLE_COLORS: Record<string, string> = {
+  'Chalk':      '#e8e4dc',
+  'Paper':      '#f2ece0',
+  'Ink':        '#0a0f1a',
+  'Gold Crest': '#e0b83a',
+  'Noon Wave':  '#64D8AE',
+  'Iris':       '#B08AF9',
+};
+
+/** Faceted edge-particle palettes — 'Spectrum' is the multi-color stream. */
+export const EDGE_PARTICLE_PALETTES: Record<string, string[]> = {
+  'Spectrum':   ['#ff4d6d', '#ffa040', '#ffdf6e', '#7cd7a0', '#5cc7ff', '#9b8aff', '#ff7ad9'],
+  'Chalk':      ['#e8e4dc'],
+  'Gold Crest': ['#e0b83a'],
+  'Noon Wave':  ['#64D8AE'],
+  'Iris':       ['#B08AF9'],
+  'Cool':       ['#5cc7ff', '#9b8aff', '#7cd7a0'],
+  'Warm':       ['#ff4d6d', '#ffa040', '#ffdf6e'],
+};
