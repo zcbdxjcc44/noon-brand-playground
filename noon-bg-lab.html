@@ -153,6 +153,38 @@
   }
   .actions button.primary:hover:not(:disabled) { background: #e6b75a; border-color: #e6b75a; }
 
+  /* ============ SEGMENTED PILLS (Style / Palette) ============ */
+  .seg {
+    display: grid;
+    gap: 4px;
+    background: rgba(255,255,255,0.04);
+    border: 1px solid rgba(255,255,255,0.08);
+    border-radius: 8px;
+    padding: 3px;
+  }
+  .seg.seg-2 { grid-template-columns: 1fr 1fr; }
+  .seg.seg-3 { grid-template-columns: 1fr 1fr 1fr; }
+  .seg button {
+    background: transparent;
+    color: rgba(255,255,255,0.6);
+    border: none;
+    padding: 7px 6px;
+    border-radius: 5px;
+    font-size: 11px;
+    font-weight: 500;
+    cursor: pointer;
+    font-family: inherit;
+    transition: all 0.12s;
+    letter-spacing: 0.02em;
+  }
+  .seg button:hover { color: #fff; background: rgba(255,255,255,0.04); }
+  .seg button.active {
+    background: rgba(217,168,74,0.18);
+    color: #f0d080;
+    box-shadow: 0 0 0 1px rgba(217,168,74,0.35);
+  }
+  .seg-row { margin-bottom: 8px; }
+
   /* ============ PRESETS ============ */
   .presets { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; }
   .presets button {
@@ -384,21 +416,66 @@ const CHAR_LABELS = {
 };
 
 // =============================================================
+// PALETTES (Noon brand: VOID-first; gold = journey signal only)
+// =============================================================
+const PALETTES = {
+  void: {
+    name: 'Void',
+    bg:           '#0a0f1a',
+    fg:           '#e8e4dc',          // chalk
+    fgRGB:        [232, 228, 220],
+    fgFaint:      'rgba(232,228,220,0.45)',
+    annotation:   'rgba(232,228,220,0.55)',
+    accent:       '#c9a227',          // gold
+    accentSoft:   '#e0b83a',
+    accentDeep:   '#8e7019',
+    morningStar:  '#f5e0a0'
+  },
+  paper: {
+    name: 'Paper',
+    bg:           '#f2ece0',          // warm cream
+    fg:           '#0a0f1a',          // ink
+    fgRGB:        [10, 15, 26],
+    fgFaint:      'rgba(10,15,26,0.40)',
+    annotation:   'rgba(10,15,26,0.55)',
+    accent:       '#8e7019',          // gold-deep, readable on paper
+    accentSoft:   '#c9a227',
+    accentDeep:   '#5a4710',
+    morningStar:  '#8e7019'
+  }
+};
+
+const STYLES = ['particles', 'contours'];  // 'faceted' to be added
+
+// =============================================================
 // DEFAULT CONFIG
 // =============================================================
 const DEFAULT_CONFIG = {
+  style:       'particles',           // 'particles' | 'contours' | 'faceted'
+  palette:     'void',                 // 'void' | 'paper'
   view:        { pitch: 0.55, yaw: 0.0, distance: 500, fov: 700, cameraHeight: 80 },
   terrain:     { scale: 0.006, amplitude: 80, drift: 0.08, contrast: 0.65, secondaryNoise: 0.3 },
   particles:   { density: 0.7, sizeMin: 9, sizeMax: 15, baseAlpha: 0.55, twinkle: 0.18 },
   charset:     { easternArabic: 0.40, westernArabic: 0.30, math: 0.25, geometry: 0.05, stars: 0 },
+  contours:    {
+    levelCount: 18,
+    lineWidth: 0.7,
+    peakOpacity: 0.90,
+    baseOpacity: 0.08,
+    falloff: 1.6,
+    gridCellsX: 90,
+    gridCellsZ: 70,
+    annotationDensity: 0.4,
+    annotationSize: 10
+  },
   goldenLine:  {
     enabled: true, pathType: 'noise', speed: 0.18,
-    width: 1.6, glowRadius: 70, color: '#d9a84a',
+    width: 1.6, glowRadius: 70, color: '#c9a227',
     disturbanceRadius: 110, disturbanceStrength: 1.4, springBack: 0.05
   },
   morningStar: {
     enabled: true, x: 0.78, y: 0.28, size: 55,
-    rayLength: 4.0, twinkleSpeed: 0.5, color: '#f0d080', opacity: 0.85
+    rayLength: 4.0, twinkleSpeed: 0.5, color: '#f5e0a0', opacity: 0.85
   }
 };
 
@@ -447,11 +524,23 @@ const SCHEMA = {
     { key: 'twinkleSpeed', label: 'Twinkle',     type: 'range', min: 0,    max: 3,    step: 0.05 },
     { key: 'color',        label: 'Color',       type: 'color' },
     { key: 'opacity',      label: 'Opacity',     type: 'range', min: 0.1,  max: 1,    step: 0.02 }
+  ],
+  contours: [
+    { key: 'levelCount',         label: 'Levels',       type: 'range', min: 4,   max: 40,  step: 1 },
+    { key: 'lineWidth',          label: 'Line Width',   type: 'range', min: 0.3, max: 2.5, step: 0.1 },
+    { key: 'peakOpacity',        label: 'Peak Alpha',   type: 'range', min: 0.1, max: 1,   step: 0.02 },
+    { key: 'baseOpacity',        label: 'Base Alpha',   type: 'range', min: 0,   max: 1,   step: 0.02 },
+    { key: 'falloff',            label: 'Falloff',      type: 'range', min: 0.3, max: 4,   step: 0.1 },
+    { key: 'gridCellsX',         label: 'Grid X',       type: 'range', min: 30,  max: 180, step: 5 },
+    { key: 'gridCellsZ',         label: 'Grid Z',       type: 'range', min: 30,  max: 180, step: 5 },
+    { key: 'annotationDensity',  label: 'Labels',       type: 'range', min: 0,   max: 1,   step: 0.02 },
+    { key: 'annotationSize',     label: 'Label Size',   type: 'range', min: 7,   max: 18,  step: 1 }
   ]
 };
 
 const GROUP_TITLES = {
   view: 'View', terrain: 'Terrain', particles: 'Particles',
+  contours: 'Contours',
   goldenLine: 'Golden Line', morningStar: 'Morning Star'
 };
 
@@ -463,6 +552,7 @@ const PRESETS = [
     name: 'Starry Sky',
     desc: 'Sparse stars · Venus prominent',
     config: {
+      style: 'particles', palette: 'void',
       view:       { pitch: 0.55, yaw: 0.0, distance: 550, fov: 800, cameraHeight: 180 },
       terrain:    { scale: 0.005, amplitude: 8, drift: 0.02, contrast: 0.30, secondaryNoise: 0.20 },
       particles:  { density: 0.65, sizeMin: 4, sizeMax: 13, baseAlpha: 0.55, twinkle: 0.42 },
@@ -475,6 +565,7 @@ const PRESETS = [
     name: 'Winding Desert',
     desc: 'Compressed dunes · visible ridges',
     config: {
+      style: 'particles', palette: 'void',
       view:       { pitch: 0.66, yaw: 0.39, distance: 950, fov: 260, cameraHeight: 265 },
       terrain:    { scale: 0.002, amplitude: 123, drift: 0.33, contrast: 1.02, secondaryNoise: 0.30 },
       particles:  { density: 1.5, sizeMin: 4, sizeMax: 6, baseAlpha: 0.76, twinkle: 0 },
@@ -487,12 +578,37 @@ const PRESETS = [
     name: 'Flat Desert',
     desc: 'Wide horizon · low relief',
     config: {
+      style: 'particles', palette: 'void',
       view:       { pitch: 0.50, yaw: 0.0, distance: 620, fov: 560, cameraHeight: 180 },
       terrain:    { scale: 0.0045, amplitude: 26, drift: 0, contrast: 0.32, secondaryNoise: 0 },
       particles:  { density: 1.5, sizeMin: 8, sizeMax: 13, baseAlpha: 0.55, twinkle: 0.15 },
       charset:    { easternArabic: 0.87, westernArabic: 0, math: 0, geometry: 0, stars: 0.05 },
       goldenLine: { enabled: true, pathType: 'curve', speed: 0.14, width: 1.4, glowRadius: 70, color: '#d9a84a', disturbanceRadius: 95, disturbanceStrength: 1.1, springBack: 0.05 },
       morningStar:{ enabled: false, x: 0.78, y: 0.25, size: 52, rayLength: 4.5, twinkleSpeed: 0.30, color: '#f0d080', opacity: 0.85 }
+    }
+  },
+  {
+    name: 'Topographic · Void',
+    desc: 'Dark map · faint contour grid',
+    config: {
+      style: 'contours', palette: 'void',
+      view:       { pitch: 0.31, yaw: 0.12, distance: 690, fov: 480, cameraHeight: 240 },
+      terrain:    { scale: 0.003, amplitude: 23, drift: 0.04, contrast: 0.65, secondaryNoise: 0.35 },
+      contours:   { levelCount: 14, lineWidth: 0.8, peakOpacity: 0.46, baseOpacity: 0.06, falloff: 1.5, gridCellsX: 110, gridCellsZ: 80, annotationDensity: 0.14, annotationSize: 9 },
+      goldenLine: { enabled: true, pathType: 'noise', speed: 0.16, width: 1.4, glowRadius: 70, color: '#c9a227', disturbanceRadius: 0, disturbanceStrength: 0, springBack: 0.05 },
+      morningStar:{ enabled: true, x: 0.80, y: 0.20, size: 42, rayLength: 3.0, twinkleSpeed: 0.30, color: '#f5e0a0', opacity: 0.55 }
+    }
+  },
+  {
+    name: "Surveyor's Notebook",
+    desc: 'Paper · ink contours · gold route',
+    config: {
+      style: 'contours', palette: 'paper',
+      view:       { pitch: 0.95, yaw: 0.0, distance: 900, fov: 700, cameraHeight: 280 },
+      terrain:    { scale: 0.0038, amplitude: 130, drift: 0.025, contrast: 0.65, secondaryNoise: 0.35 },
+      contours:   { levelCount: 26, lineWidth: 0.6, peakOpacity: 0.82, baseOpacity: 0.10, falloff: 1.5, gridCellsX: 120, gridCellsZ: 90, annotationDensity: 0.55, annotationSize: 9 },
+      goldenLine: { enabled: true, pathType: 'curve', speed: 0.12, width: 1.5, glowRadius: 40, color: '#8e7019', disturbanceRadius: 0, disturbanceStrength: 0, springBack: 0.05 },
+      morningStar:{ enabled: false, x: 0.85, y: 0.15, size: 32, rayLength: 2.4, twinkleSpeed: 0.20, color: '#8e7019', opacity: 0.6 }
     }
   }
 ];
@@ -508,7 +624,7 @@ const charsetMemory = {};  // remembers last positive value per charset key
 
 // Pristine factory copies, kept around for potential future "Revert" UX
 const FACTORY_PRESETS = JSON.parse(JSON.stringify(PRESETS));
-const STORAGE_KEY = 'noonBgLab.presets.v1';
+const STORAGE_KEY = 'noonBgLab.presets.v2';
 
 function loadPersistedPresets() {
   try {
@@ -516,12 +632,13 @@ function loadPersistedPresets() {
     if (!raw) return;
     const data = JSON.parse(raw);
     if (!Array.isArray(data)) return;
-    for (let i = 0; i < data.length && i < PRESETS.length; i++) {
-      const entry = data[i];
-      if (!entry || !entry.config) continue;
-      PRESETS[i].config = entry.config;
-      if (entry.name) PRESETS[i].name = entry.name;
-      if (entry.desc) PRESETS[i].desc = entry.desc;
+    // Match by name so reordering / inserting / removing presets in source
+    // doesn't accidentally resurrect stale slots from storage.
+    for (const entry of data) {
+      if (!entry || !entry.config || !entry.name) continue;
+      const idx = PRESETS.findIndex(p => p.name === entry.name);
+      if (idx < 0) continue;
+      PRESETS[idx].config = entry.config;
     }
   } catch (e) { /* ignore corrupt storage */ }
 }
@@ -603,6 +720,113 @@ function hexToRgb(hex) {
   };
 }
 function lerp(a, b, t) { return a + (b - a) * t; }
+
+// Chain raw marching-squares segments (flat [x,y,z, x,y,z]) into polylines by
+// merging segments that share endpoints. y is constant per level so we hash on
+// (x, z). Returns array of chains, each a flat [x,z, x,z, ...].
+const _chainKey = (x, z) => Math.round(x * 100) + ',' + Math.round(z * 100);
+function chainSegments(segments) {
+  if (segments.length === 0) return [];
+  const N = segments.length;
+  const endpoints = new Map();
+  for (let i = 0; i < N; i++) {
+    const s = segments[i];
+    const k0 = _chainKey(s[0], s[2]);
+    const k1 = _chainKey(s[3], s[5]);
+    let list = endpoints.get(k0);
+    if (!list) { list = []; endpoints.set(k0, list); }
+    list.push(i << 1);          // segIdx<<1 | endIdx=0
+    list = endpoints.get(k1);
+    if (!list) { list = []; endpoints.set(k1, list); }
+    list.push((i << 1) | 1);
+  }
+  const visited = new Uint8Array(N);
+  const chains = [];
+  for (let i = 0; i < N; i++) {
+    if (visited[i]) continue;
+    visited[i] = 1;
+    const s = segments[i];
+    const forward = [s[0], s[2], s[3], s[5]];
+
+    // walk forward from end1
+    let cx = s[3], cz = s[5];
+    while (true) {
+      const cands = endpoints.get(_chainKey(cx, cz));
+      if (!cands) break;
+      let nextSi = -1, nextEnd = 0;
+      for (let c = 0; c < cands.length; c++) {
+        const si = cands[c] >> 1;
+        if (visited[si]) continue;
+        nextSi = si; nextEnd = cands[c] & 1; break;
+      }
+      if (nextSi < 0) break;
+      visited[nextSi] = 1;
+      const ns = segments[nextSi];
+      if (nextEnd === 0) { forward.push(ns[3], ns[5]); cx = ns[3]; cz = ns[5]; }
+      else               { forward.push(ns[0], ns[2]); cx = ns[0]; cz = ns[2]; }
+    }
+
+    // walk backward from end0
+    const back = [];
+    let bx = s[0], bz = s[2];
+    while (true) {
+      const cands = endpoints.get(_chainKey(bx, bz));
+      if (!cands) break;
+      let nextSi = -1, nextEnd = 0;
+      for (let c = 0; c < cands.length; c++) {
+        const si = cands[c] >> 1;
+        if (visited[si]) continue;
+        nextSi = si; nextEnd = cands[c] & 1; break;
+      }
+      if (nextSi < 0) break;
+      visited[nextSi] = 1;
+      const ns = segments[nextSi];
+      if (nextEnd === 0) { back.push(ns[3], ns[5]); bx = ns[3]; bz = ns[5]; }
+      else               { back.push(ns[0], ns[2]); bx = ns[0]; bz = ns[2]; }
+    }
+
+    // assemble: reverse(back) + forward
+    if (back.length === 0) {
+      chains.push(forward);
+    } else {
+      const combined = new Array(back.length + forward.length);
+      let w = 0;
+      for (let bi = back.length - 2; bi >= 0; bi -= 2) {
+        combined[w++] = back[bi];
+        combined[w++] = back[bi + 1];
+      }
+      for (let fi = 0; fi < forward.length; fi++) combined[w++] = forward[fi];
+      chains.push(combined);
+    }
+  }
+  return chains;
+}
+
+// Append a smoothed quadratic spline through projected points to the current
+// path. Points format: [{ sx, sy } | null, ...]. Nulls break the subpath.
+function strokeSmoothChainPath(ctx, pts) {
+  let started = false;
+  let prev = null;
+  for (let i = 0; i < pts.length; i++) {
+    const p = pts[i];
+    if (!p) { started = false; prev = null; continue; }
+    if (!started) {
+      ctx.moveTo(p.sx, p.sy);
+      started = true; prev = p;
+      continue;
+    }
+    // If next point exists, curve through midpoint; otherwise lineTo.
+    const next = (i + 1 < pts.length) ? pts[i + 1] : null;
+    if (next) {
+      const mx = (p.sx + next.sx) * 0.5;
+      const my = (p.sy + next.sy) * 0.5;
+      ctx.quadraticCurveTo(p.sx, p.sy, mx, my);
+    } else {
+      ctx.lineTo(p.sx, p.sy);
+    }
+    prev = p;
+  }
+}
 
 // Deterministic char assignment: given a particle's persistent seeds + current
 // charset weights, always returns the same char (until weights change).
@@ -888,6 +1112,167 @@ function drawMorningStar(ctx, time, w, h) {
 }
 
 // =============================================================
+// CONTOUR FIELD (marching squares over the same noise terrain)
+//   Builds a vertex grid, then for each elevation level walks every
+//   cell, looks up the case in the standard marching-squares table,
+//   emits 0/1/2 line segments per cell. Segments live in world space
+//   and are projected by the renderer.
+// =============================================================
+class ContourField {
+  constructor() {
+    this.terrainExtent = 1400;
+    this.terrainDepth = 1100;
+    this.heights = null;          // Float32Array of vertex elevations
+    this.cellsX = 0; this.cellsZ = 0;
+    this.stepX = 0; this.stepZ = 0;
+    // Annotation slots: fixed world-space anchors. Elevation at each is
+    // sampled each frame; label position rides smoothly with the terrain
+    // instead of jumping between marching-squares segments.
+    this.annotSlots = [];
+    this.generateAnnotSlots();
+  }
+
+  generateAnnotSlots() {
+    const slots = [];
+    const TOTAL = 80;
+    for (let i = 0; i < TOTAL; i++) {
+      slots.push({
+        worldX: (Math.random() - 0.5) * 2 * this.terrainExtent * 0.95,
+        worldZ: (Math.random() - 0.5) * 2 * this.terrainDepth * 0.95,
+        priority: Math.random()
+      });
+    }
+    // Sort by priority so the density slider adds slots in a stable order
+    slots.sort((a, b) => a.priority - b.priority);
+    this.annotSlots = slots;
+  }
+
+  ensureGrid() {
+    const cx = config.contours.gridCellsX;
+    const cz = config.contours.gridCellsZ;
+    if (this.cellsX === cx && this.cellsZ === cz) return;
+    this.cellsX = cx; this.cellsZ = cz;
+    this.stepX = (this.terrainExtent * 2) / cx;
+    this.stepZ = (this.terrainDepth * 2) / cz;
+    this.heights = new Float32Array((cx + 1) * (cz + 1));
+  }
+
+  // Resample noise at every vertex of the world grid for the given time.
+  sampleHeights(time) {
+    const cx = this.cellsX, cz = this.cellsZ;
+    const stepX = this.stepX, stepZ = this.stepZ;
+    const half = this.terrainExtent, depth = this.terrainDepth;
+    const scale = config.terrain.scale;
+    const amp = config.terrain.amplitude;
+    const secondaryNoise = config.terrain.secondaryNoise;
+    const driftZ = time * config.terrain.drift * 100;
+    const h = this.heights;
+    let idx = 0;
+    for (let j = 0; j <= cz; j++) {
+      const z = -depth + j * stepZ;
+      for (let i = 0; i <= cx; i++) {
+        const x = -half + i * stepX;
+        const n1 = noise(x * scale, (z + driftZ) * scale);
+        const n2 = noise2(x * scale * 2.3, (z + driftZ) * scale * 2.3) * secondaryNoise;
+        h[idx++] = (n1 + n2 * 0.5) * amp;
+      }
+    }
+  }
+
+  height(i, j) {
+    return this.heights[j * (this.cellsX + 1) + i];
+  }
+
+  // Returns array of { level, segments: [[x0,y0,z0,x1,y1,z1], ...], major: bool }
+  buildContours() {
+    const cx = this.cellsX, cz = this.cellsZ;
+    const stepX = this.stepX, stepZ = this.stepZ;
+    const half = this.terrainExtent, depth = this.terrainDepth;
+    const N = config.contours.levelCount;
+    const amp = config.terrain.amplitude;
+
+    // Distribute levels evenly across [-amp*1.0, +amp*1.0], skipping the exact extremes
+    const levels = [];
+    for (let k = 0; k < N; k++) {
+      const t = (k + 1) / (N + 1);            // 0..1 exclusive
+      const elev = (t * 2 - 1) * amp * 1.05;
+      levels.push({ elev: elev });
+    }
+
+    const out = [];
+    for (let li = 0; li < N; li++) {
+      const L = levels[li].elev;
+      const segs = [];
+      for (let j = 0; j < cz; j++) {
+        const z0 = -depth + j * stepZ;
+        const z1 = z0 + stepZ;
+        for (let i = 0; i < cx; i++) {
+          const x0 = -half + i * stepX;
+          const x1 = x0 + stepX;
+          const h0 = this.height(i,   j  );   // v0 BL
+          const h1 = this.height(i+1, j  );   // v1 BR
+          const h2 = this.height(i+1, j+1);   // v2 TR
+          const h3 = this.height(i,   j+1);   // v3 TL
+          let c = 0;
+          if (h0 > L) c |= 1;
+          if (h1 > L) c |= 2;
+          if (h2 > L) c |= 4;
+          if (h3 > L) c |= 8;
+          if (c === 0 || c === 15) continue;
+          // Edge crossings:
+          //  e0: v0-v1 (bottom)  -> (x0 + t*stepX, z0)
+          //  e1: v1-v2 (right)   -> (x1, z0 + t*stepZ)
+          //  e2: v2-v3 (top)     -> (x1 - t*stepX, z1)
+          //  e3: v3-v0 (left)    -> (x0, z1 - t*stepZ)
+          const lerpEdge = (edgeId) => {
+            let ha, hb, ax, az, bx, bz;
+            if (edgeId === 0)      { ha = h0; hb = h1; ax = x0; az = z0; bx = x1; bz = z0; }
+            else if (edgeId === 1) { ha = h1; hb = h2; ax = x1; az = z0; bx = x1; bz = z1; }
+            else if (edgeId === 2) { ha = h2; hb = h3; ax = x1; az = z1; bx = x0; bz = z1; }
+            else                   { ha = h3; hb = h0; ax = x0; az = z1; bx = x0; bz = z0; }
+            const t = (L - ha) / (hb - ha);
+            return [ax + (bx - ax) * t, L, az + (bz - az) * t];
+          };
+          const addSeg = (eA, eB) => {
+            const a = lerpEdge(eA);
+            const b = lerpEdge(eB);
+            segs.push([a[0], a[1], a[2], b[0], b[1], b[2]]);
+          };
+          switch (c) {
+            case 1:  addSeg(3, 0); break;
+            case 2:  addSeg(0, 1); break;
+            case 3:  addSeg(3, 1); break;
+            case 4:  addSeg(1, 2); break;
+            case 5: {
+              const center = (h0 + h1 + h2 + h3) * 0.25;
+              if (center > L) { addSeg(3, 2); addSeg(0, 1); }
+              else            { addSeg(3, 0); addSeg(1, 2); }
+              break;
+            }
+            case 6:  addSeg(0, 2); break;
+            case 7:  addSeg(3, 2); break;
+            case 8:  addSeg(2, 3); break;
+            case 9:  addSeg(2, 0); break;
+            case 10: {
+              const center = (h0 + h1 + h2 + h3) * 0.25;
+              if (center > L) { addSeg(0, 3); addSeg(1, 2); }
+              else            { addSeg(0, 1); addSeg(2, 3); }
+              break;
+            }
+            case 11: addSeg(2, 1); break;
+            case 12: addSeg(1, 3); break;
+            case 13: addSeg(1, 0); break;
+            case 14: addSeg(0, 3); break;
+          }
+        }
+      }
+      out.push({ elev: L, segments: segs });
+    }
+    return out;
+  }
+}
+
+// =============================================================
 // RENDERER
 // =============================================================
 class Renderer {
@@ -895,11 +1280,16 @@ class Renderer {
     this.canvas = canvas;
     this.ctx = canvas.getContext('2d');
     this.field = new ParticleField();
+    this.contour = new ContourField();
     this.line = new GoldenLine();
     this.time = 0;
     this.cssW = window.innerWidth;
     this.cssH = window.innerHeight;
     this.dpr = 1;
+  }
+
+  getPalette() {
+    return PALETTES[config.palette] || PALETTES.void;
   }
 
   resize() {
@@ -918,9 +1308,30 @@ class Renderer {
     const ctx = this.ctx;
     const w = this.cssW, h = this.cssH;
     const t = this.time;
+    const palette = this.getPalette();
 
-    ctx.fillStyle = '#000';
+    ctx.fillStyle = palette.bg;
     ctx.fillRect(0, 0, w, h);
+
+    if (config.style === 'contours') {
+      this.drawContours();
+    } else {
+      this.drawParticles();
+    }
+
+    if (config.goldenLine.enabled && this.line.trail.length > 1) {
+      this.drawGoldenLine();
+    }
+
+    drawMorningStar(ctx, t, w, h);
+  }
+
+  drawParticles() {
+    const ctx = this.ctx;
+    const w = this.cssW, h = this.cssH;
+    const t = this.time;
+    const palette = this.getPalette();
+    const fgR = palette.fgRGB[0], fgG = palette.fgRGB[1], fgB = palette.fgRGB[2];
 
     const view = config.view;
     const terrainScale = config.terrain.scale;
@@ -939,7 +1350,6 @@ class Renderer {
     const tintRadius = config.goldenLine.disturbanceRadius * 1.6;
     const tintRadius2 = tintRadius * tintRadius;
 
-    // project + cull
     const projected = [];
     for (const p of this.field.particles) {
       const n1 = noise(p.x * terrainScale, (p.z + driftZ) * terrainScale);
@@ -961,7 +1371,6 @@ class Renderer {
       const size = (sizeMin + (sizeMax - sizeMin) * p.sizeT) * (450 / pr.depth);
       if (size < 1.5) continue;
 
-      // tint near gold line
       let tint = 0;
       if (head && config.goldenLine.enabled) {
         const dx = p.x - head.x;
@@ -971,18 +1380,17 @@ class Renderer {
           tint = (1 - Math.sqrt(d2) / tintRadius) * 0.7;
         }
       }
-      let r = 255, g = 255, b = 255;
+      let r = fgR, g = fgG, b = fgB;
       if (tint > 0) {
-        r = Math.round(lerp(255, goldRgb.r, tint));
-        g = Math.round(lerp(255, goldRgb.g, tint));
-        b = Math.round(lerp(255, goldRgb.b, tint));
+        r = Math.round(lerp(fgR, goldRgb.r, tint));
+        g = Math.round(lerp(fgG, goldRgb.g, tint));
+        b = Math.round(lerp(fgB, goldRgb.b, tint));
         alpha = Math.min(1, alpha + tint * 0.15);
       }
 
       projected.push({ sx: pr.sx, sy: pr.sy, depth: pr.depth, char: p.char, size: size, alpha: alpha, r: r, g: g, b: b });
     }
 
-    // back-to-front
     projected.sort((a, b) => b.depth - a.depth);
 
     ctx.textAlign = 'center';
@@ -997,74 +1405,194 @@ class Renderer {
       ctx.fillStyle = 'rgba(' + it.r + ',' + it.g + ',' + it.b + ',' + it.alpha.toFixed(3) + ')';
       ctx.fillText(it.char, it.sx, it.sy);
     }
+  }
 
-    // golden line
-    if (config.goldenLine.enabled && this.line.trail.length > 1) {
-      const g = config.goldenLine;
-      const trail = this.line.trail;
+  drawContours() {
+    const ctx = this.ctx;
+    const w = this.cssW, h = this.cssH;
+    const t = this.time;
+    const view = config.view;
+    const palette = this.getPalette();
+    const cfg = config.contours;
 
-      const trailPts = new Array(trail.length);
-      for (let i = 0; i < trail.length; i++) {
-        const tp = trail[i];
-        const n1 = noise(tp.x * terrainScale, (tp.z + driftZ) * terrainScale);
-        const hY = n1 * amp + 6;
-        trailPts[i] = project(tp.x, hY, tp.z, view, w, h);
-      }
+    this.contour.ensureGrid();
+    this.contour.sampleHeights(t);
+    const levels = this.contour.buildContours();
 
-      ctx.lineCap = 'round';
-      ctx.lineJoin = 'round';
+    const fg = palette.fgRGB;
+    const baseW = cfg.lineWidth;
+    const peakOp = cfg.peakOpacity;
+    const baseOp = cfg.baseOpacity;
+    const falloff = Math.max(0.1, cfg.falloff);
 
-      // soft glow stroke under trail
-      if (g.glowRadius > 0) {
-        ctx.strokeStyle = hexToRgba(g.color, 0.10);
-        ctx.lineWidth = Math.max(2, g.glowRadius * 0.35);
-        ctx.beginPath();
-        let started = false;
-        for (let i = 0; i < trailPts.length; i++) {
-          const pt = trailPts[i];
-          if (!pt) { started = false; continue; }
-          if (!started) { ctx.moveTo(pt.sx, pt.sy); started = true; }
-          else { ctx.lineTo(pt.sx, pt.sy); }
+    ctx.lineCap = 'round';
+    ctx.lineJoin = 'round';
+
+    // Levels are built bottom-to-top by elevation; rank=0 is lowest, rank=1 highest.
+    // Curved alpha highlights peaks more aggressively as falloff increases.
+    const N = levels.length;
+    for (let li = 0; li < N; li++) {
+      const level = levels[li];
+      const rank = N > 1 ? li / (N - 1) : 1;
+      const curved = Math.pow(rank, falloff);
+      const alpha = baseOp + (peakOp - baseOp) * curved;
+      level.rank = rank;     // remembered for annotation pass
+      level.alpha = alpha;
+      if (alpha < 0.005) continue;
+      ctx.strokeStyle = 'rgba(' + fg[0] + ',' + fg[1] + ',' + fg[2] + ',' + alpha.toFixed(3) + ')';
+      ctx.lineWidth = baseW * (0.75 + curved * 0.7);
+
+      // Chain raw segments into polylines, then draw each as a quadratic
+      // spline through midpoints (smooth, no sharp corners at cell boundaries).
+      const chains = chainSegments(level.segments);
+      const Lc = chains.length;
+      if (Lc === 0) continue;
+      ctx.beginPath();
+      const yL = level.elev;
+      for (let ci = 0; ci < Lc; ci++) {
+        const chain = chains[ci];
+        const pcount = chain.length >> 1;
+        if (pcount < 2) continue;
+        // Project all points first so we can do bbox cull + spline draw
+        const pts = new Array(pcount);
+        let minSx = Infinity, maxSx = -Infinity, minSy = Infinity, maxSy = -Infinity;
+        for (let p = 0; p < pcount; p++) {
+          const wx = chain[p * 2];
+          const wz = chain[p * 2 + 1];
+          const pr = project(wx, yL, wz, view, w, h);
+          pts[p] = pr;
+          if (pr) {
+            if (pr.sx < minSx) minSx = pr.sx;
+            if (pr.sx > maxSx) maxSx = pr.sx;
+            if (pr.sy < minSy) minSy = pr.sy;
+            if (pr.sy > maxSy) maxSy = pr.sy;
+          }
         }
-        ctx.stroke();
+        // Cull entirely-offscreen chains
+        if (maxSx < -200 || minSx > w + 200 || maxSy < -200 || minSy > h + 200) continue;
+        strokeSmoothChainPath(ctx, pts);
       }
-
-      // main line, alpha ramps toward head
-      for (let i = 1; i < trailPts.length; i++) {
-        const a = trailPts[i-1];
-        const b = trailPts[i];
-        if (!a || !b) continue;
-        const t01 = i / (trailPts.length - 1);
-        const lineAlpha = Math.pow(t01, 1.4) * 0.95;
-        ctx.strokeStyle = hexToRgba(g.color, lineAlpha);
-        ctx.lineWidth = g.width * (0.4 + t01 * 0.7);
-        ctx.beginPath();
-        ctx.moveTo(a.sx, a.sy);
-        ctx.lineTo(b.sx, b.sy);
-        ctx.stroke();
-      }
-
-      // head bloom
-      const headProj = trailPts[trailPts.length - 1];
-      if (headProj && g.glowRadius > 0) {
-        const grad = ctx.createRadialGradient(headProj.sx, headProj.sy, 0, headProj.sx, headProj.sy, g.glowRadius);
-        grad.addColorStop(0, hexToRgba(g.color, 0.55));
-        grad.addColorStop(0.4, hexToRgba(g.color, 0.16));
-        grad.addColorStop(1, hexToRgba(g.color, 0));
-        ctx.fillStyle = grad;
-        ctx.beginPath();
-        ctx.arc(headProj.sx, headProj.sy, g.glowRadius, 0, Math.PI * 2);
-        ctx.fill();
-
-        ctx.fillStyle = hexToRgba(g.color, 0.95);
-        ctx.beginPath();
-        ctx.arc(headProj.sx, headProj.sy, Math.max(1.5, g.width * 1.4), 0, Math.PI * 2);
-        ctx.fill();
-      }
+      ctx.stroke();
     }
 
-    // morning star overlay
-    drawMorningStar(ctx, t, w, h);
+    // Annotations — elevation labels anchored to fixed world points. Position
+    // rides smoothly with the terrain; displayed number is binned to avoid
+    // per-frame ticks. Screen-space spacing filter prevents the horizon band
+    // from accumulating labels: any candidate within minSpacing pixels of an
+    // already-placed label is skipped, so foreground naturally fits more.
+    const density = cfg.annotationDensity;
+    if (density > 0.005) {
+      const annotSize = cfg.annotationSize;
+      ctx.font = annotSize + 'px ui-monospace, "JetBrains Mono", Consolas, monospace';
+      ctx.fillStyle = palette.annotation;
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      const slots = this.contour.annotSlots;
+      const maxLabels = Math.ceil(slots.length * density);
+      const amp = config.terrain.amplitude;
+      const scale = config.terrain.scale;
+      const secondaryNoise = config.terrain.secondaryNoise;
+      const driftZ = t * config.terrain.drift * 100;
+      const binSize = Math.max(5, Math.round(amp * 0.1));
+      const minSpacing = annotSize * 5.5;
+      const minSpacing2 = minSpacing * minSpacing;
+      // Two-pass: gather candidates first so we can draw after the spacing
+      // filter — keeps the loop body tight.
+      const placedSx = []; const placedSy = []; const placedTxt = [];
+      for (let i = 0; i < slots.length; i++) {
+        if (placedSx.length >= maxLabels) break;
+        const slot = slots[i];
+        const n1 = noise(slot.worldX * scale, (slot.worldZ + driftZ) * scale);
+        const n2 = noise2(slot.worldX * scale * 2.3, (slot.worldZ + driftZ) * scale * 2.3) * secondaryNoise;
+        const hY = (n1 + n2 * 0.5) * amp;
+        const pr = project(slot.worldX, hY, slot.worldZ, view, w, h);
+        if (!pr) continue;
+        if (pr.sx < 0 || pr.sx > w || pr.sy < 0 || pr.sy > h) continue;
+        // Spacing check against already-placed labels (screen space)
+        let tooClose = false;
+        for (let k = 0; k < placedSx.length; k++) {
+          const dx = pr.sx - placedSx[k];
+          const dy = pr.sy - placedSy[k];
+          if (dx * dx + dy * dy < minSpacing2) { tooClose = true; break; }
+        }
+        if (tooClose) continue;
+        const elevRounded = Math.round(hY / binSize) * binSize;
+        placedSx.push(pr.sx);
+        placedSy.push(pr.sy);
+        placedTxt.push((elevRounded >= 0 ? '+' : '') + elevRounded);
+      }
+      for (let k = 0; k < placedSx.length; k++) {
+        ctx.fillText(placedTxt[k], placedSx[k], placedSy[k]);
+      }
+    }
+  }
+
+  drawGoldenLine() {
+    const ctx = this.ctx;
+    const w = this.cssW, h = this.cssH;
+    const t = this.time;
+    const view = config.view;
+    const terrainScale = config.terrain.scale;
+    const amp = config.terrain.amplitude;
+    const driftZ = t * config.terrain.drift * 100;
+    const g = config.goldenLine;
+    const trail = this.line.trail;
+
+    const trailPts = new Array(trail.length);
+    for (let i = 0; i < trail.length; i++) {
+      const tp = trail[i];
+      const n1 = noise(tp.x * terrainScale, (tp.z + driftZ) * terrainScale);
+      const hY = n1 * amp + 6;
+      trailPts[i] = project(tp.x, hY, tp.z, view, w, h);
+    }
+
+    ctx.lineCap = 'round';
+    ctx.lineJoin = 'round';
+
+    if (g.glowRadius > 0) {
+      ctx.strokeStyle = hexToRgba(g.color, 0.10);
+      ctx.lineWidth = Math.max(2, g.glowRadius * 0.35);
+      ctx.beginPath();
+      let started = false;
+      for (let i = 0; i < trailPts.length; i++) {
+        const pt = trailPts[i];
+        if (!pt) { started = false; continue; }
+        if (!started) { ctx.moveTo(pt.sx, pt.sy); started = true; }
+        else { ctx.lineTo(pt.sx, pt.sy); }
+      }
+      ctx.stroke();
+    }
+
+    for (let i = 1; i < trailPts.length; i++) {
+      const a = trailPts[i-1];
+      const b = trailPts[i];
+      if (!a || !b) continue;
+      const t01 = i / (trailPts.length - 1);
+      const lineAlpha = Math.pow(t01, 1.4) * 0.95;
+      ctx.strokeStyle = hexToRgba(g.color, lineAlpha);
+      ctx.lineWidth = g.width * (0.4 + t01 * 0.7);
+      ctx.beginPath();
+      ctx.moveTo(a.sx, a.sy);
+      ctx.lineTo(b.sx, b.sy);
+      ctx.stroke();
+    }
+
+    const headProj = trailPts[trailPts.length - 1];
+    if (headProj && g.glowRadius > 0) {
+      const grad = ctx.createRadialGradient(headProj.sx, headProj.sy, 0, headProj.sx, headProj.sy, g.glowRadius);
+      grad.addColorStop(0, hexToRgba(g.color, 0.55));
+      grad.addColorStop(0.4, hexToRgba(g.color, 0.16));
+      grad.addColorStop(1, hexToRgba(g.color, 0));
+      ctx.fillStyle = grad;
+      ctx.beginPath();
+      ctx.arc(headProj.sx, headProj.sy, g.glowRadius, 0, Math.PI * 2);
+      ctx.fill();
+
+      ctx.fillStyle = hexToRgba(g.color, 0.95);
+      ctx.beginPath();
+      ctx.arc(headProj.sx, headProj.sy, Math.max(1.5, g.width * 1.4), 0, Math.PI * 2);
+      ctx.fill();
+    }
   }
 }
 
@@ -1074,6 +1602,43 @@ class Renderer {
 function buildPanel() {
   const body = document.getElementById('panelBody');
   body.innerHTML = '';
+
+  // STYLE + PALETTE (segmented pills at top)
+  const styleSec = createSection('Style & Palette');
+  const styleRow = document.createElement('div');
+  styleRow.className = 'seg seg-2 seg-row';
+  STYLES.forEach(s => {
+    const b = document.createElement('button');
+    b.textContent = s.charAt(0).toUpperCase() + s.slice(1);
+    if (config.style === s) b.classList.add('active');
+    b.addEventListener('click', () => {
+      if (config.style !== s) {
+        config.style = s;
+        markDirty();
+        buildPanel();
+      }
+    });
+    styleRow.appendChild(b);
+  });
+  styleSec.controls.appendChild(styleRow);
+
+  const paletteRow = document.createElement('div');
+  paletteRow.className = 'seg seg-2';
+  Object.keys(PALETTES).forEach(pk => {
+    const b = document.createElement('button');
+    b.textContent = PALETTES[pk].name;
+    if (config.palette === pk) b.classList.add('active');
+    b.addEventListener('click', () => {
+      if (config.palette !== pk) {
+        config.palette = pk;
+        markDirty();
+        buildPanel();
+      }
+    });
+    paletteRow.appendChild(b);
+  });
+  styleSec.controls.appendChild(paletteRow);
+  body.appendChild(styleSec.section);
 
   // PRESETS
   const presetSec = createSection('Presets');
@@ -1090,8 +1655,15 @@ function buildPanel() {
   presetSec.controls.appendChild(grid);
   body.appendChild(presetSec.section);
 
-  // SCHEMA-BASED SECTIONS
-  for (const groupKey of ['view','terrain','particles','goldenLine','morningStar']) {
+  // SCHEMA-BASED SECTIONS — filtered by current style
+  const isParticles = config.style === 'particles';
+  const isContours = config.style === 'contours';
+  const groupOrder = ['view','terrain'];
+  if (isParticles) groupOrder.push('particles');
+  if (isContours) groupOrder.push('contours');
+  groupOrder.push('goldenLine', 'morningStar');
+
+  for (const groupKey of groupOrder) {
     const sec = createSection(GROUP_TITLES[groupKey]);
     for (const item of SCHEMA[groupKey]) {
       sec.controls.appendChild(createControl(groupKey, item));
@@ -1099,12 +1671,14 @@ function buildPanel() {
     body.appendChild(sec.section);
   }
 
-  // CHARSET
-  const csSec = createSection('Character Set');
-  for (const k of Object.keys(CHAR_GROUPS)) {
-    csSec.controls.appendChild(createCharsetRow(k));
+  // CHARSET — only for particles
+  if (isParticles) {
+    const csSec = createSection('Character Set');
+    for (const k of Object.keys(CHAR_GROUPS)) {
+      csSec.controls.appendChild(createCharsetRow(k));
+    }
+    body.appendChild(csSec.section);
   }
-  body.appendChild(csSec.section);
 
   // ACTIONS
   const actions = document.createElement('div');
