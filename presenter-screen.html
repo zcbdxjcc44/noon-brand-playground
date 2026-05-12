@@ -285,6 +285,17 @@
     min-width: 0;
     padding: 6px 4px;
     font-size: 10px;
+    color: var(--fg-muted);
+    border: 1px solid transparent;
+  }
+  .bg-tabs--grid button:hover {
+    color: var(--fg);
+    background: var(--hover-overlay);
+  }
+  .bg-tabs--grid button.is-active {
+    background: var(--bg-overlay);
+    color: var(--signal-bright);
+    border-color: rgba(232,184,58,0.4);
   }
   .bg-controls__row--stack { flex-direction: column; align-items: stretch; gap: 8px; }
   .bg-controls__row--stack > span { font-size: 11px; color: var(--fg-faint); }
@@ -1560,11 +1571,10 @@
   // between the teacher and a student speaker; the roster highlights whoever
   // is speaking with a gold ring.
   (function () {
-    // Teacher: local photo of Mr. Ali. Classroom photos pulled from the
-    // Hybrid Classroom Foundation Figma file (Figma MCP URLs expire in ~7d).
+    // All photos are local under assets/ so nothing expires.
     const TEACHER_BG  = "assets/teacher-ali.jpg.png";
-    const CLASSROOM_A = "https://www.figma.com/api/mcp/asset/a9c974d5-20c7-466f-9850-8b8798206b9c";
-    const CLASSROOM_B = "https://www.figma.com/api/mcp/asset/dd782a2b-5fa2-44d3-ab45-9a100ee12f63";
+    const CLASSROOM_A = "assets/classroom-a.jpg";
+    const CLASSROOM_B = "assets/classroom-b.jpg";
 
     // Avatar swatch — returns a CSS background-image value. The SVG is
     // URL-encoded so the resulting value is safe to set via JS .style.* (and
@@ -1810,9 +1820,11 @@
     // Stage cluster: big teacher on the left + 2x2 grid of classrooms.
     // A and B are unmuted (have students who can speak); D and E are present
     // but muted. All classrooms are visually equal-sized.
-    // outpost classroom photos — re-use the Saudi classroom photo for visual consistency
-    const OTHER_CLASSROOM_1 = "https://www.figma.com/api/mcp/asset/dd782a2b-5fa2-44d3-ab45-9a100ee12f63";
-    const OTHER_CLASSROOM_2 = "https://www.figma.com/api/mcp/asset/a9c974d5-20c7-466f-9850-8b8798206b9c";
+    // D has its own local photo; E re-uses A so the four classrooms still
+    // show distinct imagery without needing a 4th asset. dashed-ring +
+    // mic-muted styling differentiates D / E from the active A / B.
+    const OTHER_CLASSROOM_1 = "assets/classroom-d.jpg";
+    const OTHER_CLASSROOM_2 = ROOM_BG.A;
 
     const teacherMember = { id: "teacher", name: "Sara Al-Otaibi", sub: "Teacher", kind: "teacher", photoUrl: TEACHER_BG, muted: false };
     const classroomMembers = [
