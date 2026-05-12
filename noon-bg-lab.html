@@ -457,6 +457,30 @@ const FACET_HIGHLIGHTS = {
   'Iris':       '#B08AF9'    // heliotrope, cool dusk
 };
 
+// Curated palette for particle glyph color. Adds Paper/Ink for the Paper
+// background mode (where Chalk would be invisible).
+const PARTICLE_COLORS = {
+  'Chalk':      '#e8e4dc',
+  'Paper':      '#f2ece0',
+  'Ink':        '#0a0f1a',
+  'Gold Crest': '#e0b83a',
+  'Noon Wave':  '#64D8AE',
+  'Iris':       '#B08AF9'
+};
+
+// Palette sets for faceted edge particles. 'Spectrum' is a vibrant multi-color
+// stream (matches the reference of flowing dots along edges). Single-color
+// entries reuse brand tokens.
+const EDGE_PARTICLE_PALETTES = {
+  'Spectrum':   ['#ff4d6d', '#ffa040', '#ffdf6e', '#7cd7a0', '#5cc7ff', '#9b8aff', '#ff7ad9'],
+  'Chalk':      ['#e8e4dc'],
+  'Gold Crest': ['#e0b83a'],
+  'Noon Wave':  ['#64D8AE'],
+  'Iris':       ['#B08AF9'],
+  'Cool':       ['#5cc7ff', '#9b8aff', '#7cd7a0'],
+  'Warm':       ['#ff4d6d', '#ffa040', '#ffdf6e']
+};
+
 // =============================================================
 // DEFAULT CONFIG
 // =============================================================
@@ -465,7 +489,7 @@ const DEFAULT_CONFIG = {
   palette:     'void',                 // 'void' | 'paper'
   view:        { pitch: 0.55, yaw: 0.0, distance: 500, fov: 700, cameraHeight: 80 },
   terrain:     { scale: 0.006, amplitude: 80, drift: 0.08, contrast: 0.65, secondaryNoise: 0.3 },
-  particles:   { density: 0.7, sizeMin: 9, sizeMax: 15, baseAlpha: 0.55, twinkle: 0.18 },
+  particles:   { density: 0.7, sizeMin: 9, sizeMax: 15, baseAlpha: 0.55, twinkle: 0.18, color: 'Chalk' },
   charset:     { easternArabic: 0.40, westernArabic: 0.30, math: 0.25, geometry: 0.05, stars: 0 },
   contours:    {
     levelCount: 18,
@@ -479,18 +503,22 @@ const DEFAULT_CONFIG = {
     annotationSize: 10
   },
   faceted:     {
-    gridCellsX: 50,
-    gridCellsZ: 40,
+    gridCellsX: 28,
+    gridCellsZ: 22,
+    meshJitter: 0.35,
     lightPitch: 0.65,
     lightYaw: -0.5,
     ambient: 0.18,
     contrast: 0.92,
     fill: true,
-    highlight: 'Chalk',
+    highlight: 'Void Step',
     fillOpacity: 0.55,
-    edges: false,
-    edgeColor: 'Chalk',
-    edgeOpacity: 0.14
+    edgeMode: 'particles',
+    edgeColor: 'Spectrum',
+    edgeDensity: 6,
+    edgeParticleSize: 1.8,
+    edgeOpacity: 0.85,
+    edgeSpeed: 0.18
   },
   goldenLine:  {
     enabled: true, pathType: 'noise', speed: 0.18,
@@ -522,11 +550,12 @@ const SCHEMA = {
     { key: 'secondaryNoise', label: '2nd Octave',   type: 'range', min: 0,     max: 1,    step: 0.02 }
   ],
   particles: [
-    { key: 'density',   label: 'Density',     type: 'range', min: 0.15, max: 1.5, step: 0.05 },
-    { key: 'sizeMin',   label: 'Size Min',    type: 'range', min: 4,    max: 22,  step: 1 },
-    { key: 'sizeMax',   label: 'Size Max',    type: 'range', min: 6,    max: 30,  step: 1 },
-    { key: 'baseAlpha', label: 'Base Alpha',  type: 'range', min: 0.1,  max: 1,   step: 0.02 },
-    { key: 'twinkle',   label: 'Twinkle',     type: 'range', min: 0,    max: 0.5, step: 0.01 }
+    { key: 'density',   label: 'Density',     type: 'range',  min: 0.15, max: 1.5, step: 0.05 },
+    { key: 'sizeMin',   label: 'Size Min',    type: 'range',  min: 4,    max: 22,  step: 1 },
+    { key: 'sizeMax',   label: 'Size Max',    type: 'range',  min: 6,    max: 30,  step: 1 },
+    { key: 'color',     label: 'Color',       type: 'select', options: ['Chalk','Paper','Ink','Gold Crest','Noon Wave','Iris'] },
+    { key: 'baseAlpha', label: 'Base Alpha',  type: 'range',  min: 0.1,  max: 1,   step: 0.02 },
+    { key: 'twinkle',   label: 'Twinkle',     type: 'range',  min: 0,    max: 0.5, step: 0.01 }
   ],
   goldenLine: [
     { key: 'enabled',              label: 'Enabled',      type: 'check' },
@@ -561,18 +590,22 @@ const SCHEMA = {
     { key: 'annotationSize',     label: 'Label Size',   type: 'range', min: 7,   max: 18,  step: 1 }
   ],
   faceted: [
-    { key: 'gridCellsX',   label: 'Mesh X',      type: 'range', min: 10,   max: 80,   step: 1 },
-    { key: 'gridCellsZ',   label: 'Mesh Z',      type: 'range', min: 10,   max: 80,   step: 1 },
-    { key: 'lightPitch',   label: 'Light Pitch', type: 'range', min: 0,    max: 1.55, step: 0.02 },
-    { key: 'lightYaw',     label: 'Light Yaw',   type: 'range', min: -3.14,max: 3.14, step: 0.02 },
-    { key: 'fill',         label: 'Fill',        type: 'check' },
-    { key: 'highlight',    label: 'Fill Color',  type: 'select', options: ['Chalk','Void Step','Gold Crest','Noon Wave','Iris'] },
-    { key: 'fillOpacity',  label: 'Fill Alpha',  type: 'range', min: 0.05, max: 1,    step: 0.02 },
-    { key: 'ambient',      label: 'Ambient',     type: 'range', min: 0,    max: 0.6,  step: 0.02 },
-    { key: 'contrast',     label: 'Contrast',    type: 'range', min: 0.2,  max: 1.5,  step: 0.02 },
-    { key: 'edges',        label: 'Edges',       type: 'check' },
-    { key: 'edgeColor',    label: 'Edge Color',  type: 'select', options: ['Chalk','Void Step','Gold Crest','Noon Wave','Iris'] },
-    { key: 'edgeOpacity',  label: 'Edge Alpha',  type: 'range', min: 0,    max: 0.5,  step: 0.01 }
+    { key: 'gridCellsX',       label: 'Mesh X',      type: 'range',  min: 6,    max: 60,   step: 1 },
+    { key: 'gridCellsZ',       label: 'Mesh Z',      type: 'range',  min: 6,    max: 60,   step: 1 },
+    { key: 'meshJitter',       label: 'Mesh Jitter', type: 'range',  min: 0,    max: 0.48, step: 0.01 },
+    { key: 'lightPitch',       label: 'Light Pitch', type: 'range',  min: 0,    max: 1.55, step: 0.02 },
+    { key: 'lightYaw',         label: 'Light Yaw',   type: 'range',  min: -3.14,max: 3.14, step: 0.02 },
+    { key: 'fill',             label: 'Fill',        type: 'check' },
+    { key: 'highlight',        label: 'Fill Color',  type: 'select', options: ['Chalk','Void Step','Gold Crest','Noon Wave','Iris'] },
+    { key: 'fillOpacity',      label: 'Fill Alpha',  type: 'range',  min: 0.05, max: 1,    step: 0.02 },
+    { key: 'ambient',          label: 'Ambient',     type: 'range',  min: 0,    max: 0.6,  step: 0.02 },
+    { key: 'contrast',         label: 'Contrast',    type: 'range',  min: 0.2,  max: 1.5,  step: 0.02 },
+    { key: 'edgeMode',         label: 'Edge Mode',   type: 'select', options: ['off','lines','particles'] },
+    { key: 'edgeColor',        label: 'Edge Color',  type: 'select', options: ['Spectrum','Chalk','Gold Crest','Noon Wave','Iris','Cool','Warm','Void Step'] },
+    { key: 'edgeDensity',      label: 'Dots/Edge',   type: 'range',  min: 1,    max: 20,   step: 1 },
+    { key: 'edgeParticleSize', label: 'Dot Size',    type: 'range',  min: 0.5,  max: 5,    step: 0.1 },
+    { key: 'edgeOpacity',      label: 'Edge Alpha',  type: 'range',  min: 0,    max: 1,    step: 0.02 },
+    { key: 'edgeSpeed',        label: 'Flow Speed',  type: 'range',  min: 0,    max: 1.5,  step: 0.02 }
   ]
 };
 
@@ -642,9 +675,9 @@ const PRESETS = [
     desc: 'Low-poly · lit dunes · gold route',
     config: {
       style: 'faceted', palette: 'void',
-      view:       { pitch: 0.30, yaw: 0.0, distance: 480, fov: 620, cameraHeight: 245 },
-      terrain:    { scale: 0.0015, amplitude: 67, drift: 0.025, contrast: 0.5, secondaryNoise: 0.24 },
-      faceted:    { gridCellsX: 24, gridCellsZ: 36, lightPitch: 0.42, lightYaw: -0.40, ambient: 0.16, contrast: 0.92, fill: true, highlight: 'Void Step', fillOpacity: 0.55, edges: true, edgeColor: 'Chalk', edgeOpacity: 0.13 },
+      view:       { pitch: 0.18, yaw: -1.4, distance: 620, fov: 620, cameraHeight: 245 },
+      terrain:    { scale: 0.0015, amplitude: 53, drift: 0.025, contrast: 0.42, secondaryNoise: 0.06 },
+      faceted:    { gridCellsX: 30, gridCellsZ: 28, meshJitter: 0.33, lightPitch: 0.32, lightYaw: -1.7, ambient: 0.16, contrast: 0.92, fill: true, highlight: 'Void Step', fillOpacity: 0.55, edgeMode: 'particles', edgeColor: 'Gold Crest', edgeDensity: 5, edgeParticleSize: 0.9, edgeOpacity: 1, edgeSpeed: 0.16 },
       goldenLine: { enabled: true, pathType: 'noise', speed: 0.16, width: 1.8, glowRadius: 85, color: '#c9a227', disturbanceRadius: 0, disturbanceStrength: 0, springBack: 0.05 },
       morningStar:{ enabled: true, x: 0.78, y: 0.20, size: 52, rayLength: 3.6, twinkleSpeed: 0.30, color: '#f5e0a0', opacity: 0.70 }
     }
@@ -1335,32 +1368,64 @@ class FacetedField {
     this.heights = null;
     this.cellsX = 0; this.cellsZ = 0;
     this.stepX = 0; this.stepZ = 0;
+    this.jitterX = null;      // per-vertex world-space offsets
+    this.jitterZ = null;
+    this.diagDir = null;      // per-cell: 0 = BL-TR diagonal, 1 = BR-TL diagonal
+    this._jitterStrength = -1;
   }
 
   ensureGrid() {
     const cx = config.faceted.gridCellsX | 0;
     const cz = config.faceted.gridCellsZ | 0;
-    if (this.cellsX === cx && this.cellsZ === cz) return;
+    const j = config.faceted.meshJitter != null ? config.faceted.meshJitter : 0;
+    const sizeChanged = this.cellsX !== cx || this.cellsZ !== cz;
+    const jitterChanged = this._jitterStrength !== j;
+    if (!sizeChanged && !jitterChanged) return;
     this.cellsX = cx; this.cellsZ = cz;
     this.stepX = (this.terrainExtent * 2) / cx;
     this.stepZ = (this.terrainDepth * 2) / cz;
-    this.heights = new Float32Array((cx + 1) * (cz + 1));
+    const totalV = (cx + 1) * (cz + 1);
+    if (sizeChanged) {
+      this.heights = new Float32Array(totalV);
+      this.diagDir = new Uint8Array(cx * cz);
+      // Decide diagonal split deterministically once per grid layout.
+      for (let d = 0; d < cx * cz; d++) {
+        this.diagDir[d] = Math.random() < 0.5 ? 0 : 1;
+      }
+    }
+    // Regenerate jitter on either size or strength change.
+    this.jitterX = new Float32Array(totalV);
+    this.jitterZ = new Float32Array(totalV);
+    for (let jj = 0; jj <= cz; jj++) {
+      for (let ii = 0; ii <= cx; ii++) {
+        const idx = jj * (cx + 1) + ii;
+        // Pin boundary vertices so the mesh doesn't bleed past terrain extent
+        const isBoundaryX = (ii === 0 || ii === cx);
+        const isBoundaryZ = (jj === 0 || jj === cz);
+        this.jitterX[idx] = isBoundaryX ? 0 : (Math.random() - 0.5) * j * this.stepX;
+        this.jitterZ[idx] = isBoundaryZ ? 0 : (Math.random() - 0.5) * j * this.stepZ;
+      }
+    }
+    this._jitterStrength = j;
   }
 
   sampleHeights(time) {
     const cx = this.cellsX, cz = this.cellsZ;
-    const stepX = this.stepX, stepZ = this.stepZ;
     const half = this.terrainExtent, depth = this.terrainDepth;
     const scale = config.terrain.scale;
     const amp = config.terrain.amplitude;
     const secondaryNoise = config.terrain.secondaryNoise;
     const driftZ = time * config.terrain.drift * 100;
     const h = this.heights;
+    // Sample at the JITTERED vertex position so triangle planes match the
+    // noise surface at the rendered vertices.
     let idx = 0;
     for (let j = 0; j <= cz; j++) {
-      const z = -depth + j * stepZ;
+      const zBase = -depth + j * this.stepZ;
       for (let i = 0; i <= cx; i++) {
-        const x = -half + i * stepX;
+        const xBase = -half + i * this.stepX;
+        const x = xBase + this.jitterX[idx];
+        const z = zBase + this.jitterZ[idx];
         const n1 = noise(x * scale, (z + driftZ) * scale);
         const n2 = noise2(x * scale * 2.3, (z + driftZ) * scale * 2.3) * secondaryNoise;
         h[idx++] = (n1 + n2 * 0.5) * amp;
@@ -1369,6 +1434,15 @@ class FacetedField {
   }
 
   height(i, j) { return this.heights[j * (this.cellsX + 1) + i]; }
+
+  // World x of vertex (i, j) after jitter
+  vx(i, j) {
+    return -this.terrainExtent + i * this.stepX + this.jitterX[j * (this.cellsX + 1) + i];
+  }
+  // World z of vertex (i, j) after jitter
+  vz(i, j) {
+    return -this.terrainDepth + j * this.stepZ + this.jitterZ[j * (this.cellsX + 1) + i];
+  }
 
   // Height at any world (x, z) by interpolating within the triangle.
   // Returns null if the point falls outside the mesh.
@@ -1479,7 +1553,16 @@ class Renderer {
     const w = this.cssW, h = this.cssH;
     const t = this.time;
     const palette = this.getPalette();
-    const fgR = palette.fgRGB[0], fgG = palette.fgRGB[1], fgB = palette.fgRGB[2];
+    // Particle glyph color — pick from the brand-curated set; fall back to
+    // the palette's fg so legacy presets without a color field still render.
+    const pColorHex = PARTICLE_COLORS[config.particles.color];
+    let fgR, fgG, fgB;
+    if (pColorHex) {
+      const rgb = hexToRgb(pColorHex);
+      fgR = rgb.r; fgG = rgb.g; fgB = rgb.b;
+    } else {
+      fgR = palette.fgRGB[0]; fgG = palette.fgRGB[1]; fgB = palette.fgRGB[2];
+    }
 
     const view = config.view;
     const terrainScale = config.terrain.scale;
@@ -1680,119 +1763,125 @@ class Renderer {
     const w = this.cssW, h = this.cssH;
     const t = this.time;
     const view = config.view;
-    // Faceted is locked to the Void palette regardless of config.palette so
-    // the lit-dune aesthetic stays consistent (Paper looks wrong on facets).
-    const palette = PALETTES.void;
+    const palette = PALETTES.void;     // faceted locked to Void
     const cfg = config.faceted;
 
     const mesh = this.faceted;
     mesh.ensureGrid();
     mesh.sampleHeights(t);
 
-    // Light direction in world space. lightPitch=0 → horizontal, π/2 → straight
-    // down. lightYaw rotates the azimuth.
+    // Light direction in world space.
     const lp = cfg.lightPitch;
     const ly = cfg.lightYaw;
     const lcp = Math.cos(lp), lsp = Math.sin(lp);
     let Lx = Math.sin(ly) * lcp;
-    let Ly = lsp;                      // upward y component (light coming FROM this direction)
+    let Ly = lsp;
     let Lz = Math.cos(ly) * lcp;
-    // Normalize (defensive)
     const Llen = Math.sqrt(Lx*Lx + Ly*Ly + Lz*Lz) || 1;
     Lx /= Llen; Ly /= Llen; Lz /= Llen;
 
     const ambient = cfg.ambient;
     const contrast = cfg.contrast;
     const bg = hexToRgb(palette.bg);
-    // Fill highlight (lit-side color) and edge color, both picked from
-    // FACET_HIGHLIGHTS so the two can match or contrast as the designer wishes.
     const hiHex = FACET_HIGHLIGHTS[cfg.highlight] || FACET_HIGHLIGHTS['Chalk'];
     const hi = hexToRgb(hiHex);
-    const hiRGB = [hi.r, hi.g, hi.b];
-    const edgeHex = FACET_HIGHLIGHTS[cfg.edgeColor] || FACET_HIGHLIGHTS['Chalk'];
-    const edge = hexToRgb(edgeHex);
-    const edgeRGB = [edge.r, edge.g, edge.b];
+    const hiR = hi.r, hiG = hi.g, hiB = hi.b;
     const fillAlpha = cfg.fillOpacity != null ? cfg.fillOpacity : 1;
 
     const cx = mesh.cellsX, cz = mesh.cellsZ;
-    const stepX = mesh.stepX, stepZ = mesh.stepZ;
-    const half = mesh.terrainExtent, depth = mesh.terrainDepth;
+    const stepXc = (cx + 1);
 
-    // Build all visible triangles, then sort back-to-front (painter's algo).
+    // Track every projected vertex once (shared across triangles).
+    const totalV = (cx + 1) * (cz + 1);
+    const projX = new Float32Array(totalV);
+    const projY = new Float32Array(totalV);
+    const projD = new Float32Array(totalV);
+    const projOk = new Uint8Array(totalV);
+    let v = 0;
+    for (let j = 0; j <= cz; j++) {
+      for (let i = 0; i <= cx; i++) {
+        const wx = mesh.vx(i, j);
+        const wz = mesh.vz(i, j);
+        const wy = mesh.heights[v];
+        const pr = project(wx, wy, wz, view, w, h);
+        if (pr) {
+          projX[v] = pr.sx; projY[v] = pr.sy; projD[v] = pr.depth; projOk[v] = 1;
+        } else {
+          projOk[v] = 0;
+        }
+        v++;
+      }
+    }
+    const vIdx = (i, j) => j * stepXc + i;
+
+    // Build all visible triangles using each cell's diagonal direction.
+    // Also collect a set of unique edges (vertex-index pairs) for edge rendering.
     const tris = [];
+    const edgeSet = new Map();        // key "minIdx,maxIdx" -> [a, b]
+    const addEdge = (a, b) => {
+      const lo = a < b ? a : b;
+      const hi2 = a < b ? b : a;
+      const key = lo + ',' + hi2;
+      if (!edgeSet.has(key)) edgeSet.set(key, [lo, hi2]);
+    };
+    const emitTri = (ia, ib, ic) => {
+      if (!projOk[ia] || !projOk[ib] || !projOk[ic]) return;
+      const ax = projX[ia], ay = projY[ia];
+      const bx = projX[ib], by = projY[ib];
+      const cx2 = projX[ic], cy = projY[ic];
+      const minSx = Math.min(ax, bx, cx2);
+      const maxSx = Math.max(ax, bx, cx2);
+      const minSy = Math.min(ay, by, cy);
+      const maxSy = Math.max(ay, by, cy);
+      if (maxSx < -50 || minSx > w + 50 || maxSy < -50 || minSy > h + 50) return;
+      // World normal
+      const aix = ia % stepXc, aiz = (ia / stepXc) | 0;
+      const bix = ib % stepXc, biz = (ib / stepXc) | 0;
+      const cix = ic % stepXc, ciz = (ic / stepXc) | 0;
+      const wax = mesh.vx(aix, aiz), waz = mesh.vz(aix, aiz), way = mesh.heights[ia];
+      const wbx = mesh.vx(bix, biz), wbz = mesh.vz(bix, biz), wby = mesh.heights[ib];
+      const wcx = mesh.vx(cix, ciz), wcz = mesh.vz(cix, ciz), wcy = mesh.heights[ic];
+      const ux = wbx - wax, uy = wby - way, uz = wbz - waz;
+      const vvx = wcx - wax, vvy = wcy - way, vvz = wcz - waz;
+      let nx = uy * vvz - uz * vvy;
+      let ny = uz * vvx - ux * vvz;
+      let nz = ux * vvy - uy * vvx;
+      if (ny < 0) { nx = -nx; ny = -ny; nz = -nz; }
+      const nlen = Math.sqrt(nx*nx + ny*ny + nz*nz) || 1;
+      nx /= nlen; ny /= nlen; nz /= nlen;
+      const dot = Math.max(0, nx*Lx + ny*Ly + nz*Lz);
+      let bright = ambient + (1 - ambient) * dot * contrast;
+      if (bright > 1) bright = 1;
+      const r  = (bg.r + (hiR - bg.r) * bright) | 0;
+      const gg = (bg.g + (hiG - bg.g) * bright) | 0;
+      const bb = (bg.b + (hiB - bg.b) * bright) | 0;
+      const avgDepth = (projD[ia] + projD[ib] + projD[ic]) * 0.3333;
+      tris.push({ ax, ay, bx, by, cx: cx2, cy, r, g: gg, b: bb, depth: avgDepth });
+      addEdge(ia, ib);
+      addEdge(ib, ic);
+      addEdge(ic, ia);
+    };
     for (let j = 0; j < cz; j++) {
-      const z0 = -depth + j * stepZ;
-      const z1 = z0 + stepZ;
       for (let i = 0; i < cx; i++) {
-        const x0 = -half + i * stepX;
-        const x1 = x0 + stepX;
-        const h00 = mesh.height(i,   j  );
-        const h10 = mesh.height(i+1, j  );
-        const h11 = mesh.height(i+1, j+1);
-        const h01 = mesh.height(i,   j+1);
-
-        // Two triangles sharing the BL-TR diagonal:
-        //   A = (BL, BR, TR) = (00, 10, 11)
-        //   B = (BL, TR, TL) = (00, 11, 01)
-        // Process both with shared projection cache for v(00) and v(11).
-        const p00 = project(x0, h00, z0, view, w, h);
-        const p10 = project(x1, h10, z0, view, w, h);
-        const p11 = project(x1, h11, z1, view, w, h);
-        const p01 = project(x0, h01, z1, view, w, h);
-
-        const tryEmit = (pA, pB, pC, hA, hB, hC, ax, az, bx, bz, cxw, czw) => {
-          if (!pA || !pB || !pC) return;
-          // Quick offscreen reject (all corners far outside)
-          const minSx = Math.min(pA.sx, pB.sx, pC.sx);
-          const maxSx = Math.max(pA.sx, pB.sx, pC.sx);
-          const minSy = Math.min(pA.sy, pB.sy, pC.sy);
-          const maxSy = Math.max(pA.sy, pB.sy, pC.sy);
-          if (maxSx < -50 || minSx > w + 50 || maxSy < -50 || minSy > h + 50) return;
-          // World normal via cross product of edges (B-A) × (C-A)
-          const ux = bx - ax,           uy = hB - hA, uz = bz - az;
-          const vx = cxw - ax,          vy = hC - hA, vz = czw - az;
-          let nx = uy * vz - uz * vy;
-          let ny = uz * vx - ux * vz;
-          let nz = ux * vy - uy * vx;
-          // Ensure normal points upward (positive y in world)
-          if (ny < 0) { nx = -nx; ny = -ny; nz = -nz; }
-          const nlen = Math.sqrt(nx*nx + ny*ny + nz*nz) || 1;
-          nx /= nlen; ny /= nlen; nz /= nlen;
-          // Lambert
-          const dot = Math.max(0, nx*Lx + ny*Ly + nz*Lz);
-          let bright = ambient + (1 - ambient) * dot * contrast;
-          if (bright > 1) bright = 1;
-          // Color = lerp(bg, highlight, bright)
-          const r  = (bg.r + (hiRGB[0] - bg.r) * bright) | 0;
-          const gg = (bg.g + (hiRGB[1] - bg.g) * bright) | 0;
-          const bb = (bg.b + (hiRGB[2] - bg.b) * bright) | 0;
-          const avgDepth = (pA.depth + pB.depth + pC.depth) * 0.3333;
-          tris.push({
-            ax: pA.sx, ay: pA.sy,
-            bx: pB.sx, by: pB.sy,
-            cx: pC.sx, cy: pC.sy,
-            r: r, g: gg, b: bb,
-            depth: avgDepth
-          });
-        };
-
-        // Triangle A: (00, 10, 11)
-        tryEmit(p00, p10, p11, h00, h10, h11, x0, z0, x1, z0, x1, z1);
-        // Triangle B: (00, 11, 01)
-        tryEmit(p00, p11, p01, h00, h11, h01, x0, z0, x1, z1, x0, z1);
+        const i00 = vIdx(i, j),     i10 = vIdx(i + 1, j);
+        const i11 = vIdx(i + 1, j + 1), i01 = vIdx(i, j + 1);
+        const dir = mesh.diagDir ? mesh.diagDir[j * cx + i] : 0;
+        if (dir === 0) {
+          // BL-TR diagonal: triangles (00,10,11) and (00,11,01)
+          emitTri(i00, i10, i11);
+          emitTri(i00, i11, i01);
+        } else {
+          // BR-TL diagonal: triangles (00,10,01) and (10,11,01)
+          emitTri(i00, i10, i01);
+          emitTri(i10, i11, i01);
+        }
       }
     }
 
     // Back-to-front
     tris.sort((a, b) => b.depth - a.depth);
 
-    // Fill pass — group consecutive identical colors into one path to halve
-    // beginPath/fill overhead. Triangles after depth sort won't always cluster,
-    // but neighbours in the mesh often share similar normals so some batching
-    // happens naturally. Skipped entirely when fill is disabled (wireframe mode).
     const useFill = cfg.fill !== false;
-    const useEdges = cfg.edges;
-    const edgeAlpha = cfg.edgeOpacity;
     if (useFill) {
       const fa = fillAlpha.toFixed(3);
       let curR = -1, curG = -1, curB = -1;
@@ -1818,19 +1907,76 @@ class Renderer {
       }
     }
 
-    // Optional edges
-    if (useEdges && edgeAlpha > 0.005) {
-      ctx.strokeStyle = 'rgba(' + edgeRGB[0] + ',' + edgeRGB[1] + ',' + edgeRGB[2] + ',' + edgeAlpha.toFixed(3) + ')';
-      ctx.lineWidth = 0.5;
-      ctx.beginPath();
-      for (let i = 0; i < tris.length; i++) {
-        const tr = tris[i];
-        ctx.moveTo(tr.ax, tr.ay);
-        ctx.lineTo(tr.bx, tr.by);
-        ctx.lineTo(tr.cx, tr.cy);
-        ctx.closePath();
+    // Edge rendering — 'off' / 'lines' / 'particles'
+    const edgeMode = cfg.edgeMode || (cfg.edges ? 'lines' : 'off');
+    const edgeAlpha = cfg.edgeOpacity;
+    if (edgeMode !== 'off' && edgeAlpha > 0.005) {
+      if (edgeMode === 'lines') {
+        const edgeHex = FACET_HIGHLIGHTS[cfg.edgeColor] || EDGE_PARTICLE_PALETTES[cfg.edgeColor] && EDGE_PARTICLE_PALETTES[cfg.edgeColor][0] || FACET_HIGHLIGHTS['Chalk'];
+        const e = hexToRgb(edgeHex);
+        ctx.strokeStyle = 'rgba(' + e.r + ',' + e.g + ',' + e.b + ',' + edgeAlpha.toFixed(3) + ')';
+        ctx.lineWidth = 0.5;
+        ctx.beginPath();
+        edgeSet.forEach(pair => {
+          const a = pair[0], b = pair[1];
+          if (!projOk[a] || !projOk[b]) return;
+          ctx.moveTo(projX[a], projY[a]);
+          ctx.lineTo(projX[b], projY[b]);
+        });
+        ctx.stroke();
+      } else {
+        // 'particles' — flowing dots along each unique edge
+        const palette = EDGE_PARTICLE_PALETTES[cfg.edgeColor] || EDGE_PARTICLE_PALETTES['Spectrum'];
+        const palLen = palette.length;
+        const palRgb = palette.map(hexToRgb);
+        const dotsPerEdge = Math.max(1, cfg.edgeDensity | 0);
+        const dotSize = cfg.edgeParticleSize;
+        const dotAlpha = edgeAlpha.toFixed(3);
+        const speed = cfg.edgeSpeed || 0;
+        const flow = (t * speed) % 1;
+
+        // Group particles by color so we can batch fillRect calls.
+        // For each color, collect (sx, sy, size) and fill in one pass.
+        const batches = palRgb.map(() => []);
+        edgeSet.forEach((pair, key) => {
+          const a = pair[0], b = pair[1];
+          if (!projOk[a] || !projOk[b]) return;
+          const ax = projX[a], ay = projY[a];
+          const bx = projX[b], by = projY[b];
+          // Edge offscreen reject
+          if ((ax < -10 && bx < -10) || (ax > w + 10 && bx > w + 10)) return;
+          if ((ay < -10 && by < -10) || (ay > h + 10 && by > h + 10)) return;
+          // Hash edge key to seed deterministic colors / offsets
+          let hash = 2166136261;
+          for (let k = 0; k < key.length; k++) {
+            hash = (hash ^ key.charCodeAt(k)) * 16777619 >>> 0;
+          }
+          for (let p = 0; p < dotsPerEdge; p++) {
+            const slotRand = ((hash + p * 2654435761) >>> 0) / 4294967295;
+            // Bias toward endpoints with a cubic curve (cluster at vertices)
+            const tRaw = (slotRand + flow + p / dotsPerEdge) % 1;
+            // Bias: mix linear with squared toward endpoints
+            const biased = (tRaw < 0.5) ? (tRaw * tRaw * 2) : (1 - (1 - tRaw) * (1 - tRaw) * 2);
+            const px = ax + (bx - ax) * biased;
+            const py = ay + (by - ay) * biased;
+            const colorIdx = ((((hash >>> (p % 16)) ^ p) >>> 0) % palLen) | 0;
+            const halfSz = dotSize * 0.5;
+            batches[colorIdx].push(px - halfSz, py - halfSz);
+          }
+        });
+        // Draw each color batch
+        ctx.globalAlpha = parseFloat(dotAlpha);
+        for (let ci = 0; ci < palRgb.length; ci++) {
+          const batch = batches[ci];
+          if (batch.length === 0) continue;
+          const c = palRgb[ci];
+          ctx.fillStyle = 'rgb(' + c.r + ',' + c.g + ',' + c.b + ')';
+          for (let bi = 0; bi < batch.length; bi += 2) {
+            ctx.fillRect(batch[bi], batch[bi + 1], dotSize, dotSize);
+          }
+        }
+        ctx.globalAlpha = 1;
       }
-      ctx.stroke();
     }
   }
 
