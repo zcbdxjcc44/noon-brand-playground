@@ -11,12 +11,20 @@
  */
 
 import React, { useMemo, useRef } from 'react';
-import { Group, Path, Skia } from '@shopify/react-native-skia';
+import {
+  Group,
+  Path,
+  Skia,
+  Text as SkiaText,
+  useFont,
+} from '@shopify/react-native-skia';
 import type { SkPath } from '@shopify/react-native-skia';
+import { JetBrainsMono_400Regular } from '@expo-google-fonts/jetbrains-mono';
 
 import type { LabConfig } from './types';
 import { ContourField, chainSegments } from './ContourField';
 import { project } from './projection';
+import { noise, noise2 } from './noise';
 import { PALETTES } from './charsets';
 
 interface Props {
@@ -33,7 +41,10 @@ export default function Contours({ config, width, height, time }: Props) {
   if (!fieldRef.current) fieldRef.current = new ContourField();
   const field = fieldRef.current;
 
-  const { paths, fg } = useMemo(() => {
+  // Label font — one fixed size; we approximate centering via offsets.
+  const labelFont = useFont(JetBrainsMono_400Regular, 10);
+
+  const { paths, fg, annotation } = useMemo(() => {
     const cfg = config.contours;
     field.ensureGrid(cfg);
     field.sampleHeights(time, config.terrain);
@@ -121,8 +132,57 @@ export default function Contours({ config, width, height, time }: Props) {
         });
       }
     }
-    return { paths: out, fg: palette.fgRGB };
+    return { paths: out, fg: palette.fgRGB, annotation: palette.annotation };
   }, [config, width, height, time, field]);
+
+  // Elevation labels — anchored to fixed world points, quantised so the
+  // displayed number doesn't tick every frame, screen-space-spacing filter
+  // so the horizon band doesn't crowd up with labels.
+  const labels = useMemo(() => {
+    if (!labelFont) return [];
+    const cfg = config.contours;
+    const density = cfg.annotationDensity;
+    if (density < 0.005) return [];
+
+    const view = config.view;
+    const amp = config.terrain.amplitude;
+    const scale = config.terrain.scale;
+    const secondaryNoise = config.terrain.secondaryNoise;
+    const driftZ = time * config.terrain.drift * 100;
+    const binSize = Math.max(5, Math.round(amp * 0.1));
+    const annotSize = cfg.annotationSize;
+    const minSpacing = annotSize * 5.5;
+    const minSpacing2 = minSpacing * minSpacing;
+
+    const slots = field.annotSlots;
+    const maxLabels = Math.ceil(slots.length * density);
+    const placed: Array<{ sx: number; sy: number; text: string }> = [];
+
+    for (let i = 0; i < slots.length; i++) {
+      if (placed.length >= maxLabels) break;
+      const slot = slots[i];
+      const n1 = noise(slot.worldX * scale, (slot.worldZ + driftZ) * scale);
+      const n2 = noise2(slot.worldX * scale * 2.3, (slot.worldZ + driftZ) * scale * 2.3) * secondaryNoise;
+      const hY = (n1 + n2 * 0.5) * amp;
+      const pr = project(slot.worldX, hY, slot.worldZ, view, width, height);
+      if (!pr) continue;
+      if (pr.sx < 0 || pr.sx > width || pr.sy < 0 || pr.sy > height) continue;
+
+      // Reject if too close to a label already placed.
+      let tooClose = false;
+      for (let k = 0; k < placed.length; k++) {
+        const dx = pr.sx - placed[k].sx;
+        const dy = pr.sy - placed[k].sy;
+        if (dx * dx + dy * dy < minSpacing2) { tooClose = true; break; }
+      }
+      if (tooClose) continue;
+
+      const elev = Math.round(hY / binSize) * binSize;
+      const text = (elev >= 0 ? '+' : '') + elev;
+      placed.push({ sx: pr.sx, sy: pr.sy, text });
+    }
+    return placed;
+  }, [config, width, height, time, field, labelFont]);
 
   return (
     <Group>
@@ -135,6 +195,16 @@ export default function Contours({ config, width, height, time }: Props) {
           color={`rgba(${fg[0]},${fg[1]},${fg[2]},${p.alpha.toFixed(3)})`}
           strokeCap="round"
           strokeJoin="round"
+        />
+      ))}
+      {labelFont && labels.map((l, i) => (
+        <SkiaText
+          key={'l' + i}
+          x={l.sx - l.text.length * 2.8}
+          y={l.sy + 3}
+          text={l.text}
+          font={labelFont}
+          color={annotation}
         />
       ))}
     </Group>

@@ -26,6 +26,28 @@ export class ContourField {
   cellsZ = 0;
   stepX = 0;
   stepZ = 0;
+  // Fixed world-space anchors for elevation labels. Priority-sorted so the
+  // density slider always reveals the same prefix of slots → stable
+  // visibility across frames and config changes.
+  annotSlots: Array<{ worldX: number; worldZ: number; priority: number }> = [];
+
+  constructor() {
+    this.generateAnnotSlots();
+  }
+
+  generateAnnotSlots(): void {
+    const TOTAL = 80;
+    const slots = [];
+    for (let i = 0; i < TOTAL; i++) {
+      slots.push({
+        worldX: (Math.random() - 0.5) * 2 * this.terrainExtent * 0.95,
+        worldZ: (Math.random() - 0.5) * 2 * this.terrainDepth * 0.95,
+        priority: Math.random(),
+      });
+    }
+    slots.sort((a, b) => a.priority - b.priority);
+    this.annotSlots = slots;
+  }
 
   ensureGrid(cfg: ContoursConfig): void {
     const cx = cfg.gridCellsX | 0;

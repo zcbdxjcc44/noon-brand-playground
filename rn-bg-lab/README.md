@@ -50,7 +50,7 @@ The web lab is ~2,500 lines. Porting in phases so each step is testable:
 | 3 | `MorningStar` Skia overlay (halo + rays + core, twinkle) | ✅ done |
 | 4 | `ContourField` (marching squares) + smoothed strokes | ✅ done (labels still pending font) |
 | 5 | `FacetedField` (jittered mesh + edge particles) | ✅ done |
-| 6 | Designer console UI (sliders, segmented pills, palette/style) | ⏳ |
+| 6 | Designer console UI (sliders, segmented pills, palette/style) | ✅ done |
 | 7 | AsyncStorage persistence (Save / Reset) | ⏳ |
 | 8 | Polish + perf passes (Skia atlas for glyphs, batched paths) | ⏳ |
 
