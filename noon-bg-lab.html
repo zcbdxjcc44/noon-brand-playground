@@ -445,7 +445,17 @@ const PALETTES = {
   }
 };
 
-const STYLES = ['particles', 'contours'];  // 'faceted' to be added
+const STYLES = ['particles', 'contours', 'faceted'];
+
+// Curated highlight colors for faceted style, pulled from the Noon brand
+// tokens in assets/colors_and_type.css. Keys double as the select option text.
+const FACET_HIGHLIGHTS = {
+  'Chalk':      '#e8e4dc',   // default — strong contrast (chalk on void)
+  'Void Step':  '#232c43',   // void-4, minimal contrast, monochrome dark
+  'Gold Crest': '#e0b83a',   // gold-2, peaks catch journey gold
+  'Noon Wave':  '#64D8AE',   // noon green, fresh ridges
+  'Iris':       '#B08AF9'    // heliotrope, cool dusk
+};
 
 // =============================================================
 // DEFAULT CONFIG
@@ -467,6 +477,20 @@ const DEFAULT_CONFIG = {
     gridCellsZ: 70,
     annotationDensity: 0.4,
     annotationSize: 10
+  },
+  faceted:     {
+    gridCellsX: 50,
+    gridCellsZ: 40,
+    lightPitch: 0.65,
+    lightYaw: -0.5,
+    ambient: 0.18,
+    contrast: 0.92,
+    fill: true,
+    highlight: 'Chalk',
+    fillOpacity: 0.55,
+    edges: false,
+    edgeColor: 'Chalk',
+    edgeOpacity: 0.14
   },
   goldenLine:  {
     enabled: true, pathType: 'noise', speed: 0.18,
@@ -535,12 +559,26 @@ const SCHEMA = {
     { key: 'gridCellsZ',         label: 'Grid Z',       type: 'range', min: 30,  max: 180, step: 5 },
     { key: 'annotationDensity',  label: 'Labels',       type: 'range', min: 0,   max: 1,   step: 0.02 },
     { key: 'annotationSize',     label: 'Label Size',   type: 'range', min: 7,   max: 18,  step: 1 }
+  ],
+  faceted: [
+    { key: 'gridCellsX',   label: 'Mesh X',      type: 'range', min: 10,   max: 80,   step: 1 },
+    { key: 'gridCellsZ',   label: 'Mesh Z',      type: 'range', min: 10,   max: 80,   step: 1 },
+    { key: 'lightPitch',   label: 'Light Pitch', type: 'range', min: 0,    max: 1.55, step: 0.02 },
+    { key: 'lightYaw',     label: 'Light Yaw',   type: 'range', min: -3.14,max: 3.14, step: 0.02 },
+    { key: 'fill',         label: 'Fill',        type: 'check' },
+    { key: 'highlight',    label: 'Fill Color',  type: 'select', options: ['Chalk','Void Step','Gold Crest','Noon Wave','Iris'] },
+    { key: 'fillOpacity',  label: 'Fill Alpha',  type: 'range', min: 0.05, max: 1,    step: 0.02 },
+    { key: 'ambient',      label: 'Ambient',     type: 'range', min: 0,    max: 0.6,  step: 0.02 },
+    { key: 'contrast',     label: 'Contrast',    type: 'range', min: 0.2,  max: 1.5,  step: 0.02 },
+    { key: 'edges',        label: 'Edges',       type: 'check' },
+    { key: 'edgeColor',    label: 'Edge Color',  type: 'select', options: ['Chalk','Void Step','Gold Crest','Noon Wave','Iris'] },
+    { key: 'edgeOpacity',  label: 'Edge Alpha',  type: 'range', min: 0,    max: 0.5,  step: 0.01 }
   ]
 };
 
 const GROUP_TITLES = {
   view: 'View', terrain: 'Terrain', particles: 'Particles',
-  contours: 'Contours',
+  contours: 'Contours', faceted: 'Faceted',
   goldenLine: 'Golden Line', morningStar: 'Morning Star'
 };
 
@@ -597,6 +635,18 @@ const PRESETS = [
       contours:   { levelCount: 14, lineWidth: 0.8, peakOpacity: 0.46, baseOpacity: 0.06, falloff: 1.5, gridCellsX: 110, gridCellsZ: 80, annotationDensity: 0.14, annotationSize: 9 },
       goldenLine: { enabled: true, pathType: 'noise', speed: 0.16, width: 1.4, glowRadius: 70, color: '#c9a227', disturbanceRadius: 0, disturbanceStrength: 0, springBack: 0.05 },
       morningStar:{ enabled: true, x: 0.80, y: 0.20, size: 42, rayLength: 3.0, twinkleSpeed: 0.30, color: '#f5e0a0', opacity: 0.55 }
+    }
+  },
+  {
+    name: 'Faceted Dawn',
+    desc: 'Low-poly · lit dunes · gold route',
+    config: {
+      style: 'faceted', palette: 'void',
+      view:       { pitch: 0.30, yaw: 0.0, distance: 480, fov: 620, cameraHeight: 245 },
+      terrain:    { scale: 0.0015, amplitude: 67, drift: 0.025, contrast: 0.5, secondaryNoise: 0.24 },
+      faceted:    { gridCellsX: 24, gridCellsZ: 36, lightPitch: 0.42, lightYaw: -0.40, ambient: 0.16, contrast: 0.92, fill: true, highlight: 'Void Step', fillOpacity: 0.55, edges: true, edgeColor: 'Chalk', edgeOpacity: 0.13 },
+      goldenLine: { enabled: true, pathType: 'noise', speed: 0.16, width: 1.8, glowRadius: 85, color: '#c9a227', disturbanceRadius: 0, disturbanceStrength: 0, springBack: 0.05 },
+      morningStar:{ enabled: true, x: 0.78, y: 0.20, size: 52, rayLength: 3.6, twinkleSpeed: 0.30, color: '#f5e0a0', opacity: 0.70 }
     }
   },
   {
@@ -1273,6 +1323,101 @@ class ContourField {
 }
 
 // =============================================================
+// FACETED FIELD (low-poly triangle mesh from the same noise terrain)
+//   Samples a vertex grid like ContourField, then exposes a height-at-(x,z)
+//   helper that interpolates within the triangle the point falls in — used
+//   so the golden line can "踩在" the visible faces, not the smooth noise.
+// =============================================================
+class FacetedField {
+  constructor() {
+    this.terrainExtent = 1400;
+    this.terrainDepth = 1100;
+    this.heights = null;
+    this.cellsX = 0; this.cellsZ = 0;
+    this.stepX = 0; this.stepZ = 0;
+  }
+
+  ensureGrid() {
+    const cx = config.faceted.gridCellsX | 0;
+    const cz = config.faceted.gridCellsZ | 0;
+    if (this.cellsX === cx && this.cellsZ === cz) return;
+    this.cellsX = cx; this.cellsZ = cz;
+    this.stepX = (this.terrainExtent * 2) / cx;
+    this.stepZ = (this.terrainDepth * 2) / cz;
+    this.heights = new Float32Array((cx + 1) * (cz + 1));
+  }
+
+  sampleHeights(time) {
+    const cx = this.cellsX, cz = this.cellsZ;
+    const stepX = this.stepX, stepZ = this.stepZ;
+    const half = this.terrainExtent, depth = this.terrainDepth;
+    const scale = config.terrain.scale;
+    const amp = config.terrain.amplitude;
+    const secondaryNoise = config.terrain.secondaryNoise;
+    const driftZ = time * config.terrain.drift * 100;
+    const h = this.heights;
+    let idx = 0;
+    for (let j = 0; j <= cz; j++) {
+      const z = -depth + j * stepZ;
+      for (let i = 0; i <= cx; i++) {
+        const x = -half + i * stepX;
+        const n1 = noise(x * scale, (z + driftZ) * scale);
+        const n2 = noise2(x * scale * 2.3, (z + driftZ) * scale * 2.3) * secondaryNoise;
+        h[idx++] = (n1 + n2 * 0.5) * amp;
+      }
+    }
+  }
+
+  height(i, j) { return this.heights[j * (this.cellsX + 1) + i]; }
+
+  // Height at any world (x, z) by interpolating within the triangle.
+  // Returns null if the point falls outside the mesh.
+  heightAt(wx, wz) {
+    if (!this.heights) return null;
+    const half = this.terrainExtent, depth = this.terrainDepth;
+    const gx = (wx + half) / this.stepX;
+    const gz = (wz + depth) / this.stepZ;
+    if (gx < 0 || gz < 0 || gx >= this.cellsX || gz >= this.cellsZ) return null;
+    const i = gx | 0;
+    const j = gz | 0;
+    const fx = gx - i;
+    const fz = gz - j;
+    const h00 = this.height(i,   j  );
+    const h10 = this.height(i+1, j  );
+    const h11 = this.height(i+1, j+1);
+    const h01 = this.height(i,   j+1);
+    // Diagonal split along (00)-(11): triangle A is (00,10,11), B is (00,11,01)
+    // For fx+fz<=1 we're in triangle (00,10,01) wait — let me use the same
+    // diagonal as draw: triangle A=(00,10,11), B=(00,11,01).
+    // Plane A (BL,BR,TR): barycentric over (i+fx, j+fz):
+    //   weights: BL=(1-fx), BR=(fx-fz), TR=fz  if fx>=fz
+    //   weights: BL=(1-fz), TL...                wait that's diagonal split differently.
+    // Cleanest: split diagonal BL-TR (i.e., (00,11)).
+    //   tri-A = (00, 10, 11)  active when fx >= fz
+    //   tri-B = (00, 11, 01)  active when fx <  fz
+    if (fx >= fz) {
+      // barycentric in tri-A: at (fx,fz) inside unit square
+      //   u along 00->10 = fx - fz
+      //   v along 00->11 = fz
+      //   w (BL weight)  = 1 - (fx - fz) - fz = 1 - fx
+      const wBL = 1 - fx;
+      const wBR = fx - fz;
+      const wTR = fz;
+      return wBL * h00 + wBR * h10 + wTR * h11;
+    } else {
+      // tri-B: (00, 11, 01)
+      //   u along 00->01 = fz - fx
+      //   v along 00->11 = fx
+      //   w (BL weight)  = 1 - fz
+      const wBL = 1 - fz;
+      const wTR = fx;
+      const wTL = fz - fx;
+      return wBL * h00 + wTR * h11 + wTL * h01;
+    }
+  }
+}
+
+// =============================================================
 // RENDERER
 // =============================================================
 class Renderer {
@@ -1281,6 +1426,7 @@ class Renderer {
     this.ctx = canvas.getContext('2d');
     this.field = new ParticleField();
     this.contour = new ContourField();
+    this.faceted = new FacetedField();
     this.line = new GoldenLine();
     this.time = 0;
     this.cssW = window.innerWidth;
@@ -1315,6 +1461,8 @@ class Renderer {
 
     if (config.style === 'contours') {
       this.drawContours();
+    } else if (config.style === 'faceted') {
+      this.drawFaceted();
     } else {
       this.drawParticles();
     }
@@ -1527,6 +1675,165 @@ class Renderer {
     }
   }
 
+  drawFaceted() {
+    const ctx = this.ctx;
+    const w = this.cssW, h = this.cssH;
+    const t = this.time;
+    const view = config.view;
+    // Faceted is locked to the Void palette regardless of config.palette so
+    // the lit-dune aesthetic stays consistent (Paper looks wrong on facets).
+    const palette = PALETTES.void;
+    const cfg = config.faceted;
+
+    const mesh = this.faceted;
+    mesh.ensureGrid();
+    mesh.sampleHeights(t);
+
+    // Light direction in world space. lightPitch=0 → horizontal, π/2 → straight
+    // down. lightYaw rotates the azimuth.
+    const lp = cfg.lightPitch;
+    const ly = cfg.lightYaw;
+    const lcp = Math.cos(lp), lsp = Math.sin(lp);
+    let Lx = Math.sin(ly) * lcp;
+    let Ly = lsp;                      // upward y component (light coming FROM this direction)
+    let Lz = Math.cos(ly) * lcp;
+    // Normalize (defensive)
+    const Llen = Math.sqrt(Lx*Lx + Ly*Ly + Lz*Lz) || 1;
+    Lx /= Llen; Ly /= Llen; Lz /= Llen;
+
+    const ambient = cfg.ambient;
+    const contrast = cfg.contrast;
+    const bg = hexToRgb(palette.bg);
+    // Fill highlight (lit-side color) and edge color, both picked from
+    // FACET_HIGHLIGHTS so the two can match or contrast as the designer wishes.
+    const hiHex = FACET_HIGHLIGHTS[cfg.highlight] || FACET_HIGHLIGHTS['Chalk'];
+    const hi = hexToRgb(hiHex);
+    const hiRGB = [hi.r, hi.g, hi.b];
+    const edgeHex = FACET_HIGHLIGHTS[cfg.edgeColor] || FACET_HIGHLIGHTS['Chalk'];
+    const edge = hexToRgb(edgeHex);
+    const edgeRGB = [edge.r, edge.g, edge.b];
+    const fillAlpha = cfg.fillOpacity != null ? cfg.fillOpacity : 1;
+
+    const cx = mesh.cellsX, cz = mesh.cellsZ;
+    const stepX = mesh.stepX, stepZ = mesh.stepZ;
+    const half = mesh.terrainExtent, depth = mesh.terrainDepth;
+
+    // Build all visible triangles, then sort back-to-front (painter's algo).
+    const tris = [];
+    for (let j = 0; j < cz; j++) {
+      const z0 = -depth + j * stepZ;
+      const z1 = z0 + stepZ;
+      for (let i = 0; i < cx; i++) {
+        const x0 = -half + i * stepX;
+        const x1 = x0 + stepX;
+        const h00 = mesh.height(i,   j  );
+        const h10 = mesh.height(i+1, j  );
+        const h11 = mesh.height(i+1, j+1);
+        const h01 = mesh.height(i,   j+1);
+
+        // Two triangles sharing the BL-TR diagonal:
+        //   A = (BL, BR, TR) = (00, 10, 11)
+        //   B = (BL, TR, TL) = (00, 11, 01)
+        // Process both with shared projection cache for v(00) and v(11).
+        const p00 = project(x0, h00, z0, view, w, h);
+        const p10 = project(x1, h10, z0, view, w, h);
+        const p11 = project(x1, h11, z1, view, w, h);
+        const p01 = project(x0, h01, z1, view, w, h);
+
+        const tryEmit = (pA, pB, pC, hA, hB, hC, ax, az, bx, bz, cxw, czw) => {
+          if (!pA || !pB || !pC) return;
+          // Quick offscreen reject (all corners far outside)
+          const minSx = Math.min(pA.sx, pB.sx, pC.sx);
+          const maxSx = Math.max(pA.sx, pB.sx, pC.sx);
+          const minSy = Math.min(pA.sy, pB.sy, pC.sy);
+          const maxSy = Math.max(pA.sy, pB.sy, pC.sy);
+          if (maxSx < -50 || minSx > w + 50 || maxSy < -50 || minSy > h + 50) return;
+          // World normal via cross product of edges (B-A) × (C-A)
+          const ux = bx - ax,           uy = hB - hA, uz = bz - az;
+          const vx = cxw - ax,          vy = hC - hA, vz = czw - az;
+          let nx = uy * vz - uz * vy;
+          let ny = uz * vx - ux * vz;
+          let nz = ux * vy - uy * vx;
+          // Ensure normal points upward (positive y in world)
+          if (ny < 0) { nx = -nx; ny = -ny; nz = -nz; }
+          const nlen = Math.sqrt(nx*nx + ny*ny + nz*nz) || 1;
+          nx /= nlen; ny /= nlen; nz /= nlen;
+          // Lambert
+          const dot = Math.max(0, nx*Lx + ny*Ly + nz*Lz);
+          let bright = ambient + (1 - ambient) * dot * contrast;
+          if (bright > 1) bright = 1;
+          // Color = lerp(bg, highlight, bright)
+          const r  = (bg.r + (hiRGB[0] - bg.r) * bright) | 0;
+          const gg = (bg.g + (hiRGB[1] - bg.g) * bright) | 0;
+          const bb = (bg.b + (hiRGB[2] - bg.b) * bright) | 0;
+          const avgDepth = (pA.depth + pB.depth + pC.depth) * 0.3333;
+          tris.push({
+            ax: pA.sx, ay: pA.sy,
+            bx: pB.sx, by: pB.sy,
+            cx: pC.sx, cy: pC.sy,
+            r: r, g: gg, b: bb,
+            depth: avgDepth
+          });
+        };
+
+        // Triangle A: (00, 10, 11)
+        tryEmit(p00, p10, p11, h00, h10, h11, x0, z0, x1, z0, x1, z1);
+        // Triangle B: (00, 11, 01)
+        tryEmit(p00, p11, p01, h00, h11, h01, x0, z0, x1, z1, x0, z1);
+      }
+    }
+
+    // Back-to-front
+    tris.sort((a, b) => b.depth - a.depth);
+
+    // Fill pass — group consecutive identical colors into one path to halve
+    // beginPath/fill overhead. Triangles after depth sort won't always cluster,
+    // but neighbours in the mesh often share similar normals so some batching
+    // happens naturally. Skipped entirely when fill is disabled (wireframe mode).
+    const useFill = cfg.fill !== false;
+    const useEdges = cfg.edges;
+    const edgeAlpha = cfg.edgeOpacity;
+    if (useFill) {
+      const fa = fillAlpha.toFixed(3);
+      let curR = -1, curG = -1, curB = -1;
+      ctx.beginPath();
+      for (let i = 0; i < tris.length; i++) {
+        const tr = tris[i];
+        if (tr.r !== curR || tr.g !== curG || tr.b !== curB) {
+          if (i > 0) {
+            ctx.fillStyle = 'rgba(' + curR + ',' + curG + ',' + curB + ',' + fa + ')';
+            ctx.fill();
+          }
+          ctx.beginPath();
+          curR = tr.r; curG = tr.g; curB = tr.b;
+        }
+        ctx.moveTo(tr.ax, tr.ay);
+        ctx.lineTo(tr.bx, tr.by);
+        ctx.lineTo(tr.cx, tr.cy);
+        ctx.closePath();
+      }
+      if (tris.length > 0) {
+        ctx.fillStyle = 'rgba(' + curR + ',' + curG + ',' + curB + ',' + fa + ')';
+        ctx.fill();
+      }
+    }
+
+    // Optional edges
+    if (useEdges && edgeAlpha > 0.005) {
+      ctx.strokeStyle = 'rgba(' + edgeRGB[0] + ',' + edgeRGB[1] + ',' + edgeRGB[2] + ',' + edgeAlpha.toFixed(3) + ')';
+      ctx.lineWidth = 0.5;
+      ctx.beginPath();
+      for (let i = 0; i < tris.length; i++) {
+        const tr = tris[i];
+        ctx.moveTo(tr.ax, tr.ay);
+        ctx.lineTo(tr.bx, tr.by);
+        ctx.lineTo(tr.cx, tr.cy);
+        ctx.closePath();
+      }
+      ctx.stroke();
+    }
+  }
+
   drawGoldenLine() {
     const ctx = this.ctx;
     const w = this.cssW, h = this.cssH;
@@ -1538,11 +1845,26 @@ class Renderer {
     const g = config.goldenLine;
     const trail = this.line.trail;
 
+    // For faceted style, the trail rides the *triangulated* surface so it
+    // visually sits on the visible faces. Other styles use smooth noise.
+    const useFacetHeights = config.style === 'faceted' && this.faceted.heights;
+
     const trailPts = new Array(trail.length);
     for (let i = 0; i < trail.length; i++) {
       const tp = trail[i];
-      const n1 = noise(tp.x * terrainScale, (tp.z + driftZ) * terrainScale);
-      const hY = n1 * amp + 6;
+      let hY;
+      if (useFacetHeights) {
+        const fh = this.faceted.heightAt(tp.x, tp.z);
+        if (fh !== null) {
+          hY = fh + 4;
+        } else {
+          const n1 = noise(tp.x * terrainScale, (tp.z + driftZ) * terrainScale);
+          hY = n1 * amp + 6;
+        }
+      } else {
+        const n1 = noise(tp.x * terrainScale, (tp.z + driftZ) * terrainScale);
+        hY = n1 * amp + 6;
+      }
       trailPts[i] = project(tp.x, hY, tp.z, view, w, h);
     }
 
@@ -1622,22 +1944,25 @@ function buildPanel() {
   });
   styleSec.controls.appendChild(styleRow);
 
-  const paletteRow = document.createElement('div');
-  paletteRow.className = 'seg seg-2';
-  Object.keys(PALETTES).forEach(pk => {
-    const b = document.createElement('button');
-    b.textContent = PALETTES[pk].name;
-    if (config.palette === pk) b.classList.add('active');
-    b.addEventListener('click', () => {
-      if (config.palette !== pk) {
-        config.palette = pk;
-        markDirty();
-        buildPanel();
-      }
+  // Faceted is locked to Void palette — hide the palette selector for it
+  if (config.style !== 'faceted') {
+    const paletteRow = document.createElement('div');
+    paletteRow.className = 'seg seg-2';
+    Object.keys(PALETTES).forEach(pk => {
+      const b = document.createElement('button');
+      b.textContent = PALETTES[pk].name;
+      if (config.palette === pk) b.classList.add('active');
+      b.addEventListener('click', () => {
+        if (config.palette !== pk) {
+          config.palette = pk;
+          markDirty();
+          buildPanel();
+        }
+      });
+      paletteRow.appendChild(b);
     });
-    paletteRow.appendChild(b);
-  });
-  styleSec.controls.appendChild(paletteRow);
+    styleSec.controls.appendChild(paletteRow);
+  }
   body.appendChild(styleSec.section);
 
   // PRESETS
@@ -1658,9 +1983,11 @@ function buildPanel() {
   // SCHEMA-BASED SECTIONS — filtered by current style
   const isParticles = config.style === 'particles';
   const isContours = config.style === 'contours';
+  const isFaceted = config.style === 'faceted';
   const groupOrder = ['view','terrain'];
   if (isParticles) groupOrder.push('particles');
   if (isContours) groupOrder.push('contours');
+  if (isFaceted) groupOrder.push('faceted');
   groupOrder.push('goldenLine', 'morningStar');
 
   for (const groupKey of groupOrder) {
