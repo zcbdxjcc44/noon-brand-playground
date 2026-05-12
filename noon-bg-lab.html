@@ -671,8 +671,8 @@ const PRESETS = [
     }
   },
   {
-    name: 'Faceted Dawn',
-    desc: 'Low-poly · lit dunes · gold route',
+    name: 'Caravan Lights',
+    desc: 'Gold dots flowing along dim plates',
     config: {
       style: 'faceted', palette: 'void',
       view:       { pitch: 0.18, yaw: -1.4, distance: 620, fov: 620, cameraHeight: 245 },
@@ -683,15 +683,15 @@ const PRESETS = [
     }
   },
   {
-    name: "Surveyor's Notebook",
-    desc: 'Paper · ink contours · gold route',
+    name: 'Tectonic Drift',
+    desc: 'Coarse plates · slow geology',
     config: {
-      style: 'contours', palette: 'paper',
-      view:       { pitch: 0.95, yaw: 0.0, distance: 900, fov: 700, cameraHeight: 280 },
-      terrain:    { scale: 0.0038, amplitude: 130, drift: 0.025, contrast: 0.65, secondaryNoise: 0.35 },
-      contours:   { levelCount: 26, lineWidth: 0.6, peakOpacity: 0.82, baseOpacity: 0.10, falloff: 1.5, gridCellsX: 120, gridCellsZ: 90, annotationDensity: 0.55, annotationSize: 9 },
-      goldenLine: { enabled: true, pathType: 'curve', speed: 0.12, width: 1.5, glowRadius: 40, color: '#8e7019', disturbanceRadius: 0, disturbanceStrength: 0, springBack: 0.05 },
-      morningStar:{ enabled: false, x: 0.85, y: 0.15, size: 32, rayLength: 2.4, twinkleSpeed: 0.20, color: '#8e7019', opacity: 0.6 }
+      style: 'faceted', palette: 'void',
+      view:       { pitch: 0.18, yaw: -1.4, distance: 620, fov: 620, cameraHeight: 245 },
+      terrain:    { scale: 0.0015, amplitude: 53, drift: 0.025, contrast: 0.42, secondaryNoise: 0.06 },
+      faceted:    { gridCellsX: 13, gridCellsZ: 14, meshJitter: 0.19, lightPitch: 0.32, lightYaw: -1.2, ambient: 0.16, contrast: 0.92, fill: true, highlight: 'Void Step', fillOpacity: 0.69, edgeMode: 'lines', edgeColor: 'Void Step', edgeDensity: 5, edgeParticleSize: 0.5, edgeOpacity: 1, edgeSpeed: 0.16 },
+      goldenLine: { enabled: true, pathType: 'noise', speed: 0.16, width: 1.8, glowRadius: 85, color: '#c9a227', disturbanceRadius: 0, disturbanceStrength: 0, springBack: 0.05 },
+      morningStar:{ enabled: true, x: 0.78, y: 0.20, size: 52, rayLength: 3.6, twinkleSpeed: 0.30, color: '#f5e0a0', opacity: 0.70 }
     }
   }
 ];
@@ -2071,7 +2071,22 @@ function buildPanel() {
   const body = document.getElementById('panelBody');
   body.innerHTML = '';
 
-  // STYLE + PALETTE (segmented pills at top)
+  // PRESETS (top)
+  const presetSec = createSection('Presets');
+  const grid = document.createElement('div');
+  grid.className = 'presets';
+  PRESETS.forEach((p, i) => {
+    const btn = document.createElement('button');
+    btn.dataset.preset = i;
+    btn.innerHTML = '<span class="name">' + p.name + '</span><span class="desc">' + p.desc + '</span>';
+    if (i === activePresetIndex) btn.classList.add('active');
+    btn.addEventListener('click', () => applyPreset(i));
+    grid.appendChild(btn);
+  });
+  presetSec.controls.appendChild(grid);
+  body.appendChild(presetSec.section);
+
+  // STYLE + PALETTE (segmented pills)
   const styleSec = createSection('Style & Palette');
   const styleRow = document.createElement('div');
   styleRow.className = 'seg seg-2 seg-row';
@@ -2110,21 +2125,6 @@ function buildPanel() {
     styleSec.controls.appendChild(paletteRow);
   }
   body.appendChild(styleSec.section);
-
-  // PRESETS
-  const presetSec = createSection('Presets');
-  const grid = document.createElement('div');
-  grid.className = 'presets';
-  PRESETS.forEach((p, i) => {
-    const btn = document.createElement('button');
-    btn.dataset.preset = i;
-    btn.innerHTML = '<span class="name">' + p.name + '</span><span class="desc">' + p.desc + '</span>';
-    if (i === activePresetIndex) btn.classList.add('active');
-    btn.addEventListener('click', () => applyPreset(i));
-    grid.appendChild(btn);
-  });
-  presetSec.controls.appendChild(grid);
-  body.appendChild(presetSec.section);
 
   // SCHEMA-BASED SECTIONS — filtered by current style
   const isParticles = config.style === 'particles';
