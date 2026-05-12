@@ -465,46 +465,34 @@ const PRESETS = [
     config: {
       view:       { pitch: 0.55, yaw: 0.0, distance: 550, fov: 800, cameraHeight: 180 },
       terrain:    { scale: 0.005, amplitude: 8, drift: 0.02, contrast: 0.30, secondaryNoise: 0.20 },
-      particles:  { density: 0.45, sizeMin: 4, sizeMax: 11, baseAlpha: 0.55, twinkle: 0.42 },
+      particles:  { density: 0.65, sizeMin: 4, sizeMax: 13, baseAlpha: 0.55, twinkle: 0.42 },
       charset:    { easternArabic: 0, westernArabic: 0, math: 0, geometry: 0, stars: 1.0 },
       goldenLine: { enabled: false, pathType: 'noise', speed: 0.10, width: 1.0, glowRadius: 60, color: '#d9a84a', disturbanceRadius: 100, disturbanceStrength: 1.0, springBack: 0.05 },
-      morningStar:{ enabled: true, x: 0.72, y: 0.20, size: 90, rayLength: 5.5, twinkleSpeed: 0.25, color: '#f5e0a0', opacity: 0.92 }
+      morningStar:{ enabled: true, x: 0.71, y: 0.20, size: 41, rayLength: 2.2, twinkleSpeed: 0.55, color: '#f5e0a0', opacity: 0.46 }
     }
   },
   {
     name: 'Winding Desert',
     desc: 'Compressed dunes · visible ridges',
     config: {
-      view:       { pitch: 0.68, yaw: 0.0, distance: 320, fov: 520, cameraHeight: 60 },
-      terrain:    { scale: 0.0042, amplitude: 150, drift: 0.06, contrast: 1.05, secondaryNoise: 0.45 },
-      particles:  { density: 1.4, sizeMin: 10, sizeMax: 17, baseAlpha: 0.72, twinkle: 0.10 },
-      charset:    { easternArabic: 0.35, westernArabic: 0.30, math: 0.25, geometry: 0.05, stars: 0.05 },
+      view:       { pitch: 0.66, yaw: 0.39, distance: 950, fov: 260, cameraHeight: 265 },
+      terrain:    { scale: 0.002, amplitude: 123, drift: 0.33, contrast: 1.02, secondaryNoise: 0.30 },
+      particles:  { density: 1.5, sizeMin: 4, sizeMax: 6, baseAlpha: 0.76, twinkle: 0 },
+      charset:    { easternArabic: 0.66, westernArabic: 0, math: 0.44, geometry: 0, stars: 0.26 },
       goldenLine: { enabled: true, pathType: 'noise', speed: 0.18, width: 1.8, glowRadius: 80, color: '#d9a84a', disturbanceRadius: 120, disturbanceStrength: 1.6, springBack: 0.05 },
-      morningStar:{ enabled: true, x: 0.82, y: 0.20, size: 48, rayLength: 4.0, twinkleSpeed: 0.40, color: '#f0d080', opacity: 0.78 }
+      morningStar:{ enabled: false, x: 0.82, y: 0.20, size: 48, rayLength: 4.0, twinkleSpeed: 0.40, color: '#f0d080', opacity: 0.80 }
     }
   },
   {
     name: 'Flat Desert',
     desc: 'Wide horizon · low relief',
     config: {
-      view:       { pitch: 0.50, yaw: 0.0, distance: 600, fov: 750, cameraHeight: 60 },
-      terrain:    { scale: 0.004, amplitude: 14, drift: 0.04, contrast: 0.35, secondaryNoise: 0.20 },
-      particles:  { density: 0.85, sizeMin: 8, sizeMax: 13, baseAlpha: 0.55, twinkle: 0.15 },
-      charset:    { easternArabic: 0.40, westernArabic: 0.30, math: 0.20, geometry: 0.05, stars: 0.05 },
+      view:       { pitch: 0.50, yaw: 0.0, distance: 620, fov: 560, cameraHeight: 180 },
+      terrain:    { scale: 0.0045, amplitude: 26, drift: 0, contrast: 0.32, secondaryNoise: 0 },
+      particles:  { density: 1.5, sizeMin: 8, sizeMax: 13, baseAlpha: 0.55, twinkle: 0.15 },
+      charset:    { easternArabic: 0.87, westernArabic: 0, math: 0, geometry: 0, stars: 0.05 },
       goldenLine: { enabled: true, pathType: 'curve', speed: 0.14, width: 1.4, glowRadius: 70, color: '#d9a84a', disturbanceRadius: 95, disturbanceStrength: 1.1, springBack: 0.05 },
-      morningStar:{ enabled: true, x: 0.78, y: 0.25, size: 52, rayLength: 4.5, twinkleSpeed: 0.30, color: '#f0d080', opacity: 0.85 }
-    }
-  },
-  {
-    name: 'Slot 4 · TBD',
-    desc: 'Placeholder — to define',
-    config: {
-      view:       { pitch: 0.55, yaw: 0.0, distance: 500, fov: 700, cameraHeight: 80 },
-      terrain:    { scale: 0.006, amplitude: 80, drift: 0.08, contrast: 0.65, secondaryNoise: 0.30 },
-      particles:  { density: 0.7, sizeMin: 9, sizeMax: 15, baseAlpha: 0.55, twinkle: 0.18 },
-      charset:    { easternArabic: 0.40, westernArabic: 0.30, math: 0.25, geometry: 0.05, stars: 0 },
-      goldenLine: { enabled: true, pathType: 'noise', speed: 0.18, width: 1.6, glowRadius: 70, color: '#d9a84a', disturbanceRadius: 110, disturbanceStrength: 1.4, springBack: 0.05 },
-      morningStar:{ enabled: true, x: 0.78, y: 0.28, size: 55, rayLength: 4.0, twinkleSpeed: 0.50, color: '#f0d080', opacity: 0.85 }
+      morningStar:{ enabled: false, x: 0.78, y: 0.25, size: 52, rayLength: 4.5, twinkleSpeed: 0.30, color: '#f0d080', opacity: 0.85 }
     }
   }
 ];
