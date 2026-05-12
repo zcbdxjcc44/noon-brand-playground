@@ -25,7 +25,10 @@
        data-bg-stars="sparse|medium|dense"                     (default: dense — all 65)
        data-bg-star-glow="off|subtle|strong"                   (default: strong)
        data-bg-northstar="off|on"                              (default: on)
-       data-bg-landscape="off|topo"                            (default: topo)
+       data-bg-landscape="off|topo|lab-starry-sky|lab-winding-desert|
+                          lab-flat-desert|lab-topographic-void|
+                          lab-caravan-lights|lab-tectonic-drift"
+                                                                (default: topo)
      ────────────────────────────────────────────────────────────────────── */
 
   /* ──────────────────────────────────────────────────────────────────────
@@ -272,6 +275,19 @@
     color: var(--fg);
   }
   .bg-tabs--toggle button { min-width: 32px; }
+  .bg-tabs--grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 3px;
+    width: 100%;
+  }
+  .bg-tabs--grid button {
+    min-width: 0;
+    padding: 6px 4px;
+    font-size: 10px;
+  }
+  .bg-controls__row--stack { flex-direction: column; align-items: stretch; gap: 8px; }
+  .bg-controls__row--stack > span { font-size: 11px; color: var(--fg-faint); }
 
   /* Color swatches for the tone picker */
   .bg-swatches {
@@ -311,6 +327,26 @@
     display: none;
   }
   .app[data-bg-landscape="topo"] .terrain-topo { display: block; }
+
+  /* Lab-driven landscapes — embed noon-bg-lab.html as an iframe, full
+     viewport, behind content. Each lab-* value selects a preset via the
+     iframe's ?preset=… URL param (set by JS below). The sky/topo are
+     hidden so the lab preset fully owns the background. */
+  .bg-lab-frame {
+    position: fixed;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    border: 0;
+    z-index: 0;
+    display: none;
+    pointer-events: none;
+    background: var(--bg);
+  }
+  .app[data-bg-landscape^="lab-"] .bg-lab-frame { display: block; }
+  .app[data-bg-landscape^="lab-"] .sky-stars,
+  .app[data-bg-landscape^="lab-"] .north-star,
+  .app[data-bg-landscape^="lab-"] .terrain-topo { display: none; }
   /* Topographic terrain — every white contour AND the gold route are
      <use> instances of the same #topo-ridge path defined in <defs>, so
      they share identical curvature. Contours are translated copies, the
@@ -1159,6 +1195,11 @@
 
   </svg>
 
+  <!-- Lab-driven landscape — iframe embed of noon-bg-lab.html. Shown when
+       data-bg-landscape starts with "lab-"; URL is set by JS to pass the
+       matching preset slug. -->
+  <iframe class="bg-lab-frame" id="bgLabFrame" aria-hidden="true" title="Background lab"></iframe>
+
   <!-- HTML star field — divs are rendered into the three tier groups by JS at the
        bottom of the file. Sits as a sibling of .terrain so it covers the same
        inset:0 area, but each star uses fixed pixel dimensions with percentage
@@ -1403,11 +1444,17 @@
 
       <div class="bg-controls__divider"></div>
 
-      <div class="bg-controls__row">
+      <div class="bg-controls__row bg-controls__row--stack">
         <span>Landscape</span>
-        <div class="bg-tabs bg-tabs--toggle" data-attr="data-bg-landscape">
+        <div class="bg-tabs bg-tabs--toggle bg-tabs--grid" data-attr="data-bg-landscape">
           <button data-value="off">Off</button>
           <button data-value="topo">Topo</button>
+          <button data-value="lab-starry-sky">Starry</button>
+          <button data-value="lab-winding-desert">Winding</button>
+          <button data-value="lab-flat-desert">Flat</button>
+          <button data-value="lab-topographic-void">Topo·V</button>
+          <button data-value="lab-caravan-lights">Caravan</button>
+          <button data-value="lab-tectonic-drift">Tectonic</button>
         </div>
       </div>
     </div>
@@ -1834,6 +1881,28 @@
           b.classList.toggle("is-active", b === btn);
         });
       });
+    });
+
+    // Bg-lab iframe sync — set src only when a lab-* landscape is picked, so
+    // the iframe doesn't load (and burn CPU) until the user actually chooses
+    // one. Keeps the same src across re-selects so frames don't reload.
+    const labFrame = document.getElementById("bgLabFrame");
+    let currentLabSrc = "";
+    function syncLabFrame() {
+      const v = app.getAttribute("data-bg-landscape") || "";
+      if (v.startsWith("lab-")) {
+        const slug = v.slice(4);    // strip "lab-" prefix
+        const src = "noon-bg-lab.html?preset=" + slug + "&nopanel=1&nohint=1";
+        if (src !== currentLabSrc) {
+          labFrame.src = src;
+          currentLabSrc = src;
+        }
+      }
+    }
+    syncLabFrame();
+    new MutationObserver(syncLabFrame).observe(app, {
+      attributes: true,
+      attributeFilter: ["data-bg-landscape"]
     });
   })();
 

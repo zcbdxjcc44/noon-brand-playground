@@ -2412,6 +2412,32 @@ loadPersistedPresets();
 buildPanel();
 applyPreset(0);
 
+// =============================================================
+// URL PARAMS — for embedding (e.g. presenter-screen.html as iframe)
+//   ?preset=<slug>     pick a preset by slugified name
+//   ?nopanel=1         hide the designer panel + open-button
+//   ?nohint=1          hide the keyboard hint
+// =============================================================
+(function applyUrlParams() {
+  const params = new URLSearchParams(window.location.search);
+  const slugify = s => s.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
+  const presetSlug = params.get('preset');
+  if (presetSlug) {
+    const idx = PRESETS.findIndex(p => slugify(p.name) === presetSlug);
+    if (idx >= 0) applyPreset(idx);
+  }
+  if (params.get('nopanel') === '1') {
+    const panel = document.getElementById('panel');
+    const openBtn = document.getElementById('showPanelBtn');
+    if (panel) panel.classList.add('hidden');
+    if (openBtn) openBtn.style.display = 'none';
+  }
+  if (params.get('nohint') === '1') {
+    const hint = document.querySelector('.hint');
+    if (hint) hint.style.display = 'none';
+  }
+})();
+
 document.addEventListener('keydown', (e) => {
   if ((e.key === 'h' || e.key === 'H') && !isEditing(e.target)) {
     document.getElementById('panel').classList.toggle('hidden');
