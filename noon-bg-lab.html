@@ -445,7 +445,446 @@ const PALETTES = {
   }
 };
 
-const STYLES = ['particles', 'contours', 'faceted'];
+const STYLES = ['particles', 'contours', 'faceted', 'constellation', 'starchart'];
+
+// Star Chart — hairline connector colours (soft white / warm silver) and
+// star-point colours. Kept deliberately quiet: this style is restrained,
+// editorial, grounded — no neon, no magic.
+const STARCHART_LINE_COLORS = {
+  'Silver': '#c3c7cf',
+  'Warm':   '#ddd5c4',
+  'White':  '#e9ebef',
+};
+const STARCHART_STAR_COLORS = {
+  'Warm White': '#f1ebdd',
+  'Cool White': '#eaedf2',
+  'Silver':     '#cdd1d8',
+};
+
+// Hand-authored star graphs — one per subject. Coordinates live in a
+// normalised [-1,1] cube. Each graph traces the same recognisable 3D
+// form the constellation/glass styles used (see SUBJECTS): rings become
+// star loops, bars become star pairs, sphere cores become bright anchor
+// stars. `anchor` stars render brighter/larger; `broken` edges stop
+// partway and dissolve into the dark.
+const STAR_CHARTS = {
+  // paraboloid bowl + 3 crossing axes
+  math: {
+    name: 'Mathematics',
+    stars: [
+      { x: -0.78, y:  0.42, z:  0.00 },                 // bowl arc →
+      { x: -0.40, y: -0.06, z:  0.00 },
+      { x:  0.00, y: -0.30, z:  0.00, anchor: true },
+      { x:  0.40, y: -0.06, z:  0.00 },
+      { x:  0.78, y:  0.42, z:  0.00 },
+      { x: -0.95, y: -0.12, z:  0.00 },                 // x axis
+      { x:  0.95, y: -0.12, z:  0.00 },
+      { x:  0.00, y:  0.68, z:  0.00 },                 // y axis
+      { x:  0.00, y: -0.80, z:  0.00 },
+      { x:  0.00, y: -0.12, z: -0.95 },                 // z axis
+      { x:  0.00, y: -0.12, z:  0.95 },
+      { x:  0.00, y: -0.12, z:  0.00, anchor: true },   // origin
+    ],
+    edges: [
+      { a: 0, b: 1 }, { a: 1, b: 2 }, { a: 2, b: 3 }, { a: 3, b: 4 },
+      { a: 5, b: 11 }, { a: 11, b: 6 },
+      { a: 7, b: 11, broken: true }, { a: 11, b: 8 },
+      { a: 9, b: 11 }, { a: 11, b: 10, broken: true },
+    ],
+  },
+  // nucleus + 3 mutually-perpendicular orbit rings
+  physics: {
+    name: 'Physics',
+    stars: [
+      { x:  0.00, y:  0.00, z:  0.00, anchor: true },   // nucleus
+      { x:  0.78, y:  0.00, z:  0.00, anchor: true },   // ring A (z=0) →
+      { x:  0.24, y:  0.74, z:  0.00 },
+      { x: -0.63, y:  0.46, z:  0.00 },
+      { x: -0.63, y: -0.46, z:  0.00 },
+      { x:  0.24, y: -0.74, z:  0.00 },
+      { x:  0.63, y:  0.00, z:  0.46 },                 // ring B (y=0) →
+      { x: -0.24, y:  0.00, z:  0.74 },
+      { x: -0.78, y:  0.00, z:  0.00 },
+      { x: -0.24, y:  0.00, z: -0.74 },
+      { x:  0.63, y:  0.00, z: -0.46 },
+      { x:  0.00, y:  0.00, z:  0.78 },                 // ring C (x=0) →
+      { x:  0.00, y:  0.74, z:  0.24 },
+      { x:  0.00, y:  0.46, z: -0.63 },
+      { x:  0.00, y: -0.46, z: -0.63 },
+      { x:  0.00, y: -0.74, z:  0.24 },
+    ],
+    edges: [
+      { a: 1, b: 2 }, { a: 2, b: 3 }, { a: 3, b: 4 }, { a: 4, b: 5 }, { a: 5, b: 1, broken: true },
+      { a: 6, b: 7 }, { a: 7, b: 8 }, { a: 8, b: 9 }, { a: 9, b: 10 }, { a: 10, b: 6, broken: true },
+      { a: 11, b: 12 }, { a: 12, b: 13 }, { a: 13, b: 14 }, { a: 14, b: 15 }, { a: 15, b: 11, broken: true },
+      { a: 0, b: 1, broken: true }, { a: 0, b: 8, broken: true },
+    ],
+  },
+  // a central hexagon hub with 4 outer stars bonded outward at even
+  // tetrahedral angles — the centre connection point is a 6-sided ring
+  chemistry: {
+    name: 'Chemistry',
+    stars: [
+      { x:  0.000, y:  0.200, z:  0.000 },                 // central hexagon →
+      { x: -0.173, y:  0.100, z:  0.000 },
+      { x: -0.173, y: -0.100, z:  0.000 },
+      { x:  0.000, y: -0.200, z:  0.000 },
+      { x:  0.173, y: -0.100, z:  0.000 },
+      { x:  0.173, y:  0.100, z:  0.000 },
+      { x:  0.000, y:  0.660, z:  0.000, anchor: true },   // outer stars →
+      { x:  0.622, y: -0.220, z:  0.000, anchor: true },
+      { x: -0.311, y: -0.220, z:  0.539, anchor: true },
+      { x: -0.311, y: -0.220, z: -0.539, anchor: true },
+    ],
+    edges: [
+      { a: 0, b: 1 }, { a: 1, b: 2 }, { a: 2, b: 3, broken: true }, { a: 3, b: 4 }, { a: 4, b: 5 }, { a: 5, b: 0 },
+      { a: 0, b: 6 }, { a: 4, b: 7 }, { a: 2, b: 8 }, { a: 3, b: 9, broken: true },
+    ],
+  },
+  // two large tilted rings (crossing in 3D) with cell bodies scattered
+  // around them — the bright anchor stars are the free-floating cells,
+  // not connected to anything
+  biology: {
+    name: 'Biology',
+    stars: [
+      { x:  0.880, y:  0.000, z:  0.000 },              // ring A →
+      { x:  0.622, y:  0.573, z:  0.242 },
+      { x:  0.000, y:  0.811, z:  0.342 },
+      { x: -0.622, y:  0.573, z:  0.242 },
+      { x: -0.880, y:  0.000, z:  0.000 },
+      { x: -0.622, y: -0.573, z: -0.242 },
+      { x:  0.000, y: -0.811, z: -0.342 },
+      { x:  0.622, y: -0.573, z: -0.242 },
+      { x:  0.660, y:  0.000, z:  0.000 },              // ring B →
+      { x:  0.467, y:  0.342, z:  0.318 },
+      { x:  0.000, y:  0.483, z:  0.450 },
+      { x: -0.467, y:  0.342, z:  0.318 },
+      { x: -0.660, y:  0.000, z:  0.000 },
+      { x: -0.467, y: -0.342, z: -0.318 },
+      { x:  0.000, y: -0.483, z: -0.450 },
+      { x:  0.467, y: -0.342, z: -0.318 },
+      { x:  0.10, y:  0.34, z:  0.12, anchor: true },   // scattered cell bodies
+      { x:  0.36, y:  0.00, z: -0.14, anchor: true },
+      { x: -0.50, y: -0.40, z:  0.18, anchor: true },
+      { x:  0.80, y:  0.30, z: -0.10, anchor: true },
+    ],
+    edges: [
+      { a: 0, b: 1 }, { a: 1, b: 2 }, { a: 2, b: 3 }, { a: 3, b: 4, broken: true },
+      { a: 4, b: 5 }, { a: 5, b: 6 }, { a: 6, b: 7 }, { a: 7, b: 0, broken: true },
+      { a: 8, b: 9 }, { a: 9, b: 10 }, { a: 10, b: 11, broken: true }, { a: 11, b: 12 },
+      { a: 12, b: 13 }, { a: 13, b: 14 }, { a: 14, b: 15, broken: true }, { a: 15, b: 8 },
+    ],
+  },
+  // a bigger planet ball wrapped by a smaller strongly-tilted halo ring —
+  // a ringed-planet read. Ball and ring are not connected.
+  geography: {
+    name: 'Geography',
+    stars: [
+      { x:  0.000, y:  0.437, z:  0.000, anchor: true },   // planet ball →
+      { x: -0.386, y:  0.218, z:  0.000 },
+      { x: -0.386, y: -0.218, z:  0.000 },
+      { x:  0.000, y: -0.437, z:  0.000 },
+      { x:  0.386, y: -0.218, z:  0.000 },
+      { x:  0.386, y:  0.218, z:  0.000 },
+      { x:  0.595, y:  0.122, z:  0.000, anchor: true },   // tilted halo ring →
+      { x:  0.384, y:  0.256, z:  0.390 },
+      { x: -0.051, y:  0.243, z:  0.557 },
+      { x: -0.454, y:  0.090, z:  0.390 },
+      { x: -0.595, y: -0.122, z:  0.000 },
+      { x: -0.384, y: -0.256, z: -0.390 },
+      { x:  0.051, y: -0.243, z: -0.557 },
+      { x:  0.454, y: -0.090, z: -0.390 },
+    ],
+    edges: [
+      { a: 0, b: 1 }, { a: 1, b: 2 }, { a: 2, b: 3, broken: true }, { a: 3, b: 4 }, { a: 4, b: 5 }, { a: 5, b: 0 },
+      { a: 6, b: 7 }, { a: 7, b: 8 }, { a: 8, b: 9 }, { a: 9, b: 10, broken: true },
+      { a: 10, b: 11 }, { a: 11, b: 12 }, { a: 12, b: 13 }, { a: 13, b: 6, broken: true },
+    ],
+  },
+  // bar-chart skyline: four vertical bars on a baseline
+  quant: {
+    name: 'Qudrat Quant',
+    stars: [
+      { x: -0.60, y: -0.65, z:  0.00 },                 // bar 1
+      { x: -0.60, y: -0.15, z:  0.00 },
+      { x: -0.20, y: -0.65, z:  0.00 },                 // bar 2
+      { x: -0.20, y:  0.30, z:  0.00 },
+      { x:  0.20, y: -0.65, z:  0.00, anchor: true },   // bar 3 (tallest)
+      { x:  0.20, y:  0.60, z:  0.00, anchor: true },
+      { x:  0.60, y: -0.65, z:  0.00 },                 // bar 4
+      { x:  0.60, y:  0.05, z:  0.00 },
+    ],
+    edges: [
+      { a: 0, b: 1 }, { a: 2, b: 3 }, { a: 4, b: 5 }, { a: 6, b: 7 },
+      { a: 0, b: 2, broken: true }, { a: 2, b: 4 }, { a: 4, b: 6, broken: true },
+      { a: 1, b: 3 }, { a: 3, b: 5, broken: true }, { a: 5, b: 7 },
+    ],
+  },
+  // speech-bubble ring + a tail pointing down-left
+  verbal: {
+    name: 'Qudrat Verbal',
+    stars: [
+      { x:  0.58, y:  0.10, z:  0.00 },                 // bubble ring →
+      { x:  0.29, y:  0.60, z: -0.10 },
+      { x: -0.29, y:  0.60, z:  0.10, anchor: true },
+      { x: -0.58, y:  0.10, z:  0.00 },
+      { x: -0.29, y: -0.40, z: -0.10 },
+      { x:  0.29, y: -0.40, z:  0.10 },
+      { x: -0.34, y: -0.46, z:  0.00 },                 // tail
+      { x: -0.50, y: -0.78, z:  0.00, anchor: true },
+    ],
+    edges: [
+      { a: 0, b: 1 }, { a: 1, b: 2 }, { a: 2, b: 3 }, { a: 3, b: 4, broken: true },
+      { a: 4, b: 5 }, { a: 5, b: 0 },
+      { a: 4, b: 6 }, { a: 6, b: 7 },
+    ],
+  },
+  // capital letter 'A' — two diagonal legs meeting at an apex + a crossbar
+  esl: {
+    name: 'ESL',
+    stars: [
+      { x:  0.00, y:  0.88, z:  0.00, anchor: true },   // apex
+      { x: -0.18, y:  0.40, z:  0.06 },                 // left leg →
+      { x: -0.32, y:  0.02, z: -0.05 },
+      { x: -0.45, y: -0.40, z:  0.05 },
+      { x: -0.58, y: -0.80, z: -0.04, anchor: true },
+      { x:  0.18, y:  0.40, z: -0.06 },                 // right leg →
+      { x:  0.32, y:  0.02, z:  0.05 },
+      { x:  0.45, y: -0.40, z: -0.05 },
+      { x:  0.58, y: -0.80, z:  0.04, anchor: true },
+    ],
+    edges: [
+      { a: 0, b: 1 }, { a: 1, b: 2, broken: true }, { a: 2, b: 3 }, { a: 3, b: 4 },
+      { a: 0, b: 5 }, { a: 5, b: 6 }, { a: 6, b: 7 }, { a: 7, b: 8, broken: true },
+      { a: 2, b: 6 },
+    ],
+  },
+};
+
+// =============================================================
+// CONSTELLATION — colour palettes + procedural subject shapes
+// =============================================================
+// Multi-colour palettes built from the Noon brand primitives. The
+// constellation style scatters particles tinted from one of these.
+const CONSTELLATION_PALETTES = {
+  'Aurora':        ['#C7A8FF', '#B08AF9', '#96BCFF', '#6BA3FF', '#7FE3BE', '#64D8AE'],
+  'Brand Spectrum':['#C7A8FF', '#B08AF9', '#6BA3FF', '#7FE3BE', '#e0b83a', '#e58a7f'],
+  'Iris':          ['#C7A8FF', '#B08AF9', '#8E63E0'],
+  'Noon':          ['#9EEACB', '#7FE3BE', '#64D8AE', '#3FAE87'],
+  'Ember':         ['#f0cf5a', '#e0b83a', '#d9a74a', '#e58a7f', '#c55a4e'],
+  'Chalk':         ['#f5f1e8', '#e8e4dc', '#c9c4b8'],
+};
+
+// Each subject is a list of true-3D primitives in a normalised [-1, 1]
+// cube. A weighted sampler picks a primitive (by `w` ≈ volume) then a
+// point [x, y, z] inside it. kinds:
+//   sphere     — solid ball, or shell when shell:true; optional scale[] → ellipsoid
+//   torus      — ring of radius r + tube; oriented by euler rotX/rotY/rotZ
+//   bar3d      — thick 3D segment between (x1,y1,z1)-(x2,y2,z2)
+//   box        — axis-aligned filled box (sx,sy,sz)
+//   quad3d     — bilinear-sampled 3D quad (4 corners) + slight thickness
+//   paraboloid — bowl surface y = k·r²
+const SUBJECTS = {
+  math: {
+    name: 'Mathematics',
+    primitives: [
+      { kind: 'paraboloid', w: 4.0, cx: 0, cy: 0, cz: 0, r: 0.82, k: 1.5, thick: 0.06 },
+      { kind: 'bar3d', w: 1.0, x1: -0.95, y1: -0.45, z1: 0,     x2: 0.95, y2: -0.45, z2: 0,    thick: 0.045 },
+      { kind: 'bar3d', w: 1.0, x1: 0,     y1: -0.85, z1: 0,     x2: 0,    y2: 0.70,  z2: 0,    thick: 0.045 },
+      { kind: 'bar3d', w: 1.0, x1: 0,     y1: -0.45, z1: -0.95, x2: 0,    y2: -0.45, z2: 0.95, thick: 0.045 },
+    ],
+  },
+  physics: {
+    name: 'Physics',
+    primitives: [
+      // nucleus — 20% larger than before
+      { kind: 'sphere', w: 1.4, cx: 0, cy: 0, cz: 0, r: 0.19 },
+      // three mutually-perpendicular orbit rings → evenly distributed in 3D
+      { kind: 'torus',  w: 2.0, cx: 0, cy: 0, cz: 0, r: 0.80, tube: 0.04, rotX: 0 },
+      { kind: 'torus',  w: 2.0, cx: 0, cy: 0, cz: 0, r: 0.80, tube: 0.04, rotX: 1.5708 },
+      { kind: 'torus',  w: 2.0, cx: 0, cy: 0, cz: 0, r: 0.80, tube: 0.04, rotY: 1.5708 },
+    ],
+  },
+  chemistry: {
+    name: 'Chemistry',
+    primitives: [
+      // ball-and-stick molecule: solid atoms + bond sticks
+      { kind: 'sphere', w: 2.6, cx: 0,     cy: 0,     cz: 0,     r: 0.32 },
+      { kind: 'sphere', w: 1.3, cx: -0.62, cy: 0.30,  cz: 0.18,  r: 0.20 },
+      { kind: 'sphere', w: 1.3, cx: 0.58,  cy: -0.32, cz: -0.20, r: 0.20 },
+      { kind: 'sphere', w: 1.0, cx: 0.30,  cy: 0.55,  cz: -0.28, r: 0.17 },
+      { kind: 'sphere', w: 0.9, cx: -0.20, cy: -0.55, cz: 0.32,  r: 0.15 },
+      { kind: 'bar3d', w: 0.45, x1: 0, y1: 0, z1: 0, x2: -0.62, y2: 0.30,  z2: 0.18,  thick: 0.045 },
+      { kind: 'bar3d', w: 0.45, x1: 0, y1: 0, z1: 0, x2: 0.58,  y2: -0.32, z2: -0.20, thick: 0.045 },
+      { kind: 'bar3d', w: 0.4,  x1: 0, y1: 0, z1: 0, x2: 0.30,  y2: 0.55,  z2: -0.28, thick: 0.045 },
+      { kind: 'bar3d', w: 0.4,  x1: 0, y1: 0, z1: 0, x2: -0.20, y2: -0.55, z2: 0.32,  thick: 0.045 },
+    ],
+  },
+  biology: {
+    name: 'Biology',
+    primitives: [
+      { kind: 'sphere', w: 5.0, cx: 0,     cy: 0,     cz: 0,     r: 0.78, shell: true, thick: 0.13 },
+      { kind: 'sphere', w: 1.4, cx: -0.14, cy: 0.10,  cz: 0.06,  r: 0.22 },
+      { kind: 'sphere', w: 0.5, cx: 0.30,  cy: -0.20, cz: -0.10, r: 0.11 },
+      { kind: 'sphere', w: 0.45,cx: 0.22,  cy: 0.30,  cz: 0.18,  r: 0.10 },
+      { kind: 'sphere', w: 0.4, cx: -0.30, cy: -0.28, cz: 0.20,  r: 0.09 },
+    ],
+  },
+  geography: {
+    name: 'Geography',
+    primitives: [
+      // a planet with a tilted halo ring (Saturn-like)
+      { kind: 'sphere', w: 4.6, cx: 0, cy: 0, cz: 0, r: 0.50 },
+      { kind: 'torus',  w: 2.6, cx: 0, cy: 0, cz: 0, r: 0.86, tube: 0.07, rotX: 1.27, rotZ: 0.3 },
+      { kind: 'torus',  w: 1.1, cx: 0, cy: 0, cz: 0, r: 1.00, tube: 0.03, rotX: 1.27, rotZ: 0.3 },
+    ],
+  },
+  quant: {
+    name: 'Qudrat Quant',
+    primitives: [
+      // bars rise from a common baseline (y ≈ -0.65) to varying heights
+      { kind: 'box', w: 1.0, cx: -0.6, cy: -0.40,  cz: 0, sx: 0.24, sy: 0.50, sz: 0.24 },
+      { kind: 'box', w: 1.6, cx: -0.2, cy: -0.175, cz: 0, sx: 0.24, sy: 0.95, sz: 0.24 },
+      { kind: 'box', w: 2.0, cx: 0.2,  cy: -0.025, cz: 0, sx: 0.24, sy: 1.25, sz: 0.24 },
+      { kind: 'box', w: 1.2, cx: 0.6,  cy: -0.30,  cz: 0, sx: 0.24, sy: 0.70, sz: 0.24 },
+      { kind: 'box', w: 0.6, cx: 0,    cy: -0.68,  cz: 0, sx: 1.70, sy: 0.05, sz: 0.45 },
+    ],
+  },
+  verbal: {
+    name: 'Qudrat Verbal',
+    primitives: [
+      // rounder, fuller speech-bubble orb
+      { kind: 'sphere', w: 6.0, cx: 0, cy: 0.06, cz: 0, r: 0.62, scale: [1.05, 0.96, 0.92] },
+      { kind: 'bar3d',  w: 0.7, x1: -0.30, y1: -0.34, z1: 0, x2: -0.48, y2: -0.72, z2: 0, thick: 0.07 },
+    ],
+  },
+  esl: {
+    name: 'ESL',
+    primitives: [
+      // capital letter 'A' — two diagonal legs + a crossbar
+      { kind: 'bar3d', w: 2.4, x1: 0, y1: 0.85, z1: 0, x2: -0.62, y2: -0.82, z2: 0, thick: 0.10 },
+      { kind: 'bar3d', w: 2.4, x1: 0, y1: 0.85, z1: 0, x2:  0.62, y2: -0.82, z2: 0, thick: 0.10 },
+      { kind: 'bar3d', w: 1.0, x1: -0.31, y1: 0.0, z1: 0, x2: 0.31, y2: 0.0, z2: 0, thick: 0.09 },
+    ],
+  },
+};
+
+// Euler rotation (X then Y then Z) of a point.
+function _rot3(x, y, z, ax, ay, az) {
+  let c, s;
+  if (ax) { c = Math.cos(ax); s = Math.sin(ax); const y1 = y * c - z * s; z = y * s + z * c; y = y1; }
+  if (ay) { c = Math.cos(ay); s = Math.sin(ay); const x1 = x * c + z * s; z = -x * s + z * c; x = x1; }
+  if (az) { c = Math.cos(az); s = Math.sin(az); const x1 = x * c - y * s; y = x * s + y * c; x = x1; }
+  return [x, y, z];
+}
+
+// Random unit-ball offset (rejection-sampled), scaled by r.
+function _ballOffset(r) {
+  let x, y, z, d2;
+  do {
+    x = Math.random() * 2 - 1; y = Math.random() * 2 - 1; z = Math.random() * 2 - 1;
+    d2 = x * x + y * y + z * z;
+  } while (d2 > 1);
+  return [x * r, y * r, z * r];
+}
+
+// Sample a single 3D point [x, y, z] from a primitive.
+function _samplePrimitive(p) {
+  if (p.kind === 'sphere') {
+    let x, y, z, d2;
+    do {
+      x = Math.random() * 2 - 1; y = Math.random() * 2 - 1; z = Math.random() * 2 - 1;
+      d2 = x * x + y * y + z * z;
+    } while (d2 > 1 || d2 < 1e-6);
+    const d = Math.sqrt(d2);
+    let rr;
+    if (p.shell) {
+      rr = p.r * (1 + (Math.random() - 0.5) * (p.thick || 0.1));
+    } else {
+      rr = Math.cbrt(Math.random()) * p.r;
+    }
+    let px = (x / d) * rr, py = (y / d) * rr, pz = (z / d) * rr;
+    if (p.scale) { px *= p.scale[0]; py *= p.scale[1]; pz *= p.scale[2]; }
+    return [p.cx + px, p.cy + py, p.cz + pz];
+  }
+  if (p.kind === 'torus') {
+    const a = Math.random() * Math.PI * 2;
+    const b = Math.random() * Math.PI * 2;
+    const tr = (p.tube || 0.05) * Math.sqrt(Math.random());
+    const ringR = p.r + tr * Math.cos(b);
+    const lx = ringR * Math.cos(a);
+    const ly = ringR * Math.sin(a);
+    const lz = tr * Math.sin(b);
+    const r = _rot3(lx, ly, lz, p.rotX || 0, p.rotY || 0, p.rotZ || 0);
+    return [p.cx + r[0], p.cy + r[1], p.cz + r[2]];
+  }
+  if (p.kind === 'bar3d') {
+    const t = Math.random();
+    const px = p.x1 + (p.x2 - p.x1) * t;
+    const py = p.y1 + (p.y2 - p.y1) * t;
+    const pz = p.z1 + (p.z2 - p.z1) * t;
+    const o = _ballOffset(p.thick || 0.05);
+    return [px + o[0], py + o[1], pz + o[2]];
+  }
+  if (p.kind === 'box') {
+    return [
+      p.cx + (Math.random() - 0.5) * p.sx,
+      p.cy + (Math.random() - 0.5) * p.sy,
+      p.cz + (Math.random() - 0.5) * p.sz,
+    ];
+  }
+  if (p.kind === 'quad3d') {
+    const u = Math.random(), v = Math.random();
+    const P = p.pts;
+    const ax = P[0][0] + (P[1][0] - P[0][0]) * u;
+    const ay = P[0][1] + (P[1][1] - P[0][1]) * u;
+    const az = P[0][2] + (P[1][2] - P[0][2]) * u;
+    const bx = P[3][0] + (P[2][0] - P[3][0]) * u;
+    const by = P[3][1] + (P[2][1] - P[3][1]) * u;
+    const bz = P[3][2] + (P[2][2] - P[3][2]) * u;
+    let x = ax + (bx - ax) * v;
+    let y = ay + (by - ay) * v;
+    let z = az + (bz - az) * v;
+    // thickness along the quad normal
+    const e1x = P[1][0] - P[0][0], e1y = P[1][1] - P[0][1], e1z = P[1][2] - P[0][2];
+    const e2x = P[3][0] - P[0][0], e2y = P[3][1] - P[0][1], e2z = P[3][2] - P[0][2];
+    let nx = e1y * e2z - e1z * e2y;
+    let ny = e1z * e2x - e1x * e2z;
+    let nz = e1x * e2y - e1y * e2x;
+    const nl = Math.hypot(nx, ny, nz) || 1;
+    const off = (Math.random() - 0.5) * (p.thick || 0.04);
+    return [x + (nx / nl) * off, y + (ny / nl) * off, z + (nz / nl) * off];
+  }
+  if (p.kind === 'paraboloid') {
+    const a = Math.random() * Math.PI * 2;
+    const rr = Math.sqrt(Math.random()) * p.r;
+    const lx = Math.cos(a) * rr;
+    const lz = Math.sin(a) * rr;
+    const ly = rr * rr * p.k - p.r * p.r * p.k * 0.5;   // bowl, vertically centred
+    const off = (Math.random() - 0.5) * (p.thick || 0.05);
+    return [p.cx + lx, p.cy + ly + off, p.cz + lz];
+  }
+  return [0, 0, 0];
+}
+
+// Pre-generate a target point cloud of `count` 3D points for a subject.
+function buildSubjectCloud(subjectKey, count) {
+  const subj = SUBJECTS[subjectKey] || SUBJECTS.math;
+  const prims = subj.primitives;
+  let totalW = 0;
+  for (let i = 0; i < prims.length; i++) totalW += prims[i].w;
+  const cloud = [];
+  for (let i = 0; i < count; i++) {
+    let r = Math.random() * totalW;
+    let prim = prims[0];
+    for (let k = 0; k < prims.length; k++) {
+      r -= prims[k].w;
+      if (r <= 0) { prim = prims[k]; break; }
+    }
+    cloud.push(_samplePrimitive(prim));
+  }
+  return cloud;
+}
 
 // Curated highlight colors for faceted style, pulled from the Noon brand
 // tokens in assets/colors_and_type.css. Keys double as the select option text.
@@ -519,6 +958,35 @@ const DEFAULT_CONFIG = {
     edgeParticleSize: 1.8,
     edgeOpacity: 0.85,
     edgeSpeed: 0.18
+  },
+  constellation: {
+    subject: 'math',
+    count: 1400,
+    worldScale: 620,
+    depthScale: 1.0,
+    tightness: 0.10,
+    drift: 0.45,
+    swirlSpeed: 0.14,
+    sizeMin: 5,
+    sizeMax: 12,
+    glow: 0.55,
+    palette: 'Aurora'
+  },
+  starchart: {
+    subject:    'physics',
+    worldScale: 560,
+    depthScale: 1.0,
+    driftSpeed: 0.05,
+    lineColor:  'Silver',
+    starColor:  'Warm White',
+    lineWidth:  0.6,
+    lineGlow:   0.15,
+    breathing:  0.5,
+    brokenness: 0.4,
+    anchorSize: 4.1,
+    starSize:   1.6,
+    twinkle:    0.3,
+    brightness: 0.7
   },
   goldenLine:  {
     enabled: true, pathType: 'noise', speed: 0.18,
@@ -606,13 +1074,42 @@ const SCHEMA = {
     { key: 'edgeParticleSize', label: 'Dot Size',    type: 'range',  min: 0.5,  max: 5,    step: 0.1 },
     { key: 'edgeOpacity',      label: 'Edge Alpha',  type: 'range',  min: 0,    max: 1,    step: 0.02 },
     { key: 'edgeSpeed',        label: 'Flow Speed',  type: 'range',  min: 0,    max: 1.5,  step: 0.02 }
+  ],
+  constellation: [
+    { key: 'subject',    label: 'Subject',   type: 'select', options: ['math','physics','chemistry','biology','geography','quant','verbal','esl'] },
+    { key: 'palette',    label: 'Palette',   type: 'select', options: ['Aurora','Brand Spectrum','Iris','Noon','Ember','Chalk'] },
+    { key: 'count',      label: 'Particles', type: 'range',  min: 200,  max: 3000, step: 50 },
+    { key: 'tightness',  label: 'Tightness', type: 'range',  min: 0.02, max: 0.30, step: 0.01 },
+    { key: 'drift',      label: 'Drift',     type: 'range',  min: 0,    max: 1.5,  step: 0.05 },
+    { key: 'swirlSpeed', label: 'Swirl',     type: 'range',  min: 0,    max: 0.8,  step: 0.01 },
+    { key: 'worldScale', label: 'Scale',     type: 'range',  min: 200,  max: 1100, step: 10 },
+    { key: 'depthScale', label: 'Depth',     type: 'range',  min: 0.2,  max: 2.0,  step: 0.05 },
+    { key: 'sizeMin',    label: 'Size Min',  type: 'range',  min: 1,    max: 14,   step: 0.5 },
+    { key: 'sizeMax',    label: 'Size Max',  type: 'range',  min: 3,    max: 22,   step: 0.5 },
+    { key: 'glow',       label: 'Glow',      type: 'range',  min: 0,    max: 1,    step: 0.02 }
+  ],
+  starchart: [
+    { key: 'subject',    label: 'Subject',     type: 'select', options: ['math','physics','chemistry','biology','geography','quant','verbal','esl'] },
+    { key: 'lineColor',  label: 'Line Color',  type: 'select', options: ['Silver','Warm','White'] },
+    { key: 'starColor',  label: 'Star Color',  type: 'select', options: ['Warm White','Cool White','Silver'] },
+    { key: 'brightness', label: 'Brightness',  type: 'range',  min: 0.2,  max: 1.2,  step: 0.02 },
+    { key: 'breathing',  label: 'Breathing',   type: 'range',  min: 0,    max: 1,    step: 0.02 },
+    { key: 'brokenness', label: 'Brokenness',  type: 'range',  min: 0,    max: 1,    step: 0.02 },
+    { key: 'lineWidth',  label: 'Line Width',  type: 'range',  min: 0.3,  max: 1.6,  step: 0.05 },
+    { key: 'lineGlow',   label: 'Line Glow',   type: 'range',  min: 0,    max: 0.6,  step: 0.02 },
+    { key: 'anchorSize', label: 'Anchor Size', type: 'range',  min: 1.5,  max: 6,    step: 0.1 },
+    { key: 'starSize',   label: 'Star Size',   type: 'range',  min: 0.6,  max: 4,    step: 0.1 },
+    { key: 'twinkle',    label: 'Twinkle',     type: 'range',  min: 0,    max: 1,    step: 0.02 },
+    { key: 'driftSpeed', label: 'Drift Speed', type: 'range',  min: 0,    max: 0.4,  step: 0.005 },
+    { key: 'worldScale', label: 'Scale',       type: 'range',  min: 200,  max: 1100, step: 10 },
+    { key: 'depthScale', label: 'Depth',       type: 'range',  min: 0.2,  max: 2.0,  step: 0.05 }
   ]
 };
 
 const GROUP_TITLES = {
   view: 'View', terrain: 'Terrain', particles: 'Particles',
-  contours: 'Contours', faceted: 'Faceted',
-  goldenLine: 'Golden Line', morningStar: 'Morning Star'
+  contours: 'Contours', faceted: 'Faceted', constellation: 'Constellation',
+  starchart: 'Star Chart', goldenLine: 'Golden Line', morningStar: 'Morning Star'
 };
 
 // =============================================================
@@ -692,6 +1189,30 @@ const PRESETS = [
       faceted:    { gridCellsX: 13, gridCellsZ: 14, meshJitter: 0.19, lightPitch: 0.32, lightYaw: -1.2, ambient: 0.16, contrast: 0.92, fill: true, highlight: 'Void Step', fillOpacity: 0.69, edgeMode: 'lines', edgeColor: 'Void Step', edgeDensity: 5, edgeParticleSize: 0.5, edgeOpacity: 1, edgeSpeed: 0.16 },
       goldenLine: { enabled: true, pathType: 'noise', speed: 0.16, width: 1.8, glowRadius: 85, color: '#c9a227', disturbanceRadius: 0, disturbanceStrength: 0, springBack: 0.05 },
       morningStar:{ enabled: true, x: 0.78, y: 0.20, size: 52, rayLength: 3.6, twinkleSpeed: 0.30, color: '#f5e0a0', opacity: 0.70 }
+    }
+  },
+  {
+    name: 'Subject Nebula',
+    desc: 'Particles swarm into a subject mark',
+    config: {
+      style: 'constellation', palette: 'void',
+      view:       { pitch: 0.36, yaw: -1.24, distance: 1130, fov: 360, cameraHeight: 390 },
+      terrain:    { scale: 0.006, amplitude: 80, drift: 0.08, contrast: 0.65, secondaryNoise: 0.3 },
+      constellation: { subject: 'geography', count: 1100, worldScale: 610, depthScale: 1, tightness: 0.25, drift: 0.95, swirlSpeed: 0.23, sizeMin: 3, sizeMax: 7, glow: 0, palette: 'Aurora' },
+      goldenLine: { enabled: false, pathType: 'noise', speed: 0.16, width: 1.4, glowRadius: 60, color: '#c9a227', disturbanceRadius: 0, disturbanceStrength: 0, springBack: 0.05 },
+      morningStar:{ enabled: false, x: 0.80, y: 0.18, size: 40, rayLength: 3.0, twinkleSpeed: 0.30, color: '#f5e0a0', opacity: 0.5 }
+    }
+  },
+  {
+    name: 'Star Chart',
+    desc: 'Hidden navigation lines · quiet & vast',
+    config: {
+      style: 'starchart', palette: 'void',
+      view:       { pitch: 0.30, yaw: -0.45, distance: 1250, fov: 520, cameraHeight: 300 },
+      terrain:    { scale: 0.006, amplitude: 80, drift: 0.08, contrast: 0.65, secondaryNoise: 0.3 },
+      starchart:  { subject: 'physics', worldScale: 560, depthScale: 1, driftSpeed: 0.225, lineColor: 'Silver', starColor: 'Silver', lineWidth: 1.25, lineGlow: 0.2, breathing: 0.72, brokenness: 0.3, anchorSize: 6, starSize: 2.9, twinkle: 0.48, brightness: 1.2 },
+      goldenLine: { enabled: false, pathType: 'noise', speed: 0.16, width: 1.4, glowRadius: 60, color: '#c9a227', disturbanceRadius: 0, disturbanceStrength: 0, springBack: 0.05 },
+      morningStar:{ enabled: false, x: 0.80, y: 0.18, size: 40, rayLength: 3.0, twinkleSpeed: 0.30, color: '#f5e0a0', opacity: 0.5 }
     }
   }
 ];
@@ -1494,6 +2015,142 @@ class FacetedField {
 // =============================================================
 // RENDERER
 // =============================================================
+// =============================================================
+// CONSTELLATION FIELD
+//   Particles each spring toward a target point sampled from the
+//   current subject's shape. The whole target cloud swirls around the
+//   origin; particles also drift for a living, breathing feel. Switching
+//   subject re-targets every particle and runs a soft re-aggregation.
+// =============================================================
+class ConstellationField {
+  constructor() {
+    this.particles = [];
+    this.subject = null;
+    this.transitionT = 1;
+  }
+
+  rebuild() {
+    const cfg = config.constellation;
+    const count = Math.max(50, cfg.count | 0);
+    const cloud = buildSubjectCloud(cfg.subject, count);
+    const particles = new Array(count);
+    for (let i = 0; i < count; i++) {
+      const tgt = cloud[i];
+      particles[i] = {
+        x: (Math.random() - 0.5) * 2.4,
+        y: (Math.random() - 0.5) * 2.4,
+        z: (Math.random() - 0.5) * 2.4,
+        vx: 0, vy: 0, vz: 0,
+        tx: tgt[0], ty: tgt[1], tz: tgt[2],
+        colorT: Math.random(),
+        sizeT: Math.random(),
+        driftPhase: Math.random() * Math.PI * 2,
+        driftPhase2: Math.random() * Math.PI * 2,
+        driftPhase3: Math.random() * Math.PI * 2,
+      };
+    }
+    this.particles = particles;
+    this.subject = cfg.subject;
+    this.transitionT = 0;
+  }
+
+  retarget() {
+    const cfg = config.constellation;
+    const count = this.particles.length;
+    const cloud = buildSubjectCloud(cfg.subject, count);
+    for (let i = 0; i < count; i++) {
+      const tgt = cloud[i % cloud.length];
+      this.particles[i].tx = tgt[0];
+      this.particles[i].ty = tgt[1];
+      this.particles[i].tz = tgt[2];
+    }
+    this.subject = cfg.subject;
+    this.transitionT = 0;
+  }
+
+  update(dt, time) {
+    const cfg = config.constellation;
+    // Self-sync: rebuild on count change, retarget on subject change.
+    if (this.particles.length !== (cfg.count | 0)) {
+      this.rebuild();
+    } else if (this.subject !== cfg.subject) {
+      this.retarget();
+    }
+
+    this.transitionT = Math.min(1, this.transitionT + dt * 0.7);
+    const tight = cfg.tightness;
+    const driftAmt = cfg.drift;
+    // Swirl spins the target cloud around the vertical (Y) axis.
+    const swirlAngle = time * cfg.swirlSpeed * 0.5;
+    const cs = Math.cos(swirlAngle), sn = Math.sin(swirlAngle);
+    const damping = 0.86;
+    // Looser spring during transition so particles re-aggregate gracefully.
+    const k = tight * (0.35 + 0.65 * this.transitionT);
+
+    for (const p of this.particles) {
+      // rotate target around Y: x' = x·cos + z·sin, z' = -x·sin + z·cos
+      const rtx = p.tx * cs + p.tz * sn;
+      const rtz = -p.tx * sn + p.tz * cs;
+      const rty = p.ty;
+      p.vx += (rtx - p.x) * k;
+      p.vy += (rty - p.y) * k;
+      p.vz += (rtz - p.z) * k;
+      // gentle 3D wander
+      p.vx += Math.sin(time * 1.30 + p.driftPhase)  * driftAmt * 0.0016;
+      p.vy += Math.cos(time * 1.07 + p.driftPhase2) * driftAmt * 0.0016;
+      p.vz += Math.sin(time * 1.19 + p.driftPhase3) * driftAmt * 0.0016;
+      p.vx *= damping;
+      p.vy *= damping;
+      p.vz *= damping;
+      p.x += p.vx;
+      p.y += p.vy;
+      p.z += p.vz;
+    }
+  }
+}
+
+// =============================================================
+// STAR CHART FIELD — holds the working set for the current
+// subject's hand-authored star graph: per-star twinkle phases and
+// per-edge breathing phases (assigned once, stable across frames).
+// Rebuilds only when the subject changes; drift comes from time.
+// =============================================================
+class StarChartField {
+  constructor() {
+    this.stars = [];
+    this.edges = [];
+    this.subject = null;
+  }
+
+  rebuild() {
+    const cfg = config.starchart;
+    const chart = STAR_CHARTS[cfg.subject] || STAR_CHARTS.physics;
+
+    this.stars = chart.stars.map(s => ({
+      x: s.x, y: s.y, z: s.z,
+      anchor: !!s.anchor,
+      twPhase: Math.random() * Math.PI * 2,   // twinkle phase
+      twRate: 0.45 + Math.random() * 0.65,    // per-star twinkle rate
+    }));
+
+    this.edges = chart.edges.map(e => ({
+      a: e.a, b: e.b,
+      broken: !!e.broken,
+      brPhase: Math.random() * Math.PI * 2,   // breathing phase
+      brRate: 0.55 + Math.random() * 0.5,     // breathing rate
+      // how far a broken edge survives (0..1) before it fades to nothing
+      cut: 0.42 + Math.random() * 0.36,
+    }));
+
+    this.subject = cfg.subject;
+  }
+
+  // Cheap self-sync — rebuild when the subject changes.
+  sync() {
+    if (this.subject !== config.starchart.subject) this.rebuild();
+  }
+}
+
 class Renderer {
   constructor(canvas) {
     this.canvas = canvas;
@@ -1501,7 +2158,11 @@ class Renderer {
     this.field = new ParticleField();
     this.contour = new ContourField();
     this.faceted = new FacetedField();
+    this.constellation = new ConstellationField();
+    this.starchart = new StarChartField();
     this.line = new GoldenLine();
+    this._glowSprites = null;        // cached per-palette glow sprites
+    this._glowSpriteKey = '';
     this.time = 0;
     this.cssW = window.innerWidth;
     this.cssH = window.innerHeight;
@@ -1537,6 +2198,10 @@ class Renderer {
       this.drawContours();
     } else if (config.style === 'faceted') {
       this.drawFaceted();
+    } else if (config.style === 'constellation') {
+      this.drawConstellation();
+    } else if (config.style === 'starchart') {
+      this.drawStarChart();
     } else {
       this.drawParticles();
     }
@@ -1980,6 +2645,212 @@ class Renderer {
     }
   }
 
+  // Build (and cache) one soft radial-gradient sprite per palette colour.
+  // Drawing a cached sprite per particle is far cheaper than calling
+  // createRadialGradient every frame.
+  _ensureGlowSprites(palette) {
+    const key = palette.join(',');
+    if (this._glowSpriteKey === key && this._glowSprites) return this._glowSprites;
+    const SZ = 64;
+    const sprites = palette.map(hex => {
+      const rgb = hexToRgb(hex);
+      const cv = document.createElement('canvas');
+      cv.width = SZ; cv.height = SZ;
+      const cx = cv.getContext('2d');
+      const grad = cx.createRadialGradient(SZ / 2, SZ / 2, 0, SZ / 2, SZ / 2, SZ / 2);
+      grad.addColorStop(0,    'rgba(' + rgb.r + ',' + rgb.g + ',' + rgb.b + ',1)');
+      grad.addColorStop(0.32, 'rgba(' + rgb.r + ',' + rgb.g + ',' + rgb.b + ',0.55)');
+      grad.addColorStop(1,    'rgba(' + rgb.r + ',' + rgb.g + ',' + rgb.b + ',0)');
+      cx.fillStyle = grad;
+      cx.fillRect(0, 0, SZ, SZ);
+      return cv;
+    });
+    this._glowSprites = sprites;
+    this._glowSpriteKey = key;
+    return sprites;
+  }
+
+  drawConstellation() {
+    const ctx = this.ctx;
+    const w = this.cssW, h = this.cssH;
+    const view = config.view;
+    const cfg = config.constellation;
+    const field = this.constellation;
+    if (field.particles.length === 0) field.rebuild();
+
+    const palette = CONSTELLATION_PALETTES[cfg.palette] || CONSTELLATION_PALETTES['Aurora'];
+    const palRgb = palette.map(hexToRgb);
+    const S = cfg.worldScale;
+    const depthScale = cfg.depthScale != null ? cfg.depthScale : 1;
+    const sizeMin = cfg.sizeMin, sizeMax = cfg.sizeMax;
+    const glow = cfg.glow;
+
+    if (glow > 0.005) {
+      // Additive glow sprites — overlapping dense regions bloom toward white.
+      const sprites = this._ensureGlowSprites(palette);
+      ctx.save();
+      ctx.globalCompositeOperation = 'lighter';
+      ctx.globalAlpha = 0.35 + glow * 0.55;
+      for (const p of field.particles) {
+        const pr = project(p.x * S, p.y * S, p.z * S * depthScale, view, w, h);
+        if (!pr) continue;
+        if (pr.sx < -60 || pr.sx > w + 60 || pr.sy < -60 || pr.sy > h + 60) continue;
+        const base = (sizeMin + (sizeMax - sizeMin) * p.sizeT) * (450 / pr.depth);
+        const r = base * (1.4 + glow * 2.4);
+        if (r < 1) continue;
+        const ci = (p.colorT * palRgb.length) | 0;
+        const sprite = sprites[ci < palRgb.length ? ci : 0];
+        ctx.drawImage(sprite, pr.sx - r, pr.sy - r, r * 2, r * 2);
+      }
+      ctx.restore();
+    } else {
+      // Flat dots — crisp, no bloom.
+      for (const p of field.particles) {
+        const pr = project(p.x * S, p.y * S, p.z * S * depthScale, view, w, h);
+        if (!pr) continue;
+        if (pr.sx < -60 || pr.sx > w + 60 || pr.sy < -60 || pr.sy > h + 60) continue;
+        const size = (sizeMin + (sizeMax - sizeMin) * p.sizeT) * (450 / pr.depth);
+        if (size < 0.6) continue;
+        const ci = (p.colorT * palRgb.length) | 0;
+        const c = palRgb[ci < palRgb.length ? ci : 0];
+        ctx.fillStyle = 'rgb(' + c.r + ',' + c.g + ',' + c.b + ')';
+        ctx.beginPath();
+        ctx.arc(pr.sx, pr.sy, size * 0.5, 0, Math.PI * 2);
+        ctx.fill();
+      }
+    }
+  }
+
+  // =============================================================
+  // STAR CHART — the current subject's hand-authored star graph,
+  // drawn as a quiet navigation diagram: hairline connectors (some
+  // incomplete, dissolving into the dark), restrained star points,
+  // a few brighter anchor stars. Edges breathe; anchors twinkle.
+  // The whole graph drifts very slowly around the vertical axis.
+  // =============================================================
+  drawStarChart() {
+    const ctx = this.ctx;
+    const w = this.cssW, h = this.cssH;
+    const view = config.view;
+    const cfg = config.starchart;
+    const field = this.starchart;
+    field.sync();
+    if (field.stars.length === 0) return;
+
+    const S = cfg.worldScale;
+    const depthScale = cfg.depthScale != null ? cfg.depthScale : 1;
+    const drift = this.time * cfg.driftSpeed * 0.5;
+    const cd = Math.cos(drift), sd = Math.sin(drift);
+    // a barely-there vertical bob so the chart never feels frozen
+    const bob = Math.sin(this.time * 0.18) * 0.015;
+    const t = this.time;
+
+    const lineRgb = hexToRgb(STARCHART_LINE_COLORS[cfg.lineColor] || STARCHART_LINE_COLORS['Silver']);
+    const starRgb = hexToRgb(STARCHART_STAR_COLORS[cfg.starColor] || STARCHART_STAR_COLORS['Warm White']);
+    const master = cfg.brightness;
+
+    // project every star once
+    const P = new Array(field.stars.length);
+    for (let i = 0; i < field.stars.length; i++) {
+      const s = field.stars[i];
+      const rx = s.x * cd + s.z * sd;
+      const rz = -s.x * sd + s.z * cd;
+      P[i] = project(rx * S, (s.y + bob) * S, rz * S * depthScale, view, w, h);
+    }
+
+    // ---- edges (hairlines) — drawn first, beneath the stars -------------
+    ctx.lineCap = 'round';
+    for (const e of field.edges) {
+      const a = P[e.a], b = P[e.b];
+      if (!a || !b) continue;
+
+      // breathing — a slow sine, never fully off so the structure persists
+      const breathe = 0.5 + 0.5 * Math.sin(t * e.brRate * 0.6 + e.brPhase);
+      const edgeAlpha = master * (0.14 + breathe * (0.10 + cfg.breathing * 0.5));
+      if (edgeAlpha < 0.004) continue;
+
+      // a broken edge stops partway and dissolves — "naturally disappears"
+      let ex = b.sx, ey = b.sy;
+      if (e.broken) {
+        const cut = Math.max(0.18, e.cut - cfg.brokenness * 0.34);
+        ex = a.sx + (b.sx - a.sx) * cut;
+        ey = a.sy + (b.sy - a.sy) * cut;
+      }
+      this._drawChartEdge(a.sx, a.sy, ex, ey, lineRgb, edgeAlpha, cfg, e.broken);
+    }
+
+    // ---- stars ----------------------------------------------------------
+    for (let i = 0; i < field.stars.length; i++) {
+      const p = P[i];
+      if (!p) continue;
+      if (p.sx < -40 || p.sx > w + 40 || p.sy < -40 || p.sy > h + 40) continue;
+      this._drawChartStar(p, field.stars[i], starRgb, cfg, master, t);
+    }
+  }
+
+  // A hairline connector. Both ends fade softly so the connection reads
+  // as "found", not pinned. A broken edge's b-end dissolves fully to 0.
+  _drawChartEdge(ax, ay, bx, by, rgb, alpha, cfg, broken) {
+    const ctx = this.ctx;
+    const col = (al) => 'rgba(' + rgb.r + ',' + rgb.g + ',' + rgb.b + ',' + Math.max(0, al).toFixed(3) + ')';
+
+    // very slight glow underneath — solid + faint, barely there
+    if (cfg.lineGlow > 0.01) {
+      ctx.strokeStyle = col(alpha * cfg.lineGlow * 0.7);
+      ctx.lineWidth = cfg.lineWidth * 3.0;
+      ctx.beginPath(); ctx.moveTo(ax, ay); ctx.lineTo(bx, by); ctx.stroke();
+    }
+
+    const grad = ctx.createLinearGradient(ax, ay, bx, by);
+    grad.addColorStop(0,    col(alpha * 0.32));
+    grad.addColorStop(0.20, col(alpha));
+    grad.addColorStop(0.74, col(alpha * (broken ? 0.5 : 0.92)));
+    grad.addColorStop(1,    col(broken ? 0 : alpha * 0.42));
+    ctx.strokeStyle = grad;
+    ctx.lineWidth = cfg.lineWidth;
+    ctx.beginPath(); ctx.moveTo(ax, ay); ctx.lineTo(bx, by); ctx.stroke();
+  }
+
+  // A star point. Anchor stars are larger/brighter with a faint halo and
+  // a tiny white centre; plain stars stay restrained. Both twinkle slowly.
+  _drawChartStar(p, s, rgb, cfg, master, t) {
+    const ctx = this.ctx;
+    const dscale = 420 / p.depth;
+    let size = (s.anchor ? cfg.anchorSize : cfg.starSize) * dscale;
+
+    // twinkle — subtle, slow; anchors twinkle more than plain stars
+    const tw = Math.sin(t * s.twRate * 0.5 + s.twPhase);
+    const twAmt = s.anchor ? cfg.twinkle : cfg.twinkle * 0.35;
+    const twMul = 1 + tw * twAmt * 0.5;
+    size *= twMul;
+    if (size < 0.25) return;
+
+    const aBase = s.anchor ? 0.95 : 0.52;
+    const alpha = Math.min(1, master * aBase * (0.82 + 0.18 * twMul));
+    const col = (al) => 'rgba(' + rgb.r + ',' + rgb.g + ',' + rgb.b + ',' + Math.max(0, al).toFixed(3) + ')';
+
+    // faint halo — anchors only, very subtle
+    if (s.anchor) {
+      const hr = size * 3.6;
+      const gh = ctx.createRadialGradient(p.sx, p.sy, 0, p.sx, p.sy, hr);
+      gh.addColorStop(0,   col(alpha * 0.26));
+      gh.addColorStop(0.5, col(alpha * 0.09));
+      gh.addColorStop(1,   col(0));
+      ctx.fillStyle = gh;
+      ctx.beginPath(); ctx.arc(p.sx, p.sy, hr, 0, Math.PI * 2); ctx.fill();
+    }
+
+    // crisp core
+    ctx.fillStyle = col(alpha);
+    ctx.beginPath(); ctx.arc(p.sx, p.sy, size, 0, Math.PI * 2); ctx.fill();
+
+    // tiny white centre on anchors → reads as a deliberate navigation mark
+    if (s.anchor) {
+      ctx.fillStyle = 'rgba(255,255,255,' + Math.min(0.9, alpha * 0.8).toFixed(3) + ')';
+      ctx.beginPath(); ctx.arc(p.sx, p.sy, size * 0.42, 0, Math.PI * 2); ctx.fill();
+    }
+  }
+
   drawGoldenLine() {
     const ctx = this.ctx;
     const w = this.cssW, h = this.cssH;
@@ -2130,10 +3001,15 @@ function buildPanel() {
   const isParticles = config.style === 'particles';
   const isContours = config.style === 'contours';
   const isFaceted = config.style === 'faceted';
-  const groupOrder = ['view','terrain'];
+  const isConstellation = config.style === 'constellation';
+  const isStarChart = config.style === 'starchart';
+  // Constellation & star chart live on their own plane — no noise terrain.
+  const groupOrder = (isConstellation || isStarChart) ? ['view'] : ['view','terrain'];
   if (isParticles) groupOrder.push('particles');
   if (isContours) groupOrder.push('contours');
   if (isFaceted) groupOrder.push('faceted');
+  if (isConstellation) groupOrder.push('constellation');
+  if (isStarChart) groupOrder.push('starchart');
   groupOrder.push('goldenLine', 'morningStar');
 
   for (const groupKey of groupOrder) {
@@ -2474,6 +3350,9 @@ function loop() {
     renderer.line.update(dt, renderer.time);
     const head = renderer.line.getHead();
     renderer.field.update(dt, renderer.time, head);
+    if (config.style === 'constellation') {
+      renderer.constellation.update(dt, renderer.time);
+    }
   }
   renderer.draw();
   requestAnimationFrame(loop);
