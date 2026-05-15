@@ -3,7 +3,16 @@
  * Mirrors the web lab's SCHEMA so we can copy values between the two.
  */
 
-import { CHAR_GROUPS, EDGE_PARTICLE_PALETTES, FACET_HIGHLIGHTS, PARTICLE_COLORS, PALETTES } from './charsets';
+import {
+  CHAR_GROUPS,
+  EDGE_PARTICLE_PALETTES,
+  FACET_HIGHLIGHTS,
+  PARTICLE_COLORS,
+  PALETTES,
+  STARCHART_LINE_COLORS,
+  STARCHART_STAR_COLORS,
+} from './charsets';
+import { STARCHART_SUBJECTS } from './starcharts';
 
 export type GroupKey =
   | 'view'
@@ -11,6 +20,7 @@ export type GroupKey =
   | 'particles'
   | 'contours'
   | 'faceted'
+  | 'starchart'
   | 'goldenLine'
   | 'morningStar';
 
@@ -25,6 +35,7 @@ export const GROUP_TITLES: Record<GroupKey, string> = {
   particles:   'Particles',
   contours:    'Contours',
   faceted:     'Faceted',
+  starchart:   'Star Chart',
   goldenLine:  'Golden Line',
   morningStar: 'Morning Star',
 };
@@ -80,6 +91,22 @@ export const SCHEMA: Record<GroupKey, FieldSchema[]> = {
     { kind: 'range',  key: 'edgeParticleSize', label: 'Dot Size',    min: 0.5,  max: 5,    step: 0.1 },
     { kind: 'range',  key: 'edgeOpacity',      label: 'Edge Alpha',  min: 0,    max: 1,    step: 0.02 },
     { kind: 'range',  key: 'edgeSpeed',        label: 'Flow Speed',  min: 0,    max: 1.5,  step: 0.02 },
+  ],
+  starchart: [
+    { kind: 'select', key: 'subject',    label: 'Subject',     options: STARCHART_SUBJECTS },
+    { kind: 'select', key: 'lineColor',  label: 'Line Color',  options: Object.keys(STARCHART_LINE_COLORS) },
+    { kind: 'select', key: 'starColor',  label: 'Star Color',  options: Object.keys(STARCHART_STAR_COLORS) },
+    { kind: 'range',  key: 'brightness', label: 'Brightness',  min: 0.2,  max: 1.2,  step: 0.02 },
+    { kind: 'range',  key: 'breathing',  label: 'Breathing',   min: 0,    max: 1,    step: 0.02 },
+    { kind: 'range',  key: 'brokenness', label: 'Brokenness',  min: 0,    max: 1,    step: 0.02 },
+    { kind: 'range',  key: 'lineWidth',  label: 'Line Width',  min: 0.3,  max: 1.6,  step: 0.05 },
+    { kind: 'range',  key: 'lineGlow',   label: 'Line Glow',   min: 0,    max: 0.6,  step: 0.02 },
+    { kind: 'range',  key: 'anchorSize', label: 'Anchor Size', min: 1.5,  max: 6,    step: 0.1 },
+    { kind: 'range',  key: 'starSize',   label: 'Star Size',   min: 0.6,  max: 4,    step: 0.1 },
+    { kind: 'range',  key: 'twinkle',    label: 'Twinkle',     min: 0,    max: 1,    step: 0.02 },
+    { kind: 'range',  key: 'driftSpeed', label: 'Drift Speed', min: 0,    max: 0.4,  step: 0.005 },
+    { kind: 'range',  key: 'worldScale', label: 'Scale',       min: 200,  max: 1100, step: 10 },
+    { kind: 'range',  key: 'depthScale', label: 'Depth',       min: 0.2,  max: 2.0,  step: 0.05 },
   ],
   goldenLine: [
     { kind: 'check',  key: 'enabled',              label: 'Enabled' },

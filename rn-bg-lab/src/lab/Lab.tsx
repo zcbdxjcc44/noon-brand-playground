@@ -22,6 +22,7 @@ import { GoldenLine } from './GoldenLine';
 import Particles from './Particles';
 import Contours from './Contours';
 import Faceted from './Faceted';
+import StarChart from './StarChart';
 import GoldenLineSkia from './GoldenLineSkia';
 import MorningStar from './MorningStar';
 import Panel from './Panel';
@@ -130,6 +131,9 @@ export default function Lab() {
         )}
         {config.style === 'faceted' && (
           <Faceted config={config} width={width} height={height} time={time} />
+        )}
+        {config.style === 'starchart' && (
+          <StarChart config={config} width={width} height={height} time={time} />
         )}
         {config.goldenLine.enabled && (
           <GoldenLineSkia trail={trail} config={config} width={width} height={height} time={time} />

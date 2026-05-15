@@ -23,6 +23,12 @@ export const DEFAULT_CONFIG: LabConfig = {
     edgeMode: 'particles', edgeColor: 'Spectrum', edgeDensity: 6,
     edgeParticleSize: 1.8, edgeOpacity: 0.85, edgeSpeed: 0.18,
   },
+  starchart:   {
+    subject: 'physics', worldScale: 560, depthScale: 1.0, driftSpeed: 0.05,
+    lineColor: 'Silver', starColor: 'Warm White', lineWidth: 0.6, lineGlow: 0.15,
+    breathing: 0.5, brokenness: 0.4, anchorSize: 4.1, starSize: 1.6,
+    twinkle: 0.3, brightness: 0.7,
+  },
   goldenLine:  {
     enabled: true, pathType: 'noise', speed: 0.18,
     width: 1.6, glowRadius: 70, color: '#c9a227',
@@ -114,6 +120,19 @@ export const PRESETS: Preset[] = [
       faceted:    { gridCellsX: 13, gridCellsZ: 14, meshJitter: 0.19, lightPitch: 0.32, lightYaw: -1.2, ambient: 0.16, contrast: 0.92, fill: true, highlight: 'Void Step', fillOpacity: 0.69, edgeMode: 'lines', edgeColor: 'Void Step', edgeDensity: 5, edgeParticleSize: 0.5, edgeOpacity: 1, edgeSpeed: 0.16 },
       goldenLine: { ...DEFAULT_CONFIG.goldenLine, pathType: 'noise', speed: 0.16, width: 1.8, glowRadius: 85, color: '#c9a227', disturbanceRadius: 0, disturbanceStrength: 0 },
       morningStar:{ ...DEFAULT_CONFIG.morningStar, x: 0.78, y: 0.20, size: 52, rayLength: 3.6, twinkleSpeed: 0.30, color: '#f5e0a0', opacity: 0.70 },
+    },
+  },
+  {
+    name: 'Star Chart',
+    desc: 'Hidden navigation lines · quiet & vast',
+    config: {
+      ...DEFAULT_CONFIG,
+      style: 'starchart', palette: 'void',
+      view:       { pitch: 0.30, yaw: -0.45, distance: 1250, fov: 520, cameraHeight: 300 },
+      terrain:    { scale: 0.006, amplitude: 80, drift: 0.08, contrast: 0.65, secondaryNoise: 0.3 },
+      starchart:  { subject: 'physics', worldScale: 560, depthScale: 1, driftSpeed: 0.225, lineColor: 'Silver', starColor: 'Silver', lineWidth: 1.25, lineGlow: 0.2, breathing: 0.72, brokenness: 0.3, anchorSize: 6, starSize: 2.9, twinkle: 0.48, brightness: 1.2 },
+      goldenLine: { ...DEFAULT_CONFIG.goldenLine, enabled: false, pathType: 'noise', speed: 0.16, width: 1.4, glowRadius: 60, color: '#c9a227', disturbanceRadius: 0, disturbanceStrength: 0 },
+      morningStar:{ ...DEFAULT_CONFIG.morningStar, enabled: false, x: 0.80, y: 0.18, size: 40, rayLength: 3.0, twinkleSpeed: 0.30, color: '#f5e0a0', opacity: 0.5 },
     },
   },
 ];

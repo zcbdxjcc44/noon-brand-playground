@@ -96,3 +96,28 @@ export const EDGE_PARTICLE_PALETTES: Record<string, string[]> = {
   'Cool':       ['#5cc7ff', '#9b8aff', '#7cd7a0'],
   'Warm':       ['#ff4d6d', '#ffa040', '#ffdf6e'],
 };
+
+/**
+ * Star Chart — hairline connector colors (soft white / warm silver) and
+ * star-point colors. Kept deliberately quiet: restrained, editorial.
+ */
+export const STARCHART_LINE_COLORS: Record<string, string> = {
+  'Silver': '#c3c7cf',
+  'Warm':   '#ddd5c4',
+  'White':  '#e9ebef',
+};
+export const STARCHART_STAR_COLORS: Record<string, string> = {
+  'Warm White': '#f1ebdd',
+  'Cool White': '#eaedf2',
+  'Silver':     '#cdd1d8',
+};
+
+/** Hex `#rrggbb` → {r,g,b} 0–255. */
+export function hexToRgb(hex: string): { r: number; g: number; b: number } {
+  const h = hex.replace('#', '');
+  return {
+    r: parseInt(h.slice(0, 2), 16),
+    g: parseInt(h.slice(2, 4), 16),
+    b: parseInt(h.slice(4, 6), 16),
+  };
+}

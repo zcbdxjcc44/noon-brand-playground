@@ -3,7 +3,7 @@
  * presets and saved data round-trip cleanly between the two.
  */
 
-export type Style = 'particles' | 'contours' | 'faceted';
+export type Style = 'particles' | 'contours' | 'faceted' | 'starchart';
 export type Palette = 'void' | 'paper';
 
 export interface ViewConfig {
@@ -70,6 +70,23 @@ export interface FacetedConfig {
   edgeSpeed: number;
 }
 
+export interface StarChartConfig {
+  subject: string;         // STAR_CHARTS key
+  worldScale: number;
+  depthScale: number;
+  driftSpeed: number;
+  lineColor: string;       // STARCHART_LINE_COLORS key
+  starColor: string;       // STARCHART_STAR_COLORS key
+  lineWidth: number;
+  lineGlow: number;
+  breathing: number;
+  brokenness: number;
+  anchorSize: number;
+  starSize: number;
+  twinkle: number;
+  brightness: number;
+}
+
 export interface GoldenLineConfig {
   enabled: boolean;
   pathType: 'noise' | 'sine' | 'straight' | 'curve';
@@ -102,6 +119,7 @@ export interface LabConfig {
   charset: CharsetWeights;
   contours: ContoursConfig;
   faceted: FacetedConfig;
+  starchart: StarChartConfig;
   goldenLine: GoldenLineConfig;
   morningStar: MorningStarConfig;
 }
