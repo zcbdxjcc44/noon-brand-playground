@@ -147,7 +147,7 @@ function ballOffset(r: number): Vec3 {
 }
 
 /** Sample a single 3D point [x, y, z] from a primitive. */
-function samplePrimitive(p: Primitive): Vec3 {
+export function samplePrimitive(p: Primitive): Vec3 {
   const cx = p.cx || 0, cy = p.cy || 0, cz = p.cz || 0;
   if (p.kind === 'sphere') {
     const R = p.r || 0.5;

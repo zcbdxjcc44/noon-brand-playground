@@ -3,7 +3,7 @@
  * presets and saved data round-trip cleanly between the two.
  */
 
-export type Style = 'particles' | 'contours' | 'faceted' | 'constellation' | 'starchart';
+export type Style = 'particles' | 'contours' | 'faceted' | 'constellation' | 'starchart' | 'sand';
 export type Palette = 'void' | 'paper';
 
 export interface ViewConfig {
@@ -84,6 +84,17 @@ export interface ConstellationConfig {
   palette: string;         // CONSTELLATION_PALETTES key
 }
 
+export interface SandConfig {
+  subject: string;         // SUBJECTS key
+  palette: string;         // SAND_PALETTES key
+  grainCount: number;
+  worldScale: number;
+  depthScale: number;
+  grainSize: number;
+  flowSpeed: number;
+  spread: number;
+}
+
 export interface StarChartConfig {
   subject: string;         // STAR_CHARTS key
   worldScale: number;
@@ -135,6 +146,7 @@ export interface LabConfig {
   faceted: FacetedConfig;
   constellation: ConstellationConfig;
   starchart: StarChartConfig;
+  sand: SandConfig;
   goldenLine: GoldenLineConfig;
   morningStar: MorningStarConfig;
 }

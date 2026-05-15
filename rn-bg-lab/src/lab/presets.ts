@@ -34,6 +34,10 @@ export const DEFAULT_CONFIG: LabConfig = {
     breathing: 0.5, brokenness: 0.4, anchorSize: 4.1, starSize: 1.6,
     twinkle: 0.3, brightness: 0.7,
   },
+  sand:        {
+    subject: 'physics', palette: 'Dune', grainCount: 2600, worldScale: 560,
+    depthScale: 1.0, grainSize: 2.2, flowSpeed: 0.5, spread: 1.0,
+  },
   goldenLine:  {
     enabled: true, pathType: 'noise', speed: 0.18,
     width: 1.6, glowRadius: 70, color: '#c9a227',
@@ -136,6 +140,19 @@ export const PRESETS: Preset[] = [
       view:       { pitch: 0.36, yaw: -1.24, distance: 1130, fov: 360, cameraHeight: 390 },
       terrain:    { scale: 0.006, amplitude: 80, drift: 0.08, contrast: 0.65, secondaryNoise: 0.3 },
       constellation: { subject: 'geography', count: 1100, worldScale: 610, depthScale: 1, tightness: 0.25, drift: 0.95, swirlSpeed: 0.23, sizeMin: 3, sizeMax: 7, glow: 0, palette: 'Aurora' },
+      goldenLine: { ...DEFAULT_CONFIG.goldenLine, enabled: false, pathType: 'noise', speed: 0.16, width: 1.4, glowRadius: 60, color: '#c9a227', disturbanceRadius: 0, disturbanceStrength: 0 },
+      morningStar:{ ...DEFAULT_CONFIG.morningStar, enabled: false, x: 0.80, y: 0.18, size: 40, rayLength: 3.0, twinkleSpeed: 0.30, color: '#f5e0a0', opacity: 0.5 },
+    },
+  },
+  {
+    name: 'Drifting Sands',
+    desc: 'Flowing sand · subject forms in the dunes',
+    config: {
+      ...DEFAULT_CONFIG,
+      style: 'sand', palette: 'void',
+      view:       { pitch: 0.32, yaw: -0.40, distance: 1050, fov: 520, cameraHeight: 300 },
+      terrain:    { scale: 0.006, amplitude: 80, drift: 0.08, contrast: 0.65, secondaryNoise: 0.3 },
+      sand:       { subject: 'math', palette: 'Dune', grainCount: 5000, worldScale: 480, depthScale: 1, grainSize: 3.3, flowSpeed: 0.2, spread: 1.0 },
       goldenLine: { ...DEFAULT_CONFIG.goldenLine, enabled: false, pathType: 'noise', speed: 0.16, width: 1.4, glowRadius: 60, color: '#c9a227', disturbanceRadius: 0, disturbanceStrength: 0 },
       morningStar:{ ...DEFAULT_CONFIG.morningStar, enabled: false, x: 0.80, y: 0.18, size: 40, rayLength: 3.0, twinkleSpeed: 0.30, color: '#f5e0a0', opacity: 0.5 },
     },

@@ -11,6 +11,7 @@ import {
   PALETTES,
   STARCHART_LINE_COLORS,
   STARCHART_STAR_COLORS,
+  SAND_PALETTES,
 } from './charsets';
 import { STARCHART_SUBJECTS } from './starcharts';
 import { CONSTELLATION_PALETTES, CONSTELLATION_SUBJECTS } from './subjects';
@@ -23,6 +24,7 @@ export type GroupKey =
   | 'faceted'
   | 'constellation'
   | 'starchart'
+  | 'sand'
   | 'goldenLine'
   | 'morningStar';
 
@@ -39,6 +41,7 @@ export const GROUP_TITLES: Record<GroupKey, string> = {
   faceted:       'Faceted',
   constellation: 'Constellation',
   starchart:     'Star Chart',
+  sand:          'Sand',
   goldenLine:    'Golden Line',
   morningStar:   'Morning Star',
 };
@@ -123,6 +126,16 @@ export const SCHEMA: Record<GroupKey, FieldSchema[]> = {
     { kind: 'range',  key: 'driftSpeed', label: 'Drift Speed', min: 0,    max: 0.4,  step: 0.005 },
     { kind: 'range',  key: 'worldScale', label: 'Scale',       min: 200,  max: 1100, step: 10 },
     { kind: 'range',  key: 'depthScale', label: 'Depth',       min: 0.2,  max: 2.0,  step: 0.05 },
+  ],
+  sand: [
+    { kind: 'select', key: 'subject',    label: 'Subject',    options: CONSTELLATION_SUBJECTS },
+    { kind: 'select', key: 'palette',    label: 'Palette',    options: Object.keys(SAND_PALETTES) },
+    { kind: 'range',  key: 'grainCount', label: 'Grains',     min: 600,  max: 5000, step: 100 },
+    { kind: 'range',  key: 'grainSize',  label: 'Grain Size', min: 0.5,  max: 5,    step: 0.1 },
+    { kind: 'range',  key: 'flowSpeed',  label: 'Flow Speed', min: 0,    max: 1.5,  step: 0.02 },
+    { kind: 'range',  key: 'spread',     label: 'Spread',     min: 0.2,  max: 1.5,  step: 0.02 },
+    { kind: 'range',  key: 'worldScale', label: 'Scale',      min: 200,  max: 1100, step: 10 },
+    { kind: 'range',  key: 'depthScale', label: 'Depth',      min: 0.2,  max: 2.0,  step: 0.05 },
   ],
   goldenLine: [
     { kind: 'check',  key: 'enabled',              label: 'Enabled' },

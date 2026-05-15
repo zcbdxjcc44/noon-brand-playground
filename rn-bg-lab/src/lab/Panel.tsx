@@ -114,15 +114,17 @@ export default function Panel(props: PanelProps) {
   const isFaceted = config.style === 'faceted';
   const isConstellation = config.style === 'constellation';
   const isStarChart = config.style === 'starchart';
+  const isSand = config.style === 'sand';
 
-  // Constellation & Star Chart live on their own plane — no noise terrain.
+  // These subject-based styles live on their own plane — no noise terrain.
   const groupOrder: GroupKey[] =
-    isConstellation || isStarChart ? ['view'] : ['view', 'terrain'];
+    isConstellation || isStarChart || isSand ? ['view'] : ['view', 'terrain'];
   if (isParticles)     groupOrder.push('particles');
   if (isContours)      groupOrder.push('contours');
   if (isFaceted)       groupOrder.push('faceted');
   if (isConstellation) groupOrder.push('constellation');
   if (isStarChart)     groupOrder.push('starchart');
+  if (isSand)          groupOrder.push('sand');
   groupOrder.push('goldenLine', 'morningStar');
 
   return (
@@ -160,7 +162,7 @@ export default function Panel(props: PanelProps) {
         {/* Style + Palette */}
         <Section title="Style & Palette">
           <Segmented
-            options={['particles', 'contours', 'faceted', 'constellation', 'starchart']}
+            options={['particles', 'contours', 'faceted', 'constellation', 'starchart', 'sand']}
             value={config.style}
             onChange={v => props.onUpdateStyle(v as Style)}
           />

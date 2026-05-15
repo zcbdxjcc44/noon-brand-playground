@@ -112,6 +112,17 @@ export const STARCHART_STAR_COLORS: Record<string, string> = {
   'Silver':     '#cdd1d8',
 };
 
+/**
+ * Sand-style palettes — warm desert tones. lit (top) / mid (body) /
+ * shadow (bottom) / speckle (grain highlight).
+ */
+export const SAND_PALETTES: Record<string, { lit: string; mid: string; shadow: string; speckle: string }> = {
+  'Dune':  { lit: '#e8cf9a', mid: '#cfa86a', shadow: '#7d5f37', speckle: '#fbe7c0' },
+  'Ember': { lit: '#e0a878', mid: '#c1714a', shadow: '#6e3526', speckle: '#f4cda0' },
+  'Ash':   { lit: '#cdd0d6', mid: '#9aa0aa', shadow: '#4c5159', speckle: '#eef0f3' },
+  'Pearl': { lit: '#f2ece0', mid: '#d9d2c3', shadow: '#9c9482', speckle: '#ffffff' },
+};
+
 /** Hex `#rrggbb` → {r,g,b} 0–255. */
 export function hexToRgb(hex: string): { r: number; g: number; b: number } {
   const h = hex.replace('#', '');

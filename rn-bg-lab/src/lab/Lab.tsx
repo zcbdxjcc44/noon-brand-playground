@@ -20,11 +20,13 @@ import { PALETTES, CHAR_GROUPS } from './charsets';
 import type { LabConfig, Style } from './types';
 import { GoldenLine } from './GoldenLine';
 import { ConstellationField } from './ConstellationField';
+import { SandField } from './SandField';
 import Particles from './Particles';
 import Contours from './Contours';
 import Faceted from './Faceted';
 import Constellation from './Constellation';
 import StarChart from './StarChart';
+import Sand from './Sand';
 import GoldenLineSkia from './GoldenLineSkia';
 import MorningStar from './MorningStar';
 import Panel from './Panel';
@@ -47,10 +49,12 @@ export default function Lab() {
   if (!goldenRef.current) goldenRef.current = new GoldenLine();
   const constellationRef = useRef<ConstellationField | null>(null);
   if (!constellationRef.current) constellationRef.current = new ConstellationField();
+  const sandRef = useRef<SandField | null>(null);
+  if (!sandRef.current) sandRef.current = new SandField();
   const configRef = useRef(config);
   configRef.current = config;
 
-  // RAF tick — drives time, updates GoldenLine + ConstellationField physics.
+  // RAF tick — drives time, updates GoldenLine + Constellation/Sand physics.
   useEffect(() => {
     let raf: number;
     let last = performance.now();
@@ -63,6 +67,8 @@ export default function Lab() {
         goldenRef.current!.update(dt, nt, c.goldenLine);
         if (c.style === 'constellation') {
           constellationRef.current!.update(dt, nt, c);
+        } else if (c.style === 'sand') {
+          sandRef.current!.update(dt, nt, c);
         }
         return nt;
       });
@@ -151,6 +157,15 @@ export default function Lab() {
         )}
         {config.style === 'starchart' && (
           <StarChart config={config} width={width} height={height} time={time} />
+        )}
+        {config.style === 'sand' && (
+          <Sand
+            config={config}
+            field={sandRef.current}
+            width={width}
+            height={height}
+            time={time}
+          />
         )}
         {config.goldenLine.enabled && (
           <GoldenLineSkia trail={trail} config={config} width={width} height={height} time={time} />
