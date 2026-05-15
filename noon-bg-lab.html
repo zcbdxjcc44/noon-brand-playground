@@ -575,17 +575,17 @@ const STAR_CHARTS = {
       { a: 12, b: 13 }, { a: 13, b: 14 }, { a: 14, b: 15, broken: true }, { a: 15, b: 8 },
     ],
   },
-  // a bigger planet ball wrapped by a smaller strongly-tilted halo ring —
-  // a ringed-planet read. Ball and ring are not connected.
+  // a 3D planet ball (octahedron cage) wrapped by a smaller strongly-tilted
+  // halo ring — a ringed-planet read. Ball and ring are not connected.
   geography: {
     name: 'Geography',
     stars: [
-      { x:  0.000, y:  0.437, z:  0.000, anchor: true },   // planet ball →
-      { x: -0.386, y:  0.218, z:  0.000 },
-      { x: -0.386, y: -0.218, z:  0.000 },
+      { x:  0.437, y:  0.000, z:  0.000 },                 // planet ball (octahedron) →
+      { x:  0.000, y:  0.437, z:  0.000, anchor: true },
+      { x:  0.000, y:  0.000, z:  0.437 },
+      { x: -0.437, y:  0.000, z:  0.000 },
       { x:  0.000, y: -0.437, z:  0.000 },
-      { x:  0.386, y: -0.218, z:  0.000 },
-      { x:  0.386, y:  0.218, z:  0.000 },
+      { x:  0.000, y:  0.000, z: -0.437 },
       { x:  0.595, y:  0.122, z:  0.000, anchor: true },   // tilted halo ring →
       { x:  0.384, y:  0.256, z:  0.390 },
       { x: -0.051, y:  0.243, z:  0.557 },
@@ -596,7 +596,9 @@ const STAR_CHARTS = {
       { x:  0.454, y: -0.090, z: -0.390 },
     ],
     edges: [
-      { a: 0, b: 1 }, { a: 1, b: 2 }, { a: 2, b: 3, broken: true }, { a: 3, b: 4 }, { a: 4, b: 5 }, { a: 5, b: 0 },
+      { a: 0, b: 1 }, { a: 0, b: 2 }, { a: 0, b: 4, broken: true }, { a: 0, b: 5 },
+      { a: 1, b: 2 }, { a: 1, b: 3 }, { a: 1, b: 5 }, { a: 2, b: 3, broken: true },
+      { a: 2, b: 4 }, { a: 3, b: 4 }, { a: 3, b: 5 }, { a: 4, b: 5 },
       { a: 6, b: 7 }, { a: 7, b: 8 }, { a: 8, b: 9 }, { a: 9, b: 10, broken: true },
       { a: 10, b: 11 }, { a: 11, b: 12 }, { a: 12, b: 13 }, { a: 13, b: 6, broken: true },
     ],
