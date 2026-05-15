@@ -445,7 +445,16 @@ const PALETTES = {
   }
 };
 
-const STYLES = ['particles', 'contours', 'faceted', 'constellation', 'starchart'];
+const STYLES = ['particles', 'contours', 'faceted', 'constellation', 'starchart', 'sand'];
+
+// Sand-style palettes — warm desert tones. Each: lit (top), mid (body),
+// shadow (bottom), speckle (grain highlight).
+const SAND_PALETTES = {
+  'Dune':  { lit: '#e8cf9a', mid: '#cfa86a', shadow: '#7d5f37', speckle: '#fbe7c0' },
+  'Ember': { lit: '#e0a878', mid: '#c1714a', shadow: '#6e3526', speckle: '#f4cda0' },
+  'Ash':   { lit: '#cdd0d6', mid: '#9aa0aa', shadow: '#4c5159', speckle: '#eef0f3' },
+  'Pearl': { lit: '#f2ece0', mid: '#d9d2c3', shadow: '#9c9482', speckle: '#ffffff' },
+};
 
 // Star Chart — hairline connector colours (soft white / warm silver) and
 // star-point colours. Kept deliberately quiet: this style is restrained,
@@ -990,6 +999,16 @@ const DEFAULT_CONFIG = {
     twinkle:    0.3,
     brightness: 0.7
   },
+  sand: {
+    subject:    'physics',
+    palette:    'Dune',
+    grainCount: 2600,
+    worldScale: 560,
+    depthScale: 1.0,
+    grainSize:  2.2,
+    flowSpeed:  0.5,
+    spread:     1.0
+  },
   goldenLine:  {
     enabled: true, pathType: 'noise', speed: 0.18,
     width: 1.6, glowRadius: 70, color: '#c9a227',
@@ -1105,13 +1124,24 @@ const SCHEMA = {
     { key: 'driftSpeed', label: 'Drift Speed', type: 'range',  min: 0,    max: 0.4,  step: 0.005 },
     { key: 'worldScale', label: 'Scale',       type: 'range',  min: 200,  max: 1100, step: 10 },
     { key: 'depthScale', label: 'Depth',       type: 'range',  min: 0.2,  max: 2.0,  step: 0.05 }
+  ],
+  sand: [
+    { key: 'subject',    label: 'Subject',    type: 'select', options: ['math','physics','chemistry','biology','geography','quant','verbal','esl'] },
+    { key: 'palette',    label: 'Palette',    type: 'select', options: ['Dune','Ember','Ash','Pearl'] },
+    { key: 'grainCount', label: 'Grains',     type: 'range',  min: 600,  max: 5000, step: 100 },
+    { key: 'grainSize',  label: 'Grain Size', type: 'range',  min: 0.5,  max: 5,    step: 0.1 },
+    { key: 'flowSpeed',  label: 'Flow Speed', type: 'range',  min: 0,    max: 1.5,  step: 0.02 },
+    { key: 'spread',     label: 'Spread',     type: 'range',  min: 0.2,  max: 1.5,  step: 0.02 },
+    { key: 'worldScale', label: 'Scale',      type: 'range',  min: 200,  max: 1100, step: 10 },
+    { key: 'depthScale', label: 'Depth',      type: 'range',  min: 0.2,  max: 2.0,  step: 0.05 }
   ]
 };
 
 const GROUP_TITLES = {
   view: 'View', terrain: 'Terrain', particles: 'Particles',
   contours: 'Contours', faceted: 'Faceted', constellation: 'Constellation',
-  starchart: 'Star Chart', goldenLine: 'Golden Line', morningStar: 'Morning Star'
+  starchart: 'Star Chart', sand: 'Sand',
+  goldenLine: 'Golden Line', morningStar: 'Morning Star'
 };
 
 // =============================================================
@@ -1213,6 +1243,18 @@ const PRESETS = [
       view:       { pitch: 0.30, yaw: -0.45, distance: 1250, fov: 520, cameraHeight: 300 },
       terrain:    { scale: 0.006, amplitude: 80, drift: 0.08, contrast: 0.65, secondaryNoise: 0.3 },
       starchart:  { subject: 'physics', worldScale: 560, depthScale: 1, driftSpeed: 0.225, lineColor: 'Silver', starColor: 'Silver', lineWidth: 1.25, lineGlow: 0.2, breathing: 0.72, brokenness: 0.3, anchorSize: 6, starSize: 2.9, twinkle: 0.48, brightness: 1.2 },
+      goldenLine: { enabled: false, pathType: 'noise', speed: 0.16, width: 1.4, glowRadius: 60, color: '#c9a227', disturbanceRadius: 0, disturbanceStrength: 0, springBack: 0.05 },
+      morningStar:{ enabled: false, x: 0.80, y: 0.18, size: 40, rayLength: 3.0, twinkleSpeed: 0.30, color: '#f5e0a0', opacity: 0.5 }
+    }
+  },
+  {
+    name: 'Drifting Sands',
+    desc: 'Flowing sand · subject forms in the dunes',
+    config: {
+      style: 'sand', palette: 'void',
+      view:       { pitch: 0.32, yaw: -0.40, distance: 1050, fov: 520, cameraHeight: 300 },
+      terrain:    { scale: 0.006, amplitude: 80, drift: 0.08, contrast: 0.65, secondaryNoise: 0.3 },
+      sand:       { subject: 'math', palette: 'Dune', grainCount: 5000, worldScale: 480, depthScale: 1, grainSize: 3.3, flowSpeed: 0.2, spread: 1.0 },
       goldenLine: { enabled: false, pathType: 'noise', speed: 0.16, width: 1.4, glowRadius: 60, color: '#c9a227', disturbanceRadius: 0, disturbanceStrength: 0, springBack: 0.05 },
       morningStar:{ enabled: false, x: 0.80, y: 0.18, size: 40, rayLength: 3.0, twinkleSpeed: 0.30, color: '#f5e0a0', opacity: 0.5 }
     }
@@ -2153,6 +2195,156 @@ class StarChartField {
   }
 }
 
+// =============================================================
+// SAND FIELD — sand grains belong to "regions" (the subject's
+// primitives). Every grain glides at a steady slow pace toward a
+// waypoint inside its region; on arrival it picks a fresh one. No
+// momentum → no jumps, no orbital swirl — just a calm continuous
+// flow within each part of the shape. Rebuilds on subject / count
+// change. No external wind — the motion is all intrinsic.
+// =============================================================
+class SandField {
+  constructor() {
+    this.grains = [];
+    this.regions = [];
+    this.subject = null;
+    this.gatherUntil = 0;   // during a subject switch: gather phase end time
+  }
+
+  // Region = one of the subject's primitives, with its centroid.
+  buildRegions(subjectKey) {
+    const subj = SUBJECTS[subjectKey] || SUBJECTS.math;
+    return subj.primitives.map(p => {
+      let cx, cy, cz;
+      if (p.kind === 'bar3d') {
+        cx = (p.x1 + p.x2) * 0.5; cy = (p.y1 + p.y2) * 0.5; cz = (p.z1 + p.z2) * 0.5;
+      } else if (p.kind === 'quad3d' && p.pts) {
+        cx = (p.pts[0][0] + p.pts[1][0] + p.pts[2][0] + p.pts[3][0]) * 0.25;
+        cy = (p.pts[0][1] + p.pts[1][1] + p.pts[2][1] + p.pts[3][1]) * 0.25;
+        cz = (p.pts[0][2] + p.pts[1][2] + p.pts[2][2] + p.pts[3][2]) * 0.25;
+      } else {
+        cx = p.cx || 0; cy = p.cy || 0; cz = p.cz || 0;
+      }
+      return { prim: p, cx, cy, cz, w: p.w };
+    });
+  }
+
+  rebuild() {
+    const cfg = config.sand;
+    const count = Math.max(200, cfg.grainCount | 0);
+    this.regions = this.buildRegions(cfg.subject);
+    const regions = this.regions;
+
+    let totalW = 0;
+    for (const r of regions) totalW += r.w;
+
+    const grains = new Array(count);
+    for (let i = 0; i < count; i++) {
+      // home region — weighted by primitive volume
+      let rr = Math.random() * totalW;
+      let ri = 0;
+      for (let k = 0; k < regions.length; k++) {
+        rr -= regions[k].w;
+        if (rr <= 0) { ri = k; break; }
+      }
+      const p0 = _samplePrimitive(regions[ri].prim);
+      grains[i] = {
+        x: p0[0], y: p0[1], z: p0[2],
+        tx: p0[0], ty: p0[1], tz: p0[2],
+        region: ri,
+        speed: 0.7 + Math.random() * 0.6,
+        sizeT: Math.random(),
+        colorT: Math.random(),
+      };
+    }
+    this.grains = grains;
+    this.subject = cfg.subject;
+    this.gatherUntil = 0;
+  }
+
+  // Subject switch — keep the grains where they are, but reassign each to a
+  // region of the new subject and aim them at a loose blob near the origin.
+  // They glide inward (gather), then once the gather window passes their
+  // on-arrival resampling sends them out to re-form the new shape (disperse).
+  retarget(time) {
+    const cfg = config.sand;
+    this.regions = this.buildRegions(cfg.subject);
+    const regions = this.regions;
+    let totalW = 0;
+    for (const r of regions) totalW += r.w;
+    for (const g of this.grains) {
+      let rr = Math.random() * totalW;
+      let ri = 0;
+      for (let k = 0; k < regions.length; k++) {
+        rr -= regions[k].w;
+        if (rr <= 0) { ri = k; break; }
+      }
+      g.region = ri;
+      g.tx = (Math.random() - 0.5) * 0.7;
+      g.ty = (Math.random() - 0.5) * 0.7;
+      g.tz = (Math.random() - 0.5) * 0.7;
+    }
+    this.subject = cfg.subject;
+    this.gatherUntil = time + 0.6;   // gather phase length
+  }
+
+  update(dt, time) {
+    const cfg = config.sand;
+    if (this.grains.length !== Math.max(200, cfg.grainCount | 0)) {
+      this.rebuild();
+    } else if (this.subject !== cfg.subject) {
+      this.retarget(time);
+    }
+    const regions = this.regions;
+    const spread = cfg.spread;
+    const flow = cfg.flowSpeed;
+    const gathering = time < this.gatherUntil;
+    // the gather + disperse transition completes within ~1.5s of the switch,
+    // at a fixed brisk pace (independent of Flow Speed)
+    const transitioning = time < this.gatherUntil + 0.9;
+
+    for (const g of this.grains) {
+      // glide toward a waypoint; on arrival pick a fresh one
+      let dx = g.tx - g.x, dy = g.ty - g.y, dz = g.tz - g.z;
+      let dist = Math.sqrt(dx * dx + dy * dy + dz * dz);
+      if (dist < 0.04) {
+        if (gathering) {
+          // still gathering — mill around a loose central blob
+          g.tx = (Math.random() - 0.5) * 0.7;
+          g.ty = (Math.random() - 0.5) * 0.7;
+          g.tz = (Math.random() - 0.5) * 0.7;
+        } else {
+          // settle into / flow within the region — pick the NEAREST of a
+          // few region samples so each hop is short and hugs the region's
+          // surface. Without this, straight glides between far-apart samples
+          // cut chords across thin features (physics' rings, math's axes)
+          // and blur them; short region-hugging hops keep them crisp.
+          const r = regions[g.region];
+          let bx = 0, by = 0, bz = 0, bd = Infinity;
+          for (let s = 0; s < 5; s++) {
+            const p = _samplePrimitive(r.prim);
+            const cxp = r.cx + (p[0] - r.cx) * spread;
+            const cyp = r.cy + (p[1] - r.cy) * spread;
+            const czp = r.cz + (p[2] - r.cz) * spread;
+            const ddx = cxp - g.x, ddy = cyp - g.y, ddz = czp - g.z;
+            const d2 = ddx * ddx + ddy * ddy + ddz * ddz;
+            if (d2 < bd) { bd = d2; bx = cxp; by = cyp; bz = czp; }
+          }
+          g.tx = bx; g.ty = by; g.tz = bz;
+        }
+        dx = g.tx - g.x; dy = g.ty - g.y; dz = g.tz - g.z;
+        dist = Math.sqrt(dx * dx + dy * dy + dz * dz);
+      }
+      if (dist > 1e-5) {
+        const stepRate = transitioning ? (2.0 * g.speed) : (flow * g.speed * 0.5);
+        const step = Math.min(dist, stepRate * dt);
+        const f = step / dist;
+        g.x += dx * f; g.y += dy * f; g.z += dz * f;
+      }
+    }
+  }
+}
+
 class Renderer {
   constructor(canvas) {
     this.canvas = canvas;
@@ -2162,6 +2354,7 @@ class Renderer {
     this.faceted = new FacetedField();
     this.constellation = new ConstellationField();
     this.starchart = new StarChartField();
+    this.sand = new SandField();
     this.line = new GoldenLine();
     this._glowSprites = null;        // cached per-palette glow sprites
     this._glowSpriteKey = '';
@@ -2204,6 +2397,8 @@ class Renderer {
       this.drawConstellation();
     } else if (config.style === 'starchart') {
       this.drawStarChart();
+    } else if (config.style === 'sand') {
+      this.drawSand();
     } else {
       this.drawParticles();
     }
@@ -2853,6 +3048,82 @@ class Renderer {
     }
   }
 
+  // =============================================================
+  // SAND — grains flow on a noise wind field while being softly
+  // pulled toward "home" points sampled from the subject's 3D
+  // cloud. Rendered as a fine, dense field of individual grains in
+  // warm sand tones — the wind keeps the whole form churning.
+  // =============================================================
+  drawSand() {
+    const ctx = this.ctx;
+    const w = this.cssW, h = this.cssH;
+    const view = config.view;
+    const cfg = config.sand;
+    const field = this.sand;
+    if (field.grains.length === 0) field.rebuild();
+
+    const pal = SAND_PALETTES[cfg.palette] || SAND_PALETTES['Dune'];
+    const S = cfg.worldScale;
+    const depthScale = cfg.depthScale != null ? cfg.depthScale : 1;
+
+    // ---- project grains to screen --------------------------------------
+    const grains = field.grains;
+    const N = grains.length;
+    const px = new Float32Array(N);
+    const py = new Float32Array(N);
+    const pd = new Float32Array(N);
+    const pok = new Uint8Array(N);
+    let anyVisible = false;
+    for (let i = 0; i < N; i++) {
+      const g = grains[i];
+      const pr = project(g.x * S, g.y * S, g.z * S * depthScale, view, w, h);
+      if (!pr) continue;
+      px[i] = pr.sx; py[i] = pr.sy; pd[i] = pr.depth; pok[i] = 1;
+      anyVisible = true;
+    }
+    if (!anyVisible) return;
+
+    // ---- grains: the main layer — fine, dense dots in warm sand tones.
+    // Colour blends across the palette by colorT; near grains lift bright.
+    const cShadow = hexToRgb(pal.shadow);
+    const cMid = hexToRgb(pal.mid);
+    const cLit = hexToRgb(pal.lit);
+    const cSpeck = hexToRgb(pal.speckle);
+    const gs = cfg.grainSize;
+    for (let i = 0; i < N; i++) {
+      if (!pok[i]) continue;
+      const g = grains[i];
+      const size = (0.5 + g.sizeT) * gs * Math.min(2.2, 420 / pd[i]);
+      if (size < 0.4) continue;
+      const ct = g.colorT;
+      let r, gg, b;
+      if (ct < 0.5) {
+        const t = ct / 0.5;
+        r = cShadow.r + (cMid.r - cShadow.r) * t;
+        gg = cShadow.g + (cMid.g - cShadow.g) * t;
+        b = cShadow.b + (cMid.b - cShadow.b) * t;
+      } else if (ct < 0.85) {
+        const t = (ct - 0.5) / 0.35;
+        r = cMid.r + (cLit.r - cMid.r) * t;
+        gg = cMid.g + (cLit.g - cMid.g) * t;
+        b = cMid.b + (cLit.b - cMid.b) * t;
+      } else {
+        const t = (ct - 0.85) / 0.15;
+        r = cLit.r + (cSpeck.r - cLit.r) * t;
+        gg = cLit.g + (cSpeck.g - cLit.g) * t;
+        b = cLit.b + (cSpeck.b - cLit.b) * t;
+      }
+      const lift = Math.min(0.35, 60 / pd[i]);
+      r = r + (255 - r) * lift;
+      gg = gg + (255 - gg) * lift;
+      b = b + (255 - b) * lift;
+      ctx.fillStyle = 'rgb(' + (r | 0) + ',' + (gg | 0) + ',' + (b | 0) + ')';
+      ctx.beginPath();
+      ctx.arc(px[i], py[i], size * 0.5, 0, Math.PI * 2);
+      ctx.fill();
+    }
+  }
+
   drawGoldenLine() {
     const ctx = this.ctx;
     const w = this.cssW, h = this.cssH;
@@ -3005,13 +3276,15 @@ function buildPanel() {
   const isFaceted = config.style === 'faceted';
   const isConstellation = config.style === 'constellation';
   const isStarChart = config.style === 'starchart';
-  // Constellation & star chart live on their own plane — no noise terrain.
-  const groupOrder = (isConstellation || isStarChart) ? ['view'] : ['view','terrain'];
+  const isSand = config.style === 'sand';
+  // These subject-based styles live on their own plane — no noise terrain.
+  const groupOrder = (isConstellation || isStarChart || isSand) ? ['view'] : ['view','terrain'];
   if (isParticles) groupOrder.push('particles');
   if (isContours) groupOrder.push('contours');
   if (isFaceted) groupOrder.push('faceted');
   if (isConstellation) groupOrder.push('constellation');
   if (isStarChart) groupOrder.push('starchart');
+  if (isSand) groupOrder.push('sand');
   groupOrder.push('goldenLine', 'morningStar');
 
   for (const groupKey of groupOrder) {
@@ -3354,6 +3627,8 @@ function loop() {
     renderer.field.update(dt, renderer.time, head);
     if (config.style === 'constellation') {
       renderer.constellation.update(dt, renderer.time);
+    } else if (config.style === 'sand') {
+      renderer.sand.update(dt, renderer.time);
     }
   }
   renderer.draw();
