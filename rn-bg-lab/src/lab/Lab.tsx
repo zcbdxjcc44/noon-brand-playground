@@ -19,9 +19,11 @@ import { PRESETS } from './presets';
 import { PALETTES, CHAR_GROUPS } from './charsets';
 import type { LabConfig, Style } from './types';
 import { GoldenLine } from './GoldenLine';
+import { ConstellationField } from './ConstellationField';
 import Particles from './Particles';
 import Contours from './Contours';
 import Faceted from './Faceted';
+import Constellation from './Constellation';
 import StarChart from './StarChart';
 import GoldenLineSkia from './GoldenLineSkia';
 import MorningStar from './MorningStar';
@@ -43,10 +45,12 @@ export default function Lab() {
 
   const goldenRef = useRef<GoldenLine | null>(null);
   if (!goldenRef.current) goldenRef.current = new GoldenLine();
+  const constellationRef = useRef<ConstellationField | null>(null);
+  if (!constellationRef.current) constellationRef.current = new ConstellationField();
   const configRef = useRef(config);
   configRef.current = config;
 
-  // RAF tick — drives time, updates GoldenLine.
+  // RAF tick — drives time, updates GoldenLine + ConstellationField physics.
   useEffect(() => {
     let raf: number;
     let last = performance.now();
@@ -55,7 +59,11 @@ export default function Lab() {
       last = now;
       setTime(t => {
         const nt = t + dt;
-        goldenRef.current!.update(dt, nt, configRef.current.goldenLine);
+        const c = configRef.current;
+        goldenRef.current!.update(dt, nt, c.goldenLine);
+        if (c.style === 'constellation') {
+          constellationRef.current!.update(dt, nt, c);
+        }
         return nt;
       });
       raf = requestAnimationFrame(tick);
@@ -131,6 +139,15 @@ export default function Lab() {
         )}
         {config.style === 'faceted' && (
           <Faceted config={config} width={width} height={height} time={time} />
+        )}
+        {config.style === 'constellation' && (
+          <Constellation
+            config={config}
+            field={constellationRef.current}
+            width={width}
+            height={height}
+            time={time}
+          />
         )}
         {config.style === 'starchart' && (
           <StarChart config={config} width={width} height={height} time={time} />

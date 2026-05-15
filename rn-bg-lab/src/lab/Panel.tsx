@@ -112,14 +112,17 @@ export default function Panel(props: PanelProps) {
   const isParticles = config.style === 'particles';
   const isContours = config.style === 'contours';
   const isFaceted = config.style === 'faceted';
+  const isConstellation = config.style === 'constellation';
   const isStarChart = config.style === 'starchart';
 
-  // Star Chart lives on its own plane — no noise terrain.
-  const groupOrder: GroupKey[] = isStarChart ? ['view'] : ['view', 'terrain'];
-  if (isParticles) groupOrder.push('particles');
-  if (isContours)  groupOrder.push('contours');
-  if (isFaceted)   groupOrder.push('faceted');
-  if (isStarChart) groupOrder.push('starchart');
+  // Constellation & Star Chart live on their own plane — no noise terrain.
+  const groupOrder: GroupKey[] =
+    isConstellation || isStarChart ? ['view'] : ['view', 'terrain'];
+  if (isParticles)     groupOrder.push('particles');
+  if (isContours)      groupOrder.push('contours');
+  if (isFaceted)       groupOrder.push('faceted');
+  if (isConstellation) groupOrder.push('constellation');
+  if (isStarChart)     groupOrder.push('starchart');
   groupOrder.push('goldenLine', 'morningStar');
 
   return (
@@ -157,7 +160,7 @@ export default function Panel(props: PanelProps) {
         {/* Style + Palette */}
         <Section title="Style & Palette">
           <Segmented
-            options={['particles', 'contours', 'faceted', 'starchart']}
+            options={['particles', 'contours', 'faceted', 'constellation', 'starchart']}
             value={config.style}
             onChange={v => props.onUpdateStyle(v as Style)}
           />

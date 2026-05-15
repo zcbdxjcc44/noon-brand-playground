@@ -13,6 +13,7 @@ import {
   STARCHART_STAR_COLORS,
 } from './charsets';
 import { STARCHART_SUBJECTS } from './starcharts';
+import { CONSTELLATION_PALETTES, CONSTELLATION_SUBJECTS } from './subjects';
 
 export type GroupKey =
   | 'view'
@@ -20,6 +21,7 @@ export type GroupKey =
   | 'particles'
   | 'contours'
   | 'faceted'
+  | 'constellation'
   | 'starchart'
   | 'goldenLine'
   | 'morningStar';
@@ -33,11 +35,12 @@ export const GROUP_TITLES: Record<GroupKey, string> = {
   view:        'View',
   terrain:     'Terrain',
   particles:   'Particles',
-  contours:    'Contours',
-  faceted:     'Faceted',
-  starchart:   'Star Chart',
-  goldenLine:  'Golden Line',
-  morningStar: 'Morning Star',
+  contours:      'Contours',
+  faceted:       'Faceted',
+  constellation: 'Constellation',
+  starchart:     'Star Chart',
+  goldenLine:    'Golden Line',
+  morningStar:   'Morning Star',
 };
 
 export const SCHEMA: Record<GroupKey, FieldSchema[]> = {
@@ -91,6 +94,19 @@ export const SCHEMA: Record<GroupKey, FieldSchema[]> = {
     { kind: 'range',  key: 'edgeParticleSize', label: 'Dot Size',    min: 0.5,  max: 5,    step: 0.1 },
     { kind: 'range',  key: 'edgeOpacity',      label: 'Edge Alpha',  min: 0,    max: 1,    step: 0.02 },
     { kind: 'range',  key: 'edgeSpeed',        label: 'Flow Speed',  min: 0,    max: 1.5,  step: 0.02 },
+  ],
+  constellation: [
+    { kind: 'select', key: 'subject',    label: 'Subject',    options: CONSTELLATION_SUBJECTS },
+    { kind: 'select', key: 'palette',    label: 'Palette',    options: Object.keys(CONSTELLATION_PALETTES) },
+    { kind: 'range',  key: 'count',      label: 'Particles', min: 200,  max: 3000, step: 50 },
+    { kind: 'range',  key: 'tightness',  label: 'Tightness', min: 0.02, max: 0.30, step: 0.01 },
+    { kind: 'range',  key: 'drift',      label: 'Drift',     min: 0,    max: 1.5,  step: 0.05 },
+    { kind: 'range',  key: 'swirlSpeed', label: 'Swirl',     min: 0,    max: 0.8,  step: 0.01 },
+    { kind: 'range',  key: 'worldScale', label: 'Scale',     min: 200,  max: 1100, step: 10 },
+    { kind: 'range',  key: 'depthScale', label: 'Depth',     min: 0.2,  max: 2.0,  step: 0.05 },
+    { kind: 'range',  key: 'sizeMin',    label: 'Size Min',  min: 1,    max: 14,   step: 0.5 },
+    { kind: 'range',  key: 'sizeMax',    label: 'Size Max',  min: 3,    max: 22,   step: 0.5 },
+    { kind: 'range',  key: 'glow',       label: 'Glow',      min: 0,    max: 1,    step: 0.02 },
   ],
   starchart: [
     { kind: 'select', key: 'subject',    label: 'Subject',     options: STARCHART_SUBJECTS },

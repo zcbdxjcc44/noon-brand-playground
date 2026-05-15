@@ -23,6 +23,11 @@ export const DEFAULT_CONFIG: LabConfig = {
     edgeMode: 'particles', edgeColor: 'Spectrum', edgeDensity: 6,
     edgeParticleSize: 1.8, edgeOpacity: 0.85, edgeSpeed: 0.18,
   },
+  constellation: {
+    subject: 'math', count: 1400, worldScale: 620, depthScale: 1.0,
+    tightness: 0.10, drift: 0.45, swirlSpeed: 0.14,
+    sizeMin: 5, sizeMax: 12, glow: 0.55, palette: 'Aurora',
+  },
   starchart:   {
     subject: 'physics', worldScale: 560, depthScale: 1.0, driftSpeed: 0.05,
     lineColor: 'Silver', starColor: 'Warm White', lineWidth: 0.6, lineGlow: 0.15,
@@ -120,6 +125,19 @@ export const PRESETS: Preset[] = [
       faceted:    { gridCellsX: 13, gridCellsZ: 14, meshJitter: 0.19, lightPitch: 0.32, lightYaw: -1.2, ambient: 0.16, contrast: 0.92, fill: true, highlight: 'Void Step', fillOpacity: 0.69, edgeMode: 'lines', edgeColor: 'Void Step', edgeDensity: 5, edgeParticleSize: 0.5, edgeOpacity: 1, edgeSpeed: 0.16 },
       goldenLine: { ...DEFAULT_CONFIG.goldenLine, pathType: 'noise', speed: 0.16, width: 1.8, glowRadius: 85, color: '#c9a227', disturbanceRadius: 0, disturbanceStrength: 0 },
       morningStar:{ ...DEFAULT_CONFIG.morningStar, x: 0.78, y: 0.20, size: 52, rayLength: 3.6, twinkleSpeed: 0.30, color: '#f5e0a0', opacity: 0.70 },
+    },
+  },
+  {
+    name: 'Subject Nebula',
+    desc: 'Particles swarm into a subject mark',
+    config: {
+      ...DEFAULT_CONFIG,
+      style: 'constellation', palette: 'void',
+      view:       { pitch: 0.36, yaw: -1.24, distance: 1130, fov: 360, cameraHeight: 390 },
+      terrain:    { scale: 0.006, amplitude: 80, drift: 0.08, contrast: 0.65, secondaryNoise: 0.3 },
+      constellation: { subject: 'geography', count: 1100, worldScale: 610, depthScale: 1, tightness: 0.25, drift: 0.95, swirlSpeed: 0.23, sizeMin: 3, sizeMax: 7, glow: 0, palette: 'Aurora' },
+      goldenLine: { ...DEFAULT_CONFIG.goldenLine, enabled: false, pathType: 'noise', speed: 0.16, width: 1.4, glowRadius: 60, color: '#c9a227', disturbanceRadius: 0, disturbanceStrength: 0 },
+      morningStar:{ ...DEFAULT_CONFIG.morningStar, enabled: false, x: 0.80, y: 0.18, size: 40, rayLength: 3.0, twinkleSpeed: 0.30, color: '#f5e0a0', opacity: 0.5 },
     },
   },
   {
