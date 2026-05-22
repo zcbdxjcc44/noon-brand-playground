@@ -1,81 +1,181 @@
 /* ==========================================================================
-   Noon Academy — Colors & Type  (v2: VOID-FIRST, tight palette)
-   The Proven Routes. Pre-dawn desert. Paper appears sparingly, as a specimen.
+   Noon Academy — Colors & Type  (v3: Proven Routes, synced 2026-05-22)
+   Empty Quarter geometry. Surveyor's-notebook craft. Cartographic precision.
+   Void-first. Paper sparingly. Gold is journey signal only.
+   Mirrors rn/tokens.ts from noon-academy-design-system-main.
    ========================================================================== */
 
-@import url('https://fonts.googleapis.com/css2?family=Crimson+Pro:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500&family=Work+Sans:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&family=Noto+Naskh+Arabic:wght@400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Crimson+Pro:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500&family=Vazirmatn:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&family=Noto+Naskh+Arabic:wght@400;500;600;700&display=swap');
 
 :root {
-  /* ---------- THE core palette (kept deliberately tiny) ----------
-     Void · Ink · Paper · Gold.  Red/green are semantic-only, used rarely.
-  */
-  --void:      #0a0f1a;   /* primary brand surface — pre-dawn desert */
-  --void-2:    #10172a;   /* elevated dark surface — the scrim above */
-  --void-3:    #1a2236;   /* card on void */
-  --void-4:    #232c43;   /* highest dark surface / subtle hairline */
+  /* ---------- Color scales (mirror of rn tokens.color) ---------- */
 
-  --ink:       #0a0f1a;   /* text color on paper — same hex as void, never #000 */
+  /* Void — pre-dawn desert. The primary brand surface. */
+  --void-50:   #232c43;   /* highest dark surface / subtle hairline */
+  --void-100:  #1a2236;   /* card on void */
+  --void-200:  #10172a;   /* elevated dark surface */
+  --void-300:  #0a0f1a;   /* base */
+  --void-400:  #060913;   /* sunken */
 
-  --paper:     #f2ece0;   /* warm cream — rarely used, as specimen */
-  --paper-2:   #e8e1d2;   /* paper edge */
+  /* Chalk — the one cream. Foreground text on void. */
+  --chalk-100: #f5f1e8;
+  --chalk-200: #e8e4dc;
+  --chalk-300: #c9c4b8;
+  --chalk-400: #8e8a80;
 
-  /* Gold is NOT a UI primary. It's reserved for journey signals only:
-     routes drawn on terrain, waypoints, arrival moments, the current
-     position marker. Never buttons, never chips, never hover. */
-  --gold:      #c9a227;   /* the route itself */
-  --gold-2:    #e0b83a;   /* golden-hour, current position */
-  --gold-deep: #8e7019;
+  /* Paper — warm cream. Opt-in via .paper-mode only. */
+  --paper-100: #fbf8ef;
+  --paper-200: #f2ece0;
+  --paper-300: #e8e1d2;
 
-  /* Semantic only. Never for decoration. Use once per screen at most. */
-  --danger:    #c55a4e;   /* attention — warmer, less clinical than before */
-  --ok:        #7a8e64;   /* earned — desaturated, never a palette color */
+  /* Noon green — accent. Action, CTA, confirmations. */
+  --noon-100:  #c8f4e2;
+  --noon-200:  #9EEACB;
+  --noon-300:  #7FE3BE;   /* hover */
+  --noon-400:  #64D8AE;   /* base */
+  --noon-500:  #3FAE87;   /* active */
+  --noon-600:  #2A8A6A;   /* paper-mode accent */
+  --noon-700:  #194d3b;
+  --noon-800:  #0a3326;   /* readable text on noon */
 
-  /* ---------- Foreground scale (opacity of chalk, not new colors) ---------- */
-  --chalk:     #e8e4dc;   /* the one cream, used for text on void */
-  --fg-1:      rgba(232, 228, 220, 1.00);   /* primary text */
-  --fg-2:      rgba(232, 228, 220, 0.70);   /* secondary */
-  --fg-3:      rgba(232, 228, 220, 0.45);   /* labels, surveyor caps */
-  --fg-4:      rgba(232, 228, 220, 0.22);   /* faint / disabled */
+  /* Gold — SIGNAL only. Journey, progress, waypoints, current position. */
+  --gold-200:  #f0cf5a;
+  --gold-300:  #e0b83a;
+  --gold-400:  #c9a227;   /* base */
+  --gold-500:  #8e7019;   /* dim */
+  --gold-600:  #5a4610;
 
-  /* Rules are opacity, not new colors */
-  --rule:      rgba(232, 228, 220, 0.08);
-  --rule-2:    rgba(232, 228, 220, 0.14);
-  --rule-gold: rgba(201, 162, 39, 0.35);
+  /* Iris — voice tutor EXCLUSIVELY. Not a general secondary. */
+  --iris-300:  #C7A8FF;
+  --iris-400:  #B08AF9;
+  --iris-500:  #8E63E0;
+  --iris-600:  #6B3FA8;
+  --iris-700:  #5C3D8F;
+  --iris-800:  #3D2460;
 
-  /* ---------- Paper scheme (opt-in via .paper-mode) ----------
-     Used SPARINGLY — a quoted specimen, a printable doc, a spec sheet.
-  */
-  /* see bottom of file */
+  /* Blue — focus rings, keyboard focus only. */
+  --blue-300:  #96BCFF;
+  --blue-400:  #6BA3FF;
+  --blue-500:  #4881E0;
 
-  /* ---------- Semantic surface vars (default = void) ---------- */
-  --bg:        var(--void);
-  --bg-2:      var(--void-2);
-  --bg-3:      var(--void-3);
-  --bg-elev:   var(--void-3);
-  --fg:        var(--fg-1);
-  --fg-muted:  var(--fg-2);
-  --fg-faint:  var(--fg-3);
-  /* Heritage brand colors (preserved from original Noon identity) */
-  --noon:       #64D8AE;   /* Downy — the brand green. Primary UI accent. */
-  --noon-2:     #7FE3BE;   /* hover */
-  --noon-deep:  #3FAE87;   /* pressed */
-  --noon-ink:   #0a3326;   /* readable text on noon */
-  --iris:       #B08AF9;   /* Heliotrope — secondary, used rarely */
-  --focus:      #6BA3FF;   /* Focus blue — input/keyboard focus rings only */
+  /* Danger — errors, destructive actions. */
+  --danger-300: #e58a7f;
+  --danger-400: #c55a4e;
+  --danger-500: #9a4339;
+
+  /* Warn — caution states. */
+  --warn-300:  #F5C456;
+  --warn-400:  #E8A830;
+  --warn-500:  #C48A20;
+
+  /* Terra — terracotta. Warmth, place, classroom. */
+  --terra-200: #E8B49A;
+  --terra-300: #D4956E;
+  --terra-400: #C07A4E;
+  --terra-500: #A5633A;
+  --terra-600: #8A4E2A;
+  --terra-700: #6B3A1E;
+  --terra-800: #4A2812;
+
+  /* ---------- Legacy aliases (keep existing pages working) ---------- */
+  --void:      var(--void-300);
+  --void-2:    var(--void-200);
+  --void-3:    var(--void-100);
+  --void-4:    var(--void-50);
+  --ink:       var(--void-300);
+  --paper:     var(--paper-200);
+  --paper-2:   var(--paper-300);
+  --chalk:     var(--chalk-200);
+  --gold:      var(--gold-400);
+  --gold-2:    var(--gold-300);
+  --gold-deep: var(--gold-500);
+  --noon:      var(--noon-400);
+  --noon-2:    var(--noon-300);
+  --noon-deep: var(--noon-500);
+  --noon-ink:  var(--noon-800);
+  --iris:      var(--iris-400);
+  --focus:     var(--blue-400);
   --focus-soft: rgba(107,163,255,0.18);
+  --danger:    var(--danger-400);
+  --ok:        var(--noon-500);   /* legacy: was a separate olive; map to noon */
 
-  /* UI accent = noon green. Gold is SEMANTIC signal (journey) only. */
-  --accent:     var(--noon);
-  --accent-fg:  var(--noon-ink);
-  --signal:     var(--gold);       /* journey / motion / arrival — not UI chrome */
-  --signal-fg:  var(--void);
+  /* ---------- Semantic theme (default = void) ---------- */
+  --bg:           var(--void-300);
+  --bg-sunken:    var(--void-400);
+  --bg-raised:    var(--void-200);
+  --bg-overlay:   var(--void-100);
+  --bg-2:         var(--void-200);   /* legacy */
+  --bg-3:         var(--void-100);   /* legacy */
+  --bg-elev:      var(--void-100);   /* legacy */
+
+  --fg:           rgba(232,228,220,1.00);
+  --fg-muted:     rgba(232,228,220,0.70);
+  --fg-subtle:    rgba(232,228,220,0.55);
+  --fg-faint:     rgba(232,228,220,0.35);
+  --fg-disabled:  rgba(232,228,220,0.45);
+  --fg-inverse:   var(--void-300);
+  /* legacy fg scale */
+  --fg-1:         var(--fg);
+  --fg-2:         var(--fg-muted);
+  --fg-3:         rgba(232,228,220,0.45);
+  --fg-4:         rgba(232,228,220,0.22);
+
+  --border:        rgba(232,228,220,0.10);
+  --border-strong: rgba(232,228,220,0.22);
+  --divider:       rgba(232,228,220,0.06);
+  --rule:          rgba(232,228,220,0.08);   /* legacy */
+  --rule-2:        rgba(232,228,220,0.14);   /* legacy */
+  --rule-gold:     rgba(201,162,39,0.35);
+
+  --hover-overlay:    rgba(232,228,220,0.04);
+  --active-overlay:   rgba(232,228,220,0.08);
+  --selected-overlay: rgba(232,228,220,0.06);
+  --input-bg:         rgba(232,228,220,0.03);
+
+  /* Accent (noon green) */
+  --accent:        var(--noon-400);
+  --accent-hover:  var(--noon-300);
+  --accent-active: var(--noon-500);
+  --accent-fg:     var(--noon-800);
+  --accent-soft:   rgba(100,216,174,0.14);
+  --accent-border: rgba(100,216,174,0.35);
+  --accent-glow:   rgba(100,216,174,0.15);
+
+  /* Signal (gold — journey only) */
+  --signal:        var(--gold-400);
+  --signal-dim:    var(--gold-500);
+  --signal-bright: var(--gold-300);
+  --signal-soft:   rgba(201,162,39,0.12);
+  --signal-border: rgba(201,162,39,0.35);
+  --signal-fg:     var(--void-300);
+
+  /* Danger */
+  --danger-soft:   rgba(197,90,78,0.10);
+  --danger-border: rgba(197,90,78,0.40);
+
+  /* Iris (voice tutor) */
+  --iris-soft:     rgba(176,138,249,0.10);
+  --iris-border:   rgba(176,138,249,0.40);
+  --iris-label:    rgba(176,138,249,0.60);
+  --iris-dot:      rgba(176,138,249,0.50);
+
+  /* Terra (warmth / classroom / place) */
+  --terra:         var(--terra-600);
+  --terra-soft:    rgba(138,78,42,0.10);
+  --terra-border:  rgba(138,78,42,0.35);
 
   /* ---------- Type ---------- */
   --font-serif:  'Crimson Pro', 'GT Super', Georgia, serif;
-  --font-sans:   'Work Sans', 'Inter', ui-sans-serif, system-ui, sans-serif;
+  --font-sans:   'Vazirmatn', 'Inter', ui-sans-serif, system-ui, sans-serif;
   --font-mono:   'JetBrains Mono', ui-monospace, 'SF Mono', Menlo, monospace;
   --font-arabic: 'Noto Naskh Arabic', 'Amiri', serif;
 
+  /* Token scale (mirror of rn fs) */
+  --fs-9: 9px;  --fs-10: 10px; --fs-11: 11px; --fs-12: 12px; --fs-13: 13px;
+  --fs-14: 14px; --fs-15: 15px; --fs-16: 16px; --fs-18: 18px; --fs-20: 20px;
+  --fs-22: 22px; --fs-24: 24px; --fs-28: 28px; --fs-32: 32px; --fs-40: 40px; --fs-48: 48px;
+
+  /* Display / heading scale (fluid, web-only convenience) */
   --fs-display: clamp(56px, 7vw, 96px);
   --fs-h1:      clamp(40px, 4.2vw, 60px);
   --fs-h2:      clamp(30px, 3vw, 42px);
@@ -86,49 +186,130 @@
   --fs-micro:   12px;
   --fs-caps:    11px;
 
-  --lh-tight:   1.05;
-  --lh-snug:    1.2;
-  --lh-normal:  1.55;
+  --lh-tight:  1.05;
+  --lh-snug:   1.2;
+  --lh-normal: 1.5;
+  --lh-loose:  1.7;
 
-  --tracking-caps: 0.14em;
+  --tracking-caps:  0.14em;
   --tracking-tight: -0.015em;
 
   /* ---------- Geometry ---------- */
   --grid: 8px;
+  /* Spacing (mirror of rn sp) */
+  --sp-0: 0;     --sp-0_5: 2px; --sp-1: 4px;  --sp-2: 8px;  --sp-3: 12px;
+  --sp-4: 16px;  --sp-5: 20px;  --sp-6: 24px; --sp-7: 32px; --sp-8: 40px;
+  --sp-9: 48px;  --sp-10: 64px; --sp-11: 80px; --sp-12: 96px;
+  /* legacy aliases */
   --s-1: 4px; --s-2: 8px; --s-3: 12px; --s-4: 16px;
   --s-5: 24px; --s-6: 32px; --s-7: 48px; --s-8: 64px; --s-9: 96px;
 
-  /* Corners — engineered, never soft. No pills except avatars. */
-  --r-0: 0; --r-1: 2px; --r-2: 4px; --r-3: 8px; --r-pill: 999px;
+  /* Heights (mirror of rn h) */
+  --h-xs: 24px; --h-sm: 32px; --h-md: 40px; --h-lg: 48px; --h-xl: 56px;
 
-  /* Shadows on void are mostly rule outlines + deep vignettes */
-  --shadow-void:   0 0 0 1px var(--rule), 0 24px 48px -24px rgba(0,0,0,0.65);
-  --shadow-lift:   0 0 0 1px var(--rule-2), 0 40px 80px -30px rgba(0,0,0,0.8);
+  /* Icons (mirror of rn icon) */
+  --icon-xs: 6px;  --icon-sm: 10px; --icon-md: 14px; --icon-lg: 18px;
+  --icon-xl: 20px; --icon-tab: 22px; --icon-2xl: 28px;
+
+  /* Radii — engineered, never soft. No pills except avatars. */
+  --r-0: 0; --r-1: 2px; --r-2: 4px; --r-3: 6px; --r-4: 8px; --r-pill: 999px;
+
+  /* ---------- Elevation ---------- */
+  /* Void: depth via brighter borders + deep vignettes. */
+  --elev-1: inset 0 0 0 1px rgba(232,228,220,0.08);
+  --elev-2: inset 0 0 0 1px rgba(232,228,220,0.12),
+            0 0 1px 0 rgba(232,228,220,0.06);
+  --elev-3: inset 0 0 0 1px rgba(232,228,220,0.16),
+            0 4px 16px -2px rgba(0,0,0,0.5);
+  --elev-4: inset 0 0 0 1px rgba(232,228,220,0.22),
+            0 8px 32px -4px rgba(0,0,0,0.6);
+  /* legacy aliases */
+  --shadow-void: var(--elev-3);
+  --shadow-lift: var(--elev-4);
 
   /* Faint gold grid on void — used VERY sparingly, major-lines only */
   --grid-void:
     linear-gradient(to right, rgba(201,162,39,0.035) 1px, transparent 1px) 0 0 / 64px 64px,
     linear-gradient(to bottom, rgba(201,162,39,0.035) 1px, transparent 1px) 0 0 / 64px 64px,
-    var(--void);
+    var(--void-300);
 
+  /* ---------- Motion ---------- */
   --ease: cubic-bezier(0.22, 0.61, 0.36, 1);
   --dur-1: 120ms; --dur-2: 200ms; --dur-3: 320ms;
 }
 
-/* Paper specimen mode — only for quoted artifacts (printable, spec sheet, etc.) */
+/* ==========================================================================
+   Paper specimen mode — opt-in for printable / quoted artifacts.
+   ========================================================================== */
 .paper-mode {
-  --bg:        var(--paper);
-  --bg-2:      #ede7d7;
-  --bg-3:      #fbf8ef;
-  --bg-elev:   #fbf8ef;
-  --fg:        var(--ink);
-  --fg-muted:  #4a4842;
-  --fg-faint:  #6e6a5f;
-  --rule:      rgba(10, 15, 26, 0.12);
-  --rule-2:    rgba(10, 15, 26, 0.22);
-  --chalk:     var(--ink);
+  --bg:           var(--paper-200);
+  --bg-sunken:    var(--paper-300);
+  --bg-raised:    var(--paper-100);
+  --bg-overlay:   var(--paper-100);
+  --bg-2:         var(--paper-300);
+  --bg-3:         var(--paper-100);
+  --bg-elev:      var(--paper-100);
+
+  --fg:           var(--void-300);
+  --fg-muted:     rgba(10,15,26,0.72);
+  --fg-subtle:    rgba(10,15,26,0.55);
+  --fg-faint:     rgba(10,15,26,0.38);
+  --fg-disabled:  rgba(10,15,26,0.45);
+  --fg-inverse:   var(--chalk-100);
+  --fg-1:         var(--fg);
+  --fg-2:         var(--fg-muted);
+  --fg-3:         var(--fg-faint);
+
+  --border:        rgba(10,15,26,0.10);
+  --border-strong: rgba(10,15,26,0.22);
+  --divider:       rgba(10,15,26,0.06);
+  --rule:          rgba(10,15,26,0.12);
+  --rule-2:        rgba(10,15,26,0.22);
+  --chalk:         var(--ink);
+
+  --hover-overlay:    rgba(10,15,26,0.04);
+  --active-overlay:   rgba(10,15,26,0.08);
+  --selected-overlay: rgba(10,15,26,0.06);
+  --input-bg:         rgba(10,15,26,0.02);
+
+  --accent:        var(--noon-600);
+  --accent-hover:  #238060;
+  --accent-active: #1a6048;
+  --accent-fg:     var(--paper-100);
+  --accent-soft:   rgba(25,110,82,0.10);
+  --accent-border: rgba(25,110,82,0.30);
+  --accent-glow:   rgba(25,110,82,0.12);
+
+  --signal:        var(--gold-400);
+  --signal-dim:    rgba(201,162,39,0.70);
+  --signal-bright: var(--gold-400);
+  --signal-soft:   rgba(201,162,39,0.12);
+  --signal-border: rgba(201,162,39,0.30);
+
+  --danger:        var(--danger-500);
+  --danger-soft:   rgba(154,67,57,0.10);
+  --danger-border: rgba(154,67,57,0.30);
+
+  --iris:          var(--iris-500);
+  --iris-soft:     rgba(142,99,224,0.10);
+  --iris-border:   rgba(142,99,224,0.35);
+  --iris-label:    rgba(142,99,224,0.55);
+  --iris-dot:      rgba(142,99,224,0.45);
+
+  --terra:         var(--terra-400);
+  --terra-soft:    rgba(192,122,78,0.12);
+  --terra-border:  rgba(192,122,78,0.35);
+
+  /* Paper elevation: real drop shadows */
+  --elev-1: 0 1px 2px 0 rgba(10,15,26,0.06), inset 0 0 0 1px rgba(10,15,26,0.08);
+  --elev-2: 0 2px 8px 0 rgba(10,15,26,0.08), inset 0 0 0 1px rgba(10,15,26,0.06);
+  --elev-3: 0 4px 16px 0 rgba(10,15,26,0.10), inset 0 0 0 1px rgba(10,15,26,0.05);
+  --elev-4: 0 8px 32px 0 rgba(10,15,26,0.14), inset 0 0 0 1px rgba(10,15,26,0.04);
 }
 
+/* ==========================================================================
+   Base typography
+   ========================================================================== */
 html, body {
   background: var(--bg);
   color: var(--fg);
