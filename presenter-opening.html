@@ -1,0 +1,2326 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Presenter Opening — sequence directions</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Crimson+Pro:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&family=Vazirmatn:wght@300;400;500;600;700&family=Noto+Naskh+Arabic:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  /* ──────────────────────────────────────────────────────────────────────
+     CONTROL ATTRIBUTES — set on .app, all switchable via the control panel.
+
+     SEQUENCE
+       data-countdown   = mission | cinema | sands | grain
+       data-phase       = countdown | teacher | slides | stage
+                          (stage is opt-in only — never reached via auto-sequence)
+       data-duration    = 5 | 10 | 15   (countdown seconds)
+       data-teacher-hold= 2 | 3 | 5     (seconds the teacher-solo is held)
+
+     BACKGROUND
+       data-bg-stars    = sparse | medium | dense
+       data-bg-glow     = off | subtle | strong
+       data-bg-northstar= off | on
+       data-bg-landscape= off | dunes |
+                          lab-starry-sky | lab-winding-desert | lab-flat-desert |
+                          lab-topographic-void | lab-caravan-lights | lab-tectonic-drift
+     ────────────────────────────────────────────────────────────────────── */
+
+  /* ───── Noon tokens (void theme + terra warmth) ───── */
+  :root {
+    --bg: #0a0f1a;
+    --bg-sunken: #060913;
+    --bg-raised: #10172a;
+    --bg-overlay: #1a2236;
+    --paper-100: #fbf8ef;
+    --fg: rgba(232, 228, 220, 1);
+    --fg-muted: rgba(232, 228, 220, 0.70);
+    --fg-subtle: rgba(232, 228, 220, 0.55);
+    --fg-faint: rgba(232, 228, 220, 0.35);
+    --border: rgba(232, 228, 220, 0.10);
+    --border-strong: rgba(232, 228, 220, 0.22);
+    --divider: rgba(232, 228, 220, 0.06);
+    --hover-overlay: rgba(232, 228, 220, 0.04);
+    --active-overlay: rgba(232, 228, 220, 0.08);
+    --accent: #64D8AE;
+    --signal: #c9a227;
+    --signal-bright: #e0b83a;
+    --signal-soft: rgba(201, 162, 39, 0.18);
+    --signal-glow: rgba(240, 207, 90, 0.5);
+    --danger: #c55a4e;
+    --danger-soft: rgba(197, 90, 78, 0.10);
+    --danger-border: rgba(197, 90, 78, 0.40);
+    --sand-300: #D4956E;
+    --sand-200: #E8B49A;
+    --sand-100: #f3cfb3;
+    --sp-2: 8px; --sp-3: 12px; --sp-4: 16px; --sp-5: 20px;
+    --sp-6: 24px; --sp-7: 32px; --sp-8: 40px;
+    --r-2: 4px; --r-3: 6px; --r-4: 8px; --r-pill: 999px;
+    --font-sans: 'Vazirmatn', system-ui, sans-serif;
+    --font-serif: 'Crimson Pro', Georgia, serif;
+    --font-mono: 'JetBrains Mono', ui-monospace, monospace;
+    --font-arabic: 'Noto Naskh Arabic', serif;
+  }
+  * { box-sizing: border-box; }
+  html, body { height: 100%; }
+  body {
+    margin: 0; font-family: var(--font-sans);
+    color: var(--fg); background: var(--bg-sunken);
+    -webkit-font-smoothing: antialiased; overflow: hidden;
+  }
+
+  /* ───── App shell ───── */
+  .app {
+    height: 100vh;
+    background: var(--bg);
+    position: relative; overflow: hidden;
+    display: grid; grid-template-rows: 64px 1fr;
+  }
+
+  /* ──────────────────────────────────────────────────────────────────────
+     BACKDROP — stars, north star, landscape (topo OR dunes)
+     ────────────────────────────────────────────────────────────────────── */
+  .sky-stars { position: absolute; inset: 0; pointer-events: none; z-index: 0;
+    filter: brightness(1.6) drop-shadow(0 0 1.5px rgba(240,207,90,0.85))
+                              drop-shadow(0 0 4px rgba(240,207,90,0.4));
+    transition: opacity 600ms ease, filter 600ms ease;
+  }
+  .sky-stars .star { position: absolute; border-radius: 50%;
+    background: rgb(224,184,58); transform: translate(-50%,-50%);
+  }
+  /* star density */
+  .app[data-bg-stars="sparse"] .stars-medium,
+  .app[data-bg-stars="sparse"] .stars-dim    { display: none; }
+  .app[data-bg-stars="medium"] .stars-dim    { display: none; }
+  /* glow tier */
+  .app[data-bg-glow="off"] .sky-stars { filter: none; }
+  .app[data-bg-glow="subtle"] .sky-stars {
+    filter: brightness(1.25) drop-shadow(0 0 1px rgba(240,207,90,0.45));
+  }
+
+  .north-star {
+    position: absolute; left: 86.11%; top: 13%;
+    width: 0; height: 0; pointer-events: none; z-index: 0;
+    animation: star-twinkle 8s ease-in-out infinite;
+    transition: opacity 600ms ease;
+  }
+  .north-star > * { position: absolute; left: 50%; top: 50%; transform: translate(-50%,-50%); }
+  .north-star__halo { border-radius: 50%; }
+  .north-star__halo--1 { width: 52px; height: 52px; background: rgba(201,162,39,0.06); }
+  .north-star__halo--2 { width: 32px; height: 32px; background: rgba(201,162,39,0.14); }
+  .north-star__halo--3 { width: 18px; height: 18px; background: rgba(201,162,39,0.30); }
+  .north-star__shimmer { background: rgba(232,184,58,0.55); }
+  .north-star__shimmer--h { width: 44px; height: 1px; }
+  .north-star__shimmer--v { width: 1px;  height: 44px; }
+  .north-star__core { width: 7px; height: 7px; border-radius: 50%; background: rgba(240,207,90,1); }
+  @keyframes star-twinkle { 0%,100% { opacity:.65 } 50% { opacity:1 } }
+  .app[data-bg-northstar="off"] .north-star { display: none; }
+
+  /* ── Landscape: drifting dunes ── */
+  .dunes {
+    position: absolute; left: 0; right: 0; bottom: 0;
+    height: 55vh;
+    pointer-events: none; z-index: 0;
+    overflow: hidden;
+    display: none;
+  }
+  .dunes svg {
+    position: absolute; left: 0; right: 0;
+    width: 200%;
+    bottom: 0;
+  }
+  /* Parent opacity of each dune layer — globally tames the whole landscape
+     so the foreground content (countdown / teacher / slides) stays the
+     focus. Each layer's internal stop colors are tuned separately below. */
+  .dunes svg.far    { bottom: 30%; opacity: 0.22; animation: drift-x 90s linear infinite; }
+  .dunes svg.mid    { bottom: 12%; opacity: 0.34; animation: drift-x 60s linear infinite; }
+  .dunes svg.near   { bottom: 0;   opacity: 0.50; animation: drift-x 40s linear infinite; }
+  @keyframes drift-x {
+    from { transform: translateX(0); }
+    to   { transform: translateX(-50%); }
+  }
+  .app[data-bg-landscape="dunes"] .dunes { display: block; }
+  /* When dunes are active, ease the stars back so they don't fight the warmth */
+  .app[data-bg-landscape="dunes"] .sky-stars { opacity: 0.85; }
+
+  /* ── Landscape C: lab-driven presets (iframe embed of noon-bg-lab.html) ── */
+  .bg-lab-frame {
+    position: fixed; inset: 0;
+    width: 100%; height: 100%;
+    border: 0; z-index: 0;
+    display: none;
+    pointer-events: none;
+    background: var(--bg);
+  }
+  .app[data-bg-landscape^="lab-"] .bg-lab-frame { display: block; }
+  /* When a lab preset is active, hide every built-in backdrop element so the
+     lab owns the canvas. Same approach presenter-screen.html uses. */
+  .app[data-bg-landscape^="lab-"] .sky-stars,
+  .app[data-bg-landscape^="lab-"] .north-star,
+  .app[data-bg-landscape^="lab-"] .dunes { display: none; }
+
+  /* Landscape layers compete with the chat for visual attention in the
+     slides phase — fade them out so the messages stay legible. Stars + north
+     star are subtle enough to keep; only the loud landscape elements drop. */
+  .dunes, .bg-lab-frame { transition: opacity 500ms ease; }
+  .app[data-phase="slides"] .dunes,
+  .app[data-phase="slides"] .bg-lab-frame {
+    opacity: 0;
+    pointer-events: none;
+  }
+
+  /* ──────────────────────────────────────────────────────────────────────
+     TOPBAR — appears only in the slides phase
+     ────────────────────────────────────────────────────────────────────── */
+  .topbar {
+    position: relative; z-index: 4;
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 0 var(--sp-6);
+    border-bottom: 1px solid var(--divider);
+    opacity: 0; pointer-events: none;
+    transition: opacity 600ms ease 200ms;
+  }
+  .app[data-phase="slides"] .topbar { opacity: 1; pointer-events: auto; }
+  .session-meta { display: flex; align-items: center; gap: var(--sp-4); }
+  .time {
+    display: flex; align-items: center; gap: var(--sp-3);
+    padding: var(--sp-2) var(--sp-3);
+    border: 1px solid var(--border); border-radius: var(--r-2);
+    background: var(--hover-overlay);
+  }
+  .time__diamond {
+    width: 8px; height: 8px; background: var(--signal-bright);
+    transform: rotate(45deg); box-shadow: 0 0 10px var(--signal-soft);
+  }
+  .time__value {
+    font-family: var(--font-mono); font-size: 14px; letter-spacing: 0.04em;
+    color: var(--fg); font-variant-numeric: tabular-nums; min-width: 44px;
+  }
+  .session-title {
+    font-family: var(--font-serif); font-size: 16px; font-weight: 500;
+    color: var(--fg-muted); letter-spacing: -0.005em;
+  }
+  .session-title em { font-style: italic; color: var(--fg); margin-right: 4px; }
+  .me-avatar {
+    width: 40px; height: 40px; border-radius: 50%;
+    background: var(--accent); display: inline-flex;
+    align-items: center; justify-content: center;
+    color: #0a3326; font-family: var(--font-serif);
+    font-weight: 500; font-size: 16px;
+    border: 1px solid var(--border-strong);
+  }
+
+  /* Top-right controls cluster — mic, cam, avatar */
+  .controls { display: flex; align-items: center; gap: var(--sp-3); }
+  .icon-btn {
+    width: 40px; height: 40px;
+    border-radius: var(--r-pill);
+    border: 1px solid var(--border);
+    background: var(--hover-overlay);
+    color: var(--fg-muted);
+    display: inline-flex; align-items: center; justify-content: center;
+    cursor: pointer;
+    transition: background 120ms ease, color 120ms ease,
+                border-color 120ms ease, transform 120ms ease;
+    position: relative;
+  }
+  .icon-btn:hover {
+    background: var(--active-overlay);
+    color: var(--fg);
+    border-color: var(--border-strong);
+  }
+  .icon-btn:active { transform: translateY(0.5px); }
+  /* Pressed = muted/camera-off — switch to danger palette and reveal the
+     diagonal "strike" line drawn through the icon. */
+  .icon-btn[aria-pressed="true"] {
+    background: var(--danger-soft);
+    border-color: var(--danger-border);
+    color: var(--danger);
+  }
+  .icon-btn[aria-pressed="true"] .strike { display: block; }
+  .strike { display: none; }
+
+  /* ───── Main ───── */
+  .main {
+    position: relative; z-index: 3;
+    min-height: 0; padding: var(--sp-5);
+    display: flex; align-items: center; justify-content: center;
+  }
+
+  /* ──────────────────────────────────────────────────────────────────────
+     COUNTDOWN — shared shell. Per-style sections show only when matching.
+     ────────────────────────────────────────────────────────────────────── */
+  .countdown {
+    position: absolute; inset: 0; z-index: 3;
+    display: none; /* enabled per style below */
+    align-items: center; justify-content: center;
+    transition: opacity 800ms ease, transform 800ms cubic-bezier(.4,0,.2,1);
+  }
+  .app[data-countdown="mission"]    .countdown.cd-mission,
+  .app[data-countdown="cinema"]     .countdown.cd-cinema,
+  .app[data-countdown="sands"]      .countdown.cd-sands,
+  .app[data-countdown="grain"]      .countdown.cd-grain {
+    display: flex;
+  }
+  /* hide countdown layer entirely once we're past it */
+  .app[data-phase="teacher"] .countdown,
+  .app[data-phase="slides"] .countdown {
+    opacity: 0; transform: scale(0.94); pointer-events: none;
+  }
+
+  /* ─── B · MISSION CONTROL ─── */
+  .cd-mission { /* container is flex/center via base */ }
+  .mc-strip {
+    position: absolute; top: var(--sp-7); left: 50%;
+    transform: translateX(-50%);
+    display: flex; align-items: center; gap: 12px;
+    padding: 8px 16px;
+    border: 1px solid var(--border);
+    border-radius: var(--r-2);
+    background: rgba(10,15,26,0.6);
+    color: var(--fg-muted);
+  }
+  .mc-strip__dot {
+    width: 6px; height: 6px; border-radius: 50%;
+    background: var(--signal-bright);
+    box-shadow: 0 0 8px var(--signal-soft);
+    animation: dot-pulse 1.4s ease-in-out infinite;
+  }
+  @keyframes dot-pulse { 0%,100% { opacity:.6 } 50% { opacity:1 } }
+  /* Session title inside the strip — matches the slides-topbar style so
+     identity reads the same in both moments. */
+  .mc-strip__title {
+    font-family: var(--font-serif);
+    font-size: 14px; font-weight: 500;
+    color: var(--fg-muted);
+    letter-spacing: 0;
+  }
+  .mc-strip__title em {
+    font-style: italic;
+    color: var(--fg);
+    margin-right: 4px;
+  }
+  .mc-ring-wrap { position: relative; width: 380px; height: 380px; }
+  .mc-ring-bg, .mc-ring-fg { position: absolute; inset: 0; transform: rotate(-90deg); }
+  .mc-ring-bg circle { fill: none; stroke: var(--border-strong); stroke-width: 1; }
+  .mc-ring-fg circle {
+    fill: none; stroke: var(--signal-bright);
+    stroke-width: 1.5; stroke-linecap: butt;
+    filter: drop-shadow(0 0 4px var(--signal-soft));
+    transition: stroke-dashoffset 1s linear;
+  }
+  .mc-ticks { position: absolute; inset: 0; }
+  .mc-ticks line { stroke: var(--fg-faint); stroke-width: 1; }
+  .mc-ticks line.is-lit { stroke: var(--signal-bright); filter: drop-shadow(0 0 3px var(--signal-soft)); }
+  .mc-number {
+    position: absolute; inset: 0;
+    display: flex; flex-direction: column;
+    align-items: center; justify-content: center;
+  }
+  .mc-number__digit {
+    font-family: var(--font-mono); font-weight: 500;
+    font-size: 140px; line-height: 1;
+    color: var(--fg); font-variant-numeric: tabular-nums;
+    letter-spacing: -0.04em;
+  }
+  .mc-number__digit.is-ticking { animation: mc-flick 220ms ease-out; }
+  @keyframes mc-flick {
+    0%   { opacity: 0.2; transform: translateY(-6px); }
+    100% { opacity: 1;   transform: translateY(0); }
+  }
+  .mc-number__unit {
+    font-family: var(--font-mono); font-size: 10px;
+    letter-spacing: 0.32em; text-transform: uppercase;
+    color: var(--fg-subtle); margin-top: 8px;
+  }
+  .mc-readout {
+    position: absolute;
+    font-family: var(--font-mono); font-size: 10px;
+    letter-spacing: 0.20em; text-transform: uppercase;
+    color: var(--fg-faint);
+    display: flex; flex-direction: column; gap: 6px;
+  }
+  .mc-readout__value { color: var(--fg-muted); }
+  .mc-readout--tl { top: 90px; left: 56px; }
+  .mc-readout--tr { top: 90px; right: 56px; text-align: right; align-items: flex-end; }
+  .mc-readout--bl { bottom: 56px; left: 56px; }
+  .mc-readout--br { bottom: 56px; right: 56px; text-align: right; align-items: flex-end; }
+  .mc-cross {
+    position: absolute; inset: 0; pointer-events: none;
+    background-image:
+      linear-gradient(to right, transparent calc(50% - 0.5px), rgba(232,228,220,0.04) calc(50% - 0.5px), rgba(232,228,220,0.04) calc(50% + 0.5px), transparent calc(50% + 0.5px)),
+      linear-gradient(to bottom, transparent calc(50% - 0.5px), rgba(232,228,220,0.04) calc(50% - 0.5px), rgba(232,228,220,0.04) calc(50% + 0.5px), transparent calc(50% + 0.5px));
+  }
+  .mc-scanlines {
+    position: absolute; inset: 0; pointer-events: none;
+    background-image: repeating-linear-gradient(
+      to bottom, transparent 0, transparent 2px,
+      rgba(232,228,220,0.018) 2px, rgba(232,228,220,0.018) 3px);
+  }
+
+  /* ─── C · CINEMATIC ─── */
+  .cd-cinema { /* base */ }
+
+  /* Label sits at the top of the viewport, above the giant numeric.
+     Position: absolute keeps it from displacing the centered .cin-stage.
+     Larger type than the Sands/Grain labels because the cinema mode has
+     dimmed everything else — the eye needs a bigger anchor up top. */
+  .cin-label {
+    position: absolute; top: 11vh; left: 50%;
+    transform: translateX(-50%);
+    display: flex; flex-direction: column; align-items: center; gap: 14px;
+    z-index: 4;
+    pointer-events: none;
+    text-align: center;
+  }
+  .cin-label__ar {
+    font-family: var(--font-arabic);
+    font-size: 30px; font-weight: 500;
+    color: var(--fg-muted);
+    direction: rtl;
+    letter-spacing: 0;
+    text-shadow: 0 0 32px rgba(232,228,220,0.18);
+  }
+  .cin-label__en {
+    font-family: var(--font-mono);
+    font-size: 14px; font-weight: 400;
+    text-transform: uppercase;
+    letter-spacing: 0.4em;
+    color: var(--fg-subtle);
+    /* trim trailing letter-spacing so the centering reads true */
+    padding-left: 0.4em;
+  }
+
+  .cin-stage {
+    position: relative;
+    width: 60vh; height: 60vh;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .cin-digit {
+    position: absolute;
+    font-family: var(--font-serif); font-weight: 500;
+    font-size: 56vh; line-height: 1;
+    color: var(--signal-bright);  /* gold — same signal hue as the rest of the brand */
+    font-variant-numeric: tabular-nums;
+    letter-spacing: -0.04em;
+    text-shadow:
+      0 0 40px rgba(240,207,90,0.45),
+      0 0 120px rgba(240,207,90,0.22);
+    will-change: transform, opacity;
+  }
+  /* Outgoing exits faster than incoming arrives, so the new digit doesn't
+     fight the ghost of the previous one. Outgoing clears in ~280ms; the
+     entering digit takes ~800ms to fully bloom in. */
+  .cin-digit.is-entering { animation: cin-in 800ms cubic-bezier(.16, .8, .24, 1) backwards; }
+  .cin-digit.is-leaving  { animation: cin-out 280ms cubic-bezier(.4, 0, .8, .4) forwards; }
+  @keyframes cin-in {
+    /* Hold invisible for the first 15% so the outgoing digit has time to
+       drop out cleanly before the new one starts asserting itself. */
+    0%   { opacity: 0; transform: scale(1.5) translateY(-4vh); filter: blur(6px); }
+    15%  { opacity: 0; }
+    55%  { opacity: 1; filter: blur(0); }
+    100% { opacity: 1; transform: scale(1) translateY(0); filter: blur(0); }
+  }
+  @keyframes cin-out {
+    0%   { opacity: 1; transform: scale(1) translateY(0); filter: blur(0); }
+    100% { opacity: 0; transform: scale(0.78) translateY(1vh); filter: blur(3px); }
+  }
+  .cin-underline {
+    position: absolute; bottom: 8vh; left: 50%;
+    transform: translateX(-50%);
+    width: 56px; height: 2px;
+    background: var(--signal-bright);
+    box-shadow: 0 0 16px var(--signal-glow);
+    opacity: 0;
+    animation: under-in 900ms ease 400ms forwards;
+  }
+  @keyframes under-in {
+    from { opacity: 0; width: 0; }
+    to   { opacity: 1; width: 56px; }
+  }
+  .cin-horizon {
+    position: absolute;
+    left: 50%; bottom: 18vh; transform: translateX(-50%);
+    width: 12%; height: 1px;
+    background: linear-gradient(to right,
+      transparent 0%, rgba(240,207,90,0.6) 50%, transparent 100%);
+    box-shadow: 0 0 24px rgba(240,207,90,0.35);
+    opacity: 0;
+  }
+  /* Vignette + dimmed backdrop active only in cinematic mode */
+  .vignette {
+    position: absolute; inset: 0; z-index: 2; pointer-events: none;
+    background: radial-gradient(ellipse at center,
+      transparent 30%, rgba(6, 9, 19, 0.45) 65%, rgba(6, 9, 19, 0.85) 100%);
+    opacity: 0; transition: opacity 800ms ease;
+  }
+  /* Countdown dimming — applies to ALL countdown styles so the number is
+     never fighting a bright landscape. Dims the dunes + stars + north star
+     and turns on the radial-vignette overlay. Selector is keyed on phase
+     only (used to be cinema-only). */
+  .app[data-phase="countdown"] .vignette   { opacity: 1; }
+  .app[data-phase="countdown"] .sky-stars  { opacity: 0.45; }
+  .app[data-phase="countdown"] .north-star { opacity: 0.5; }
+  .app[data-phase="countdown"] .dunes      { opacity: 0.5; }
+  /* The faint horizon shimmer is a cinema-only flourish, so keep its
+     reveal scoped to the cinema style. */
+  .app[data-countdown="cinema"][data-phase="countdown"] .cin-horizon { opacity: 1; }
+
+  /* ─── D · DRIFTING SANDS ─── */
+  .cd-sands { flex-direction: column; gap: var(--sp-6); }
+  .sands-label { display: flex; flex-direction: column; align-items: center; gap: 6px; }
+  .sands-label__ar {
+    font-family: var(--font-arabic); font-size: 18px; font-weight: 500;
+    color: var(--sand-200); direction: rtl;
+    text-shadow: 0 0 16px rgba(232,180,154,0.3);
+  }
+  .sands-label__en {
+    font-family: var(--font-mono); font-size: 10px;
+    letter-spacing: 0.32em; text-transform: uppercase; color: var(--fg-faint);
+  }
+  .sands-numeral {
+    position: relative;
+    width: 360px; height: 280px;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .sands-numeral svg {
+    position: absolute; inset: 0;
+    width: 100%; height: 100%;
+    overflow: visible;
+  }
+  .sands-numeral text {
+    font-family: var(--font-serif); font-weight: 600;
+    font-size: 240px;
+    fill: url(#sand-fill);
+    filter: url(#sand-grain);
+    text-anchor: middle; dominant-baseline: central;
+    letter-spacing: -0.04em;
+  }
+  .sands-numeral::before {
+    content: '';
+    position: absolute; inset: -80px;
+    border-radius: 50%;
+    background: radial-gradient(circle,
+      rgba(232,180,154,0.22) 0%, rgba(212,149,110,0.10) 35%, transparent 70%);
+    pointer-events: none;
+    animation: sands-halo 5s ease-in-out infinite;
+  }
+  @keyframes sands-halo {
+    0%,100% { opacity: 0.65; transform: scale(0.96); }
+    50%     { opacity: 1;   transform: scale(1.04); }
+  }
+  .sands-numeral .num-in,
+  .sands-numeral .num-out {
+    transition: transform 700ms cubic-bezier(.16,.8,.24,1),
+                opacity 700ms ease, filter 700ms ease;
+  }
+  .sands-numeral .num-out {
+    transform: translateX(60px) scale(1.05);
+    opacity: 0;
+    filter: blur(8px) saturate(1.2);
+  }
+  .sands-numeral .num-in.is-incoming {
+    transform: translateX(-60px) scale(0.95);
+    opacity: 0;
+    filter: blur(8px) saturate(0.8);
+  }
+  .sands-streaks { display: flex; flex-direction: column; gap: 8px; align-items: center; }
+  .sands-streak {
+    width: 0; height: 1px;
+    background: linear-gradient(to right,
+      transparent 0%, rgba(232,180,154,0.5) 30%, rgba(240,207,90,0.8) 50%,
+      rgba(232,180,154,0.5) 70%, transparent 100%);
+    transition: width 600ms cubic-bezier(.2,.7,.3,1), opacity 600ms ease;
+  }
+  .sands-streak.is-active { opacity: 1; }
+  .sands-streak[data-row="0"].is-active { width: 220px; }
+  .sands-streak[data-row="1"].is-active { width: 160px; opacity: 0.6; }
+  .sands-streak[data-row="2"].is-active { width: 100px; opacity: 0.35; }
+  .sands-marks { display: flex; gap: 12px; margin-top: 4px; }
+  .sands-mark {
+    width: 6px; height: 6px;
+    border-radius: 50%;
+    background: rgba(212,149,110,0.18);
+    border: 1px solid rgba(212,149,110,0.35);
+    transition: background 320ms ease, box-shadow 320ms ease, border-color 320ms ease;
+  }
+  .sands-mark.is-filled {
+    background: var(--sand-100);
+    border-color: var(--sand-200);
+    box-shadow: 0 0 10px rgba(232,180,154,0.6);
+  }
+  /* Ambient grain canvas — visible only in sands mode */
+  .grain-canvas {
+    position: absolute; inset: 0; z-index: 1;
+    pointer-events: none;
+    opacity: 0; transition: opacity 600ms ease;
+  }
+  .app[data-countdown="sands"][data-phase="countdown"] .grain-canvas { opacity: 1; }
+
+  /* ─── E · GRAIN — numerals physically made of sand particles ─── */
+  .cd-grain { flex-direction: column; gap: var(--sp-6); }
+  .grn-label { display: flex; flex-direction: column; align-items: center; gap: 6px; }
+  .grn-label__ar {
+    font-family: var(--font-arabic); font-size: 18px; font-weight: 500;
+    color: var(--sand-200); direction: rtl;
+    text-shadow: 0 0 16px rgba(232,180,154,0.3);
+  }
+  .grn-label__en {
+    font-family: var(--font-mono); font-size: 10px;
+    letter-spacing: 0.32em; text-transform: uppercase; color: var(--fg-faint);
+  }
+  .grn-canvas-wrap {
+    position: relative;
+    /* Generous frame so dispersed grains don't clip during the scatter beat */
+    width: 600px; height: 420px;
+  }
+  /* Warm halo behind the particle cloud — keeps the desert mood when the
+     grains briefly dissolve into nothing between numbers */
+  .grn-canvas-wrap::before {
+    content: '';
+    position: absolute; inset: -40px;
+    border-radius: 50%;
+    background: radial-gradient(circle,
+      rgba(232,180,154,0.16) 0%,
+      rgba(212,149,110,0.08) 35%,
+      transparent 70%);
+    pointer-events: none;
+    animation: sands-halo 5s ease-in-out infinite;
+  }
+  .grn-canvas {
+    position: absolute; inset: 0;
+    width: 100%; height: 100%;
+    pointer-events: none;
+  }
+  .grn-marks { display: flex; gap: 12px; margin-top: 4px; }
+  .grn-mark {
+    width: 6px; height: 6px;
+    border-radius: 50%;
+    background: rgba(212,149,110,0.18);
+    border: 1px solid rgba(212,149,110,0.35);
+    transition: background 320ms ease, box-shadow 320ms ease, border-color 320ms ease;
+  }
+  .grn-mark.is-filled {
+    background: var(--sand-100);
+    border-color: var(--sand-200);
+    box-shadow: 0 0 10px rgba(232,180,154,0.6);
+  }
+
+  /* ──────────────────────────────────────────────────────────────────────
+     TEACHER SOLO — same across all styles
+     ────────────────────────────────────────────────────────────────────── */
+  .teacher-solo {
+    position: absolute; inset: 0; z-index: 2;
+    display: flex; flex-direction: column;
+    align-items: center; justify-content: center;
+    gap: var(--sp-7);
+    opacity: 0; transform: scale(0.88);
+    transition: opacity 700ms cubic-bezier(.4,0,.2,1),
+                transform 900ms cubic-bezier(.34,1.56,.64,1);
+    pointer-events: none;
+  }
+  .app[data-phase="teacher"] .teacher-solo {
+    opacity: 1; transform: scale(1); pointer-events: auto;
+  }
+  .app[data-phase="slides"] .teacher-solo {
+    opacity: 0; transform: scale(1.05);
+  }
+  .teacher-circle {
+    --size: 380px;
+    position: relative;
+    width: var(--size); height: var(--size);
+    border-radius: 50%;
+    background-image: url('assets/teacher-ali.jpg.png');
+    background-size: cover; background-position: center;
+    box-shadow: 0 0 0 1.5px rgba(232,228,220,0.20),
+                0 12px 32px rgba(0,0,0,0.45),
+                0 0 80px rgba(232,117,90,0.12);
+  }
+  .teacher-circle::before {
+    content: '';
+    position: absolute; inset: -8px;
+    border-radius: 50%;
+    border: 1.5px solid rgba(232,117,90,0.55);
+    box-shadow: 0 0 28px rgba(232,117,90,0.35);
+    animation: rim-breath 3s ease-in-out infinite;
+  }
+  @keyframes rim-breath {
+    0%,100% { transform: scale(0.985); opacity: 0.85; }
+    50%     { transform: scale(1.02);  opacity: 1; }
+  }
+  .teacher-circle::after {
+    content: '';
+    position: absolute;
+    top: -22px; left: 50%;
+    width: 14px; height: 14px;
+    background: var(--signal-bright);
+    transform: translateX(-50%) rotate(45deg);
+    box-shadow: 0 0 14px var(--signal-soft);
+  }
+  .teacher-label { display: flex; flex-direction: column; align-items: center; gap: 4px; }
+  .teacher-label__name {
+    font-family: var(--font-serif); font-size: 28px;
+    color: var(--fg); letter-spacing: -0.01em;
+  }
+  .teacher-label__sub {
+    font-family: var(--font-mono); font-size: 10px;
+    letter-spacing: 0.28em; text-transform: uppercase;
+    color: var(--fg-subtle);
+  }
+
+  /* ──────────────────────────────────────────────────────────────────────
+     STAGE VIEW — teacher + classroom cameras as a centered cluster.
+     Opt-in only: reached by clicking "Stage" in the Skip-to control.
+     Never entered by the auto-sequence (countdown → teacher → slides).
+     ────────────────────────────────────────────────────────────────────── */
+  .stage-view {
+    position: absolute; inset: 0; z-index: 3;
+    display: flex; align-items: center; justify-content: center;
+    padding: var(--sp-5);
+    opacity: 0; transform: scale(0.96);
+    transition: opacity 700ms cubic-bezier(.4,0,.2,1),
+                transform 700ms cubic-bezier(.34,1.56,.64,1);
+    pointer-events: none;
+  }
+  .app[data-phase="stage"] .stage-view {
+    opacity: 1; transform: scale(1); pointer-events: auto;
+  }
+  /* hide all other phase layers while stage is up */
+  .app[data-phase="stage"] .teacher-solo,
+  .app[data-phase="stage"] .slide-area,
+  .app[data-phase="stage"] .countdown { opacity: 0; pointer-events: none; }
+  .app[data-phase="stage"] .topbar { opacity: 1; pointer-events: auto; }
+
+  /* big teacher circle on the left + 2x2 classroom grid, centered as a unit */
+  .stage-cluster {
+    display: flex; align-items: center;
+    gap: 80px; /* sp-11, generous breathing */
+    position: relative;
+  }
+  .classrooms-grid {
+    display: grid;
+    grid-template-columns: repeat(2, auto);
+    gap: var(--sp-7) var(--sp-8);
+  }
+
+  /* member = teacher or classroom camera tile */
+  .member {
+    display: flex; flex-direction: column;
+    align-items: center; gap: var(--sp-4);
+  }
+  .member--teacher { gap: var(--sp-6); }
+  .member__circle {
+    --member-size: 170px;
+    position: relative;
+    width: var(--member-size); height: var(--member-size);
+    border-radius: 50%;
+    flex-shrink: 0;
+  }
+  .member--teacher .member__circle   { --member-size: 360px; }
+  .member--classroom .member__circle { --member-size: 170px; }
+
+  .member__photo {
+    position: absolute; inset: 0;
+    border-radius: inherit;
+    background-size: cover; background-position: center;
+    box-shadow: 0 0 0 1.5px rgba(232,228,220,0.20),
+                0 12px 32px rgba(0,0,0,0.45);
+    z-index: 1;
+  }
+  .member--classroom .member__photo {
+    box-shadow: 0 0 0 1px rgba(232,228,220,0.18),
+                0 8px 20px rgba(0,0,0,0.4);
+  }
+
+  /* dashed gray rim — closed transmission (default on classrooms) */
+  .member__circle::before {
+    content: '';
+    position: absolute; inset: -5%;
+    border-radius: 50%;
+    border: 1.5px dashed rgba(232,228,220,0.32);
+    pointer-events: none;
+    z-index: 0;
+  }
+  /* teacher reuses the rim-breath animation from .teacher-circle::before */
+  .member--teacher .member__circle::before {
+    border: 1.5px solid rgba(232,117,90,0.55);
+    box-shadow: 0 0 28px rgba(232,117,90,0.35);
+    animation: rim-breath 3s ease-in-out infinite;
+  }
+
+  /* gold waypoint diamond — anchored above the rim */
+  .member__waypoint {
+    position: absolute;
+    top: calc(-5% - 6px); left: 50%;
+    width: 12px; height: 12px;
+    background: var(--signal-bright);
+    transform: translateX(-50%) rotate(45deg);
+    box-shadow: 0 0 14px var(--signal-soft);
+    z-index: 2;
+  }
+  .member--classroom .member__waypoint { top: calc(-5% - 5px); width: 10px; height: 10px; }
+  .member--teacher .member__waypoint   { top: calc(-5% - 7px); width: 14px; height: 14px; }
+
+  /* mute pip — small dark circle bottom-right */
+  .member__mute {
+    position: absolute;
+    right: 4%; bottom: 4%;
+    width: 30px; height: 30px;
+    background: rgba(10,15,26,0.85);
+    border-radius: 50%;
+    border: 1px solid var(--border-strong);
+    display: inline-flex; align-items: center; justify-content: center;
+    color: var(--danger);
+    z-index: 2;
+  }
+  .member__mute svg { width: 60%; height: 60%; }
+
+  .member__label { text-align: center; line-height: 1.2; color: var(--fg); }
+  .member__name {
+    font-family: var(--font-sans);
+    font-size: 14px; font-weight: 600;
+    letter-spacing: -0.005em;
+  }
+  .member--teacher .member__name {
+    font-family: var(--font-serif);
+    font-size: 24px; font-weight: 500;
+    letter-spacing: -0.01em;
+  }
+  .member--classroom .member__name { font-size: 13px; }
+  .member__sub {
+    font-family: var(--font-mono);
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.28em;
+    color: var(--fg-subtle);
+    margin-top: 4px;
+  }
+  .member--classroom .member__sub { display: none; }
+
+  /* ──────────────────────────────────────────────────────────────────────
+     SLIDE VIEW — same across all styles
+     ────────────────────────────────────────────────────────────────────── */
+  .slide-area {
+    position: absolute; inset: 0; z-index: 1;
+    padding: var(--sp-5);
+    display: grid;
+    grid-template-columns: minmax(0,1fr) 320px;
+    /* Lock the row to the available height — otherwise the chat list grows
+       the row vertically and shoves the slide canvas downward as messages
+       arrive. minmax(0, 1fr) lets children opt into internal scrolling. */
+    grid-template-rows: minmax(0, 1fr);
+    gap: var(--sp-5);
+    opacity: 0; transform: scale(0.96);
+    transition: opacity 700ms ease 200ms, transform 700ms ease 200ms;
+    pointer-events: none;
+  }
+  .app[data-phase="slides"] .slide-area {
+    opacity: 1; transform: scale(1); pointer-events: auto;
+  }
+  .app[data-phase="slides"] .main { padding-top: var(--sp-5); }
+  .stage-wrap {
+    display: flex; align-items: center; justify-content: center;
+    min-width: 0; min-height: 0; overflow: hidden;
+  }
+  .stage {
+    position: relative; aspect-ratio: 16/9;
+    width: 100%; max-width: 100%; max-height: 100%;
+    border-radius: var(--r-4);
+    background: var(--paper-100); overflow: hidden;
+    box-shadow: inset 0 0 0 1px rgba(10,15,26,0.10),
+                0 1px 0 rgba(232,228,220,0.04),
+                0 8px 32px rgba(0,0,0,0.35);
+    display: flex; flex-direction: column;
+    align-items: center; justify-content: center;
+    padding: 64px; text-align: center;
+  }
+  .stage::before {
+    content: ''; position: absolute; inset: 0;
+    background-image:
+      linear-gradient(to right, rgba(10,15,26,0.045) 1px, transparent 1px),
+      linear-gradient(to bottom, rgba(10,15,26,0.045) 1px, transparent 1px);
+    background-size: 24px 24px;
+  }
+  .stage::after {
+    content: ''; position: absolute; inset: 0;
+    background-image:
+      linear-gradient(to right, rgba(201,162,39,0.10) 1px, transparent 1px),
+      linear-gradient(to bottom, rgba(201,162,39,0.10) 1px, transparent 1px);
+    background-size: 96px 96px;
+  }
+  .slide-eyebrow {
+    position: relative; z-index: 1;
+    font-family: var(--font-mono); font-size: 11px;
+    letter-spacing: 0.32em; text-transform: uppercase;
+    color: rgba(10,15,26,0.55); margin-bottom: var(--sp-4);
+  }
+  .slide-title {
+    position: relative; z-index: 1;
+    font-family: var(--font-serif); font-size: 56px;
+    font-weight: 500; color: rgba(10,15,26,0.92);
+    line-height: 1.1; letter-spacing: -0.015em;
+    max-width: 720px;
+  }
+  .slide-title em { color: #c9a227; font-style: italic; }
+  .sidebar {
+    display: flex; flex-direction: column; gap: var(--sp-4);
+    /* min-height:0 lets the inner flex children (chat) actually shrink and
+       hand the overflow to .messages — without it, the flex column inflates
+       to fit its content and pushes everything around it. */
+    min-height: 0;
+  }
+  .focus {
+    position: relative; border-radius: var(--r-4);
+    overflow: hidden; aspect-ratio: 16/9;
+    background-image: url('assets/classroom-a.jpg');
+    background-size: cover; background-position: center;
+    border: 2px solid var(--border-strong);
+  }
+  .focus__overlay {
+    position: absolute; inset: 0;
+    background: linear-gradient(to top, rgba(10,15,26,0.88) 0%, rgba(10,15,26,0) 50%);
+  }
+  .focus__pip {
+    position: absolute; top: var(--sp-3); left: var(--sp-3);
+    width: 56px; height: 56px; border-radius: var(--r-3);
+    background: center/cover no-repeat url('assets/teacher-ali.jpg.png');
+    background-position: center 20%;
+    box-shadow: 0 0 0 1.5px rgba(232,228,220,0.30), 0 4px 12px rgba(0,0,0,0.4);
+  }
+  .focus__label {
+    position: absolute; left: var(--sp-3); bottom: var(--sp-3); color: var(--fg);
+  }
+  .focus__name { font-family: var(--font-serif); font-size: 16px; }
+  .focus__sub  { font-family: var(--font-mono); font-size: 10px;
+    letter-spacing: 0.22em; text-transform: uppercase; color: var(--fg-subtle); }
+
+  /* ── Stage roster — avatar + name underneath, evenly spaced ── */
+  .roster {
+    display: flex; align-items: flex-start; justify-content: space-between;
+    gap: var(--sp-2); padding: var(--sp-3) var(--sp-2);
+    border-top: 1px solid var(--divider);
+    border-bottom: 1px solid var(--divider);
+  }
+  .roster__item {
+    display: flex; flex-direction: column; align-items: center; gap: 6px;
+    flex: 1; min-width: 0;
+    cursor: pointer;
+    transition: opacity 200ms ease;
+  }
+  .roster__avatar {
+    width: 40px; height: 40px;
+    border-radius: 50%;
+    background-color: var(--bg-overlay);
+    background-size: 70% 70%;
+    background-position: center;
+    background-repeat: no-repeat;
+    border: 1px solid var(--border-strong);
+    transition: box-shadow 200ms ease, border-color 200ms ease;
+  }
+  .roster__name {
+    font-family: var(--font-sans);
+    font-size: 11px; font-weight: 400;
+    color: var(--fg-subtle);
+    text-align: center;
+    white-space: nowrap;
+    overflow: hidden; text-overflow: ellipsis;
+    max-width: 100%;
+    transition: color 200ms ease;
+  }
+  .roster__item.is-speaking .roster__name {
+    color: #E8755A; font-weight: 600;
+  }
+  .roster__item.is-speaking .roster__avatar {
+    border-color: rgba(232,117,90,0.55);
+    box-shadow: 0 0 14px rgba(232,117,90,0.35);
+  }
+
+  /* ── Class chat — heading + flowing message cards ── */
+  .chat {
+    display: flex; flex-direction: column;
+    min-height: 0; flex: 1;
+  }
+  .chat__head {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: var(--sp-3) var(--sp-1) var(--sp-3);
+  }
+  .chat__title {
+    font-family: var(--font-mono); font-size: 10px;
+    text-transform: uppercase; letter-spacing: 0.22em;
+    color: var(--fg-faint);
+  }
+  .messages {
+    overflow-y: auto; overflow-x: hidden;
+    display: flex; flex-direction: column;
+    gap: var(--sp-3);
+    padding: 0 var(--sp-1) var(--sp-4);
+    scrollbar-width: thin;
+    scrollbar-color: var(--border) transparent;
+  }
+  .messages::-webkit-scrollbar { width: 6px; }
+  .messages::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+  .messages::-webkit-scrollbar-thumb:hover { background: var(--border-strong); }
+
+  /* Message card — dark rounded rectangle, avatar + body */
+  .msg {
+    display: flex; gap: var(--sp-3);
+    align-items: flex-start;
+    padding: var(--sp-3) var(--sp-3);
+    background: var(--hover-overlay);
+    border: 1px solid transparent;
+    border-radius: var(--r-4);
+    transition: background 200ms ease, border-color 200ms ease;
+    /* Fresh-message arrival animation */
+    animation: msg-in 320ms cubic-bezier(.16,.8,.24,1) backwards;
+  }
+  .msg.is-fresh { border-color: rgba(232,184,58,0.20); }
+  @keyframes msg-in {
+    from { opacity: 0; transform: translateY(8px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+  .msg__avatar {
+    width: 32px; height: 32px;
+    border-radius: 50%;
+    background-color: var(--bg-overlay);
+    background-size: 70% 70%;
+    background-position: center;
+    background-repeat: no-repeat;
+    flex-shrink: 0;
+    border: 1px solid var(--border-strong);
+  }
+  .msg__body { min-width: 0; flex: 1; }
+  .msg__name {
+    font-family: var(--font-sans);
+    font-size: 13px; font-weight: 600;
+    color: var(--fg);
+    letter-spacing: -0.005em;
+    margin-bottom: 3px;
+    display: flex; align-items: center; gap: 6px;
+  }
+  .msg__time {
+    margin-left: auto;
+    font-family: var(--font-mono);
+    font-size: 9px;
+    color: var(--fg-faint);
+    letter-spacing: 0.06em;
+    font-weight: 400;
+    display: flex; align-items: center; gap: 6px;
+  }
+  /* Tiny gold dot next to "just now" marks a brand-new message — fades after a beat */
+  .msg__fresh-dot {
+    width: 5px; height: 5px;
+    border-radius: 50%;
+    background: var(--signal-bright);
+    box-shadow: 0 0 6px var(--signal-soft);
+    opacity: 0;
+    transition: opacity 400ms ease;
+  }
+  .msg.is-fresh .msg__fresh-dot { opacity: 1; }
+  .msg__text {
+    font-family: var(--font-sans);
+    font-size: 13px; line-height: 1.5;
+    color: var(--fg-muted);
+    word-wrap: break-word;
+  }
+
+  /* ──────────────────────────────────────────────────────────────────────
+     CONTROL PANEL — bottom-left, collapsible (mirrors presenter-screen.html)
+     ────────────────────────────────────────────────────────────────────── */
+  .controls-panel {
+    position: fixed;
+    bottom: var(--sp-5); left: var(--sp-5);
+    z-index: 100;
+    font-family: var(--font-mono);
+    color: var(--fg);
+    min-width: 260px;
+  }
+  .cp-handle {
+    display: inline-flex; align-items: center; gap: var(--sp-2);
+    padding: 6px 12px;
+    background: var(--bg-overlay);
+    border: 1px solid var(--border);
+    border-radius: var(--r-2);
+    color: var(--fg-muted);
+    font-family: var(--font-mono); font-size: 10px;
+    text-transform: uppercase; letter-spacing: 0.18em;
+    cursor: pointer;
+    transition: color 160ms ease, background 160ms ease;
+  }
+  .cp-handle:hover { color: var(--fg); background: var(--bg-raised); }
+  .cp-diamond { width: 6px; height: 6px; background: var(--signal-bright); transform: rotate(45deg); }
+  .cp-panel {
+    display: none;
+    margin-top: var(--sp-2);
+    padding: var(--sp-3) var(--sp-4);
+    background: rgba(10,15,26,0.92);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border: 1px solid var(--border);
+    border-radius: var(--r-3);
+    box-shadow: 0 8px 32px rgba(0,0,0,0.45);
+    max-height: 80vh; overflow: auto;
+  }
+  .controls-panel.is-open .cp-panel { display: block; }
+  .cp-section {
+    text-transform: uppercase; letter-spacing: 0.22em;
+    font-size: 9px; color: var(--fg-faint);
+    margin: var(--sp-3) 0 var(--sp-2);
+    padding-bottom: 4px;
+    border-bottom: 1px solid var(--divider);
+  }
+  .cp-section:first-child { margin-top: 0; }
+  .cp-row {
+    display: flex; align-items: center; justify-content: space-between;
+    gap: var(--sp-3); padding: 4px 0;
+    font-size: 11px; color: var(--fg-muted);
+  }
+  .cp-row--stack { flex-direction: column; align-items: stretch; gap: 8px; }
+  .cp-row--stack > span { font-size: 11px; color: var(--fg-faint); }
+  .cp-tabs {
+    display: inline-flex;
+    border: 1px solid var(--border);
+    border-radius: var(--r-2);
+    background: var(--hover-overlay);
+    padding: 2px;
+    gap: 1px;
+  }
+  .cp-tabs button {
+    padding: 4px 8px;
+    border: none; background: transparent;
+    color: var(--fg-faint);
+    font-family: var(--font-mono); font-size: 9px;
+    text-transform: uppercase; letter-spacing: 0.06em;
+    cursor: pointer; border-radius: 3px;
+    transition: background 160ms ease, color 160ms ease;
+    min-width: 26px;
+  }
+  .cp-tabs button:hover { color: var(--fg-muted); }
+  .cp-tabs button.is-active {
+    background: var(--bg-overlay); color: var(--fg);
+  }
+  .cp-tabs--grid {
+    display: grid; grid-template-columns: repeat(4, 1fr);
+    gap: 3px; width: 100%;
+  }
+  .cp-tabs--grid-3 {
+    display: grid; grid-template-columns: repeat(3, 1fr);
+    gap: 3px; width: 100%;
+  }
+  .cp-tabs--grid button,
+  .cp-tabs--grid-3 button { min-width: 0; padding: 6px 4px; font-size: 10px; }
+  .cp-actions { display: flex; gap: var(--sp-2); margin-top: var(--sp-3); }
+  .cp-btn {
+    flex: 1;
+    padding: 8px 10px;
+    background: var(--hover-overlay);
+    border: 1px solid var(--border);
+    border-radius: var(--r-2);
+    color: var(--fg-muted);
+    font-family: var(--font-mono); font-size: 10px;
+    letter-spacing: 0.18em; text-transform: uppercase;
+    cursor: pointer;
+    transition: color 160ms ease, background 160ms ease, border-color 160ms ease;
+  }
+  .cp-btn:hover { color: var(--fg); background: var(--active-overlay); border-color: var(--border-strong); }
+  .cp-btn--primary {
+    color: var(--signal-bright);
+    border-color: rgba(232,184,58,0.4);
+  }
+  .cp-btn--primary:hover {
+    background: rgba(232,184,58,0.08);
+    color: var(--signal-bright);
+  }
+</style>
+</head>
+<body>
+
+<div class="app" id="app"
+     data-countdown="mission"
+     data-phase="countdown"
+     data-duration="10"
+     data-teacher-hold="5"
+     data-bg-stars="dense"
+     data-bg-glow="strong"
+     data-bg-northstar="on"
+     data-bg-landscape="dunes">
+
+  <!-- ── Backdrop: stars ── -->
+  <div class="sky-stars" aria-hidden="true">
+    <div class="stars-bright"></div>
+    <div class="stars-medium"></div>
+    <div class="stars-dim"></div>
+  </div>
+
+  <!-- North star -->
+  <div class="north-star" aria-hidden="true">
+    <span class="north-star__halo north-star__halo--1"></span>
+    <span class="north-star__halo north-star__halo--2"></span>
+    <span class="north-star__halo north-star__halo--3"></span>
+    <span class="north-star__shimmer north-star__shimmer--h"></span>
+    <span class="north-star__shimmer north-star__shimmer--v"></span>
+    <span class="north-star__core"></span>
+  </div>
+
+  <!-- ── Backdrop: drifting dunes ──
+       More restrained pass — terra reduced to a whisper, chalk strokes
+       thinned, and the gold wind-ripple pulled back. The dunes should
+       read as a horizon suggestion, not a feature. -->
+  <div class="dunes" aria-hidden="true">
+    <svg class="far" viewBox="0 0 2880 240" preserveAspectRatio="none">
+      <defs>
+        <linearGradient id="dune-far" x1="0" x2="0" y1="0" y2="1">
+          <stop offset="0%"   stop-color="rgba(212,149,110,0.04)"/>   <!-- terra hint -->
+          <stop offset="100%" stop-color="rgba(26,34,54,0.30)"/>      <!-- void-100 -->
+        </linearGradient>
+      </defs>
+      <path d="M0,240 L0,180 C160,160 320,120 480,130 C640,140 760,170 920,160 C1080,150 1220,110 1440,120 L1440,120 C1600,160 1760,120 1920,130 C2080,140 2200,170 2360,160 C2520,150 2660,110 2880,120 L2880,240 Z" fill="url(#dune-far)"/>
+      <path d="M0,180 C160,160 320,120 480,130 C640,140 760,170 920,160 C1080,150 1220,110 1440,120 C1600,160 1760,120 1920,130 C2080,140 2200,170 2360,160 C2520,150 2660,110 2880,120" fill="none" stroke="rgba(232,228,220,0.10)" stroke-width="0.6"/>
+    </svg>
+    <svg class="mid" viewBox="0 0 2880 240" preserveAspectRatio="none">
+      <defs>
+        <linearGradient id="dune-mid" x1="0" x2="0" y1="0" y2="1">
+          <stop offset="0%"   stop-color="rgba(212,149,110,0.07)"/>   <!-- terra whisper -->
+          <stop offset="100%" stop-color="rgba(16,23,42,0.42)"/>      <!-- void-200 -->
+        </linearGradient>
+      </defs>
+      <path d="M0,240 L0,160 C200,110 400,80 600,110 C800,140 940,180 1200,150 C1340,135 1440,90 1440,90 L1440,90 C1640,110 1840,80 2040,110 C2240,140 2380,180 2640,150 C2780,135 2880,90 2880,90 L2880,240 Z" fill="url(#dune-mid)"/>
+      <path d="M0,160 C200,110 400,80 600,110 C800,140 940,180 1200,150 C1340,135 1440,90 1440,90 C1640,110 1840,80 2040,110 C2240,140 2380,180 2640,150 C2780,135 2880,90 2880,90" fill="none" stroke="rgba(232,228,220,0.18)" stroke-width="0.8"/>
+      <path d="M0,160 C200,110 400,80 600,110 C800,140 940,180 1200,150 C1340,135 1440,90 1440,90 C1640,110 1840,80 2040,110 C2240,140 2380,180 2640,150 C2780,135 2880,90 2880,90" fill="none" stroke="rgba(201,162,39,0.22)" stroke-width="0.5" stroke-dasharray="2 6" stroke-linecap="round"/>
+    </svg>
+    <svg class="near" viewBox="0 0 2880 240" preserveAspectRatio="none">
+      <defs>
+        <linearGradient id="dune-near" x1="0" x2="0" y1="0" y2="1">
+          <stop offset="0%"   stop-color="rgba(138,78,42,0.22)"/>      <!-- terra-600 trace -->
+          <stop offset="100%" stop-color="rgba(10,15,26,0.85)"/>       <!-- void-300 base -->
+        </linearGradient>
+      </defs>
+      <path d="M0,240 L0,120 C160,80 360,40 560,80 C760,120 920,170 1200,140 C1380,120 1440,60 1440,60 L1440,60 C1600,80 1800,40 2000,80 C2200,120 2360,170 2640,140 C2820,120 2880,60 2880,60 L2880,240 Z" fill="url(#dune-near)"/>
+      <path d="M0,120 C160,80 360,40 560,80 C760,120 920,170 1200,140 C1380,120 1440,60 1440,60 C1600,80 1800,40 2000,80 C2200,120 2360,170 2640,140 C2820,120 2880,60 2880,60" fill="none" stroke="rgba(232,228,220,0.32)" stroke-width="0.9" filter="drop-shadow(0 0 3px rgba(232,228,220,0.14))"/>
+    </svg>
+  </div>
+
+  <!-- Lab-driven landscape — iframe embed of noon-bg-lab.html. Shown when
+       data-bg-landscape starts with "lab-"; URL is set by JS to pass the
+       matching preset slug. -->
+  <iframe class="bg-lab-frame" id="bgLabFrame" aria-hidden="true" title="Background lab"></iframe>
+
+  <!-- Ambient grain canvas — visible only in sands mode -->
+  <canvas class="grain-canvas" id="grain"></canvas>
+
+  <!-- Vignette — cinematic only -->
+  <div class="vignette" aria-hidden="true"></div>
+
+  <!-- ── Topbar (visible in slides phase only) ── -->
+  <header class="topbar">
+    <div class="session-meta">
+      <div class="time">
+        <span class="time__diamond" aria-hidden="true"></span>
+        <span class="time__value" id="timer">00:00</span>
+      </div>
+      <span class="session-title"><em>Algebra II</em> · Quadratic functions, lesson 3</span>
+    </div>
+
+    <div class="controls">
+      <!-- Mic — pressed = muted. The diagonal "strike" line is hidden by
+           default; the [aria-pressed="true"] state reveals it. -->
+      <button class="icon-btn" id="mic" aria-pressed="false"
+              aria-label="Toggle microphone" data-tip="Mute">
+        <svg width="18" height="18" viewBox="0 0 18 18" fill="none"
+             stroke="currentColor" stroke-width="1.5"
+             stroke-linecap="round" stroke-linejoin="round">
+          <rect x="6.5" y="2" width="5" height="9" rx="2.5"/>
+          <path d="M3.5 8.5a5.5 5.5 0 0 0 11 0"/>
+          <line x1="9" y1="14" x2="9" y2="16.5"/>
+          <line x1="6.5" y1="16.5" x2="11.5" y2="16.5"/>
+          <line class="strike" x1="2.5" y1="2.5" x2="15.5" y2="15.5"/>
+        </svg>
+      </button>
+
+      <!-- Camera — pressed = video off. Same strike treatment as mic. -->
+      <button class="icon-btn" id="cam" aria-pressed="false"
+              aria-label="Toggle camera" data-tip="Stop video">
+        <svg width="18" height="18" viewBox="0 0 18 18" fill="none"
+             stroke="currentColor" stroke-width="1.5"
+             stroke-linecap="round" stroke-linejoin="round">
+          <rect x="2" y="5" width="10" height="8" rx="1.5"/>
+          <path d="M12 8.2 16 6v6l-4-2.2z"/>
+          <line class="strike" x1="2.5" y1="2.5" x2="15.5" y2="15.5"/>
+        </svg>
+      </button>
+
+      <div class="me-avatar" title="You" aria-label="Your profile">JI</div>
+    </div>
+  </header>
+
+  <!-- ── Main ── -->
+  <main class="main">
+
+    <!-- Shared SVG defs (sand-grain filter + gradient) — used by sands countdown -->
+    <svg width="0" height="0" aria-hidden="true" style="position:absolute;">
+      <defs>
+        <filter id="sand-grain" x="-20%" y="-20%" width="140%" height="140%">
+          <feTurbulence type="fractalNoise" baseFrequency="0.7" numOctaves="2" seed="3" result="noise"/>
+          <feDisplacementMap in="SourceGraphic" in2="noise" scale="3"/>
+        </filter>
+        <linearGradient id="sand-fill" x1="0" x2="0" y1="0" y2="1">
+          <stop offset="0%"   stop-color="#f3cfb3"/>
+          <stop offset="45%"  stop-color="#e0b83a"/>
+          <stop offset="100%" stop-color="#D4956E"/>
+        </linearGradient>
+      </defs>
+    </svg>
+
+    <!-- ── Countdown B — Mission Control ── -->
+    <div class="countdown cd-mission">
+      <div class="mc-cross" aria-hidden="true"></div>
+      <div class="mc-scanlines" aria-hidden="true"></div>
+
+      <div class="mc-strip">
+        <span class="mc-strip__dot"></span>
+        <span class="mc-strip__title"><em>Algebra II</em> · Quadratic functions, lesson 3</span>
+      </div>
+
+      <div class="mc-readout mc-readout--tl">
+        <div>Session</div><div class="mc-readout__value">ALG-II · L3 · CH7</div>
+        <div>Channel</div><div class="mc-readout__value">Live · Studio 04</div>
+      </div>
+      <div class="mc-readout mc-readout--tr">
+        <div>Viewers</div><div class="mc-readout__value" id="mcViewers">000 102</div>
+        <div>Classrooms</div><div class="mc-readout__value">02 active · 02 standby</div>
+      </div>
+      <div class="mc-readout mc-readout--bl">
+        <div>Presenter</div><div class="mc-readout__value">Sara Al-Otaibi</div>
+      </div>
+      <div class="mc-readout mc-readout--br">
+        <div>Stream</div><div class="mc-readout__value">1080p · 30fps · OK</div>
+      </div>
+
+      <div class="mc-ring-wrap">
+        <svg class="mc-ring-bg" viewBox="0 0 200 200" aria-hidden="true">
+          <circle cx="100" cy="100" r="92"/>
+        </svg>
+        <svg class="mc-ring-fg" viewBox="0 0 200 200" aria-hidden="true">
+          <circle id="mcRing" cx="100" cy="100" r="92"
+                  stroke-dasharray="578.05" stroke-dashoffset="0"/>
+        </svg>
+        <svg class="mc-ticks" viewBox="0 0 200 200" aria-hidden="true" id="mcTicks"></svg>
+        <div class="mc-number">
+          <div class="mc-number__digit" id="mcDigit">10</div>
+          <div class="mc-number__unit">Seconds to live</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── Countdown C — Cinematic ── -->
+    <div class="countdown cd-cinema">
+      <!-- Bilingual label sits up top, away from the massive numeric in the
+           middle of the stage. Same wording as Sands / Grain for continuity. -->
+      <div class="cin-label">
+        <div class="cin-label__ar">الحصة تبدأ</div>
+        <div class="cin-label__en">Class begins in</div>
+      </div>
+      <div class="cin-horizon" id="cinHorizon"></div>
+      <div class="cin-stage" id="cinStage"></div>
+      <div class="cin-underline"></div>
+    </div>
+
+    <!-- ── Countdown E — Grain (numerals made of sand particles) ── -->
+    <div class="countdown cd-grain">
+      <div class="grn-label">
+        <div class="grn-label__ar">الحصة تبدأ</div>
+        <div class="grn-label__en">Class begins in</div>
+      </div>
+      <div class="grn-canvas-wrap">
+        <canvas class="grn-canvas" id="grnCanvas"></canvas>
+      </div>
+      <div class="grn-marks" id="grnMarks" aria-hidden="true"></div>
+    </div>
+
+    <!-- ── Countdown D — Drifting Sands ── -->
+    <div class="countdown cd-sands">
+      <div class="sands-label">
+        <div class="sands-label__ar">الحصة تبدأ</div>
+        <div class="sands-label__en">Class begins in</div>
+      </div>
+      <div class="sands-numeral" id="sandsNumeral">
+        <svg class="num-in" viewBox="0 0 360 280" preserveAspectRatio="xMidYMid meet">
+          <text x="180" y="140">10</text>
+        </svg>
+      </div>
+      <div class="sands-streaks" id="sandsStreaks">
+        <div class="sands-streak" data-row="0"></div>
+        <div class="sands-streak" data-row="1"></div>
+        <div class="sands-streak" data-row="2"></div>
+      </div>
+      <div class="sands-marks" id="sandsMarks" aria-hidden="true"></div>
+    </div>
+
+    <!-- ── Teacher solo ── -->
+    <div class="teacher-solo">
+      <div class="teacher-circle"></div>
+      <div class="teacher-label">
+        <div class="teacher-label__name">Sara Al-Otaibi</div>
+        <div class="teacher-label__sub">Teacher · Live</div>
+      </div>
+    </div>
+
+    <!-- ── Slide view ── -->
+    <div class="slide-area">
+      <div class="stage-wrap">
+        <section class="stage">
+          <div class="slide-eyebrow">Lesson 3 · Chapter 7</div>
+          <h1 class="slide-title">Quadratic functions <em>— the vertex form</em></h1>
+        </section>
+      </div>
+      <aside class="sidebar">
+        <div class="focus">
+          <div class="focus__pip"></div>
+          <div class="focus__overlay"></div>
+          <div class="focus__label">
+            <div class="focus__name">Sara Al-Otaibi</div>
+            <div class="focus__sub">Teacher</div>
+          </div>
+        </div>
+
+        <!-- Roster — avatars + names; populated by JS so we can highlight speakers -->
+        <div class="roster" id="roster" role="list" aria-label="On stage"></div>
+
+        <!-- Class chat — heading + flowing messages container, populated by firehose JS -->
+        <div class="chat">
+          <div class="chat__head">
+            <span class="chat__title">Class chat</span>
+          </div>
+          <div class="messages" id="messages"></div>
+        </div>
+      </aside>
+    </div>
+
+    <!-- ── Stage view — opt-in only, reached via "Stage" in Skip-to. ── -->
+    <div class="stage-view" aria-label="Stage view">
+      <div class="stage-cluster" role="list" aria-label="Stage participants">
+        <!-- Teacher (lead party — large circle, breathing coral rim) -->
+        <div class="member member--teacher" role="listitem">
+          <div class="member__circle">
+            <div class="member__photo" style="background-image: url('assets/teacher-ali.jpg.png');"></div>
+            <span class="member__waypoint" aria-hidden="true"></span>
+          </div>
+          <div class="member__label">
+            <div class="member__name">Sara Al-Otaibi</div>
+            <div class="member__sub">Teacher · Live</div>
+          </div>
+        </div>
+
+        <!-- 2x2 classroom grid (4 outposts, all muted by default) -->
+        <div class="classrooms-grid">
+          <div class="member member--classroom" role="listitem">
+            <div class="member__circle">
+              <div class="member__photo" style="background-image: url('assets/classroom-a.jpg');"></div>
+              <span class="member__mute" aria-label="Muted">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="1" y1="1" x2="23" y2="23"/><path d="M9 9v3a3 3 0 0 0 5.12 2.12M15 9.34V4a3 3 0 0 0-5.94-.6"/><path d="M17 16.95A7 7 0 0 1 5 12v-2m14 0v2a7 7 0 0 1-.11 1.23"/></svg>
+              </span>
+            </div>
+            <div class="member__label"><div class="member__name">Classroom A</div></div>
+          </div>
+          <div class="member member--classroom" role="listitem">
+            <div class="member__circle">
+              <div class="member__photo" style="background-image: url('assets/classroom-b.jpg');"></div>
+              <span class="member__mute" aria-label="Muted">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="1" y1="1" x2="23" y2="23"/><path d="M9 9v3a3 3 0 0 0 5.12 2.12M15 9.34V4a3 3 0 0 0-5.94-.6"/><path d="M17 16.95A7 7 0 0 1 5 12v-2m14 0v2a7 7 0 0 1-.11 1.23"/></svg>
+              </span>
+            </div>
+            <div class="member__label"><div class="member__name">Classroom B</div></div>
+          </div>
+          <div class="member member--classroom" role="listitem">
+            <div class="member__circle">
+              <div class="member__photo" style="background-image: url('assets/classroom-d.jpg');"></div>
+              <span class="member__mute" aria-label="Muted">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="1" y1="1" x2="23" y2="23"/><path d="M9 9v3a3 3 0 0 0 5.12 2.12M15 9.34V4a3 3 0 0 0-5.94-.6"/><path d="M17 16.95A7 7 0 0 1 5 12v-2m14 0v2a7 7 0 0 1-.11 1.23"/></svg>
+              </span>
+            </div>
+            <div class="member__label"><div class="member__name">Classroom D</div></div>
+          </div>
+          <div class="member member--classroom" role="listitem">
+            <div class="member__circle">
+              <div class="member__photo" style="background-image: url('assets/classroom-a.jpg');"></div>
+              <span class="member__mute" aria-label="Muted">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="1" y1="1" x2="23" y2="23"/><path d="M9 9v3a3 3 0 0 0 5.12 2.12M15 9.34V4a3 3 0 0 0-5.94-.6"/><path d="M17 16.95A7 7 0 0 1 5 12v-2m14 0v2a7 7 0 0 1-.11 1.23"/></svg>
+              </span>
+            </div>
+            <div class="member__label"><div class="member__name">Classroom E</div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <!-- ── Control panel ── -->
+  <aside class="controls-panel is-open" id="cp" aria-label="Sequence controls">
+    <button class="cp-handle" id="cpHandle">
+      <span class="cp-diamond"></span> Sequence controls
+    </button>
+    <div class="cp-panel">
+
+      <div class="cp-section">Countdown style</div>
+      <div class="cp-row cp-row--stack">
+        <div class="cp-tabs cp-tabs--grid" data-attr="data-countdown">
+          <button data-value="mission">B · Mission</button>
+          <button data-value="cinema">C · Cinema</button>
+          <button data-value="sands">D · Sands</button>
+          <button data-value="grain">E · Grain</button>
+        </div>
+      </div>
+
+      <div class="cp-section">Sequence</div>
+      <div class="cp-row">
+        <span>Skip to</span>
+        <div class="cp-tabs" data-attr="data-phase">
+          <button data-value="countdown">Count</button>
+          <button data-value="teacher">Teacher</button>
+          <button data-value="slides">Slides</button>
+          <button data-value="stage">Stage</button>
+        </div>
+      </div>
+      <div class="cp-row">
+        <span>Duration</span>
+        <div class="cp-tabs" data-attr="data-duration">
+          <button data-value="5">5s</button>
+          <button data-value="10">10s</button>
+          <button data-value="15">15s</button>
+        </div>
+      </div>
+      <div class="cp-row">
+        <span>Teacher hold</span>
+        <div class="cp-tabs" data-attr="data-teacher-hold">
+          <button data-value="2">2s</button>
+          <button data-value="3">3s</button>
+          <button data-value="5">5s</button>
+        </div>
+      </div>
+
+      <div class="cp-section">Backdrop</div>
+      <div class="cp-row">
+        <span>Stars</span>
+        <div class="cp-tabs" data-attr="data-bg-stars">
+          <button data-value="sparse">Sparse</button>
+          <button data-value="medium">Medium</button>
+          <button data-value="dense">Dense</button>
+        </div>
+      </div>
+      <div class="cp-row">
+        <span>Star glow</span>
+        <div class="cp-tabs" data-attr="data-bg-glow">
+          <button data-value="off">Off</button>
+          <button data-value="subtle">Subtle</button>
+          <button data-value="strong">Strong</button>
+        </div>
+      </div>
+      <div class="cp-row">
+        <span>North star</span>
+        <div class="cp-tabs" data-attr="data-bg-northstar">
+          <button data-value="off">Off</button>
+          <button data-value="on">On</button>
+        </div>
+      </div>
+      <div class="cp-row cp-row--stack">
+        <span>Landscape · built-in</span>
+        <div class="cp-tabs" data-attr="data-bg-landscape">
+          <button data-value="off">Off</button>
+          <button data-value="dunes">Dunes</button>
+        </div>
+      </div>
+
+      <div class="cp-row cp-row--stack">
+        <span>Landscape · lab presets</span>
+        <div class="cp-tabs cp-tabs--grid" data-attr="data-bg-landscape"
+             title="Loaded from noon-bg-lab.html as iframe">
+          <button data-value="lab-starry-sky"      title="Starry Sky — sparse stars, Venus prominent">Starry</button>
+          <button data-value="lab-winding-desert"  title="Winding Desert — compressed dunes, visible ridges">Winding</button>
+          <button data-value="lab-flat-desert"     title="Flat Desert — wide horizon, low relief">Flat</button>
+          <button data-value="lab-topographic-void" title="Topographic · Void — dark map, faint contour grid">Topo·V</button>
+          <button data-value="lab-caravan-lights"  title="Caravan Lights — gold dots flowing along dim plates">Caravan</button>
+          <button data-value="lab-tectonic-drift"  title="Tectonic Drift — coarse plates, slow geology">Tectonic</button>
+        </div>
+      </div>
+
+      <div class="cp-actions">
+        <button class="cp-btn cp-btn--primary" id="cpReplay">▷ Replay</button>
+      </div>
+    </div>
+  </aside>
+</div>
+
+<script>
+  /* ──────────────────────────────────────────────────────────────────────
+     STAR FIELD — rendered once, shown according to data-bg-stars
+     ────────────────────────────────────────────────────────────────────── */
+  (function () {
+    const stars = {
+      bright: [[300,90,2.2,.85],[1180,70,2.0,.80],[740,270,2.4,.75],[540,180,1.8,.70]],
+      medium: [[1340,450,2.0,.70],[980,160,1.6,.62],[120,280,1.6,.60],[320,80,1.0,.45],
+               [580,130,1.2,.50],[1180,340,1.0,.40],[1020,110,0.9,.35],[240,250,0.8,.32]],
+      dim: [[120,60,.8,.30],[180,180,.7,.25],[440,50,.6,.20],[660,160,.7,.28],[720,90,.7,.25],
+            [1100,200,.6,.20],[1180,40,.6,.20],[100,240,.5,.20],[480,230,.6,.22],[540,280,.6,.22],
+            [1080,280,.7,.26],[1240,220,.6,.20],[80,420,.6,.22],[560,320,.6,.22],[1280,440,.7,.25],
+            [60,540,.6,.22],[1240,540,.7,.28],[60,100,.7,.32],[380,100,.6,.26],[640,60,.6,.28],
+            [800,140,.7,.32],[880,70,.6,.28],[1280,80,.6,.28],[1400,60,.6,.28],[700,360,.7,.32],
+            [880,320,.6,.30],[940,220,.6,.28],[1140,220,.6,.28],[1340,280,.6,.30]],
+    };
+    const W = 1440, H = 900;
+    const sizePx = r => Math.max(2, Math.round(r * 2.4));
+    for (const tier of Object.keys(stars)) {
+      const wrap = document.querySelector('.sky-stars .stars-' + tier);
+      for (const [cx, cy, r, op] of stars[tier]) {
+        const d = document.createElement('div');
+        d.className = 'star';
+        const px = sizePx(r);
+        d.style.cssText = `left:${(cx/W*100).toFixed(3)}%;top:${(cy/H*100).toFixed(3)}%;` +
+          `width:${px}px;height:${px}px;opacity:${op}`;
+        wrap.appendChild(d);
+      }
+    }
+  })();
+
+  /* ──────────────────────────────────────────────────────────────────────
+     SAND-GRAIN AMBIENT PARTICLE FIELD (canvas) — only animated when sands mode
+     ────────────────────────────────────────────────────────────────────── */
+  const grainCtl = (function () {
+    const canvas = document.getElementById('grain');
+    const ctx = canvas.getContext('2d');
+    let W = 0, H = 0, dpr = Math.min(window.devicePixelRatio || 1, 2);
+    let grains = [];
+    let windPulse = 0;
+    let rafId = 0;
+
+    function resize() {
+      W = window.innerWidth; H = window.innerHeight;
+      canvas.width  = W * dpr; canvas.height = H * dpr;
+      canvas.style.width  = W + 'px'; canvas.style.height = H + 'px';
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    }
+    window.addEventListener('resize', resize);
+    resize();
+
+    function seed() {
+      grains = [];
+      const count = Math.round((W * H) / 9000);
+      for (let i = 0; i < count; i++) {
+        grains.push({
+          x: Math.random() * W,
+          y: H * 0.25 + Math.random() * H * 0.7,
+          vx: 0.15 + Math.random() * 0.5,
+          vy: -0.05 + Math.random() * 0.1,
+          r: 0.4 + Math.random() * 1.3,
+          a: 0.18 + Math.random() * 0.45,
+          mix: Math.random()
+        });
+      }
+    }
+    seed();
+
+    function tick() {
+      ctx.clearRect(0, 0, W, H);
+      windPulse *= 0.94;
+      for (const g of grains) {
+        const wind = 1 + windPulse * 6;
+        g.x += g.vx * wind;
+        g.y += g.vy + (Math.random() - 0.5) * 0.15;
+        if (g.x > W + 6) g.x = -6;
+        if (g.x < -6)    g.x = W + 6;
+        if (g.y > H + 6) g.y -= H + 12;
+        if (g.y < -6)    g.y += H + 12;
+        const r = Math.round(212 + (240-212) * g.mix);
+        const gg= Math.round(149 + (207-149) * g.mix);
+        const b = Math.round(110 + (90-110)  * g.mix);
+        ctx.beginPath();
+        ctx.fillStyle = `rgba(${r},${gg},${b},${g.a})`;
+        ctx.arc(g.x, g.y, g.r, 0, Math.PI * 2);
+        ctx.fill();
+      }
+      rafId = requestAnimationFrame(tick);
+    }
+    tick();
+
+    return { gust(s) { windPulse = Math.min(1, windPulse + s); } };
+  })();
+
+  /* ──────────────────────────────────────────────────────────────────────
+     COUNTDOWN ENGINES — one per style.
+     Each exposes { reset(), tick(secondsRemaining, totalSeconds) }.
+     ────────────────────────────────────────────────────────────────────── */
+
+  // ── B · Mission Control ──
+  const ENGINE_mission = (function () {
+    const digit   = document.getElementById('mcDigit');
+    const ring    = document.getElementById('mcRing');
+    const ticks   = document.getElementById('mcTicks');
+    const viewers = document.getElementById('mcViewers');
+    const C = 578.05;
+
+    function rebuildTicks(count) {
+      ticks.replaceChildren();
+      const cx = 100, cy = 100, r0 = 80, r1 = 86;
+      const ns = 'http://www.w3.org/2000/svg';
+      for (let i = 0; i < count; i++) {
+        // Positive angle step lays out ticks clockwise from 12 o'clock;
+        // array-order lighting then sweeps clockwise.
+        const angle = (i / count) * Math.PI * 2 - Math.PI / 2;
+        const x0 = cx + Math.cos(angle) * r0, y0 = cy + Math.sin(angle) * r0;
+        const x1 = cx + Math.cos(angle) * r1, y1 = cy + Math.sin(angle) * r1;
+        const line = document.createElementNS(ns, 'line');
+        line.setAttribute('x1', x0); line.setAttribute('y1', y0);
+        line.setAttribute('x2', x1); line.setAttribute('y2', y1);
+        ticks.appendChild(line);
+      }
+    }
+    function reset(total) {
+      digit.textContent = total;
+      ring.style.strokeDashoffset = '0';
+      rebuildTicks(total);
+      viewers.textContent = '000 102';
+      const lines = ticks.querySelectorAll('line');
+      if (lines[0]) lines[0].classList.add('is-lit');
+    }
+    function tick(secLeft, total) {
+      digit.textContent = secLeft;
+      digit.classList.remove('is-ticking');
+      void digit.offsetWidth;
+      digit.classList.add('is-ticking');
+      const prog = (total - secLeft) / total;
+      // Negative dashoffset shifts the dash pattern BACKWARD along the SVG
+      // path direction. Since the <circle> path runs clockwise from 12 o'clock
+      // (after the parent's rotate(-90deg)), shifting backward makes the gap
+      // grow counterclockwise — the visible arc retracts from the upper-left
+      // through 9, 6, 3, back to 12.
+      ring.style.strokeDashoffset = String(-C * prog);
+      const idx = total - secLeft;
+      const lines = ticks.querySelectorAll('line');
+      if (lines[idx]) lines[idx].classList.add('is-lit');
+      const v = 102 + Math.floor(Math.random() * 3) * idx;
+      viewers.textContent = '000 ' + String(v).padStart(3,'0');
+    }
+    return { reset, tick };
+  })();
+
+  // ── C · Cinematic ──
+  const ENGINE_cinema = (function () {
+    const stage   = document.getElementById('cinStage');
+    const horizon = document.getElementById('cinHorizon');
+    function makeDigit(text, isFirst) {
+      const d = document.createElement('div');
+      d.className = 'cin-digit' + (isFirst ? '' : ' is-entering');
+      d.textContent = text;
+      return d;
+    }
+    function reset(total) {
+      stage.replaceChildren(makeDigit(total, true));
+      horizon.style.transition = '';
+      horizon.style.width = '12%';
+      // re-trigger the widening transition on next frame
+      requestAnimationFrame(() => {
+        horizon.style.transition = `width ${total}s linear, opacity 700ms ease`;
+        horizon.style.width = '64%';
+      });
+    }
+    function tick(secLeft, total) {
+      // Mark existing digits as leaving — they exit in 280ms (see cin-out),
+      // so DOM removal matches that timeline. The incoming digit holds
+      // invisible for its first 15% (~120ms) so the ghosting overlap is
+      // minimal — by the time the new digit starts blooming, the old one
+      // is nearly gone.
+      stage.querySelectorAll('.cin-digit').forEach(el => {
+        el.classList.remove('is-entering');
+        el.classList.add('is-leaving');
+        setTimeout(() => el.remove(), 280);
+      });
+      stage.appendChild(makeDigit(secLeft, false));
+    }
+    return { reset, tick };
+  })();
+
+  // ── D · Drifting Sands ──
+  const ENGINE_sands = (function () {
+    const numeral = document.getElementById('sandsNumeral');
+    const marks   = document.getElementById('sandsMarks');
+    const streaks = document.getElementById('sandsStreaks');
+    // build marks once
+    for (let i = 0; i < 10; i++) {
+      const d = document.createElement('div'); d.className = 'sands-mark'; marks.appendChild(d);
+    }
+    function makeSvg(text, cls) {
+      const ns = 'http://www.w3.org/2000/svg';
+      const svg = document.createElementNS(ns, 'svg');
+      svg.setAttribute('viewBox', '0 0 360 280');
+      svg.setAttribute('preserveAspectRatio', 'xMidYMid meet');
+      svg.setAttribute('class', cls);
+      const t = document.createElementNS(ns, 'text');
+      t.setAttribute('x', '180'); t.setAttribute('y', '140');
+      t.textContent = text; svg.appendChild(t);
+      return svg;
+    }
+    function pulseStreaks() {
+      const el = streaks.querySelectorAll('.sands-streak');
+      el.forEach(s => s.classList.remove('is-active'));
+      void streaks.offsetWidth;
+      el.forEach(s => s.classList.add('is-active'));
+    }
+    function reset(total) {
+      // remove existing numerals
+      numeral.querySelectorAll('svg').forEach(s => s.remove());
+      numeral.appendChild(makeSvg(total, 'num-in'));
+      const dots = marks.querySelectorAll('.sands-mark');
+      dots.forEach((d, i) => {
+        d.classList.remove('is-filled');
+        d.style.display = i < total ? '' : 'none';
+      });
+      if (dots[0]) dots[0].classList.add('is-filled');
+      pulseStreaks();
+    }
+    function tick(secLeft, total) {
+      numeral.querySelectorAll('svg.num-in, svg.num-out').forEach(el => {
+        el.classList.remove('num-in');
+        el.classList.add('num-out');
+        setTimeout(() => el.remove(), 750);
+      });
+      const next = makeSvg(secLeft, 'num-in');
+      next.classList.add('is-incoming');
+      numeral.appendChild(next);
+      requestAnimationFrame(() => {
+        requestAnimationFrame(() => next.classList.remove('is-incoming'));
+      });
+      const dots = marks.querySelectorAll('.sands-mark');
+      const idx = total - secLeft;
+      if (dots[idx]) dots[idx].classList.add('is-filled');
+      grainCtl.gust(0.7);
+      pulseStreaks();
+    }
+    return { reset, tick };
+  })();
+
+  // ── E · Grain — numerals physically composed of sand grains ──
+  // Mechanism:
+  //   1. Render the target digit to an offscreen canvas (white-on-black).
+  //   2. Walk the pixel grid every `stride` px, collect (x,y) of every lit
+  //      pixel → that's the cloud of TARGET positions for this digit.
+  //   3. Assign each particle to a (shuffled) target. Particles ease toward
+  //      their target with damped spring physics, so they "settle" into it.
+  //   4. On each tick we (a) kick every particle with a random outward
+  //      velocity — the scatter beat — and (b) immediately resample for
+  //      the new digit so the spring force pulls them back into formation.
+  //   The disperse → coalesce reads as a single continuous motion.
+  const ENGINE_grain = (function () {
+    const canvas = document.getElementById('grnCanvas');
+    const ctx = canvas.getContext('2d');
+    const N = 1400;
+    let W = 0, H = 0;
+    const dpr = Math.min(window.devicePixelRatio || 1, 2);
+    const particles = [];
+    let rafId = 0;
+    let active = false;
+    let initialized = false;
+
+    function resize() {
+      const rect = canvas.getBoundingClientRect();
+      W = Math.max(1, Math.round(rect.width));
+      H = Math.max(1, Math.round(rect.height));
+      canvas.width  = W * dpr;
+      canvas.height = H * dpr;
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    }
+    // Refresh sizing when viewport changes so the digit stays centered
+    window.addEventListener('resize', () => {
+      if (initialized) resize();
+    });
+
+    function initParticles() {
+      particles.length = 0;
+      for (let i = 0; i < N; i++) {
+        particles.push({
+          // start scattered around the frame so the very first reveal also
+          // "settles in" rather than appearing pre-formed
+          x: Math.random() * W,
+          y: Math.random() * H,
+          vx: (Math.random() - 0.5) * 2,
+          vy: (Math.random() - 0.5) * 2,
+          tx: W / 2, ty: H / 2,
+          r: 0.9 + Math.random() * 1.3,
+          mix: Math.random(),                 // 0..1 sand→gold blend
+          a: 0.55 + Math.random() * 0.4
+        });
+      }
+      initialized = true;
+    }
+
+    // Rasterize the digit and return all "lit" pixel positions.
+    // Stride controls density: 3 = ~3000 points, smooth + plenty of slack.
+    function sampleDigit(text, stride) {
+      const off = document.createElement('canvas');
+      off.width = W; off.height = H;
+      const c = off.getContext('2d');
+      c.fillStyle = '#000';
+      c.fillRect(0, 0, W, H);
+      // Serif weight 600 reads as a stout sand-built numeral; size scales
+      // with frame height so this works at any prototype size.
+      const size = Math.round(H * 0.78);
+      c.font = `600 ${size}px "Crimson Pro", Georgia, serif`;
+      c.textAlign = 'center';
+      c.textBaseline = 'middle';
+      c.fillStyle = '#fff';
+      c.fillText(text, W / 2, H / 2);
+      const data = c.getImageData(0, 0, W, H).data;
+      const pts = [];
+      const s = stride || 3;
+      for (let y = 0; y < H; y += s) {
+        for (let x = 0; x < W; x += s) {
+          // Red channel ≈ luminance for white-on-black; >128 = inside the glyph.
+          const i = (y * W + x) * 4;
+          if (data[i] > 128) pts.push([x, y]);
+        }
+      }
+      return pts;
+    }
+
+    // Re-assign every particle to a (shuffled) target sampled from `text`.
+    // withKick: apply a coherent WIND GUST — every grain gets the same base
+    //           direction (with small per-grain variation) so the cloud
+    //           moves like wind-blown sand, not like a thrown handful.
+    function assignTargets(text, withKick) {
+      const pts = sampleDigit(text, 3);
+      if (!pts.length) return;
+      // Fisher–Yates shuffle — particles distribute organically across the form
+      for (let i = pts.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        const tmp = pts[i]; pts[i] = pts[j]; pts[j] = tmp;
+      }
+      // Pick one coherent wind direction for this tick, biased slightly toward
+      // horizontal (desert wind sweeps across the dunes, not up/down).
+      let windAngle = 0, windStrength = 0;
+      if (withKick) {
+        // Base angle anywhere on the circle, but compress the vertical
+        // component so the gust feels grounded.
+        const raw = Math.random() * Math.PI * 2;
+        windAngle = raw;
+        windStrength = 2.8 + Math.random() * 2.6;   // gentler than before (was 5–16)
+      }
+      for (let i = 0; i < particles.length; i++) {
+        const p = particles[i];
+        const t = pts[i % pts.length];
+        p.tx = t[0]; p.ty = t[1];
+        if (withKick) {
+          // Coherent wind: every grain shares the base direction with only a
+          // small ±18° deviation. This is what makes it READ as "wind" rather
+          // than "explosion" — coherence beats magnitude every time.
+          const localAngle = windAngle + (Math.random() - 0.5) * 0.6;
+          const localSpeed = windStrength * (0.55 + Math.random() * 0.9);
+          p.vx += Math.cos(localAngle) * localSpeed * 0.6;
+          p.vy += Math.sin(localAngle) * localSpeed * 0.6;
+          // Tiny per-grain turbulence so the cloud doesn't move as one slab
+          p.vx += (Math.random() - 0.5) * 0.7;
+          p.vy += (Math.random() - 0.5) * 0.7;
+        }
+      }
+    }
+
+    function frame() {
+      if (!active) { rafId = 0; return; }
+      ctx.clearRect(0, 0, W, H);
+      for (const p of particles) {
+        // Two forces, intentionally decoupled (no spring physics):
+        //
+        // 1. WIND MOMENTUM — pure velocity that decays viscously. Damping
+        //    0.94 keeps the gust alive for ~0.5–1s before it dies down,
+        //    matching how real wind eases off rather than snapping back.
+        p.x += p.vx;
+        p.y += p.vy;
+        p.vx *= 0.94;
+        p.vy *= 0.94;
+        // 2. ATTRACTION — a pure lerp (NOT a spring). The particle moves
+        //    a small fraction of the remaining distance to target each
+        //    frame. Exponential approach is monotonic — it physically
+        //    CAN'T overshoot, so there is no bounce no matter how far the
+        //    grain was carried by the wind.
+        p.x += (p.tx - p.x) * 0.038;
+        p.y += (p.ty - p.y) * 0.038;
+        // Sub-pixel jitter — gives the settled state a "live" granular shimmer
+        p.x += (Math.random() - 0.5) * 0.18;
+        p.y += (Math.random() - 0.5) * 0.18;
+        // Sand→gold color blend per-particle (set once in init, stable)
+        const r = (212 + (240 - 212) * p.mix) | 0;
+        const g = (149 + (207 - 149) * p.mix) | 0;
+        const b = (110 + (90  - 110) * p.mix) | 0;
+        ctx.beginPath();
+        ctx.fillStyle = `rgba(${r},${g},${b},${p.a})`;
+        ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
+        ctx.fill();
+      }
+      rafId = requestAnimationFrame(frame);
+    }
+
+    function start() {
+      if (active) return;
+      active = true;
+      if (!rafId) rafId = requestAnimationFrame(frame);
+    }
+    function stop() { active = false; }
+
+    function reset(total) {
+      resize();
+      if (!initialized) initParticles();
+      // Build marker dots lazily
+      const marks = document.getElementById('grnMarks');
+      if (!marks.children.length) {
+        for (let i = 0; i < 15; i++) {
+          const d = document.createElement('div'); d.className = 'grn-mark'; marks.appendChild(d);
+        }
+      }
+      const dots = marks.querySelectorAll('.grn-mark');
+      dots.forEach((d, i) => {
+        d.classList.remove('is-filled');
+        d.style.display = i < total ? '' : 'none';
+      });
+      if (dots[0]) dots[0].classList.add('is-filled');
+      // First reveal: assign targets without the scatter kick — particles
+      // drift in from their random starting positions, settling into "10"
+      assignTargets(String(total), false);
+      start();
+    }
+
+    function tick(secLeft, total) {
+      // Disperse + re-coalesce in a single pass: kick velocities outward,
+      // resample for the new digit, and let the spring pull them back in.
+      assignTargets(String(secLeft), true);
+      const dots = document.querySelectorAll('#grnMarks .grn-mark');
+      const idx = total - secLeft;
+      if (dots[idx]) dots[idx].classList.add('is-filled');
+    }
+
+    return { reset, tick, stop };
+  })();
+
+  const ENGINES = {
+    mission: ENGINE_mission,
+    cinema:  ENGINE_cinema,
+    sands:   ENGINE_sands,
+    grain:   ENGINE_grain,
+  };
+
+  /* ──────────────────────────────────────────────────────────────────────
+     SEQUENCE CONDUCTOR — reads attrs off .app, drives the engines + phases
+     ────────────────────────────────────────────────────────────────────── */
+  const app     = document.getElementById('app');
+  const timerEl = document.getElementById('timer');
+
+  let timers = [];
+  let liveTimer = null;
+  function schedule(fn, ms) { const id = setTimeout(fn, ms); timers.push(id); return id; }
+  function clearAll() {
+    timers.forEach(clearTimeout); timers = [];
+    if (liveTimer) { clearInterval(liveTimer); liveTimer = null; }
+  }
+
+  // Halt any engines that own a render loop (e.g. canvas-based ones).
+  function stopAllEngines() {
+    Object.values(ENGINES).forEach(e => { if (e.stop) e.stop(); });
+  }
+
+  function startSequence() {
+    clearAll();
+    stopAllEngines();
+
+    const style = app.dataset.countdown;
+    const duration = Math.max(2, parseInt(app.dataset.duration, 10) || 10);
+    const hold = Math.max(1, parseInt(app.dataset.teacherHold, 10) || 3);
+
+    app.dataset.phase = 'countdown';
+    syncPhaseControl();
+    timerEl.textContent = '00:00';
+
+    const engine = ENGINES[style];
+    if (!engine) return;
+    engine.reset(duration);
+
+    // schedule each tick
+    for (let i = 1; i < duration; i++) {
+      schedule(() => engine.tick(duration - i, duration), i * 1000);
+    }
+
+    // teacher phase — stop any render-loop engines once countdown is done
+    schedule(() => {
+      app.dataset.phase = 'teacher';
+      syncPhaseControl();
+      stopAllEngines();
+    }, duration * 1000);
+
+    // slides phase
+    schedule(() => {
+      app.dataset.phase = 'slides';
+      syncPhaseControl();
+      let m = 0, s = 0;
+      liveTimer = setInterval(() => {
+        s++; if (s >= 60) { s = 0; m++; }
+        timerEl.textContent = String(m).padStart(2,'0') + ':' + String(s).padStart(2,'0');
+      }, 1000);
+    }, (duration + hold) * 1000);
+  }
+
+  function jumpToPhase(phase) {
+    clearAll();
+    stopAllEngines();
+    app.dataset.phase = phase;
+    if (phase === 'countdown') {
+      // restart the full sequence — feels more natural than freezing on "10"
+      startSequence();
+      return;
+    }
+    if (phase === 'slides') {
+      let m = 0, s = 0;
+      liveTimer = setInterval(() => {
+        s++; if (s >= 60) { s = 0; m++; }
+        timerEl.textContent = String(m).padStart(2,'0') + ':' + String(s).padStart(2,'0');
+      }, 1000);
+    }
+  }
+
+  /* ──────────────────────────────────────────────────────────────────────
+     CONTROL PANEL WIRING
+     ────────────────────────────────────────────────────────────────────── */
+  function syncTabs(group) {
+    const attr = group.dataset.attr;
+    const current = app.getAttribute(attr);
+    group.querySelectorAll('button').forEach(b => {
+      b.classList.toggle('is-active', b.dataset.value === current);
+    });
+  }
+  // Sync every group bound to the same attribute (e.g. landscape has two: built-in + lab)
+  function syncAttrGroups(attr) {
+    document.querySelectorAll(`.cp-tabs[data-attr="${attr}"]`).forEach(syncTabs);
+  }
+  function syncPhaseControl() {
+    syncAttrGroups('data-phase');
+  }
+
+  // Lab iframe: lazy-load when first lab-* preset picked, then keep src current.
+  const labFrame = document.getElementById('bgLabFrame');
+  let currentLabSrc = '';
+  function syncLabFrame() {
+    const v = app.getAttribute('data-bg-landscape') || '';
+    if (v.startsWith('lab-')) {
+      const slug = v.slice(4);    // strip "lab-" prefix
+      const src = 'noon-bg-lab.html?preset=' + slug + '&nopanel=1&nohint=1';
+      if (src !== currentLabSrc) {
+        labFrame.src = src;
+        currentLabSrc = src;
+      }
+    }
+  }
+  syncLabFrame();
+  new MutationObserver(syncLabFrame).observe(app, {
+    attributes: true,
+    attributeFilter: ['data-bg-landscape']
+  });
+
+  (function () {
+    const cp = document.getElementById('cp');
+    document.getElementById('cpHandle').addEventListener('click', () => cp.classList.toggle('is-open'));
+
+    document.querySelectorAll('.cp-tabs').forEach(group => {
+      syncTabs(group);
+      group.addEventListener('click', e => {
+        const btn = e.target.closest('button');
+        if (!btn || !btn.dataset.value) return;
+        const attr = group.dataset.attr;
+        const value = btn.dataset.value;
+        app.setAttribute(attr, value);
+        // Sync ALL groups bound to this attribute (landscape has two)
+        syncAttrGroups(attr);
+
+        // Behaviors per control
+        if (attr === 'data-countdown') {
+          // restart the sequence with the new style
+          startSequence();
+        } else if (attr === 'data-phase') {
+          jumpToPhase(value);
+        } else if (attr === 'data-duration' || attr === 'data-teacher-hold') {
+          // changing durations restarts the sequence so the new timing applies
+          startSequence();
+        }
+        // bg-* changes are purely CSS — no JS restart needed
+        // (lab iframe sync handled by MutationObserver on data-bg-landscape)
+      });
+    });
+
+    document.getElementById('cpReplay').addEventListener('click', startSequence);
+  })();
+
+  /* ──────────────────────────────────────────────────────────────────────
+     ROSTER + CLASS CHAT — sidebar life during the slides phase
+     ────────────────────────────────────────────────────────────────────── */
+  const ROSTER = [
+    { id: "alwaleed", name: "Alwaleed" },
+    { id: "faris",    name: "Faris"    },
+    { id: "maheer",   name: "Maheer"   },
+    { id: "saad",     name: "Saad"     },
+    { id: "rakan",    name: "Rakan"    },
+  ];
+  const ROSTER_BY_ID = Object.fromEntries(ROSTER.map(s => [s.id, s]));
+
+  // Letter-avatar as inline SVG data URL — serif letter on the current bg.
+  // Returned as a CSS background-image value so it can be assigned to
+  // .roster__avatar / .msg__avatar without splicing HTML.
+  function letterAvatar(letter) {
+    const svg =
+      '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">' +
+      '<text x="32" y="42" text-anchor="middle" font-family="Crimson Pro, Georgia, serif" ' +
+      'font-size="32" font-weight="600" fill="white">' + letter + '</text>' +
+      '</svg>';
+    return 'url("data:image/svg+xml;utf8,' + encodeURIComponent(svg) + '")';
+  }
+
+  // Render roster items once — names sit under avatars
+  (function renderRoster () {
+    const root = document.getElementById('roster');
+    if (!root) return;
+    root.replaceChildren(...ROSTER.map(s => {
+      const item = document.createElement('div');
+      item.className = 'roster__item';
+      item.dataset.id = s.id;
+      item.setAttribute('role', 'listitem');
+
+      const av = document.createElement('div');
+      av.className = 'roster__avatar';
+      av.style.backgroundImage = letterAvatar(s.name[0]);
+
+      const nm = document.createElement('div');
+      nm.className = 'roster__name';
+      nm.textContent = s.name;
+
+      item.append(av, nm);
+      return item;
+    }));
+  })();
+
+  // Chat lines — same set as presenter-screen.html
+  const CHAT_LINES = [
+    { who: "maheer",   text: "Hi Sir, looking forward to learning this class" },
+    { who: "alwaleed", text: "Sir, can you repeat the formula?" },
+    { who: "saad",     text: "Got it, thank you" },
+    { who: "faris",    text: "Is x = -b/2a the vertex?" },
+    { who: "rakan",    text: "Yes, I have understood" },
+    { who: "maheer",   text: "Could you do another example please" },
+    { who: "alwaleed", text: "I think the discriminant is 16" },
+    { who: "saad",     text: "Wait, where did the +4 come from?" },
+    { who: "faris",    text: "On it" },
+    { who: "rakan",    text: "Sir my mic isn't working, sorry" },
+    { who: "maheer",   text: "So roots are 2 and -2, right?" },
+    { who: "alwaleed", text: "Yes Sir" },
+    { who: "saad",     text: "Got the answer: x² + 4x + 4 = (x+2)²" },
+    { who: "faris",    text: "Done with question 3" },
+    { who: "rakan",    text: "Can we get the slides afterwards?" },
+  ];
+
+  function appendChatMessage(line, label) {
+    const list = document.getElementById('messages');
+    if (!list) return;
+    const s = ROSTER_BY_ID[line.who];
+    if (!s) return;
+
+    const node = document.createElement('div');
+    node.className = 'msg is-fresh';
+
+    const av = document.createElement('div');
+    av.className = 'msg__avatar';
+    av.style.backgroundImage = letterAvatar(s.name[0]);
+
+    const body = document.createElement('div');
+    body.className = 'msg__body';
+
+    const nameRow = document.createElement('div');
+    nameRow.className = 'msg__name';
+    nameRow.appendChild(document.createTextNode(s.name));
+
+    const time = document.createElement('span');
+    time.className = 'msg__time';
+    const dot = document.createElement('span');
+    dot.className = 'msg__fresh-dot';
+    time.append(dot, document.createTextNode(label));
+    nameRow.appendChild(time);
+
+    const text = document.createElement('div');
+    text.className = 'msg__text';
+    text.textContent = line.text;
+
+    body.append(nameRow, text);
+    node.append(av, body);
+    list.appendChild(node);
+
+    // Cap scrollback so the DOM doesn't grow unbounded over a long class
+    while (list.children.length > 30) list.removeChild(list.firstChild);
+    list.scrollTop = list.scrollHeight;
+
+    // Drop the "fresh" highlight after a beat
+    setTimeout(() => node.classList.remove('is-fresh'), 2400);
+  }
+
+  // Chat firehose state — guarded so we only ever have one stream running
+  let chatIdx = 0;
+  let chatTimer = null;
+  let chatStarted = false;
+
+  function startChatFlow() {
+    if (chatStarted) return;
+    chatStarted = true;
+    const list = document.getElementById('messages');
+    if (!list) return;
+    list.replaceChildren();
+
+    // Pre-seed a few messages so the chat doesn't open empty
+    const seed = 3;
+    for (let i = 0; i < seed; i++) {
+      appendChatMessage(CHAT_LINES[chatIdx % CHAT_LINES.length], (seed - i) + 'm');
+      chatIdx++;
+    }
+    // Strip the "fresh" highlight from the pre-seeded ones immediately —
+    // they shouldn't pretend to be brand new
+    list.querySelectorAll('.msg').forEach(m => m.classList.remove('is-fresh'));
+
+    function tick() {
+      const line = CHAT_LINES[chatIdx % CHAT_LINES.length];
+      chatIdx++;
+      appendChatMessage(line, 'just now');
+      chatTimer = setTimeout(tick, 2200 + Math.random() * 1400);
+    }
+    chatTimer = setTimeout(tick, 1800);
+  }
+
+  function stopChatFlow() {
+    if (chatTimer) { clearTimeout(chatTimer); chatTimer = null; }
+    chatStarted = false;
+  }
+
+  // Drive chat lifecycle from phase changes — start when slides reveal,
+  // stop on any leave (so a Replay from controls resets cleanly)
+  new MutationObserver(() => {
+    if (app.dataset.phase === 'slides') startChatFlow();
+    else stopChatFlow();
+  }).observe(app, { attributes: true, attributeFilter: ['data-phase'] });
+
+  /* ──────────────────────────────────────────────────────────────────────
+     TOPBAR ICON BUTTONS — mic + camera toggles
+     ────────────────────────────────────────────────────────────────────── */
+  function toggleBtn(id, tipOn, tipOff) {
+    const btn = document.getElementById(id);
+    if (!btn) return;
+    btn.addEventListener('click', () => {
+      const pressed = btn.getAttribute('aria-pressed') === 'true';
+      btn.setAttribute('aria-pressed', String(!pressed));
+      btn.dataset.tip = !pressed ? tipOn : tipOff;
+    });
+  }
+  toggleBtn('mic', 'Unmute', 'Mute');
+  toggleBtn('cam', 'Start video', 'Stop video');
+
+  // First run
+  startSequence();
+</script>
+</body>
+</html>
