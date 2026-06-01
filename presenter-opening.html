@@ -6,15 +6,18 @@
 <title>Presenter Opening — sequence directions</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Crimson+Pro:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&family=Vazirmatn:wght@300;400;500;600;700&family=Noto+Naskh+Arabic:wght@400;500;600&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Crimson+Pro:ital,wght@0,300;0,400;0,500;0,600;0,700;1,300;1,400&family=JetBrains+Mono:wght@400;500;600&family=Vazirmatn:wght@300;400;500;600;700&family=Noto+Naskh+Arabic:wght@400;500;600&display=swap" rel="stylesheet">
 <style>
   /* ──────────────────────────────────────────────────────────────────────
      CONTROL ATTRIBUTES — set on .app, all switchable via the control panel.
 
      SEQUENCE
        data-countdown   = mission | cinema | sands | grain
-       data-phase       = countdown | teacher | slides | stage
-                          (stage is opt-in only — never reached via auto-sequence)
+       data-phase       = teamup | countdown | teacher | slides | stage
+                          (teamup is the new opener — manual Start advances
+                           to countdown. stage is opt-in only.)
+       data-mode        = team | solo  (solo skips team grid, shows attendance)
+       data-demo-state  = 1 | 2 | 3 | 4 | 5  (lobby roster scenario)
        data-duration    = 5 | 10 | 15   (countdown seconds)
        data-teacher-hold= 2 | 3 | 5     (seconds the teacher-solo is held)
 
@@ -260,7 +263,8 @@
   .app[data-countdown="mission"]    .countdown.cd-mission,
   .app[data-countdown="cinema"]     .countdown.cd-cinema,
   .app[data-countdown="sands"]      .countdown.cd-sands,
-  .app[data-countdown="grain"]      .countdown.cd-grain {
+  .app[data-countdown="grain"]      .countdown.cd-grain,
+  .app[data-countdown="cosmos"]     .countdown.cd-cosmos {
     display: flex;
   }
   /* hide countdown layer entirely once we're past it */
@@ -607,14 +611,191 @@
     box-shadow: 0 0 10px rgba(232,180,154,0.6);
   }
 
+  /* ─── F · COSMOS ─── Editorial Cosmos · diagonal spine
+     Reuses Noon tokens; sits on top of dimmed sky-stars / dunes during
+     countdown. Composition mirrors the "aspicientes stellas" reference —
+     a BL→TR diagonal spine of celestial elements anchored by the digit
+     and decorated ring at center. Gold = journey signal; blue = secondary
+     celestial accent; terra appears once as a hand-drawn organic touch. */
+  .cd-cosmos { /* flex/center via base .countdown */ }
+
+  /* Bilingual label above the ring — same wording as cinema/sands/grain
+     so identity carries across variants. Pulled toward the top edge
+     (top: 9vh) so even on short-viewport hosts (720p) there's a clear
+     gap between the label and the ring. */
+  .cos-label {
+    position: absolute;
+    top: 9vh; left: 50%;
+    transform: translateX(-50%);
+    display: flex; flex-direction: column;
+    align-items: center; gap: 10px;
+    text-align: center; z-index: 4;
+    pointer-events: none;
+  }
+  .cos-label__ar {
+    font-family: var(--font-arabic);
+    font-size: 22px; font-weight: 500;
+    color: var(--fg-muted);
+    direction: rtl;
+    text-shadow: 0 0 24px rgba(232,228,220,0.14);
+  }
+  .cos-label__en {
+    font-family: var(--font-mono);
+    font-size: 11px; font-weight: 400;
+    text-transform: uppercase;
+    letter-spacing: 0.42em;
+    color: var(--fg-subtle);
+    padding-left: 0.42em; /* trim trailing tracking */
+    display: flex; align-items: center; gap: 16px;
+  }
+  .cos-label__en::before, .cos-label__en::after {
+    content: '';
+    width: 28px; height: 1px;
+    background: var(--border-strong);
+  }
+
+  /* Full-canvas SVG spine — the diagonal field of stations + dust.
+     The host's sky-stars layer already provides dense star dust, so this
+     stays restrained: a faint diagonal trajectory, three station clusters,
+     a few horizontal chart ticks, and one terra hand-drawn flourish. */
+  .cos-spine {
+    position: absolute; inset: 0;
+    width: 100%; height: 100%;
+    pointer-events: none;
+    z-index: 3;
+  }
+  .cos-spine .twinkle { animation: cos-twinkle 6s ease-in-out infinite; }
+  .cos-spine .twinkle.t2 { animation-delay: 1.2s; animation-duration: 7.4s; }
+  .cos-spine .twinkle.t3 { animation-delay: 2.6s; animation-duration: 6.8s; }
+  .cos-spine .twinkle.t4 { animation-delay: 0.4s; animation-duration: 5.4s; }
+  .cos-spine .twinkle.t5 { animation-delay: 3.2s; animation-duration: 7s;   }
+  @keyframes cos-twinkle {
+    0%, 100% { opacity: 1; }
+    50%      { opacity: 0.4; }
+  }
+
+  /* Hero — digit + decorated ring at center.
+     Hero is the geometric anchor; ring fills it; decorations ride the
+     circumference (gold tick at 12, sparkle riding the arc, small portal
+     at the opposite quadrant). The digit uses SVG <text> with
+     dominant-baseline: central — same approach as the sands variant —
+     because CSS line-box centering on Crimson Pro drifts off-center as
+     the digit value changes (1 vs 10 occupy different visual extents).
+     SVG baseline gives pixel-perfect optical centering for every digit. */
+  .cos-hero {
+    position: relative;
+    /* Smaller than before so labels have breathing room on shorter
+       viewports (720p host had label/hero collision at the old 460px). */
+    width: clamp(240px, 26vw, 360px);
+    height: clamp(240px, 26vw, 360px);
+    display: grid; place-items: center;
+    z-index: 4;
+  }
+  .cos-ring {
+    position: absolute;
+    top: 50%; left: 50%;
+    transform: translate(-50%, -50%);
+    width: 100%; height: 100%;
+    border: 1px solid var(--border-strong);
+    border-radius: 50%;
+  }
+  .cos-ring-deco {
+    position: absolute;
+    top: 50%; left: 50%;
+    transform: translate(-50%, -50%);
+    width: 100%; height: 100%;
+    pointer-events: none;
+  }
+  .cos-digit {
+    grid-area: 1 / 1;
+    width: 100%; height: 100%;
+    display: block;
+    overflow: visible;
+    pointer-events: none;
+    filter: drop-shadow(0 0 18px rgba(232, 228, 220, 0.08));
+  }
+  .cos-digit text {
+    font-family: var(--font-serif);
+    font-weight: 400;
+    /* Size in viewBox units (100×100). 56 means the digit cap-height is
+       ~56% of the ring diameter — proportionally identical to the previous
+       CSS sizing but anchored in the SVG so it scales with the hero. */
+    font-size: 56px;
+    letter-spacing: -0.02em;
+    fill: var(--fg);
+    font-variant-numeric: lining-nums tabular-nums;
+    font-feature-settings: "lnum" 1, "tnum" 1;
+  }
+  .cos-digit.is-ticking { animation: cos-fade 800ms ease-out; }
+  @keyframes cos-fade {
+    0%   { opacity: 0; transform: translateY(8px); filter: blur(4px); }
+    35%  { opacity: 1; transform: translateY(0);   filter: blur(0); }
+    85%  { opacity: 1; transform: translateY(0);   filter: blur(0); }
+    100% { opacity: 0.9; transform: translateY(-2px); }
+  }
+
+  /* Latin signature script at bottom — matches the references' flowing
+     handwritten footer. Italic Crimson Pro at weight 300 gives the
+     calligraphic feel without needing a script font load. */
+  .cos-footer {
+    position: absolute;
+    /* Pulled toward the bottom edge so the ring gets matching breathing
+       room below it. Symmetric with .cos-label's top: 9vh. */
+    bottom: 9vh; left: 50%;
+    transform: translateX(-50%);
+    text-align: center; z-index: 4;
+  }
+  .cos-footer__latin {
+    font-family: var(--font-serif);
+    font-style: italic;
+    font-weight: 300;
+    font-size: clamp(20px, 1.8vw, 26px);
+    color: var(--fg-muted);
+    letter-spacing: 0.02em;
+    line-height: 1;
+  }
+  .cos-footer__lesson {
+    margin-top: 12px;
+    font-family: var(--font-mono);
+    font-size: 10px;
+    letter-spacing: 0.36em;
+    color: var(--fg-faint);
+    text-transform: uppercase;
+  }
+
+  /* Cartographic corner annotations — surveyor's-notebook register.
+     Mirrors the brand's "lat/long-style" register without colliding with
+     mission's mc-readouts (those only show under [data-countdown="mission"]). */
+  .cos-meta {
+    position: absolute;
+    font-family: var(--font-mono);
+    font-size: 9px;
+    letter-spacing: 0.28em;
+    color: var(--fg-faint);
+    text-transform: uppercase;
+    z-index: 4;
+  }
+  .cos-meta--tl { top: 36px; left: 36px; }
+  .cos-meta--tr { top: 36px; right: 36px; }
+  .cos-meta--bl { bottom: 36px; left: 36px; }
+  .cos-meta--br { bottom: 36px; right: 36px; }
+
   /* ──────────────────────────────────────────────────────────────────────
      TEACHER SOLO — same across all styles
      ────────────────────────────────────────────────────────────────────── */
   .teacher-solo {
+    /* Lift --size up so .teacher-label can reference it for absolute
+       positioning below the circle. */
+    --size: 380px;
     position: absolute; inset: 0; z-index: 2;
-    display: flex; flex-direction: column;
+    display: flex;
     align-items: center; justify-content: center;
-    gap: var(--sp-7);
+    /* Previously: flex-direction: column; gap: var(--sp-7);
+       That centered the WHOLE column (circle + gap + label) as a unit,
+       which put the circle's center ~37px above viewport center. Mission's
+       and cosmos's rings sit exactly at viewport center, so the morph had
+       a visible jump. Now the circle is the only flex item being centered;
+       the label is absolutely positioned below it (see .teacher-label). */
     opacity: 0; transform: scale(0.88);
     transition: opacity 700ms cubic-bezier(.4,0,.2,1),
                 transform 900ms cubic-bezier(.34,1.56,.64,1);
@@ -627,7 +808,7 @@
     opacity: 0; transform: scale(1.05);
   }
   .teacher-circle {
-    --size: 380px;
+    /* --size now cascades from .teacher-solo so .teacher-label can use it. */
     position: relative;
     width: var(--size); height: var(--size);
     border-radius: 50%;
@@ -658,7 +839,18 @@
     transform: translateX(-50%) rotate(45deg);
     box-shadow: 0 0 14px var(--signal-soft);
   }
-  .teacher-label { display: flex; flex-direction: column; align-items: center; gap: 4px; }
+  /* Anchored to viewport center + circle radius + 32px gap so the label
+     always sits directly below the circle, regardless of label height.
+     This keeps the circle itself precisely at viewport center for the
+     mission/cosmos morph. */
+  .teacher-label {
+    position: absolute;
+    left: 50%;
+    top: calc(50% + var(--size) / 2 + 32px);
+    transform: translateX(-50%);
+    display: flex; flex-direction: column;
+    align-items: center; gap: 4px;
+  }
   .teacher-label__name {
     font-family: var(--font-serif); font-size: 28px;
     color: var(--fg); letter-spacing: -0.01em;
@@ -667,6 +859,128 @@
     font-family: var(--font-mono); font-size: 10px;
     letter-spacing: 0.28em; text-transform: uppercase;
     color: var(--fg-subtle);
+  }
+
+  /* ──────────────────────────────────────────────────────────────────────
+     COUNTDOWN → TEACHER MORPH  (mission + cosmos only)
+
+     The other variants (cinema, sands, grain) have no ring geometry to
+     hand off to the teacher circle, so they keep the default crossfade —
+     countdown scales down to 0.94, teacher scales up from 0.88.
+
+     Mission and cosmos both render a circle in the same position as the
+     teacher circle. The morph keeps that circle "in place" through the
+     transition: instead of the countdown shrinking and the teacher
+     growing past it, the countdown's ring brightens to gold (the journey
+     signal completing), its decorations drift outward and dissolve, and
+     the teacher circle enters at a scale matching the ring so the
+     outline appears continuous across the handoff.
+
+     Timing is ~800ms total, matching the existing transition contract so
+     no JS scheduling needs to change.
+     ────────────────────────────────────────────────────────────────────── */
+
+  /* Shared override: don't shrink mission/cosmos as they exit — the ring
+     stays put while its contents disperse. */
+  .app[data-countdown="mission"][data-phase="teacher"] .countdown,
+  .app[data-countdown="cosmos"][data-phase="teacher"] .countdown {
+    transform: scale(1);  /* override the default scale(0.94) shrink */
+  }
+
+  /* ── Mission morph ── */
+  /* Decorations (corner readouts, strip, cross, scanlines, ticks) drift
+     outward and fade faster than the parent's 800ms. */
+  .app[data-countdown="mission"][data-phase="teacher"] .mc-readout,
+  .app[data-countdown="mission"][data-phase="teacher"] .mc-strip,
+  .app[data-countdown="mission"][data-phase="teacher"] .mc-cross,
+  .app[data-countdown="mission"][data-phase="teacher"] .mc-scanlines,
+  .app[data-countdown="mission"][data-phase="teacher"] .mc-ticks {
+    opacity: 0;
+    transform: scale(1.06);
+    transition: opacity 400ms ease, transform 700ms cubic-bezier(.4,0,.2,1);
+  }
+  /* Digit dissolves — scale up + blur as it fades. */
+  .app[data-countdown="mission"][data-phase="teacher"] .mc-number__digit,
+  .app[data-countdown="mission"][data-phase="teacher"] .mc-number__unit {
+    opacity: 0;
+    transform: scale(1.15);
+    filter: blur(8px);
+    transition: opacity 360ms ease, transform 600ms ease, filter 600ms ease;
+  }
+  /* Progress ring + base ring: brighten to gold (the journey signal
+     completing), then they fade with the parent. */
+  .app[data-countdown="mission"][data-phase="teacher"] .mc-ring-fg circle {
+    stroke: var(--signal-bright);
+    filter: drop-shadow(0 0 10px var(--signal-soft));
+    transition: stroke 280ms ease, filter 280ms ease;
+  }
+  .app[data-countdown="mission"][data-phase="teacher"] .mc-ring-bg circle {
+    stroke: var(--signal-bright);
+    transition: stroke 280ms ease;
+  }
+  /* Mission's ring is already 380px — same as teacher. Teacher enters at
+     scale 1 (no scale animation) so the outline lands exactly on the
+     mission ring's outline as it fades. Only opacity animates. */
+  .app[data-countdown="mission"] .teacher-solo {
+    transform: scale(1);
+  }
+  .app[data-countdown="mission"][data-phase="teacher"] .teacher-solo {
+    transform: scale(1);
+  }
+
+  /* ── Cosmos morph ── */
+  /* The full spine drifts outward and dissolves — the constellation
+     "releases" as the class begins. */
+  .app[data-countdown="cosmos"][data-phase="teacher"] .cos-spine,
+  .app[data-countdown="cosmos"][data-phase="teacher"] .cos-ring-deco {
+    opacity: 0;
+    transform: scale(1.18);
+    transform-origin: center center;
+    transition: opacity 500ms ease, transform 800ms cubic-bezier(.4,0,.2,1);
+  }
+  /* The cos-ring-deco's transform stack needs to preserve the original
+     translate(-50%, -50%) centering. */
+  .app[data-countdown="cosmos"][data-phase="teacher"] .cos-ring-deco {
+    transform: translate(-50%, -50%) scale(1.18);
+  }
+  /* Eyebrow + footer labels also drift outward. */
+  .app[data-countdown="cosmos"][data-phase="teacher"] .cos-label,
+  .app[data-countdown="cosmos"][data-phase="teacher"] .cos-footer {
+    opacity: 0;
+    transform: translateX(-50%) translateY(-8px);
+    transition: opacity 400ms ease, transform 600ms cubic-bezier(.4,0,.2,1);
+  }
+  .app[data-countdown="cosmos"][data-phase="teacher"] .cos-footer {
+    transform: translateX(-50%) translateY(8px);
+  }
+  /* Corner cartographic meta dissolves in place. */
+  .app[data-countdown="cosmos"][data-phase="teacher"] .cos-meta {
+    opacity: 0;
+    transition: opacity 400ms ease;
+  }
+  /* Digit dissolves — same recipe as mission: scale up + blur + fade. */
+  .app[data-countdown="cosmos"][data-phase="teacher"] .cos-digit {
+    opacity: 0;
+    transform: scale(1.18);
+    filter: blur(8px);
+    transition: opacity 360ms ease, transform 600ms ease, filter 600ms ease;
+  }
+  /* Ring border brightens to gold — the journey signal completing — then
+     fades with the parent. */
+  .app[data-countdown="cosmos"][data-phase="teacher"] .cos-ring {
+    border-color: var(--signal-bright);
+    box-shadow: 0 0 24px rgba(201,162,39,0.30);
+    transition: border-color 320ms ease, box-shadow 320ms ease;
+  }
+  /* Cosmos's ring (~340px max) is smaller than teacher's 380px. The
+     teacher-solo default scales from 0.88 → 1, which is close to the
+     cos-hero / teacher ratio (~0.895). Setting the explicit value so the
+     entrance starts exactly where the cosmos ring sat. */
+  .app[data-countdown="cosmos"] .teacher-solo {
+    transform: scale(0.895);
+  }
+  .app[data-countdown="cosmos"][data-phase="teacher"] .teacher-solo {
+    transform: scale(1);
   }
 
   /* ──────────────────────────────────────────────────────────────────────
@@ -799,6 +1113,409 @@
   .member--classroom .member__sub { display: none; }
 
   /* ──────────────────────────────────────────────────────────────────────
+     TEAM-UP VIEW — lobby phase before countdown.
+       data-mode = team | solo  (default: team)
+       data-demo-state = 1..5   (cycles through empty → all-teamed → solo)
+     Per-team accent comes from data-team on the card; brand color tokens
+     are introduced below since the rest of presenter-opening only ships
+     accent / signal / danger.
+     ────────────────────────────────────────────────────────────────────── */
+  :root {
+    --team-cloud:     #c9c4b8;  /* chalk-300 */
+    --team-crystal:   #B08AF9;  /* iris */
+    --team-fire:      #c55a4e;  /* danger */
+    --team-lightning: #e0b83a;  /* gold-300 */
+    --team-rainstorm: #6BA3FF;  /* blue-400 */
+    --team-tornado:   #8e8a80;  /* chalk-400 */
+    --team-tsunami:   #64D8AE;  /* noon-400 */
+    --team-volcano:   #C07A4E;  /* terra-400 */
+  }
+
+  .teamup-view {
+    position: absolute; inset: 0; z-index: 2;
+    display: flex; flex-direction: column;
+    padding: var(--sp-5);
+    gap: var(--sp-5);
+    opacity: 0;
+    transition: opacity 500ms cubic-bezier(.4,0,.2,1);
+    pointer-events: none;
+  }
+  .app[data-phase="teamup"] .teamup-view {
+    opacity: 1; pointer-events: auto;
+  }
+  /* hide other phase layers while team-up is up */
+  .app[data-phase="teamup"] .teacher-solo,
+  .app[data-phase="teamup"] .slide-area,
+  .app[data-phase="teamup"] .countdown,
+  .app[data-phase="teamup"] .stage-view { opacity: 0; pointer-events: none; }
+  .app[data-phase="teamup"] .topbar { opacity: 1; pointer-events: auto; }
+
+  /* ── Top status row: count chips ─────────────────────────────────────── */
+  .teamup__counts {
+    display: flex; gap: var(--sp-3);
+    align-items: center;
+    flex-shrink: 0;
+  }
+  .count-chip {
+    display: inline-flex; align-items: center; gap: 8px;
+    height: 30px;
+    padding: 0 14px 0 12px;
+    border-radius: var(--r-pill);
+    background: var(--bg-overlay);
+    border: 1px solid var(--border);
+    font-family: var(--font-sans);
+    font-size: 12px;
+    color: var(--fg);
+    letter-spacing: -0.005em;
+  }
+  .count-chip__dot {
+    width: 8px; height: 8px; border-radius: 50%;
+    background: var(--accent);
+  }
+  .count-chip--students .count-chip__dot { background: var(--danger); }
+  .count-chip--teams    .count-chip__dot { background: var(--accent); }
+  .count-chip__total {
+    color: var(--fg-faint);
+    font-feature-settings: 'tnum';
+    margin-right: 4px;
+  }
+
+  /* ── Team grid ───────────────────────────────────────────────────────── */
+  .teamup__body {
+    flex: 1; min-height: 0; position: relative;
+    display: flex; flex-direction: column;
+    gap: var(--sp-4);
+  }
+  /* 3 columns max, 2 rows max for up to 6 teams. Cards stretch responsively
+     to fill the available width but cap at 540px each (the width that fits
+     6 member pills in a single row, so we don't need to budget for wrap on
+     wide viewports). On narrower screens minmax allows the row to grow if
+     members need to wrap, instead of clipping. */
+  .team-grid {
+    flex: 1; min-height: 0; overflow: hidden;
+    display: grid;
+    gap: var(--sp-4);
+    grid-template-columns: repeat(3, 1fr);
+    grid-auto-rows: minmax(170px, auto);
+    max-width: calc(540px * 3 + var(--sp-4) * 2);
+    align-content: flex-start;
+    justify-content: start;
+  }
+
+  /* ── Empty state ─────────────────────────────────────────────────────── */
+  .team-grid--empty {
+    display: flex; align-items: center; justify-content: center;
+    color: var(--fg-faint);
+    font-family: var(--font-serif); font-style: italic;
+    font-size: 18px;
+    background-image: radial-gradient(ellipse at 50% 50%, var(--border) 1px, transparent 1px);
+    background-size: 24px 24px;
+    background-position: 0 0;
+    border-radius: var(--r-4);
+    opacity: 0.85;
+  }
+
+  /* ── Team card ───────────────────────────────────────────────────────── */
+  .team-card {
+    position: relative;
+    background: var(--bg-raised);
+    border: 1px solid var(--border);
+    border-radius: var(--r-4);
+    padding: var(--sp-4) var(--sp-5);
+    overflow: hidden;
+    display: flex; flex-direction: column;
+    gap: var(--sp-3);
+    min-height: 0;
+  }
+  /* per-team accent strip at top */
+  .team-card::before {
+    content: ''; position: absolute;
+    top: 0; left: 0; right: 0; height: 2px;
+    background: var(--team-color, var(--accent));
+    opacity: 0.85;
+  }
+  /* surveyor's tick on top-right — anchors the card to "ground" */
+  .team-card::after {
+    content: ''; position: absolute;
+    top: -1px; right: -1px;
+    width: 10px; height: 10px;
+    border-top: 1px solid var(--team-color, var(--accent));
+    border-right: 1px solid var(--team-color, var(--accent));
+    opacity: 0.5;
+    border-top-right-radius: var(--r-4);
+  }
+
+  .team-card__header {
+    display: flex; align-items: center; gap: 12px;
+    flex-shrink: 0;
+  }
+  .team-card__icon {
+    width: 36px; height: 36px;
+    flex-shrink: 0;
+    object-fit: contain;
+  }
+  .team-card__name {
+    font-family: var(--font-serif);
+    font-size: 22px;
+    font-weight: 500;
+    color: var(--fg);
+    letter-spacing: -0.01em;
+    flex: 1; min-width: 0;
+    text-overflow: ellipsis; overflow: hidden; white-space: nowrap;
+  }
+  .team-card__count {
+    font-family: var(--font-mono);
+    font-size: 13px;
+    color: var(--team-color, var(--fg-muted));
+    letter-spacing: 0.04em;
+    padding: 2px 8px;
+    border-radius: var(--r-2);
+    background: var(--bg-overlay);
+  }
+
+  .team-card__members {
+    display: flex; flex-wrap: wrap;
+    gap: var(--sp-3) var(--sp-3);
+    align-items: flex-start;
+    align-content: flex-start;
+    min-height: 0; flex: 1;
+    overflow: hidden;
+  }
+  .member-pill {
+    display: flex; flex-direction: column;
+    align-items: center; gap: 6px;
+    min-width: 0;
+    max-width: 72px;
+  }
+  /* Enlarged avatar — most teams have 4–6 members so we have the room,
+     and bigger circles make the team-color tint and initials read clearly. */
+  .member-pill__circle {
+    width: 48px; height: 48px;
+    border-radius: 50%;
+    background: var(--bg-overlay);
+    border: 1.5px solid var(--border);
+    display: inline-flex; align-items: center; justify-content: center;
+    font-family: var(--font-sans);
+    font-size: 18px; font-weight: 600;
+    color: var(--team-color, var(--fg));
+    letter-spacing: 0.02em;
+    flex-shrink: 0;
+  }
+  .member-pill__name {
+    font-family: var(--font-sans);
+    font-size: 11px;
+    color: var(--fg-muted);
+    line-height: 1.2;
+    text-align: center;
+    text-overflow: ellipsis; overflow: hidden; white-space: nowrap;
+    max-width: 72px;
+  }
+
+  /* ── Still-picking strip — gold-bordered callout so the teacher's eye
+     lands on the students who still need a team. ─────────────────────────── */
+  .teamup__picking {
+    flex-shrink: 0;
+    background: color-mix(in srgb, var(--signal) 6%, var(--bg-overlay));
+    border: 1.5px solid color-mix(in srgb, var(--signal) 55%, transparent);
+    border-radius: var(--r-4);
+    padding: var(--sp-3) var(--sp-4);
+    display: flex; flex-direction: column;
+    gap: var(--sp-3);
+    max-height: 220px;
+    overflow: hidden;
+    box-shadow: 0 0 0 1px color-mix(in srgb, var(--signal) 12%, transparent),
+                0 0 22px color-mix(in srgb, var(--signal) 14%, transparent);
+  }
+  .teamup__picking-label {
+    display: flex; align-items: center; gap: 8px;
+    font-family: var(--font-sans);
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--signal-bright);
+    letter-spacing: -0.005em;
+  }
+  .teamup__picking-label svg {
+    width: 16px; height: 16px;
+    color: var(--signal);
+  }
+  .teamup__picking-list {
+    display: flex; flex-wrap: wrap;
+    gap: 8px 10px;
+    overflow-y: auto;
+  }
+  .picking-pill {
+    display: inline-flex; align-items: center; gap: 10px;
+    padding: 4px 12px 4px 4px;
+    border-radius: var(--r-pill);
+    background: var(--bg-raised);
+    border: 1px solid color-mix(in srgb, var(--signal) 25%, transparent);
+    font-family: var(--font-sans);
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--fg);
+    letter-spacing: -0.005em;
+    transition: background-color 280ms ease, border-color 280ms ease,
+                color 280ms ease, opacity 280ms ease, box-shadow 280ms ease;
+  }
+  .picking-pill__circle {
+    width: 28px; height: 28px;
+    border-radius: 50%;
+    background: color-mix(in srgb, var(--signal) 14%, transparent);
+    border: 2px solid color-mix(in srgb, var(--signal-bright) 80%, transparent);
+    display: inline-flex; align-items: center; justify-content: center;
+    font-family: var(--font-sans);
+    font-size: 12px; font-weight: 700;
+    color: var(--signal-bright);
+    flex-shrink: 0;
+    transition: background-color 280ms ease, border-color 280ms ease,
+                border-style 0ms ease 280ms, color 280ms ease;
+  }
+  /* "Not yet joined the session" — muted/dashed treatment so they read as
+     background info rather than action items. Promoted to gold styling
+     once the student arrives. */
+  .picking-pill.is-absent {
+    background: var(--bg-overlay);
+    border: 1px dashed color-mix(in srgb, var(--fg) 22%, transparent);
+    color: var(--fg-faint);
+    opacity: 0.7;
+  }
+  .picking-pill.is-absent .picking-pill__circle {
+    background: color-mix(in srgb, var(--fg) 5%, transparent);
+    border: 1.5px dashed color-mix(in srgb, var(--fg) 25%, transparent);
+    color: var(--fg-faint);
+  }
+
+  /* ── Empty state messaging ───────────────────────────────────────────── */
+  .teamup__empty-msg {
+    color: var(--fg-faint);
+    font-family: var(--font-serif);
+    font-style: italic;
+    font-size: 16px;
+    text-align: center;
+    padding: var(--sp-5);
+  }
+
+  /* ── Floating Start CTA ──────────────────────────────────────────────── */
+  .teamup__start {
+    position: absolute;
+    right: var(--sp-5); bottom: var(--sp-5);
+    display: inline-flex; align-items: center; gap: 8px;
+    height: 48px;
+    padding: 0 22px 0 24px;
+    border-radius: var(--r-pill);
+    background: var(--accent);
+    color: var(--bg);
+    border: none;
+    font-family: var(--font-sans);
+    font-size: 14px; font-weight: 600;
+    letter-spacing: -0.005em;
+    cursor: pointer;
+    box-shadow: 0 0 0 1px color-mix(in srgb, var(--accent) 80%, transparent),
+                0 0 24px color-mix(in srgb, var(--accent) 28%, transparent),
+                0 8px 24px rgba(0,0,0,0.4);
+    transition: transform 200ms ease, box-shadow 200ms ease, background 200ms ease;
+    z-index: 4;
+  }
+  .teamup__start:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 0 0 1px color-mix(in srgb, var(--accent) 90%, transparent),
+                0 0 32px color-mix(in srgb, var(--accent) 38%, transparent),
+                0 12px 28px rgba(0,0,0,0.45);
+  }
+  .teamup__start svg { width: 16px; height: 16px; }
+  .teamup__start-hint {
+    position: absolute;
+    right: 0; bottom: calc(100% + 8px);
+    font-family: var(--font-mono);
+    font-size: 10px;
+    color: var(--fg-faint);
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    white-space: nowrap;
+    pointer-events: none;
+  }
+  /* Start sits above picking strip area */
+
+  /* ── Entrance animations — cascade in as the lobby fills ────────────── */
+  @keyframes teamup-pop {
+    0%   { opacity: 0; transform: translateY(8px) scale(0.96); }
+    100% { opacity: 1; transform: translateY(0)   scale(1); }
+  }
+  .team-card {
+    animation: teamup-pop 420ms cubic-bezier(.34, 1.46, .64, 1) both;
+    animation-delay: calc(var(--i, 0) * 70ms);
+  }
+  .member-pill {
+    animation: teamup-pop 300ms cubic-bezier(.34, 1.46, .64, 1) both;
+    animation-delay: calc(var(--i, 0) * 28ms + 180ms);
+  }
+  .picking-pill {
+    animation: teamup-pop 260ms cubic-bezier(.34, 1.46, .64, 1) both;
+    animation-delay: calc(var(--i, 0) * 22ms);
+  }
+  .attendee {
+    animation: teamup-pop 240ms cubic-bezier(.34, 1.46, .64, 1) both;
+    animation-delay: calc(var(--i, 0) * 10ms);
+  }
+  /* Picking strip slides + fades in/out as it appears or empties */
+  .teamup__picking {
+    transition: opacity 380ms ease, max-height 460ms ease, padding 380ms ease,
+                border-color 380ms ease;
+    overflow: hidden;
+  }
+  .teamup__picking.is-empty {
+    opacity: 0;
+    max-height: 0;
+    padding-top: 0; padding-bottom: 0;
+    border-color: transparent;
+    pointer-events: none;
+  }
+  /* Empty-state grid fades when scenario flips to having teams */
+  .team-grid {
+    transition: opacity 280ms ease;
+  }
+
+  /* ── Solo mode: attendance grid ──────────────────────────────────────── */
+  .app[data-mode="solo"] .team-grid,
+  .app[data-mode="solo"] .teamup__picking { display: none; }
+  .app:not([data-mode="solo"]) .attendance-grid { display: none; }
+
+  .attendance-grid {
+    flex: 1; min-height: 0;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(96px, 1fr));
+    gap: var(--sp-3) var(--sp-2);
+    align-content: flex-start;
+    overflow-y: auto;
+    padding-right: var(--sp-3);
+  }
+  .attendee {
+    display: flex; flex-direction: column;
+    align-items: center; gap: 6px;
+    min-width: 0;
+  }
+  .attendee__circle {
+    width: 52px; height: 52px;
+    border-radius: 50%;
+    background: color-mix(in srgb, var(--accent) 14%, transparent);
+    border: 1px solid color-mix(in srgb, var(--accent) 35%, transparent);
+    display: inline-flex; align-items: center; justify-content: center;
+    font-family: var(--font-sans);
+    font-size: 18px; font-weight: 600;
+    color: var(--accent);
+    letter-spacing: 0.02em;
+  }
+  .attendee__name {
+    font-family: var(--font-sans);
+    font-size: 12px;
+    color: var(--fg-muted);
+    text-align: center;
+    line-height: 1.2;
+    max-width: 88px;
+    text-overflow: ellipsis; overflow: hidden; white-space: nowrap;
+  }
+
+  /* ──────────────────────────────────────────────────────────────────────
      SLIDE VIEW — same across all styles
      ────────────────────────────────────────────────────────────────────── */
   .slide-area {
@@ -870,12 +1587,34 @@
        to fit its content and pushes everything around it. */
     min-height: 0;
   }
+  /* Focus tile border treatment mirrors presenter-screen's stage-view
+     vocabulary: default is the active "speaking" state (teacher is
+     presenting during slides), coral glow + 3s breath; add .focus--passive
+     for the dashed-gray "closed transmission" fallback. */
   .focus {
     position: relative; border-radius: var(--r-4);
     overflow: hidden; aspect-ratio: 16/9;
     background-image: url('assets/classroom-a.jpg');
     background-size: cover; background-position: center;
-    border: 2px solid var(--border-strong);
+    border: 1.5px solid rgba(232,117,90,0.85);
+    animation: focus-rim-pulse 3s ease-in-out infinite;
+    transition: border-color 500ms cubic-bezier(0.4,0,0.2,1),
+                box-shadow   500ms cubic-bezier(0.4,0,0.2,1);
+  }
+  @keyframes focus-rim-pulse {
+    0%, 100% {
+      box-shadow: 0 0 0 1px rgba(232,117,90,0.25),
+                  0 0 22px rgba(232,117,90,0.28);
+    }
+    50% {
+      box-shadow: 0 0 0 1.5px rgba(232,117,90,0.45),
+                  0 0 36px rgba(232,117,90,0.50);
+    }
+  }
+  .focus--passive {
+    border: 1.5px dashed rgba(232,228,220,0.30);
+    animation: none;
+    box-shadow: none;
   }
   .focus__overlay {
     position: absolute; inset: 0;
@@ -1136,14 +1875,16 @@
 <body>
 
 <div class="app" id="app"
-     data-countdown="mission"
-     data-phase="countdown"
+     data-countdown="cinema"
+     data-phase="teamup"
+     data-mode="team"
+     data-demo-state="3"
      data-duration="10"
      data-teacher-hold="5"
      data-bg-stars="dense"
      data-bg-glow="strong"
      data-bg-northstar="on"
-     data-bg-landscape="dunes">
+     data-bg-landscape="lab-starry-sky">
 
   <!-- ── Backdrop: stars ── -->
   <div class="sky-stars" aria-hidden="true">
@@ -1356,6 +2097,120 @@
       <div class="sands-marks" id="sandsMarks" aria-hidden="true"></div>
     </div>
 
+    <!-- ── Countdown F — Cosmos (editorial cosmos, diagonal spine) ── -->
+    <div class="countdown cd-cosmos">
+      <!-- Bilingual label at the top, matching cinema / sands / grain phrasing -->
+      <div class="cos-label">
+        <div class="cos-label__ar">الحصة تبدأ</div>
+        <div class="cos-label__en">Class begins in</div>
+      </div>
+
+      <!-- Full-canvas spine: diagonal trajectory + station clusters + chart ticks
+           + a single terra hand-drawn flourish at the BL anchor. Sized in a
+           1000×1000 viewBox so positions read consistently across aspect ratios. -->
+      <svg class="cos-spine" viewBox="0 0 1000 1000" preserveAspectRatio="xMidYMid slice" aria-hidden="true">
+        <defs>
+          <symbol id="cos-sparkle-big" viewBox="-20 -20 40 40">
+            <path d="M0,-18 C2,-6 6,-2 18,0 C6,2 2,6 0,18 C-2,6 -6,2 -18,0 C-6,-2 -2,-6 0,-18 Z" fill="currentColor"/>
+          </symbol>
+          <symbol id="cos-sparkle-plus" viewBox="-10 -10 20 20">
+            <path d="M0,-9 L0,9 M-9,0 L9,0" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/>
+          </symbol>
+          <symbol id="cos-portal" viewBox="-20 -20 40 40">
+            <circle cx="0" cy="0" r="14" fill="none" stroke="currentColor" stroke-width="0.8"/>
+            <circle cx="0" cy="0" r="6"  fill="none" stroke="currentColor" stroke-width="0.6" opacity="0.55"/>
+          </symbol>
+        </defs>
+
+        <!-- Faint diagonal trajectory line (BL → TR) -->
+        <line x1="115" y1="870" x2="900" y2="120"
+              stroke="rgba(232,228,220,0.18)" stroke-width="0.8"
+              stroke-dasharray="2 8" opacity="0.6"/>
+
+        <!-- Station 1: bottom-left (smaller, quieter) -->
+        <g transform="translate(165, 830)">
+          <use href="#cos-portal" width="32" height="32" x="-16" y="-16" color="rgba(232,228,220,0.55)"/>
+          <use href="#cos-sparkle-plus" width="14" height="14" x="-7" y="-7" color="#96BCFF" class="twinkle t2"/>
+        </g>
+        <g transform="translate(225, 740)">
+          <circle cx="0" cy="0" r="22" fill="#e0b83a" opacity="0.06"/>
+          <circle cx="0" cy="0" r="12" fill="#e0b83a" opacity="0.10"/>
+          <use href="#cos-sparkle-big" width="22" height="22" x="-11" y="-11" color="#e0b83a" class="twinkle t3"/>
+        </g>
+        <circle cx="290" cy="685" r="3.5" fill="#6BA3FF" class="twinkle t4"/>
+
+        <!-- Station 2: middle (sparse, the ring is the hero) -->
+        <use href="#cos-sparkle-plus" width="12" height="12" x="434" y="549"
+             color="rgba(232,228,220,0.70)" class="twinkle"/>
+        <circle cx="560" cy="445" r="2" fill="#96BCFF" opacity="0.7" class="twinkle t5"/>
+
+        <!-- Station 3: top-right (larger cluster, constellation halo) -->
+        <g transform="translate(720, 290)">
+          <circle cx="0" cy="0" r="34" fill="#e0b83a" opacity="0.06"/>
+          <circle cx="0" cy="0" r="20" fill="#e0b83a" opacity="0.12"/>
+          <use href="#cos-sparkle-big" width="34" height="34" x="-17" y="-17" color="#e0b83a" class="twinkle t3"/>
+        </g>
+        <g transform="translate(810, 215)">
+          <use href="#cos-portal" width="28" height="28" x="-14" y="-14" color="rgba(232,228,220,0.70)"/>
+        </g>
+        <circle cx="660" cy="345" r="4.5" fill="#c9a227" class="twinkle t2"/>
+        <circle cx="855" cy="170" r="2.5" fill="#6BA3FF" opacity="0.7" class="twinkle t4"/>
+        <use href="#cos-sparkle-plus" width="14" height="14" x="756" y="361"
+             color="rgba(232,228,220,0.70)" class="twinkle t5"/>
+
+        <!-- Horizontal chart-tick lines paired with sparkles (image 2 reference) -->
+        <g fill="rgba(232,228,220,0.35)">
+          <circle cx="225" cy="740" r="0.6"/><circle cx="208" cy="740" r="0.6"/><circle cx="191" cy="740" r="0.6"/>
+          <circle cx="174" cy="740" r="0.6"/><circle cx="157" cy="740" r="0.6"/>
+          <circle cx="720" cy="290" r="0.6"/><circle cx="737" cy="290" r="0.6"/><circle cx="754" cy="290" r="0.6"/>
+          <circle cx="771" cy="290" r="0.6"/><circle cx="788" cy="290" r="0.6"/>
+        </g>
+
+        <!-- Hand-drawn terra flourish anchoring the BL end of the spine -->
+        <path d="M 105 880 Q 145 845 165 860 Q 188 880 175 905 M 168 868 Q 178 875 180 882 M 158 882 Q 168 887 170 894"
+              fill="none" stroke="rgba(192,122,78,0.45)" stroke-width="1.1"
+              stroke-linecap="round" opacity="0.9"/>
+      </svg>
+
+      <!-- Hero: digit + decorated ring -->
+      <div class="cos-hero">
+        <div class="cos-ring"></div>
+        <svg class="cos-ring-deco" viewBox="-100 -100 200 200" aria-hidden="true">
+          <!-- Gold tick at 12 o'clock — the journey signal -->
+          <line x1="0" y1="-99" x2="0" y2="-94" stroke="#e0b83a" stroke-width="1"/>
+          <!-- Sparkle riding the arc at ~30° from top -->
+          <g transform="translate(49.5 -85.7)">
+            <circle cx="0" cy="0" r="6" fill="#e0b83a" opacity="0.10"/>
+            <use href="#cos-sparkle-plus" width="10" height="10" x="-5" y="-5" color="#e0b83a" class="twinkle t3"/>
+          </g>
+          <!-- Tiny portal at ~210° (opposite quadrant) -->
+          <g transform="translate(-49.5 85.7)">
+            <use href="#cos-portal" width="16" height="16" x="-8" y="-8" color="rgba(232,228,220,0.70)"/>
+          </g>
+          <!-- Pinpoint blue dot at ~155° -->
+          <circle cx="-90.6" cy="42" r="1.5" fill="#96BCFF" class="twinkle t5"/>
+        </svg>
+        <!-- Digit in SVG: text-anchor + dominant-baseline central = pixel-perfect
+             optical centering on the ring's geometric center, immune to the
+             font's typographic baseline quirks. Same pattern sands uses. -->
+        <svg class="cos-digit" id="cosDigit" viewBox="0 0 100 100" aria-label="countdown">
+          <text id="cosDigitText" x="50" y="50" text-anchor="middle" dominant-baseline="central">10</text>
+        </svg>
+      </div>
+
+      <!-- Latin signature footer -->
+      <div class="cos-footer">
+        <div class="cos-footer__latin">aspicientes stellas</div>
+        <div class="cos-footer__lesson">Algebra II · Lesson 3 · Chapter 7</div>
+      </div>
+
+      <!-- Cartographic corner meta -->
+      <div class="cos-meta cos-meta--tl">N · 24°37′</div>
+      <div class="cos-meta cos-meta--tr">E · 46°43′</div>
+      <div class="cos-meta cos-meta--bl">Studio · 04</div>
+      <div class="cos-meta cos-meta--br">Live · 1080p</div>
+    </div>
+
     <!-- ── Teacher solo ── -->
     <div class="teacher-solo">
       <div class="teacher-circle"></div>
@@ -1363,6 +2218,41 @@
         <div class="teacher-label__name">Sara Al-Otaibi</div>
         <div class="teacher-label__sub">Teacher · Live</div>
       </div>
+    </div>
+
+    <!-- ── Team-up view (lobby before countdown) — populated by renderTeamup() ── -->
+    <div class="teamup-view" aria-label="Team-up lobby">
+      <div class="teamup__counts">
+        <span class="count-chip count-chip--students" id="tuStudents">
+          <span class="count-chip__dot"></span>
+          <span id="tuStudentsN">0</span><span class="count-chip__total"> / 24</span> here
+        </span>
+        <span class="count-chip count-chip--teams" id="tuTeams">
+          <span class="count-chip__dot"></span>
+          <span id="tuTeamsN">0</span> teams
+        </span>
+      </div>
+
+      <div class="teamup__body">
+        <!-- Team mode: grid -->
+        <div class="team-grid" id="tuGrid" data-teams="0"></div>
+        <!-- Solo mode: attendance grid -->
+        <div class="attendance-grid" id="tuAttendance"></div>
+        <!-- Bottom strip: students still picking a team -->
+        <div class="teamup__picking" id="tuPicking" hidden>
+          <div class="teamup__picking-label">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+            <span id="tuPickingLabel">0 students still picking a team</span>
+          </div>
+          <div class="teamup__picking-list" id="tuPickingList"></div>
+        </div>
+      </div>
+
+      <button class="teamup__start" id="tuStart" aria-label="Start class">
+        <span class="teamup__start-hint" id="tuStartHint">when you're ready</span>
+        Start class
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+      </button>
     </div>
 
     <!-- ── Slide view ── -->
@@ -1468,6 +2358,7 @@
           <button data-value="cinema">C · Cinema</button>
           <button data-value="sands">D · Sands</button>
           <button data-value="grain">E · Grain</button>
+          <button data-value="cosmos">F · Cosmos</button>
         </div>
       </div>
 
@@ -1475,10 +2366,28 @@
       <div class="cp-row">
         <span>Skip to</span>
         <div class="cp-tabs" data-attr="data-phase">
+          <button data-value="teamup">Team-up</button>
           <button data-value="countdown">Count</button>
           <button data-value="teacher">Teacher</button>
           <button data-value="slides">Slides</button>
           <button data-value="stage">Stage</button>
+        </div>
+      </div>
+      <div class="cp-row">
+        <span>Mode</span>
+        <div class="cp-tabs" data-attr="data-mode">
+          <button data-value="team">Team</button>
+          <button data-value="solo">Solo</button>
+        </div>
+      </div>
+      <div class="cp-row">
+        <span>Demo state</span>
+        <div class="cp-tabs" data-attr="data-demo-state">
+          <button data-value="1">1</button>
+          <button data-value="2">2</button>
+          <button data-value="3">3</button>
+          <button data-value="4">4</button>
+          <button data-value="5">5</button>
         </div>
       </div>
       <div class="cp-row">
@@ -1997,11 +2906,36 @@
     return { reset, tick, stop };
   })();
 
+  // ── F · Cosmos ──
+  // Minimal engine: the digit is the only thing that changes during the
+  // countdown. Spine and ring decorations are static; their twinkle is
+  // driven by CSS animations and runs continuously.
+  // The digit lives inside an <svg> wrapper so it can use
+  // dominant-baseline: central for precise centering — we update the
+  // <text> element's textContent and bounce the animation class on the
+  // <svg> wrapper.
+  const ENGINE_cosmos = (function () {
+    const digit     = document.getElementById('cosDigit');      // <svg> wrapper
+    const digitText = document.getElementById('cosDigitText');  // <text> inside
+    function reset(total) {
+      digitText.textContent = total;
+      digit.classList.remove('is-ticking');
+    }
+    function tick(secLeft, total) {
+      digitText.textContent = secLeft;
+      digit.classList.remove('is-ticking');
+      void digit.getBoundingClientRect(); // restart animation
+      digit.classList.add('is-ticking');
+    }
+    return { reset, tick };
+  })();
+
   const ENGINES = {
     mission: ENGINE_mission,
     cinema:  ENGINE_cinema,
     sands:   ENGINE_sands,
     grain:   ENGINE_grain,
+    cosmos:  ENGINE_cosmos,
   };
 
   /* ──────────────────────────────────────────────────────────────────────
@@ -2023,6 +2957,9 @@
     Object.values(ENGINES).forEach(e => { if (e.stop) e.stop(); });
   }
 
+  // Starts the full countdown → teacher → slides sequence.
+  // Note: team-up is NOT part of this auto-sequence — it's the lobby phase
+  // before countdown, advanced only by clicking the Start button.
   function startSequence() {
     clearAll();
     stopAllEngines();
@@ -2079,7 +3016,609 @@
         timerEl.textContent = String(m).padStart(2,'0') + ':' + String(s).padStart(2,'0');
       }, 1000);
     }
+    // 'teamup' and 'teacher' and 'stage' just need the attribute flip; the
+    // CSS handles the rest. team-up keeps the timer at 00:00 and restarts
+    // the lifecycle auto-cycle from state 1.
+    if (phase === 'teamup') {
+      timerEl.textContent = '00:00';
+      startTeamupCycle();
+    } else {
+      // Leaving team-up — kill the cycle so it doesn't keep mutating state
+      stopTeamupCycle();
+    }
   }
+
+  /* ──────────────────────────────────────────────────────────────────────
+     TEAM-UP — lobby phase data + render.
+     5 demo scenarios cover the lifecycle: empty → few picking → 2 teams
+     forming → 6 teams + many unteamed → all teamed.
+     Mode toggle: team (default) vs solo (attendance grid).
+     ────────────────────────────────────────────────────────────────────── */
+  const TEAM_POOL = [
+    { id: 'cloud',     name: 'Cloud',     avatar: 'assets/teams/Cloud.svg',     color: 'var(--team-cloud)' },
+    { id: 'crystal',   name: 'Crystal',   avatar: 'assets/teams/Crystal.svg',   color: 'var(--team-crystal)' },
+    { id: 'fire',      name: 'Fire',      avatar: 'assets/teams/Fire.svg',      color: 'var(--team-fire)' },
+    { id: 'lightning', name: 'Lightning', avatar: 'assets/teams/Lightening.svg',color: 'var(--team-lightning)' },
+    { id: 'rainstorm', name: 'Rainstorm', avatar: 'assets/teams/Rainstorm.svg', color: 'var(--team-rainstorm)' },
+    { id: 'tornado',   name: 'Tornado',   avatar: 'assets/teams/Tornado.svg',   color: 'var(--team-tornado)' },
+    { id: 'tsunami',   name: 'Tsunami',   avatar: 'assets/teams/Tsunami.svg',   color: 'var(--team-tsunami)' },
+    { id: 'volcano',   name: 'Volcano',   avatar: 'assets/teams/Volcano.svg',   color: 'var(--team-volcano)' },
+  ];
+
+  const FIRST_NAMES = ['Aisha','Yousef','Layla','Omar','Maya','Khalid','Sara','Hassan','Noor','Tariq','Fatima','Ibrahim','Reem','Mostafa','Salma','Yara','Ali','Hala','Mariam','Ziad','Lina','Mohammed','Hana','Karim','Nadia','Faris','Dalia','Rakan','Saad','Jana','Adam','Lubna','Ahmed','Bushra','Tarek','Hadi','Eman','Walid','Asma','Rashed','Mira','Amal','Sami','Dana','Khaled','Rami','Lara','Bilal','Hind','Nour','Said','Maya','Tamer','Salwa','Ramy','Lara','Joud','Ramzi','Hala','Wael'];
+  const LAST_INITIALS = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+  function rosterName(i) { return FIRST_NAMES[i % FIRST_NAMES.length] + ' ' + LAST_INITIALS[i % LAST_INITIALS.length] + '.'; }
+
+  // Each scenario = { teamSizes: [n,...], pickingN, absentN }
+  // expected pool of CLASS_CAP. teamSizes sum + pickingN + absentN = CLASS_CAP.
+  const CLASS_CAP = 24;
+  const SCENARIOS = {
+    1: { teamSizes: [],            pickingN: 0,  absentN: 24 }, // empty
+    2: { teamSizes: [],            pickingN: 4,  absentN: 20 }, // few picking
+    3: { teamSizes: [3, 4],        pickingN: 4,  absentN: 13 }, // 2 teams + picking (11/24)
+    4: { teamSizes: [3, 4, 3, 4, 3], pickingN: 5, absentN: 2 }, // 5 teams + picking (22/24)
+    5: { teamSizes: [4, 4, 4, 4, 4, 4], pickingN: 0, absentN: 0 }, // 6 teams of 4, all teamed (24/24)
+  };
+
+  // Smooth integer tween for the count chips
+  function tweenNumber(el, from, to, duration) {
+    if (!el || from === to) { if (el) el.textContent = to; return; }
+    const start = performance.now();
+    function frame(now) {
+      const t = Math.min(1, (now - start) / duration);
+      const eased = 1 - Math.pow(1 - t, 3);
+      el.textContent = Math.round(from + (to - from) * eased);
+      if (t < 1) requestAnimationFrame(frame);
+    }
+    requestAnimationFrame(frame);
+  }
+
+  function renderTeamup() {
+    const mode = app.dataset.mode || 'team';
+    const state = parseInt(app.dataset.demoState, 10) || 3;
+    const scenario = SCENARIOS[state] || SCENARIOS[3];
+
+    const totalAssigned = scenario.teamSizes.reduce((a,b) => a+b, 0);
+    const here = totalAssigned + scenario.pickingN;
+    const teams = scenario.teamSizes.length;
+    const absent = scenario.absentN;
+
+    // Count chips — capture previous values and tween
+    const tuStudentsN = document.getElementById('tuStudentsN');
+    const tuTeamsN    = document.getElementById('tuTeamsN');
+    const tuTeamsChip = document.getElementById('tuTeams');
+    const prevStudents = parseInt(tuStudentsN && tuStudentsN.textContent, 10) || 0;
+    const prevTeams    = parseInt(tuTeamsN    && tuTeamsN.textContent,    10) || 0;
+    tweenNumber(tuStudentsN, prevStudents, here,  500);
+    tweenNumber(tuTeamsN,    prevTeams,    teams, 500);
+    if (tuTeamsChip) tuTeamsChip.style.display = mode === 'solo' ? 'none' : '';
+
+    if (mode === 'solo') {
+      renderAttendance(here);
+      // collapse team-up specific UI
+      document.getElementById('tuPicking').classList.add('is-empty');
+      document.getElementById('tuGrid').innerHTML = '';
+    } else {
+      renderTeamGrid(scenario);
+      renderPicking(scenario);
+      document.getElementById('tuAttendance').innerHTML = '';
+    }
+
+    // Update Start hint based on readiness
+    const startBtn  = document.getElementById('tuStart');
+    const startHint = document.getElementById('tuStartHint');
+    if (startBtn && startHint) {
+      if (here === 0) {
+        startHint.textContent = 'no one is here yet';
+        startBtn.style.opacity = '0.6';
+      } else if (mode === 'team' && scenario.pickingN > 0) {
+        startHint.textContent = `${scenario.pickingN} still picking · start anyway?`;
+        startBtn.style.opacity = '0.92';
+      } else {
+        startHint.textContent = "when you're ready";
+        startBtn.style.opacity = '1';
+      }
+    }
+  }
+
+  function renderTeamGrid(scenario) {
+    const grid  = document.getElementById('tuGrid');
+    const teams = scenario.teamSizes.length;
+    grid.dataset.teams = teams;
+    grid.innerHTML = '';
+    if (teams === 0) {
+      grid.classList.add('team-grid--empty');
+      grid.textContent = 'Teams will appear here as students group up';
+      return;
+    }
+    grid.classList.remove('team-grid--empty');
+    grid.textContent = '';
+
+    let nameIdx = 0;
+    scenario.teamSizes.forEach((size, i) => {
+      const team = TEAM_POOL[i % TEAM_POOL.length];
+      const card = document.createElement('div');
+      card.className = 'team-card';
+      card.dataset.team = team.id;
+      card.style.setProperty('--team-color', team.color);
+      card.style.setProperty('--i', i);
+
+      // header
+      const header = document.createElement('div');
+      header.className = 'team-card__header';
+      const icon = document.createElement('img');
+      icon.className = 'team-card__icon';
+      icon.src = team.avatar; icon.alt = '';
+      const nameEl = document.createElement('span');
+      nameEl.className = 'team-card__name';
+      nameEl.textContent = team.name;
+      const countEl = document.createElement('span');
+      countEl.className = 'team-card__count';
+      countEl.textContent = size;
+      header.append(icon, nameEl, countEl);
+      card.appendChild(header);
+
+      // members
+      const members = document.createElement('div');
+      members.className = 'team-card__members';
+      for (let j = 0; j < size; j++) {
+        const name = rosterName(nameIdx++);
+        const pill = document.createElement('div');
+        pill.className = 'member-pill';
+        pill.style.setProperty('--i', j);
+        const circle = document.createElement('span');
+        circle.className = 'member-pill__circle';
+        circle.style.background = `color-mix(in srgb, ${team.color} 14%, transparent)`;
+        circle.style.borderColor = `color-mix(in srgb, ${team.color} 35%, transparent)`;
+        circle.textContent = name[0];
+        const label = document.createElement('span');
+        label.className = 'member-pill__name';
+        label.textContent = name;
+        pill.append(circle, label);
+        members.appendChild(pill);
+      }
+      card.appendChild(members);
+      grid.appendChild(card);
+    });
+  }
+
+  function renderPicking(scenario) {
+    const picking = document.getElementById('tuPicking');
+    const list    = document.getElementById('tuPickingList');
+    const label   = document.getElementById('tuPickingLabel');
+    const pickingN = scenario.pickingN;
+    const absentN  = scenario.absentN;
+
+    // Hide the panel only when every expected student is teamed up.
+    if (pickingN === 0 && absentN === 0) {
+      picking.classList.add('is-empty');
+      list.innerHTML = '';
+      label.textContent = 'All teamed up';
+      return;
+    }
+    picking.classList.remove('is-empty');
+    if (pickingN > 0 && absentN > 0)      label.textContent = `${pickingN} picking a team · ${absentN} not joined yet`;
+    else if (pickingN > 0)                 label.textContent = `${pickingN} students still picking a team`;
+    else                                   label.textContent = `${absentN} students not joined yet`;
+
+    list.innerHTML = '';
+    // Names AFTER the teamed students so we don't show duplicates:
+    //   sids 1..teamed       → in a team (already rendered in the grid)
+    //   sids teamed+1..+N    → picking (gold ring)
+    //   sids past that       → absent  (dashed + muted)
+    const start = scenario.teamSizes.reduce((a,b) => a+b, 0);
+    let idx = 0;
+    for (let i = 0; i < pickingN; i++) {
+      const sid = start + i + 1;
+      const pill = buildPickingPillDOM(sid);
+      pill.style.setProperty('--i', idx++);
+      list.appendChild(pill);
+    }
+    for (let i = 0; i < absentN; i++) {
+      const sid = start + pickingN + i + 1;
+      const pill = buildPickingPillDOM(sid);
+      pill.classList.add('is-absent');
+      pill.style.setProperty('--i', idx++);
+      list.appendChild(pill);
+    }
+  }
+
+  function renderAttendance(here) {
+    const grid = document.getElementById('tuAttendance');
+    grid.innerHTML = '';
+    for (let i = 0; i < here; i++) {
+      const name = rosterName(i);
+      const item = document.createElement('div');
+      item.className = 'attendee';
+      item.style.setProperty('--i', i);
+      const circle = document.createElement('span');
+      circle.className = 'attendee__circle';
+      circle.textContent = name[0];
+      const label = document.createElement('span');
+      label.className = 'attendee__name';
+      label.textContent = name;
+      item.append(circle, label);
+      grid.appendChild(item);
+    }
+  }
+
+  /* ── Auto-cycle: continuous simulation 0 → 24 students ─────────────────
+     Generates a deterministic sequence of micro-events (arrive, form team,
+     fill team) every ~320ms instead of snapping through scenario snapshots.
+     The end state is the same as SCENARIOS[5] — 6 teams × 4 students each.
+     Total cycle length ≈ 11–12s. Stops automatically when the user manually
+     scrubs the Demo state tabs, switches mode, or leaves the team-up phase. */
+  const SIM_STEP_MS = 320;
+  const TEAM_CAP    = 4;
+  const MAX_TEAMS   = 6;
+  let teamupTimers = [];
+  let teamupCycleArmed = false;
+
+  function stopTeamupCycle() {
+    teamupTimers.forEach(clearTimeout);
+    teamupTimers = [];
+    teamupCycleArmed = false;
+  }
+
+  // Fisher–Yates shuffle (returns a new array; doesn't mutate the input)
+  function shuffleArray(arr) {
+    const a = arr.slice();
+    for (let i = a.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [a[i], a[j]] = [a[j], a[i]];
+    }
+    return a;
+  }
+  // Pick and remove a random element from an array (Knuth-style)
+  function pickRandom(arr) {
+    const idx = Math.floor(Math.random() * arr.length);
+    return arr.splice(idx, 1)[0];
+  }
+
+  function generateTeamOperations() {
+    const ops = [];
+    let t = 0;
+    const teams = [];   // [[sid, sid, ...], ...]
+    const picking = []; // [sid, ...]
+    let arrived = 0;
+    // Each run shuffles which avatars come into play, so cycle 1 might lead
+    // with Tornado and cycle 2 with Crystal instead of Cloud every time.
+    const poolOrder = shuffleArray([0, 1, 2, 3, 4, 5, 6, 7]);
+
+    while (arrived < CLASS_CAP || picking.length > 0) {
+      const incompleteIdxs = teams
+        .map((t, i) => (t.length < TEAM_CAP ? i : -1))
+        .filter(i => i !== -1);
+      const canFill = incompleteIdxs.length > 0 && picking.length >= 1;
+      const canForm = teams.length < MAX_TEAMS && picking.length >= 3;
+      const cycle = ops.length % 5;
+      let acted = false;
+
+      if (cycle < 3 && arrived < CLASS_CAP) {
+        // 3 arrivals in a row, then 2 settle actions — gives picking pool a
+        // chance to grow visibly before teams gather them up
+        arrived++;
+        picking.push(arrived);
+        ops.push({ at: t, op: 'arrive', sid: arrived });
+        acted = true;
+      } else if (canForm && canFill) {
+        // Mid-cycle: when both form and fill are possible, split ~70/30 in
+        // favor of forming a new team, so teams stop appearing only AFTER
+        // existing ones fully populate.
+        if (Math.random() < 0.7) {
+          const sids = [pickRandom(picking), pickRandom(picking), pickRandom(picking)];
+          const poolIdx = poolOrder[teams.length];
+          teams.push(sids.slice());
+          ops.push({ at: t, op: 'form', teamIdx: teams.length - 1, poolIdx, sids });
+        } else {
+          const incompleteIdx = incompleteIdxs[Math.floor(Math.random() * incompleteIdxs.length)];
+          const sid = pickRandom(picking);
+          teams[incompleteIdx].push(sid);
+          ops.push({ at: t, op: 'fill', teamIdx: incompleteIdx, sid });
+        }
+        acted = true;
+      } else if (canForm) {
+        const sids = [pickRandom(picking), pickRandom(picking), pickRandom(picking)];
+        const poolIdx = poolOrder[teams.length];
+        teams.push(sids.slice());
+        ops.push({ at: t, op: 'form', teamIdx: teams.length - 1, poolIdx, sids });
+        acted = true;
+      } else if (canFill) {
+        // Random target — picks an arbitrary incomplete team, not the first
+        const incompleteIdx = incompleteIdxs[Math.floor(Math.random() * incompleteIdxs.length)];
+        const sid = pickRandom(picking);
+        teams[incompleteIdx].push(sid);
+        ops.push({ at: t, op: 'fill', teamIdx: incompleteIdx, sid });
+        acted = true;
+      } else if (arrived < CLASS_CAP) {
+        // Fallback: keep students arriving even when nothing else applies
+        arrived++;
+        picking.push(arrived);
+        ops.push({ at: t, op: 'arrive', sid: arrived });
+        acted = true;
+      }
+
+      if (!acted) break;
+      t += SIM_STEP_MS;
+    }
+    return ops;
+  }
+
+  function generateSoloOperations() {
+    // Solo mode: 24 students just arrive into the attendance grid, no teams
+    const ops = [];
+    for (let i = 0; i < CLASS_CAP; i++) {
+      ops.push({ at: i * SIM_STEP_MS, op: 'arrive', sid: i + 1 });
+    }
+    return ops;
+  }
+
+  /* ── DOM helpers used by the simulation ───────────────────────────────── */
+  function buildPickingPillDOM(sid) {
+    const name = rosterName(sid - 1);
+    const pill = document.createElement('span');
+    pill.className = 'picking-pill';
+    pill.dataset.student = sid;
+    const circle = document.createElement('span');
+    circle.className = 'picking-pill__circle';
+    circle.textContent = name[0];
+    pill.append(circle, document.createTextNode(' ' + name));
+    return pill;
+  }
+  function buildMemberPillDOM(sid, team) {
+    const name = rosterName(sid - 1);
+    const pill = document.createElement('div');
+    pill.className = 'member-pill';
+    pill.dataset.student = sid;
+    const circle = document.createElement('span');
+    circle.className = 'member-pill__circle';
+    circle.style.background = `color-mix(in srgb, ${team.color} 14%, transparent)`;
+    circle.style.borderColor = `color-mix(in srgb, ${team.color} 35%, transparent)`;
+    circle.textContent = name[0];
+    const label = document.createElement('span');
+    label.className = 'member-pill__name';
+    label.textContent = name;
+    pill.append(circle, label);
+    return pill;
+  }
+  function buildTeamCardDOM(team, teamIdx) {
+    const card = document.createElement('div');
+    card.className = 'team-card';
+    card.dataset.team = team.id;
+    card.dataset.teamIdx = teamIdx;
+    card.style.setProperty('--team-color', team.color);
+    // No --i stagger here — simulation adds cards one at a time, each at its
+    // own moment; --i would just hide them behind a 70ms × idx delay.
+    const header = document.createElement('div');
+    header.className = 'team-card__header';
+    const icon = document.createElement('img');
+    icon.className = 'team-card__icon';
+    icon.src = team.avatar; icon.alt = '';
+    const nameEl = document.createElement('span');
+    nameEl.className = 'team-card__name';
+    nameEl.textContent = team.name;
+    const countEl = document.createElement('span');
+    countEl.className = 'team-card__count';
+    countEl.textContent = '0';
+    header.append(icon, nameEl, countEl);
+    card.appendChild(header);
+    const members = document.createElement('div');
+    members.className = 'team-card__members';
+    card.appendChild(members);
+    return card;
+  }
+  function buildAttendeeDOM(sid) {
+    const name = rosterName(sid - 1);
+    const item = document.createElement('div');
+    item.className = 'attendee';
+    item.dataset.student = sid;
+    const circle = document.createElement('span');
+    circle.className = 'attendee__circle';
+    circle.textContent = name[0];
+    const label = document.createElement('span');
+    label.className = 'attendee__name';
+    label.textContent = name;
+    item.append(circle, label);
+    return item;
+  }
+
+  /* ── DOM operations used by the simulator ─────────────────────────────── */
+  function addPickingPill(sid) {
+    const list = document.getElementById('tuPickingList');
+    const picking = document.getElementById('tuPicking');
+    picking.classList.remove('is-empty');
+    // The pill was pre-created as an absent placeholder when the cycle
+    // started — just promote it to the active gold treatment.
+    const existing = list.querySelector(`[data-student="${sid}"]`);
+    if (existing) {
+      existing.classList.remove('is-absent');
+    } else {
+      list.appendChild(buildPickingPillDOM(sid));
+    }
+  }
+  function removePickingPill(sid) {
+    const list = document.getElementById('tuPickingList');
+    const pill = list.querySelector(`[data-student="${sid}"]`);
+    if (!pill) return;
+    pill.classList.add('is-leaving');
+    const tid = setTimeout(() => {
+      pill.remove();
+      if (list.children.length === 0) {
+        document.getElementById('tuPicking').classList.add('is-empty');
+      }
+    }, 220);
+    teamupTimers.push(tid);
+  }
+  function addMemberPill(teamIdx, sid) {
+    const card = document.querySelector(`.team-card[data-team-idx="${teamIdx}"]`);
+    if (!card) return;
+    // Look up the team by id stored on the card — works regardless of which
+    // pool index was chosen at form time.
+    const team = TEAM_POOL.find(t => t.id === card.dataset.team);
+    if (!team) return;
+    const members = card.querySelector('.team-card__members');
+    members.appendChild(buildMemberPillDOM(sid, team));
+    // Update team count
+    const countEl = card.querySelector('.team-card__count');
+    if (countEl) countEl.textContent = members.children.length;
+  }
+  function addTeamCard(teamIdx, sids, poolIdx) {
+    const grid = document.getElementById('tuGrid');
+    if (grid.classList.contains('team-grid--empty')) {
+      grid.classList.remove('team-grid--empty');
+      grid.textContent = '';
+    }
+    // poolIdx is the SHUFFLED index — comes from the form op
+    const team = TEAM_POOL[poolIdx % TEAM_POOL.length];
+    grid.appendChild(buildTeamCardDOM(team, teamIdx));
+    // Founding members cascade in over the first ~400ms after the card
+    sids.forEach((sid, i) => {
+      const tid = setTimeout(() => {
+        if (!teamupCycleArmed) return;
+        addMemberPill(teamIdx, sid);
+        updateCountChips();
+      }, i * 90 + 160);
+      teamupTimers.push(tid);
+    });
+  }
+  function addAttendee(sid) {
+    const grid = document.getElementById('tuAttendance');
+    grid.appendChild(buildAttendeeDOM(sid));
+  }
+  function updateCountChips() {
+    // "arrived" excludes absent placeholders — only count students actually
+    // in the session (gold picking pills + teamed members + attendees)
+    const arrived = document.querySelectorAll('.picking-pill:not(.is-absent):not(.is-leaving)').length
+                  + document.querySelectorAll('.member-pill').length
+                  + document.querySelectorAll('.attendee').length;
+    const teams = document.querySelectorAll('.team-card').length;
+    const tuStudentsN = document.getElementById('tuStudentsN');
+    const tuTeamsN = document.getElementById('tuTeamsN');
+    if (tuStudentsN) {
+      const prev = parseInt(tuStudentsN.textContent, 10) || 0;
+      tweenNumber(tuStudentsN, prev, arrived, 240);
+    }
+    if (tuTeamsN) {
+      const prev = parseInt(tuTeamsN.textContent, 10) || 0;
+      tweenNumber(tuTeamsN, prev, teams, 240);
+    }
+    // Picking strip label — split between "picking" (gold) and "not joined" (absent)
+    const pickingN = document.querySelectorAll('.picking-pill:not(.is-absent):not(.is-leaving)').length;
+    const absentN  = document.querySelectorAll('.picking-pill.is-absent:not(.is-leaving)').length;
+    const labelEl = document.getElementById('tuPickingLabel');
+    if (labelEl) {
+      if (pickingN === 0 && absentN === 0) labelEl.textContent = 'All teamed up';
+      else if (pickingN > 0 && absentN > 0) labelEl.textContent = `${pickingN} picking a team · ${absentN} not joined yet`;
+      else if (pickingN > 0) labelEl.textContent = `${pickingN} students still picking a team`;
+      else labelEl.textContent = `${absentN} students not joined yet`;
+    }
+    // Start CTA hint
+    const startBtn  = document.getElementById('tuStart');
+    const startHint = document.getElementById('tuStartHint');
+    if (startBtn && startHint) {
+      if (arrived === 0) {
+        startHint.textContent = 'no one is here yet';
+        startBtn.style.opacity = '0.6';
+      } else if (pickingN > 0) {
+        startHint.textContent = `${pickingN} still picking · start anyway?`;
+        startBtn.style.opacity = '0.92';
+      } else {
+        startHint.textContent = "when you're ready";
+        startBtn.style.opacity = '1';
+      }
+    }
+  }
+
+  function applyOp(op) {
+    const mode = app.dataset.mode || 'team';
+    if (op.op === 'arrive') {
+      if (mode === 'solo') addAttendee(op.sid);
+      else                 addPickingPill(op.sid);
+    } else if (mode === 'team') {
+      if (op.op === 'fill') {
+        removePickingPill(op.sid);
+        addMemberPill(op.teamIdx, op.sid);
+      } else if (op.op === 'form') {
+        op.sids.forEach(sid => removePickingPill(sid));
+        addTeamCard(op.teamIdx, op.sids, op.poolIdx);
+      }
+    }
+    updateCountChips();
+  }
+
+  function resetTeamupDOM() {
+    const grid = document.getElementById('tuGrid');
+    const list = document.getElementById('tuPickingList');
+    const picking = document.getElementById('tuPicking');
+    const att = document.getElementById('tuAttendance');
+    const mode = app.dataset.mode || 'team';
+    if (grid) {
+      grid.innerHTML = '';
+      grid.classList.add('team-grid--empty');
+      grid.textContent = 'Teams will appear here as students group up';
+    }
+    if (list) list.innerHTML = '';
+    if (picking) {
+      if (mode === 'team') {
+        // Pre-create absent placeholders for every expected student so the
+        // panel stays visible from the start with the full roster.
+        for (let i = 1; i <= CLASS_CAP; i++) {
+          const pill = buildPickingPillDOM(i);
+          pill.classList.add('is-absent');
+          list.appendChild(pill);
+        }
+        picking.classList.remove('is-empty');
+      } else {
+        picking.classList.add('is-empty');
+      }
+    }
+    if (att) att.innerHTML = '';
+    const tuStudentsN = document.getElementById('tuStudentsN');
+    const tuTeamsN    = document.getElementById('tuTeamsN');
+    const tuTeamsChip = document.getElementById('tuTeams');
+    if (tuStudentsN) tuStudentsN.textContent = '0';
+    if (tuTeamsN)    tuTeamsN.textContent = '0';
+    if (tuTeamsChip) tuTeamsChip.style.display = (app.dataset.mode === 'solo') ? 'none' : '';
+    // Reset CTA hint
+    const startHint = document.getElementById('tuStartHint');
+    const startBtn  = document.getElementById('tuStart');
+    if (startHint) startHint.textContent = 'no one is here yet';
+    if (startBtn)  startBtn.style.opacity = '0.6';
+  }
+
+  function startTeamupCycle() {
+    stopTeamupCycle();
+    teamupCycleArmed = true;
+    resetTeamupDOM();
+    const mode = app.dataset.mode || 'team';
+    const ops = mode === 'solo' ? generateSoloOperations() : generateTeamOperations();
+    ops.forEach(op => {
+      const tid = setTimeout(() => {
+        if (!teamupCycleArmed) return;
+        applyOp(op);
+      }, op.at);
+      teamupTimers.push(tid);
+    });
+    // Hold open until the last op's animation settles, then disarm
+    const lastT = ops.length ? ops[ops.length - 1].at : 0;
+    const endId = setTimeout(() => { teamupCycleArmed = false; }, lastT + 600);
+    teamupTimers.push(endId);
+  }
+
+  // Wire Start button → jump to countdown
+  const startBtnEl = document.getElementById('tuStart');
+  if (startBtnEl) {
+    startBtnEl.addEventListener('click', () => jumpToPhase('countdown'));
+  }
+
+  // Initial render
+  renderTeamup();
+
+  // Re-render when mode or demo state changes
+  new MutationObserver(() => {
+    if (app.dataset.phase === 'teamup') renderTeamup();
+    else renderTeamup(); // also keep state synced if user toggles while elsewhere
+  }).observe(app, { attributes: true, attributeFilter: ['data-mode', 'data-demo-state', 'data-phase'] });
 
   /* ──────────────────────────────────────────────────────────────────────
      CONTROL PANEL WIRING
@@ -2136,13 +3675,19 @@
 
         // Behaviors per control
         if (attr === 'data-countdown') {
-          // restart the sequence with the new style
-          startSequence();
+          // restart the sequence with the new style — unless we're holding
+          // in team-up, in which case just update the setting silently so
+          // the change takes effect when the teacher clicks Start.
+          if (app.dataset.phase !== 'teamup') startSequence();
         } else if (attr === 'data-phase') {
           jumpToPhase(value);
         } else if (attr === 'data-duration' || attr === 'data-teacher-hold') {
           // changing durations restarts the sequence so the new timing applies
-          startSequence();
+          if (app.dataset.phase !== 'teamup') startSequence();
+        } else if (attr === 'data-demo-state' || attr === 'data-mode') {
+          // Manual scrub of the lobby state — cancel the auto-cycle so the
+          // user's pick sticks. The MutationObserver re-runs renderTeamup().
+          stopTeamupCycle();
         }
         // bg-* changes are purely CSS — no JS restart needed
         // (lab iframe sync handled by MutationObserver on data-bg-landscape)
@@ -2319,8 +3864,15 @@
   toggleBtn('mic', 'Unmute', 'Mute');
   toggleBtn('cam', 'Start video', 'Stop video');
 
-  // First run
-  startSequence();
+  // First run — respect the initial data-phase (team-up auto-cycles through
+  // the lifecycle and then holds at "all teamed" until Start is clicked;
+  // any other phase runs the countdown auto-sequence).
+  if (app.dataset.phase === 'teamup') {
+    syncPhaseControl();
+    startTeamupCycle();
+  } else {
+    startSequence();
+  }
 </script>
 </body>
 </html>
