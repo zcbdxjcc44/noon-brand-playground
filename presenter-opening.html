@@ -17,7 +17,9 @@
                           (teamup is the new opener — manual Start advances
                            to countdown. stage is opt-in only.)
        data-mode        = team | solo  (solo skips team grid, shows attendance)
-       data-demo-state  = 1 | 2 | 3 | 4 | 5  (lobby roster scenario)
+       data-card-layout = row | stacked  (team card: icon+name on the left
+                                          with members right-grid, or icon+name
+                                          on top with members flex-wrapped below)
        data-duration    = 5 | 10 | 15   (countdown seconds)
        data-teacher-hold= 2 | 3 | 5     (seconds the teacher-solo is held)
 
@@ -1196,8 +1198,11 @@
     display: grid;
     gap: var(--sp-4);
     grid-template-columns: repeat(3, 1fr);
-    grid-auto-rows: minmax(170px, auto);
-    max-width: calc(540px * 3 + var(--sp-4) * 2);
+    grid-auto-rows: minmax(184px, auto);
+    /* Cap each card around the width that snugly wraps its content
+       (sidebar 120 + gap 12 + members ~232 + padding 40 ≈ 404, plus a
+       little headroom). */
+    max-width: calc(440px * 3 + var(--sp-4) * 2);
     align-content: flex-start;
     justify-content: start;
   }
@@ -1215,7 +1220,9 @@
     opacity: 0.85;
   }
 
-  /* ── Team card ───────────────────────────────────────────────────────── */
+  /* ── Team card — left/right layout ───────────────────────────────────────
+     Left sidebar holds the team icon + name + count; right area holds the
+     member avatars in a 3-column grid. */
   .team-card {
     position: relative;
     background: var(--bg-raised);
@@ -1223,8 +1230,9 @@
     border-radius: var(--r-4);
     padding: var(--sp-4) var(--sp-5);
     overflow: hidden;
-    display: flex; flex-direction: column;
+    display: flex; flex-direction: row;
     gap: var(--sp-3);
+    align-items: stretch;
     min-height: 0;
   }
   /* per-team accent strip at top */
@@ -1245,14 +1253,24 @@
     border-top-right-radius: var(--r-4);
   }
 
-  .team-card__header {
-    display: flex; align-items: center; gap: 12px;
-    flex-shrink: 0;
+  .team-card__sidebar {
+    flex: 0 0 auto;
+    width: 120px;
+    display: flex; flex-direction: column;
+    gap: var(--sp-2);
+    /* Horizontally centered stack — icon, name, and count line up to
+       the same midline. */
+    align-items: center;
+    text-align: center;
+    /* Top-aligned so the icon shares a baseline with the first row of
+       members on the right — no drift as more rows of members appear. */
+    justify-content: flex-start;
   }
   .team-card__icon {
-    width: 36px; height: 36px;
+    width: 76px; height: 76px;
     flex-shrink: 0;
     object-fit: contain;
+    margin-bottom: 6px;
   }
   .team-card__name {
     font-family: var(--font-serif);
@@ -1260,25 +1278,57 @@
     font-weight: 500;
     color: var(--fg);
     letter-spacing: -0.01em;
-    flex: 1; min-width: 0;
+    line-height: 1.1;
+    max-width: 100%;
     text-overflow: ellipsis; overflow: hidden; white-space: nowrap;
   }
   .team-card__count {
     font-family: var(--font-mono);
-    font-size: 13px;
-    color: var(--team-color, var(--fg-muted));
-    letter-spacing: 0.04em;
-    padding: 2px 8px;
-    border-radius: var(--r-2);
-    background: var(--bg-overlay);
+    font-size: 11px;
+    color: var(--fg-muted);
+    letter-spacing: 0.06em;
+  }
+
+  /* ── Stacked layout — icon + name on top, members flex-wrapped below ───
+     Engaged via [data-card-layout="stacked"] on .app */
+  .app[data-card-layout="stacked"] .team-card {
+    flex-direction: column;
+    gap: var(--sp-3);
+  }
+  .app[data-card-layout="stacked"] .team-card__sidebar {
+    width: auto;
+    flex-direction: row;
+    align-items: center;
+    text-align: left;
+    gap: 12px;
+    justify-content: flex-start;
+  }
+  .app[data-card-layout="stacked"] .team-card__icon {
+    width: 36px; height: 36px;
+    margin-bottom: 0;
+  }
+  .app[data-card-layout="stacked"] .team-card__name {
+    flex: 1;
+    font-size: 22px;
+  }
+  .app[data-card-layout="stacked"] .team-card__members {
+    display: flex; flex-wrap: wrap;
+    grid-template-columns: none;
+    gap: var(--sp-2) var(--sp-3);
+    align-content: flex-start;
+    justify-content: flex-start;
   }
 
   .team-card__members {
-    display: flex; flex-wrap: wrap;
-    gap: var(--sp-3) var(--sp-3);
-    align-items: flex-start;
-    align-content: flex-start;
-    min-height: 0; flex: 1;
+    flex: 1; min-width: 0; min-height: 0;
+    display: grid;
+    /* Fixed pill-width columns + center the whole grid in the available
+       space, so pills sit close together as one tight cluster regardless
+       of card width (instead of spreading via 1fr). */
+    grid-template-columns: repeat(3, 72px);
+    gap: var(--sp-2) 8px;
+    align-content: start;
+    justify-content: center;
     overflow: hidden;
   }
   .member-pill {
@@ -1287,17 +1337,17 @@
     min-width: 0;
     max-width: 72px;
   }
-  /* Enlarged avatar — most teams have 4–6 members so we have the room,
-     and bigger circles make the team-color tint and initials read clearly. */
+  /* Neutral white avatar — team identity is already carried by the card's
+     accent strip + icon + count, so the member circles stay calm. */
   .member-pill__circle {
     width: 48px; height: 48px;
     border-radius: 50%;
     background: var(--bg-overlay);
-    border: 1.5px solid var(--border);
+    border: 1.5px solid color-mix(in srgb, var(--fg) 25%, transparent);
     display: inline-flex; align-items: center; justify-content: center;
     font-family: var(--font-sans);
     font-size: 18px; font-weight: 600;
-    color: var(--team-color, var(--fg));
+    color: var(--fg);
     letter-spacing: 0.02em;
     flex-shrink: 0;
   }
@@ -1315,15 +1365,16 @@
      lands on the students who still need a team. ─────────────────────────── */
   .teamup__picking {
     flex-shrink: 0;
-    background: color-mix(in srgb, var(--signal) 6%, var(--bg-overlay));
-    border: 1.5px solid color-mix(in srgb, var(--signal) 55%, transparent);
+    background: var(--bg-overlay);
+    border: 1px solid var(--border);
     border-radius: var(--r-4);
     padding: var(--sp-3) var(--sp-4);
     display: flex; flex-direction: column;
     gap: var(--sp-3);
     overflow: hidden;
-    box-shadow: 0 0 0 1px color-mix(in srgb, var(--signal) 12%, transparent),
-                0 0 22px color-mix(in srgb, var(--signal) 14%, transparent);
+    /* Lock the panel height so it doesn't shrink/grow as pills come and go
+       (fits label + 1 row of 28px pills + padding + gap) */
+    height: 92px;
   }
   .teamup__picking-label {
     display: flex; align-items: center; gap: 8px;
@@ -1362,12 +1413,12 @@
   .picking-pill__circle {
     width: 28px; height: 28px;
     border-radius: 50%;
-    background: color-mix(in srgb, var(--signal) 14%, transparent);
-    border: 2px solid color-mix(in srgb, var(--signal-bright) 80%, transparent);
+    background: var(--bg-overlay);
+    border: 1.5px solid color-mix(in srgb, var(--fg) 25%, transparent);
     display: inline-flex; align-items: center; justify-content: center;
     font-family: var(--font-sans);
-    font-size: 12px; font-weight: 700;
-    color: var(--signal-bright);
+    font-size: 12px; font-weight: 600;
+    color: var(--fg);
     flex-shrink: 0;
     transition: background-color 280ms ease, border-color 280ms ease,
                 border-style 0ms ease 280ms, color 280ms ease;
@@ -1880,7 +1931,7 @@
      data-countdown="cinema"
      data-phase="teamup"
      data-mode="team"
-     data-demo-state="3"
+     data-card-layout="row"
      data-duration="10"
      data-teacher-hold="5"
      data-bg-stars="dense"
@@ -2230,7 +2281,6 @@
           <span id="tuStudentsN">0</span><span class="count-chip__total"> / 24</span> here
         </span>
         <span class="count-chip count-chip--teams" id="tuTeams">
-          <span class="count-chip__dot"></span>
           <span id="tuTeamsN">0</span> teams
         </span>
       </div>
@@ -2383,13 +2433,10 @@
         </div>
       </div>
       <div class="cp-row">
-        <span>Demo state</span>
-        <div class="cp-tabs" data-attr="data-demo-state">
-          <button data-value="1">1</button>
-          <button data-value="2">2</button>
-          <button data-value="3">3</button>
-          <button data-value="4">4</button>
-          <button data-value="5">5</button>
+        <span>Card layout</span>
+        <div class="cp-tabs" data-attr="data-card-layout">
+          <button data-value="row">Side</button>
+          <button data-value="stacked">Stacked</button>
         </div>
       </div>
       <div class="cp-row">
@@ -3145,9 +3192,9 @@
       card.style.setProperty('--team-color', team.color);
       card.style.setProperty('--i', i);
 
-      // header
-      const header = document.createElement('div');
-      header.className = 'team-card__header';
+      // sidebar — icon + name + count stacked vertically on the left
+      const sidebar = document.createElement('div');
+      sidebar.className = 'team-card__sidebar';
       const icon = document.createElement('img');
       icon.className = 'team-card__icon';
       icon.src = team.avatar; icon.alt = '';
@@ -3157,8 +3204,8 @@
       const countEl = document.createElement('span');
       countEl.className = 'team-card__count';
       countEl.textContent = size;
-      header.append(icon, nameEl, countEl);
-      card.appendChild(header);
+      sidebar.append(icon, nameEl, countEl);
+      card.appendChild(sidebar);
 
       // members
       const members = document.createElement('div');
@@ -3170,8 +3217,6 @@
         pill.style.setProperty('--i', j);
         const circle = document.createElement('span');
         circle.className = 'member-pill__circle';
-        circle.style.background = `color-mix(in srgb, ${team.color} 14%, transparent)`;
-        circle.style.borderColor = `color-mix(in srgb, ${team.color} 35%, transparent)`;
         circle.textContent = name[0];
         const label = document.createElement('span');
         label.className = 'member-pill__name';
@@ -3199,9 +3244,8 @@
       return;
     }
     picking.classList.remove('is-empty');
-    if (pickingN > 0 && absentN > 0)      label.textContent = `${pickingN} picking a team · ${absentN} not joined yet`;
-    else if (pickingN > 0)                 label.textContent = `${pickingN} students still picking a team`;
-    else                                   label.textContent = `${absentN} students not joined yet`;
+    if (pickingN === 1)                    label.textContent = '1 student still picking a team';
+    else                                    label.textContent = `${pickingN} students still picking a team`;
 
     list.innerHTML = '';
     // Names AFTER the teamed students so we don't show duplicates:
@@ -3374,8 +3418,7 @@
     pill.dataset.student = sid;
     const circle = document.createElement('span');
     circle.className = 'member-pill__circle';
-    circle.style.background = `color-mix(in srgb, ${team.color} 14%, transparent)`;
-    circle.style.borderColor = `color-mix(in srgb, ${team.color} 35%, transparent)`;
+    // bg / border stay neutral — team identity lives in the card chrome
     circle.textContent = name[0];
     const label = document.createElement('span');
     label.className = 'member-pill__name';
@@ -3391,8 +3434,8 @@
     card.style.setProperty('--team-color', team.color);
     // No --i stagger here — simulation adds cards one at a time, each at its
     // own moment; --i would just hide them behind a 70ms × idx delay.
-    const header = document.createElement('div');
-    header.className = 'team-card__header';
+    const sidebar = document.createElement('div');
+    sidebar.className = 'team-card__sidebar';
     const icon = document.createElement('img');
     icon.className = 'team-card__icon';
     icon.src = team.avatar; icon.alt = '';
@@ -3402,8 +3445,8 @@
     const countEl = document.createElement('span');
     countEl.className = 'team-card__count';
     countEl.textContent = '0';
-    header.append(icon, nameEl, countEl);
-    card.appendChild(header);
+    sidebar.append(icon, nameEl, countEl);
+    card.appendChild(sidebar);
     const members = document.createElement('div');
     members.className = 'team-card__members';
     card.appendChild(members);
@@ -3429,14 +3472,7 @@
     const list = document.getElementById('tuPickingList');
     const picking = document.getElementById('tuPicking');
     picking.classList.remove('is-empty');
-    // The pill was pre-created as an absent placeholder when the cycle
-    // started — just promote it to the active gold treatment.
-    const existing = list.querySelector(`[data-student="${sid}"]`);
-    if (existing) {
-      existing.classList.remove('is-absent');
-    } else {
-      list.appendChild(buildPickingPillDOM(sid));
-    }
+    list.appendChild(buildPickingPillDOM(sid));
   }
   function removePickingPill(sid) {
     const list = document.getElementById('tuPickingList');
@@ -3445,7 +3481,11 @@
     pill.classList.add('is-leaving');
     const tid = setTimeout(() => {
       pill.remove();
-      if (list.children.length === 0) {
+      // Hide only when every expected student is teamed — not just when
+      // the picking list happens to be empty (might mean "no one picking
+      // right now but students are still arriving").
+      const teamed = document.querySelectorAll('.member-pill').length;
+      if (teamed >= CLASS_CAP) {
         document.getElementById('tuPicking').classList.add('is-empty');
       }
     }, 220);
@@ -3504,15 +3544,27 @@
       const prev = parseInt(tuTeamsN.textContent, 10) || 0;
       tweenNumber(tuTeamsN, prev, teams, 240);
     }
-    // Picking strip label — split between "picking" (gold) and "not joined" (absent)
-    const pickingN = document.querySelectorAll('.picking-pill:not(.is-absent):not(.is-leaving)').length;
-    const absentN  = document.querySelectorAll('.picking-pill.is-absent:not(.is-leaving)').length;
-    const labelEl = document.getElementById('tuPickingLabel');
+    // Picking strip label — three states:
+    //   • someone is actively picking → "N students still picking a team"
+    //   • no one is picking yet some haven't joined → "Waiting for N
+    //     student(s) to join the session"
+    //   • all 24 are in teams → "All teamed up"
+    const teamed   = document.querySelectorAll('.member-pill').length;
+    const pickingN = document.querySelectorAll('.picking-pill:not(.is-leaving)').length;
+    const absentN  = Math.max(0, CLASS_CAP - teamed - pickingN);
+    const labelEl  = document.getElementById('tuPickingLabel');
     if (labelEl) {
-      if (pickingN === 0 && absentN === 0) labelEl.textContent = 'All teamed up';
-      else if (pickingN > 0 && absentN > 0) labelEl.textContent = `${pickingN} picking a team · ${absentN} not joined yet`;
-      else if (pickingN > 0) labelEl.textContent = `${pickingN} students still picking a team`;
-      else labelEl.textContent = `${absentN} students not joined yet`;
+      if (teamed >= CLASS_CAP) {
+        labelEl.textContent = 'All teamed up';
+      } else if (pickingN > 0) {
+        labelEl.textContent = pickingN === 1
+          ? '1 student still picking a team'
+          : `${pickingN} students still picking a team`;
+      } else {
+        labelEl.textContent = absentN === 1
+          ? 'Waiting for 1 student to join the session'
+          : `Waiting for ${absentN} students to join the session`;
+      }
     }
     // Start CTA hint
     const startBtn  = document.getElementById('tuStart');
@@ -3561,18 +3613,10 @@
     }
     if (list) list.innerHTML = '';
     if (picking) {
-      if (mode === 'team') {
-        // Pre-create absent placeholders for every expected student so the
-        // panel stays visible from the start with the full roster.
-        for (let i = 1; i <= CLASS_CAP; i++) {
-          const pill = buildPickingPillDOM(i);
-          pill.classList.add('is-absent');
-          list.appendChild(pill);
-        }
-        picking.classList.remove('is-empty');
-      } else {
-        picking.classList.add('is-empty');
-      }
+      // Panel starts visible in team mode (empty pill list, label shows
+      // "0 students still picking a team"). Hides only when all 24 teamed.
+      if (mode === 'team') picking.classList.remove('is-empty');
+      else                 picking.classList.add('is-empty');
     }
     if (att) att.innerHTML = '';
     const tuStudentsN = document.getElementById('tuStudentsN');
@@ -3586,6 +3630,8 @@
     const startBtn  = document.getElementById('tuStart');
     if (startHint) startHint.textContent = 'no one is here yet';
     if (startBtn)  startBtn.style.opacity = '0.6';
+    // Seed the panel label with the empty-room copy ("Waiting for 24 …")
+    updateCountChips();
   }
 
   function startTeamupCycle() {
@@ -3616,11 +3662,8 @@
   // Initial render
   renderTeamup();
 
-  // Re-render when mode or demo state changes
-  new MutationObserver(() => {
-    if (app.dataset.phase === 'teamup') renderTeamup();
-    else renderTeamup(); // also keep state synced if user toggles while elsewhere
-  }).observe(app, { attributes: true, attributeFilter: ['data-mode', 'data-demo-state', 'data-phase'] });
+  // (Removed demo-state MutationObserver — mode + phase changes are wired
+  // through cp-tabs handler / jumpToPhase directly.)
 
   /* ──────────────────────────────────────────────────────────────────────
      CONTROL PANEL WIRING
@@ -3686,17 +3729,20 @@
         } else if (attr === 'data-duration' || attr === 'data-teacher-hold') {
           // changing durations restarts the sequence so the new timing applies
           if (app.dataset.phase !== 'teamup') startSequence();
-        } else if (attr === 'data-demo-state' || attr === 'data-mode') {
-          // Manual scrub of the lobby state — cancel the auto-cycle so the
-          // user's pick sticks. The MutationObserver re-runs renderTeamup().
-          stopTeamupCycle();
+        } else if (attr === 'data-mode') {
+          // Mode toggle while in team-up — restart the cycle in the new mode
+          // (team-grid → attendance-grid or vice versa). Otherwise just stash
+          // the setting for the next time team-up loads.
+          if (app.dataset.phase === 'teamup') startTeamupCycle();
         }
         // bg-* changes are purely CSS — no JS restart needed
         // (lab iframe sync handled by MutationObserver on data-bg-landscape)
       });
     });
 
-    document.getElementById('cpReplay').addEventListener('click', startSequence);
+    // Replay restarts the full prototype from team-up (empty lobby → arrivals
+     // → countdown → teacher → slides), not just from countdown.
+    document.getElementById('cpReplay').addEventListener('click', () => jumpToPhase('teamup'));
   })();
 
   /* ──────────────────────────────────────────────────────────────────────
