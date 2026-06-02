@@ -1321,7 +1321,6 @@
     padding: var(--sp-3) var(--sp-4);
     display: flex; flex-direction: column;
     gap: var(--sp-3);
-    max-height: 220px;
     overflow: hidden;
     box-shadow: 0 0 0 1px color-mix(in srgb, var(--signal) 12%, transparent),
                 0 0 22px color-mix(in srgb, var(--signal) 14%, transparent);
@@ -1339,9 +1338,10 @@
     color: var(--signal);
   }
   .teamup__picking-list {
-    display: flex; flex-wrap: wrap;
+    display: flex; flex-wrap: nowrap;
     gap: 8px 10px;
-    overflow-y: auto;
+    overflow: hidden;
+    min-width: 0;
   }
   .picking-pill {
     display: inline-flex; align-items: center; gap: 10px;
@@ -1354,6 +1354,8 @@
     font-weight: 500;
     color: var(--fg);
     letter-spacing: -0.005em;
+    white-space: nowrap;
+    flex-shrink: 0;
     transition: background-color 280ms ease, border-color 280ms ease,
                 color 280ms ease, opacity 280ms ease, box-shadow 280ms ease;
   }
@@ -1370,18 +1372,18 @@
     transition: background-color 280ms ease, border-color 280ms ease,
                 border-style 0ms ease 280ms, color 280ms ease;
   }
-  /* "Not yet joined the session" — muted/dashed treatment so they read as
-     background info rather than action items. Promoted to gold styling
+  /* "Not yet joined the session" — solid gray outline (muted) so they read
+     as background info rather than action items. Promoted to gold styling
      once the student arrives. */
   .picking-pill.is-absent {
     background: var(--bg-overlay);
-    border: 1px dashed color-mix(in srgb, var(--fg) 22%, transparent);
+    border: 1px solid color-mix(in srgb, var(--fg) 22%, transparent);
     color: var(--fg-faint);
     opacity: 0.7;
   }
   .picking-pill.is-absent .picking-pill__circle {
     background: color-mix(in srgb, var(--fg) 5%, transparent);
-    border: 1.5px dashed color-mix(in srgb, var(--fg) 25%, transparent);
+    border: 1.5px solid color-mix(in srgb, var(--fg) 25%, transparent);
     color: var(--fg-faint);
   }
 
@@ -2345,7 +2347,7 @@
   </main>
 
   <!-- ── Control panel ── -->
-  <aside class="controls-panel is-open" id="cp" aria-label="Sequence controls">
+  <aside class="controls-panel" id="cp" aria-label="Sequence controls">
     <button class="cp-handle" id="cpHandle">
       <span class="cp-diamond"></span> Sequence controls
     </button>
