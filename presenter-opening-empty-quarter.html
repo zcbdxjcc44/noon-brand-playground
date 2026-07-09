@@ -1,0 +1,3568 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Presenter Opening — The Empty Quarter</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&family=IBM+Plex+Sans+Arabic:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+  /* ──────────────────────────────────────────────────────────────────────
+     CONTROL ATTRIBUTES — set on .app, all switchable via the control panel.
+
+     SEQUENCE
+       data-countdown   = mission | cinema | sands
+       data-phase       = teamup | countdown | teacher | slides | stage
+                          (teamup is the opener — once everyone has joined
+                           it auto-advances to countdown after ~3.5s.
+                           stage is opt-in only.)
+       data-mode        = team | solo  (solo parked for now — no control;
+                          attribute + code path retained)
+       data-card-layout = row | stacked  (team card: icon+name on the left
+                                          with members right-grid, or icon+name
+                                          on top with members flex-wrapped below)
+       data-duration    = 5 | 10 | 15   (countdown seconds)
+       data-teacher-hold= 2 | 3 | 5     (seconds the teacher-solo is held —
+                          fixed at the attribute default; control removed)
+       data-sound       = on | off  (synthesized countdown ticks + arrival
+                          chime — no audio assets)
+       data-slide       = tag | band  (slide cover style — Figma 15868:748
+                          corner-tag vs 15931:32630 saffron side band)
+       data-card-style  = plain | crest  (team-up card: original sidebar vs
+                          facet-banner crest in the team's family color)
+
+     BACKGROUND — The Empty Quarter landscape directions (V2.2)
+       data-bg-landscape= off | quiet | mural | pins
+                          quiet — canonical ridge terrain, stroke-only cream
+                                  on ink (the quiet line voice; Register's
+                                  resolved countdown ground)
+                          mural — the filled terrain artwork ramp, held to a
+                                  low horizon band and dimmed
+                          pins  — Pinboard horizon: a bounded pin field with
+                                  the facade dissolve under center stage
+       data-bg-khatam   = off | on  (single ceremonial ornament behind the
+                          countdown numeral — rotates at 150s / 210s counter)
+     ────────────────────────────────────────────────────────────────────── */
+
+  /* ───── The Empty Quarter tokens — V2.2 (empty-quarter-visual-style_3) ───── */
+  :root {
+    /* ink surfaces — the presenter is always ink: the one dark, luminous
+       object in a warm room */
+    --bg: #26282E;          /* ink */
+    --bg-sunken: #1F2126;
+    --bg-raised: #2C2F36;   /* ink-2 */
+    --bg-overlay: #30333B;  /* ink-3 */
+    --paper-100: #F1EBDD;   /* plaster — reading surface */
+    --fg: rgba(241, 235, 221, 1);          /* cream */
+    --fg-muted: rgba(241, 235, 221, 0.70);
+    --fg-subtle: rgba(241, 235, 221, 0.55);
+    --fg-faint: rgba(241, 235, 221, 0.35);
+    --border: rgba(241, 235, 221, 0.10);
+    --border-strong: rgba(241, 235, 221, 0.22);
+    --divider: rgba(241, 235, 221, 0.06);
+    --hover-overlay: rgba(241, 235, 221, 0.04);
+    --active-overlay: rgba(241, 235, 221, 0.08);
+    /* semantic roles — per-surface stops (this file lives on ink) */
+    --accent: #64D8AE;                       /* Action · Live — the only button color */
+    --water: #7C99B4;                        /* Water · Progression — path travelled, current position */
+    --teal: #5E8C7F;                         /* Intelligence — the intelligent layer speaking */
+    --purple: #9D8CFF;                       /* AI voice — the tutor only */
+    --signal: #BC5A37;                       /* terracotta — voice & hero surface */
+    --signal-bright: #E8663A;                /* Heat · Signal (ember on ink) — the now-node */
+    --signal-soft: rgba(232, 102, 58, 0.18);
+    --signal-glow: rgba(232, 102, 58, 0.45);
+    --danger: #c55a4e;
+    --danger-soft: rgba(197, 90, 78, 0.10);
+    --danger-border: rgba(197, 90, 78, 0.40);
+    /* clay artwork ramp — pattern-intrinsic, used by the sands numeral */
+    --sand-300: #CB7A50;
+    --sand-200: #D2A47A;
+    --sand-100: #DDC09A;
+    --sp-2: 8px; --sp-3: 12px; --sp-4: 16px; --sp-5: 20px;
+    --sp-6: 24px; --sp-7: 32px; --sp-8: 40px;
+    --r-2: 4px; --r-3: 6px; --r-4: 8px; --r-pill: 999px;
+    --font-sans: 'Hanken Grotesk', system-ui, sans-serif;
+    --font-serif: 'Hanken Grotesk', system-ui, sans-serif;
+    --font-mono: 'JetBrains Mono', ui-monospace, monospace;
+    --font-arabic: 'IBM Plex Sans Arabic', sans-serif;
+  }
+  * { box-sizing: border-box; }
+  html, body { height: 100%; }
+  body {
+    margin: 0; font-family: var(--font-sans);
+    color: var(--fg); background: var(--bg-sunken);
+    -webkit-font-smoothing: antialiased; overflow: hidden;
+  }
+
+  /* ───── App shell ───── */
+  .app {
+    height: 100vh;
+    background: var(--bg);
+    position: relative; overflow: hidden;
+    display: grid; grid-template-rows: 64px 1fr;
+  }
+
+  /* ──────────────────────────────────────────────────────────────────────
+     BACKDROP — The Empty Quarter terrain. Three proposed directions:
+       quiet — canonical ridge terrain in the quiet line voice (stroke-only
+               cream on ink). The Register's resolved countdown ground.
+       mural — the filled terrain artwork ramp (cream → deep rust), held to
+               a low horizon band and dimmed so content leads.
+       pins  — Pinboard horizon: the dune silhouette drawn in pins, thinned
+               under center stage by the facade dissolve (parity rings —
+               no opacity fades, ever).
+     All three obey the plateau rule: the bottom edge settles to an
+     unbroken plane. Painted once by JS from the canonical algorithms.
+     ────────────────────────────────────────────────────────────────────── */
+  .terrain {
+    position: absolute; left: 0; right: 0; bottom: 0;
+    pointer-events: none; z-index: 0;
+    display: none;
+    transition: opacity 600ms ease;
+  }
+  .terrain svg { display: block; width: 100%; height: 100%; }
+  .terrain--quiet { height: 42vh; opacity: 0.9; }
+  .terrain--mural { height: 26vh; opacity: 0.55; }
+  .terrain--pins  { height: 30vh; opacity: 0.9; }
+  .app[data-bg-landscape="quiet"] .terrain--quiet,
+  .app[data-bg-landscape="mural"] .terrain--mural,
+  .app[data-bg-landscape="pins"]  .terrain--pins { display: block; }
+
+  /* ── Khatam — the single ceremonial ornament ──
+     Centered behind the countdown numeral. Ceremony is glacial: 150s per
+     revolution, inner ring counter-rotating at 210s. At that speed it
+     doesn't spin — it lives. Countdown phase only; never wallpaper.
+     Mission keeps its own instrument ring, so the Khatam yields there. */
+  .khatam {
+    position: absolute; left: 50%; top: 50%;
+    width: 88vh; height: 88vh;
+    margin: -44vh 0 0 -44vh;
+    pointer-events: none; z-index: 2;
+    opacity: 0;
+    transition: opacity 900ms ease;
+  }
+  .app[data-bg-khatam="off"] .khatam,
+  .app[data-countdown="mission"] .khatam { display: none; }
+  .app[data-bg-khatam="on"][data-phase="countdown"] .khatam { opacity: 1; }
+  /* sands → teacher: the Khatam stays up while the numeral dissolves, so
+     the ceremony frames the teacher's arrival before fading with slides */
+  .app[data-bg-khatam="on"][data-countdown="sands"][data-phase="teacher"] .khatam { opacity: 1; }
+  .khatam__outer, .khatam__inner {
+    position: absolute; inset: 0;
+    transform-origin: 50% 50%;
+  }
+  .khatam__outer { animation: khatam-turn 150s linear infinite; }
+  .khatam__inner { animation: khatam-turn-ccw 210s linear infinite; }
+  @keyframes khatam-turn     { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+  @keyframes khatam-turn-ccw { from { transform: rotate(0deg); } to { transform: rotate(-360deg); } }
+
+  /* Terrain competes with the chat for attention in the slides phase —
+     fade it out so the messages stay legible. */
+  .app[data-phase="slides"] .terrain { opacity: 0; }
+
+  /* ──────────────────────────────────────────────────────────────────────
+     TOPBAR — appears only in the slides phase
+     ────────────────────────────────────────────────────────────────────── */
+  .topbar {
+    position: relative; z-index: 4;
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 0 var(--sp-6);
+    border-bottom: 1px solid var(--divider);
+    opacity: 0; pointer-events: none;
+    transition: opacity 600ms ease 200ms;
+  }
+  .app[data-phase="slides"] .topbar { opacity: 1; pointer-events: auto; }
+  .session-meta { display: flex; align-items: center; gap: var(--sp-4); }
+  .time {
+    display: flex; align-items: center; gap: var(--sp-3);
+    padding: var(--sp-2) var(--sp-3);
+    border: 1px solid var(--border); border-radius: var(--r-2);
+    background: var(--hover-overlay);
+  }
+  .time__diamond {
+    width: 8px; height: 8px; background: var(--fg-muted);
+    transform: rotate(45deg);
+  }
+  .time__value {
+    font-family: var(--font-mono); font-size: 14px; letter-spacing: 0.04em;
+    color: var(--fg); font-variant-numeric: tabular-nums; min-width: 44px;
+  }
+  .session-title {
+    font-family: var(--font-serif); font-size: 16px; font-weight: 500;
+    color: var(--fg-muted); letter-spacing: -0.005em;
+  }
+  .session-title em { font-style: italic; color: var(--fg); margin-right: 4px; }
+  .me-avatar {
+    width: 40px; height: 40px; border-radius: 50%;
+    background: var(--bg-overlay); display: inline-flex;
+    align-items: center; justify-content: center;
+    color: var(--fg); font-family: var(--font-serif);
+    font-weight: 500; font-size: 16px;
+    border: 1px solid var(--border-strong);
+  }
+
+  /* Top-right controls cluster — mic, cam, avatar */
+  .controls { display: flex; align-items: center; gap: var(--sp-3); }
+  .icon-btn {
+    width: 40px; height: 40px;
+    border-radius: var(--r-pill);
+    border: 1px solid var(--border);
+    background: var(--hover-overlay);
+    color: var(--fg-muted);
+    display: inline-flex; align-items: center; justify-content: center;
+    cursor: pointer;
+    transition: background 120ms ease, color 120ms ease,
+                border-color 120ms ease, transform 120ms ease;
+    position: relative;
+  }
+  .icon-btn:hover {
+    background: var(--active-overlay);
+    color: var(--fg);
+    border-color: var(--border-strong);
+  }
+  .icon-btn:active { transform: translateY(0.5px); }
+  /* Pressed = muted/camera-off — switch to danger palette and reveal the
+     diagonal "strike" line drawn through the icon. */
+  .icon-btn[aria-pressed="true"] {
+    background: var(--signal-soft);
+    border-color: rgba(232, 102, 58, 0.4);
+    color: var(--signal-bright);
+  }
+  .icon-btn[aria-pressed="true"] .strike { display: block; }
+  .strike { display: none; }
+
+  /* ───── Main ───── */
+  .main {
+    position: relative; z-index: 3;
+    min-height: 0; padding: var(--sp-5);
+    display: flex; align-items: center; justify-content: center;
+  }
+
+  /* ──────────────────────────────────────────────────────────────────────
+     COUNTDOWN — shared shell. Per-style sections show only when matching.
+     ────────────────────────────────────────────────────────────────────── */
+  .countdown {
+    position: absolute; inset: 0; z-index: 3;
+    display: none; /* enabled per style below */
+    align-items: center; justify-content: center;
+    transition: opacity 800ms ease, transform 800ms cubic-bezier(.4,0,.2,1);
+  }
+  .app[data-countdown="mission"]    .countdown.cd-mission,
+  .app[data-countdown="cinema"]     .countdown.cd-cinema,
+  .app[data-countdown="sands"]      .countdown.cd-sands {
+    display: flex;
+  }
+  /* hide countdown layer entirely once we're past it */
+  .app[data-phase="teacher"] .countdown,
+  .app[data-phase="slides"] .countdown {
+    opacity: 0; transform: scale(0.94); pointer-events: none;
+  }
+
+  /* ─── B · MISSION CONTROL ─── */
+  .cd-mission { /* container is flex/center via base */ }
+  .mc-strip {
+    position: absolute; top: var(--sp-7); left: 50%;
+    transform: translateX(-50%);
+    display: flex; align-items: center; gap: 12px;
+    padding: 8px 16px;
+    border: 1px solid var(--border);
+    border-radius: var(--r-2);
+    background: rgba(38,40,46,0.6);
+    color: var(--fg-muted);
+  }
+  .mc-strip__dot {
+    width: 6px; height: 6px; border-radius: 50%;
+    background: var(--accent);   /* Action · Live — the session is on air */
+    box-shadow: 0 0 8px rgba(100, 216, 174, 0.35);
+    animation: dot-pulse 1.4s ease-in-out infinite;
+  }
+  @keyframes dot-pulse { 0%,100% { opacity:.6 } 50% { opacity:1 } }
+  /* Session title inside the strip — matches the slides-topbar style so
+     identity reads the same in both moments. */
+  .mc-strip__title {
+    font-family: var(--font-serif);
+    font-size: 14px; font-weight: 500;
+    color: var(--fg-muted);
+    letter-spacing: 0;
+  }
+  .mc-strip__title em {
+    font-style: italic;
+    color: var(--fg);
+    margin-right: 4px;
+  }
+  .mc-ring-wrap { position: relative; width: 380px; height: 380px; }
+  .mc-ring-bg, .mc-ring-fg { position: absolute; inset: 0; transform: rotate(-90deg); }
+  .mc-ring-bg circle { fill: none; stroke: var(--border-strong); stroke-width: 1; }
+  .mc-ring-fg circle {
+    /* Water owns progression — the currency of ground covered */
+    fill: none; stroke: var(--water);
+    stroke-width: 1.5; stroke-linecap: butt;
+    filter: drop-shadow(0 0 4px rgba(124, 153, 180, 0.35));
+    transition: stroke-dashoffset 1s linear;
+  }
+  .mc-ticks { position: absolute; inset: 0; }
+  .mc-ticks line { stroke: var(--fg-faint); stroke-width: 1; }
+  .mc-ticks line.is-lit { stroke: var(--water); filter: drop-shadow(0 0 3px rgba(124, 153, 180, 0.35)); }
+  .mc-number {
+    position: absolute; inset: 0;
+    display: flex; flex-direction: column;
+    align-items: center; justify-content: center;
+  }
+  .mc-number__digit {
+    /* Display type is heavy — painted-on-the-wall weight, cropped tight */
+    font-family: var(--font-sans); font-weight: 800;
+    font-size: 150px; line-height: 1;
+    color: var(--fg); font-variant-numeric: tabular-nums;
+    letter-spacing: -0.04em;
+  }
+  .mc-number__digit.is-ticking { animation: mc-flick 220ms ease-out; }
+  /* Ticks settle (§07): the digit arrives at scale .94 → 1 with a soft
+     ease — weight landing, not bouncing. */
+  @keyframes mc-flick {
+    0%   { opacity: 0.35; transform: scale(0.94); }
+    100% { opacity: 1;    transform: scale(1); }
+  }
+  .mc-number__unit {
+    font-family: var(--font-mono); font-size: 11px;
+    letter-spacing: 0.32em; text-transform: uppercase;
+    color: var(--fg-subtle); margin-top: 8px;
+  }
+  .mc-readout {
+    position: absolute;
+    font-family: var(--font-mono); font-size: 11px;
+    letter-spacing: 0.20em; text-transform: uppercase;
+    color: var(--fg-faint);
+    display: flex; flex-direction: column; gap: 6px;
+  }
+  .mc-readout__value { color: var(--fg-muted); }
+  .mc-readout--tl { top: 90px; left: 56px; }
+  .mc-readout--tr { top: 90px; right: 56px; text-align: right; align-items: flex-end; }
+  .mc-readout--bl { bottom: 56px; left: 56px; }
+  .mc-readout--br { bottom: 56px; right: 56px; text-align: right; align-items: flex-end; }
+  .mc-cross {
+    position: absolute; inset: 0; pointer-events: none;
+    background-image:
+      linear-gradient(to right, transparent calc(50% - 0.5px), rgba(241,235,221,0.04) calc(50% - 0.5px), rgba(241,235,221,0.04) calc(50% + 0.5px), transparent calc(50% + 0.5px)),
+      linear-gradient(to bottom, transparent calc(50% - 0.5px), rgba(241,235,221,0.04) calc(50% - 0.5px), rgba(241,235,221,0.04) calc(50% + 0.5px), transparent calc(50% + 0.5px));
+  }
+  .mc-scanlines {
+    position: absolute; inset: 0; pointer-events: none;
+    background-image: repeating-linear-gradient(
+      to bottom, transparent 0, transparent 2px,
+      rgba(241,235,221,0.018) 2px, rgba(241,235,221,0.018) 3px);
+  }
+
+  /* ─── C · CINEMATIC ─── */
+  .cd-cinema { /* base */ }
+
+  /* Label sits at the top of the viewport, above the giant numeric.
+     Position: absolute keeps it from displacing the centered .cin-stage.
+     Larger type than the Sands labels because the cinema mode has
+     dimmed everything else — the eye needs a bigger anchor up top. */
+  .cin-label {
+    position: absolute; top: 11vh; left: 50%;
+    transform: translateX(-50%);
+    display: flex; flex-direction: column; align-items: center; gap: 14px;
+    z-index: 4;
+    pointer-events: none;
+    text-align: center;
+  }
+  .cin-label__ar {
+    font-family: var(--font-arabic);
+    font-size: 30px; font-weight: 600;
+    color: var(--fg-muted);
+    direction: rtl;
+    letter-spacing: 0;
+    text-shadow: 0 0 32px rgba(241,235,221,0.18);
+  }
+  .cin-label__en {
+    font-family: var(--font-mono);
+    font-size: 14px; font-weight: 400;
+    text-transform: uppercase;
+    letter-spacing: 0.4em;
+    color: var(--fg-subtle);
+    /* trim trailing letter-spacing so the centering reads true */
+    padding-left: 0.4em;
+  }
+
+  .cin-stage {
+    position: relative;
+    width: 60vh; height: 60vh;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .cin-digit {
+    position: absolute;
+    /* Display type is heavy (700–800), cropped tight. Cream, not heat —
+       the warmth belongs to the terrain behind it. */
+    font-family: var(--font-sans); font-weight: 800;
+    font-size: 52vh; line-height: 1;
+    color: var(--fg);  /* warm cream on ink */
+    font-variant-numeric: tabular-nums;
+    letter-spacing: -0.03em;
+    text-shadow: 0 0 48px rgba(241,235,221,0.16);
+    will-change: transform, opacity;
+  }
+  /* Outgoing exits faster than incoming arrives, so the new digit doesn't
+     fight the ghost of the previous one. Outgoing clears in ~280ms; the
+     entering digit takes ~800ms to fully bloom in. */
+  .cin-digit.is-entering { animation: cin-in 800ms cubic-bezier(.16, .8, .24, 1) backwards; }
+  .cin-digit.is-leaving  { animation: cin-out 280ms cubic-bezier(.4, 0, .8, .4) forwards; }
+  /* Ticks settle (§07): .94 → 1 with a soft ease — weight landing, not
+     bouncing. Hold invisible for the first 18% so the outgoing digit has
+     time to drop out cleanly. */
+  @keyframes cin-in {
+    0%   { opacity: 0; transform: scale(0.94); }
+    18%  { opacity: 0; }
+    60%  { opacity: 1; }
+    100% { opacity: 1; transform: scale(1); }
+  }
+  @keyframes cin-out {
+    0%   { opacity: 1; transform: scale(1); }
+    100% { opacity: 0; transform: scale(1.03); filter: blur(2px); }
+  }
+  .cin-underline {
+    position: absolute; bottom: 8vh; left: 50%;
+    transform: translateX(-50%);
+    width: 56px; height: 2px;
+    background: rgba(241,235,221,0.75);
+    box-shadow: 0 0 16px rgba(241,235,221,0.25);
+    opacity: 0;
+    animation: under-in 900ms ease 400ms forwards;
+  }
+  @keyframes under-in {
+    from { opacity: 0; width: 0; }
+    to   { opacity: 1; width: 56px; }
+  }
+  .cin-horizon {
+    position: absolute;
+    left: 50%; bottom: 18vh; transform: translateX(-50%);
+    width: 12%; height: 1px;
+    background: linear-gradient(to right,
+      transparent 0%, rgba(241,235,221,0.5) 50%, transparent 100%);
+    box-shadow: 0 0 24px rgba(241,235,221,0.2);
+    opacity: 0;
+  }
+  /* Vignette + dimmed backdrop active only in cinematic mode */
+  .vignette {
+    position: absolute; inset: 0; z-index: 2; pointer-events: none;
+    background: radial-gradient(ellipse at center,
+      transparent 30%, rgba(31, 33, 38, 0.45) 65%, rgba(31, 33, 38, 0.85) 100%);
+    opacity: 0; transition: opacity 800ms ease;
+  }
+  /* Countdown dimming — the numeral must never fight a bright landscape.
+     The quiet line terrain IS the resolved countdown ground (Register),
+     so it holds; the louder directions step back. */
+  .app[data-phase="countdown"] .vignette        { opacity: 1; }
+  .app[data-phase="countdown"] .terrain--mural  { opacity: 0.3; }
+  /* pinboard is never faded — pins are full-strength or absent; the
+     vignette alone quiets the field during the countdown */
+  /* The faint horizon shimmer is a cinema-only flourish, so keep its
+     reveal scoped to the cinema style. */
+  .app[data-countdown="cinema"][data-phase="countdown"] .cin-horizon { opacity: 1; }
+
+  /* ─── D · DRIFTING SANDS ─── */
+  .cd-sands { flex-direction: column; gap: var(--sp-6); }
+  .sands-label { display: flex; flex-direction: column; align-items: center; gap: 6px; }
+  .sands-label__ar {
+    font-family: var(--font-arabic); font-size: 18px; font-weight: 600;
+    color: var(--sand-200); direction: rtl;
+    text-shadow: 0 0 16px rgba(210,164,122,0.3);
+  }
+  .sands-label__en {
+    font-family: var(--font-mono); font-size: 11px;
+    letter-spacing: 0.32em; text-transform: uppercase; color: var(--fg-faint);
+  }
+  .sands-numeral {
+    position: relative;
+    width: 520px; height: 420px;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .sands-numeral svg {
+    position: absolute; inset: 0;
+    width: 100%; height: 100%;
+    overflow: visible;
+  }
+  .sands-numeral text {
+    font-family: var(--font-serif); font-weight: 800;
+    font-size: 350px;
+    fill: url(#sand-fill);
+    filter: url(#sand-grain);
+    text-anchor: middle; dominant-baseline: central;
+    letter-spacing: -0.04em;
+  }
+  .sands-numeral::before {
+    content: '';
+    position: absolute; inset: -80px;
+    border-radius: 50%;
+    background: radial-gradient(circle,
+      rgba(210,164,122,0.22) 0%, rgba(203,122,80,0.10) 35%, transparent 70%);
+    pointer-events: none;
+    animation: sands-halo 5s ease-in-out infinite;
+  }
+  @keyframes sands-halo {
+    0%,100% { opacity: 0.65; transform: scale(0.96); }
+    50%     { opacity: 1;   transform: scale(1.04); }
+  }
+  .sands-numeral .num-in,
+  .sands-numeral .num-out {
+    transition: transform 700ms cubic-bezier(.16,.8,.24,1),
+                opacity 700ms ease, filter 700ms ease;
+  }
+  .sands-numeral .num-out {
+    transform: translateX(60px) scale(1.05);
+    opacity: 0;
+    filter: blur(8px) saturate(1.2);
+  }
+  .sands-numeral .num-in.is-incoming {
+    transform: translateX(-60px) scale(0.95);
+    opacity: 0;
+    filter: blur(8px) saturate(0.8);
+  }
+  .sands-streaks { display: flex; flex-direction: column; gap: 8px; align-items: center; }
+  .sands-streak {
+    width: 0; height: 1px;
+    background: linear-gradient(to right,
+      transparent 0%, rgba(210,164,122,0.5) 30%, rgba(241,235,221,0.8) 50%,
+      rgba(210,164,122,0.5) 70%, transparent 100%);
+    transition: width 600ms cubic-bezier(.2,.7,.3,1), opacity 600ms ease;
+  }
+  .sands-streak.is-active { opacity: 1; }
+  .sands-streak[data-row="0"].is-active { width: 220px; }
+  .sands-streak[data-row="1"].is-active { width: 160px; opacity: 0.6; }
+  .sands-streak[data-row="2"].is-active { width: 100px; opacity: 0.35; }
+  /* Route grammar: diamond = waypoint; fill is a state, never a style.
+     The route is drawn in water and only water; green appears exactly
+     once — at arrival. */
+  .sands-marks { display: flex; gap: 14px; margin-top: 6px; }
+  .sands-mark {
+    width: 7px; height: 7px;
+    transform: rotate(45deg);
+    background: transparent;
+    border: 1px solid rgba(241,235,221,0.35);
+    transition: background 320ms ease, border-color 320ms ease;
+  }
+  .sands-mark.is-filled {
+    background: var(--water);
+    border-color: var(--water);
+  }
+  .sands-mark.is-arrival {
+    background: var(--accent);
+    border-color: var(--accent);
+  }
+  /* Ambient grain canvas — visible only in sands mode */
+  .grain-canvas {
+    position: absolute; inset: 0; z-index: 1;
+    pointer-events: none;
+    opacity: 0; transition: opacity 600ms ease;
+  }
+  .app[data-countdown="sands"][data-phase="countdown"] .grain-canvas { opacity: 1; }
+
+  /* ──────────────────────────────────────────────────────────────────────
+     TEACHER SOLO — same across all styles
+     ────────────────────────────────────────────────────────────────────── */
+  .teacher-solo {
+    /* Lift --size up so .teacher-label can reference it for absolute
+       positioning below the circle. */
+    --size: 380px;
+    position: absolute; inset: 0; z-index: 2;
+    display: flex;
+    align-items: center; justify-content: center;
+    /* Previously: flex-direction: column; gap: var(--sp-7);
+       That centered the WHOLE column (circle + gap + label) as a unit,
+       which put the circle's center ~37px above viewport center. Mission's
+       ring sits exactly at viewport center, so the morph had a visible
+       jump. Now the circle is the only flex item being centered;
+       the label is absolutely positioned below it (see .teacher-label). */
+    opacity: 0; transform: scale(0.88);
+    transition: opacity 700ms cubic-bezier(.4,0,.2,1),
+                transform 900ms cubic-bezier(.34,1.56,.64,1);
+    pointer-events: none;
+  }
+  .app[data-phase="teacher"] .teacher-solo {
+    opacity: 1; transform: scale(1); pointer-events: auto;
+  }
+  .app[data-phase="slides"] .teacher-solo {
+    opacity: 0; transform: scale(1.05);
+  }
+  .teacher-circle {
+    /* --size now cascades from .teacher-solo so .teacher-label can use it. */
+    position: relative;
+    width: var(--size); height: var(--size);
+    border-radius: 50%;
+    background-image: url('assets/teacher-ali.jpg.png');
+    background-size: cover; background-position: center;
+    box-shadow: 0 0 0 1.5px rgba(241,235,221,0.20),
+                0 12px 32px rgba(0,0,0,0.45),
+                0 0 80px rgba(100,216,174,0.10);
+  }
+  .teacher-circle::before {
+    content: '';
+    position: absolute; inset: -8px;
+    border-radius: 50%;
+    border: 1.5px solid rgba(100,216,174,0.5);
+    box-shadow: 0 0 28px rgba(100,216,174,0.25);
+    animation: rim-breath 3s ease-in-out infinite;
+  }
+  @keyframes rim-breath {
+    0%,100% { transform: scale(0.985); opacity: 0.85; }
+    50%     { transform: scale(1.02);  opacity: 1; }
+  }
+  /* Anchored to viewport center + circle radius + 32px gap so the label
+     always sits directly below the circle, regardless of label height.
+     This keeps the circle itself precisely at viewport center for the
+     mission morph. */
+  .teacher-label {
+    position: absolute;
+    left: 50%;
+    top: calc(50% + var(--size) / 2 + 32px);
+    transform: translateX(-50%);
+    display: flex; flex-direction: column;
+    align-items: center; gap: 4px;
+  }
+  .teacher-label__name {
+    font-family: var(--font-serif); font-size: 30px; font-weight: 500;
+    color: var(--fg); letter-spacing: -0.015em;
+  }
+  .teacher-label__sub {
+    font-family: var(--font-mono); font-size: 11px;
+    letter-spacing: 0.28em; text-transform: uppercase;
+    color: var(--fg-subtle);
+  }
+
+  /* ── Sands morph — the countdown layer holds at scale 1 while the
+     numeral blurs up and out exactly where the teacher circle lands;
+     label, streaks and marks drop away faster. With the Khatam holding
+     (above), the handoff reads as one continuous ceremony. ── */
+  .app[data-countdown="sands"][data-phase="teacher"] .countdown {
+    transform: scale(1);
+  }
+  .app[data-countdown="sands"][data-phase="teacher"] .sands-numeral svg {
+    opacity: 0;
+    transform: scale(1.12);
+    filter: blur(10px);
+    transition: opacity 420ms ease, transform 700ms ease, filter 700ms ease;
+  }
+  .app[data-countdown="sands"][data-phase="teacher"] .sands-numeral::before {
+    opacity: 0;
+    transition: opacity 500ms ease;
+  }
+  .app[data-countdown="sands"][data-phase="teacher"] .sands-label,
+  .app[data-countdown="sands"][data-phase="teacher"] .sands-streaks,
+  .app[data-countdown="sands"][data-phase="teacher"] .sands-marks {
+    opacity: 0;
+    transition: opacity 350ms ease;
+  }
+
+  /* ──────────────────────────────────────────────────────────────────────
+     COUNTDOWN → TEACHER MORPH  (mission only)
+
+     The other variants (cinema, sands) have no ring geometry to hand
+     off to the teacher circle, so they keep the default crossfade —
+     countdown scales down to 0.94, teacher scales up from 0.88.
+
+     Mission renders a circle in the same position as the teacher circle.
+     The morph keeps that circle "in place" through the transition:
+     instead of the countdown shrinking and the teacher growing past it,
+     the countdown's ring brightens to green (arrival — the route grammar
+     completing), its decorations drift outward and dissolve, and the
+     teacher circle enters at a scale matching the ring so the outline
+     appears continuous across the handoff.
+
+     Timing is ~800ms total, matching the existing transition contract so
+     no JS scheduling needs to change.
+     ────────────────────────────────────────────────────────────────────── */
+
+  /* Override: don't shrink mission as it exits — the ring stays put
+     while its contents disperse. */
+  .app[data-countdown="mission"][data-phase="teacher"] .countdown {
+    transform: scale(1);  /* override the default scale(0.94) shrink */
+  }
+
+  /* ── Mission morph ── */
+  /* Decorations (corner readouts, strip, cross, scanlines, ticks) drift
+     outward and fade faster than the parent's 800ms. */
+  .app[data-countdown="mission"][data-phase="teacher"] .mc-readout,
+  .app[data-countdown="mission"][data-phase="teacher"] .mc-strip,
+  .app[data-countdown="mission"][data-phase="teacher"] .mc-cross,
+  .app[data-countdown="mission"][data-phase="teacher"] .mc-scanlines,
+  .app[data-countdown="mission"][data-phase="teacher"] .mc-ticks {
+    opacity: 0;
+    transform: scale(1.06);
+    transition: opacity 400ms ease, transform 700ms cubic-bezier(.4,0,.2,1);
+  }
+  /* Digit dissolves — scale up + blur as it fades. */
+  .app[data-countdown="mission"][data-phase="teacher"] .mc-number__digit,
+  .app[data-countdown="mission"][data-phase="teacher"] .mc-number__unit {
+    opacity: 0;
+    transform: scale(1.15);
+    filter: blur(8px);
+    transition: opacity 360ms ease, transform 600ms ease, filter 600ms ease;
+  }
+  /* Progress ring + base ring: brighten to green — arrival, the route
+     grammar completing — then they fade with the parent. */
+  .app[data-countdown="mission"][data-phase="teacher"] .mc-ring-fg circle {
+    stroke: var(--accent);
+    filter: drop-shadow(0 0 10px rgba(100, 216, 174, 0.3));
+    transition: stroke 280ms ease, filter 280ms ease;
+  }
+  .app[data-countdown="mission"][data-phase="teacher"] .mc-ring-bg circle {
+    stroke: var(--accent);
+    transition: stroke 280ms ease;
+  }
+  /* Mission's ring is already 380px — same as teacher. Teacher enters at
+     scale 1 (no scale animation) so the outline lands exactly on the
+     mission ring's outline as it fades. Only opacity animates. */
+  .app[data-countdown="mission"] .teacher-solo {
+    transform: scale(1);
+  }
+  .app[data-countdown="mission"][data-phase="teacher"] .teacher-solo {
+    transform: scale(1);
+  }
+
+  /* ──────────────────────────────────────────────────────────────────────
+     STAGE VIEW — teacher + classroom cameras as a centered cluster.
+     Opt-in only: reached by clicking "Stage" in the Skip-to control.
+     Never entered by the auto-sequence (countdown → teacher → slides).
+     ────────────────────────────────────────────────────────────────────── */
+  .stage-view {
+    position: absolute; inset: 0; z-index: 3;
+    display: flex; align-items: center; justify-content: center;
+    padding: var(--sp-5);
+    opacity: 0; transform: scale(0.96);
+    transition: opacity 700ms cubic-bezier(.4,0,.2,1),
+                transform 700ms cubic-bezier(.34,1.56,.64,1);
+    pointer-events: none;
+  }
+  .app[data-phase="stage"] .stage-view {
+    opacity: 1; transform: scale(1); pointer-events: auto;
+  }
+  /* hide all other phase layers while stage is up */
+  .app[data-phase="stage"] .teacher-solo,
+  .app[data-phase="stage"] .slide-area,
+  .app[data-phase="stage"] .countdown { opacity: 0; pointer-events: none; }
+  .app[data-phase="stage"] .topbar { opacity: 1; pointer-events: auto; }
+
+  /* big teacher circle on the left + 2x2 classroom grid, centered as a unit */
+  .stage-cluster {
+    display: flex; align-items: center;
+    gap: 80px; /* sp-11, generous breathing */
+    position: relative;
+  }
+  .classrooms-grid {
+    display: grid;
+    grid-template-columns: repeat(2, auto);
+    gap: var(--sp-7) var(--sp-8);
+  }
+
+  /* member = teacher or classroom camera tile */
+  .member {
+    display: flex; flex-direction: column;
+    align-items: center; gap: var(--sp-4);
+  }
+  .member--teacher { gap: var(--sp-6); }
+  .member__circle {
+    --member-size: 170px;
+    position: relative;
+    width: var(--member-size); height: var(--member-size);
+    border-radius: 50%;
+    flex-shrink: 0;
+  }
+  .member--teacher .member__circle   { --member-size: 360px; }
+  .member--classroom .member__circle { --member-size: 170px; }
+
+  .member__photo {
+    position: absolute; inset: 0;
+    border-radius: inherit;
+    background-size: cover; background-position: center;
+    box-shadow: 0 0 0 1.5px rgba(241,235,221,0.20),
+                0 12px 32px rgba(0,0,0,0.45);
+    z-index: 1;
+  }
+  .member--classroom .member__photo {
+    box-shadow: 0 0 0 1px rgba(241,235,221,0.18),
+                0 8px 20px rgba(0,0,0,0.4);
+  }
+
+  /* dashed gray rim — closed transmission (default on classrooms) */
+  .member__circle::before {
+    content: '';
+    position: absolute; inset: -5%;
+    border-radius: 50%;
+    border: 1.5px dashed rgba(241,235,221,0.32);
+    pointer-events: none;
+    z-index: 0;
+  }
+  /* teacher reuses the rim-breath animation from .teacher-circle::before */
+  .member--teacher .member__circle::before {
+    border: 1.5px solid rgba(100,216,174,0.5);
+    box-shadow: 0 0 28px rgba(100,216,174,0.25);
+    animation: rim-breath 3s ease-in-out infinite;
+  }
+  /* a classroom taking the floor — the green voice ring (Action · Live) */
+  .member--classroom.is-speaking .member__circle::before {
+    border-style: solid;
+    border-color: rgba(100,216,174,0.5);
+    box-shadow: 0 0 28px rgba(100,216,174,0.25);
+    animation: rim-breath 3s ease-in-out infinite;
+  }
+  .member--classroom.is-speaking .member__name { color: var(--accent); }
+  .member__circle::before,
+  .member__name { transition: color 400ms ease, border-color 400ms ease, box-shadow 400ms ease; }
+
+
+  /* mute pip — small dark circle bottom-right */
+  .member__mute {
+    position: absolute;
+    right: 4%; bottom: 4%;
+    width: 30px; height: 30px;
+    background: rgba(38,40,46,0.85);
+    border-radius: 50%;
+    border: 1px solid var(--border-strong);
+    display: inline-flex; align-items: center; justify-content: center;
+    color: var(--signal-bright);   /* mute is Heat's job — Heat is not danger */
+    z-index: 2;
+  }
+  .member__mute svg { width: 60%; height: 60%; }
+
+  .member__label { text-align: center; line-height: 1.2; color: var(--fg); }
+  .member__name {
+    font-family: var(--font-sans);
+    font-size: 14px; font-weight: 600;
+    letter-spacing: -0.005em;
+  }
+  .member--teacher .member__name {
+    font-family: var(--font-serif);
+    font-size: 24px; font-weight: 500;
+    letter-spacing: -0.01em;
+  }
+  .member--classroom .member__name { font-size: 13px; }
+  .member__sub {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.28em;
+    color: var(--fg-subtle);
+    margin-top: 4px;
+  }
+  .member--classroom .member__sub { display: none; }
+
+  /* ──────────────────────────────────────────────────────────────────────
+     TEAM-UP VIEW — lobby phase before countdown.
+       data-mode = team | solo  (default: team)
+       data-demo-state = 1..5   (cycles through empty → all-teamed → solo)
+     Per-team accent comes from data-team on the card; brand color tokens
+     are introduced below since the rest of presenter-opening only ships
+     accent / signal / danger.
+     ────────────────────────────────────────────────────────────────────── */
+  /* Decorative families (§01) — light/core steps on ink; assignments are
+     stable (a team keeps its family everywhere). Orange and violet are
+     deliberately absent: Heat and the AI own those hues. */
+  :root {
+    --team-cloud:     #B7CEDD;  /* Sky · light */
+    --team-crystal:   #D3B4C4;  /* Plum · light */
+    --team-fire:      #C98A87;  /* Rose · core */
+    --team-lightning: #EFD9A0;  /* Saffron · light */
+    --team-rainstorm: #86A7BE;  /* Sky · core */
+    --team-tornado:   #C6CCAA;  /* Sage · light */
+    --team-tsunami:   #9FAA7D;  /* Sage · core */
+    --team-volcano:   #E7B9B4;  /* Rose · light */
+  }
+
+  .teamup-view {
+    position: absolute; inset: 0; z-index: 2;
+    display: flex; flex-direction: column;
+    padding: var(--sp-5);
+    gap: var(--sp-5);
+    opacity: 0;
+    transition: opacity 500ms cubic-bezier(.4,0,.2,1);
+    pointer-events: none;
+  }
+  .app[data-phase="teamup"] .teamup-view {
+    opacity: 1; pointer-events: auto;
+  }
+  /* hide other phase layers while team-up is up */
+  .app[data-phase="teamup"] .teacher-solo,
+  .app[data-phase="teamup"] .slide-area,
+  .app[data-phase="teamup"] .countdown,
+  .app[data-phase="teamup"] .stage-view { opacity: 0; pointer-events: none; }
+  .app[data-phase="teamup"] .topbar { opacity: 1; pointer-events: auto; }
+
+  /* ── Top status row: count chips ─────────────────────────────────────── */
+  .teamup__counts {
+    display: flex; gap: var(--sp-3);
+    align-items: center;
+    flex-shrink: 0;
+  }
+  .count-chip {
+    display: inline-flex; align-items: center; gap: 8px;
+    height: 30px;
+    padding: 0 14px 0 12px;
+    border-radius: var(--r-2);   /* chips are 3–4, not pills */
+    background: var(--bg-overlay);
+    border: 1px solid var(--border);
+    font-family: var(--font-sans);
+    font-size: 12px;
+    color: var(--fg);
+    letter-spacing: -0.005em;
+  }
+  .count-chip__dot {
+    width: 8px; height: 8px; border-radius: 50%;
+    background: var(--accent);
+  }
+  .count-chip--students .count-chip__dot { background: var(--accent); }  /* arrived = live */
+  .count-chip--teams    .count-chip__dot { background: var(--water); }   /* formed = progression */
+  .count-chip__total {
+    color: var(--fg-faint);
+    font-feature-settings: 'tnum';
+    margin-right: 4px;
+  }
+
+  /* ── Team grid ───────────────────────────────────────────────────────── */
+  .teamup__body {
+    flex: 1; min-height: 0; position: relative;
+    display: flex; flex-direction: column;
+    gap: var(--sp-4);
+  }
+  /* 3 columns max, 2 rows max for up to 6 teams. Cards stretch responsively
+     to fill the available width but cap at 540px each (the width that fits
+     6 member pills in a single row, so we don't need to budget for wrap on
+     wide viewports). On narrower screens minmax allows the row to grow if
+     members need to wrap, instead of clipping. */
+  .team-grid {
+    flex: 1; min-height: 0; overflow: hidden;
+    display: grid;
+    gap: var(--sp-4);
+    grid-template-columns: repeat(3, 1fr);
+    grid-auto-rows: minmax(184px, auto);
+    /* Cap each card around the width that snugly wraps its content
+       (sidebar 120 + gap 12 + members ~232 + padding 40 ≈ 404, plus a
+       little headroom). */
+    max-width: calc(440px * 3 + var(--sp-4) * 2);
+    align-content: flex-start;
+    justify-content: start;
+  }
+
+  /* ── Empty state ─────────────────────────────────────────────────────── */
+  .team-grid--empty {
+    display: flex; align-items: center; justify-content: center;
+    color: var(--fg-faint);
+    font-family: var(--font-serif); font-style: italic;
+    font-size: 18px;
+    background-image: radial-gradient(ellipse at 50% 50%, var(--border) 1px, transparent 1px);
+    background-size: 24px 24px;
+    background-position: 0 0;
+    border-radius: var(--r-4);
+    opacity: 0.85;
+  }
+
+  /* ── Team card — left/right layout ───────────────────────────────────────
+     Left sidebar holds the team icon + name + count; right area holds the
+     member avatars in a 3-column grid. */
+  .team-card {
+    position: relative;
+    background: var(--bg-raised);
+    border: 1px solid var(--border);
+    border-radius: var(--r-4);
+    padding: var(--sp-4) var(--sp-5);
+    overflow: hidden;
+    display: flex; flex-direction: row;
+    gap: var(--sp-3);
+    align-items: stretch;
+    min-height: 0;
+  }
+  /* per-team accent strip at top */
+  .team-card::before {
+    content: ''; position: absolute;
+    top: 0; left: 0; right: 0; height: 2px;
+    background: var(--team-color, var(--accent));
+    opacity: 0.85;
+  }
+  /* surveyor's tick on top-right — anchors the card to "ground" */
+  .team-card::after {
+    content: ''; position: absolute;
+    top: -1px; right: -1px;
+    width: 10px; height: 10px;
+    border-top: 1px solid var(--team-color, var(--accent));
+    border-right: 1px solid var(--team-color, var(--accent));
+    opacity: 0.5;
+    border-top-right-radius: var(--r-4);
+  }
+
+  .team-card__sidebar {
+    position: relative;
+    flex: 0 0 auto;
+    width: 120px;
+    display: flex; flex-direction: column;
+    gap: var(--sp-2);
+    /* Horizontally centered stack — icon and name line up to the same
+       midline. */
+    align-items: center;
+    text-align: center;
+    /* Top-aligned so the icon shares a baseline with the first row of
+       members on the right — no drift as more rows of members appear. */
+    justify-content: flex-start;
+    border-radius: 6px;
+    overflow: hidden;
+  }
+  /* facet-banner crest — painted per team by teamBannerSVG() */
+  .team-card__banner {
+    display: none;
+    position: absolute; inset: 0;
+    width: 100%; height: 100%;
+  }
+  .app[data-card-style="crest"] .team-card__banner { display: block; }
+  /* the band bleeds to the card's edges — no inset, no rounded plate;
+     the card's own overflow:hidden clips it to the outer radius, so it
+     reads as an endless surface the icon sits on */
+  .app[data-card-style="crest"] .team-card { padding: 0; gap: 0; }
+  .app[data-card-style="crest"] .team-card__sidebar {
+    width: 140px;
+    border-radius: 0;
+    padding: 18px 10px;
+  }
+  .app[data-card-style="crest"] .team-card__members {
+    margin: 16px 20px 16px 14px;
+  }
+  .app[data-card-style="crest"][data-card-layout="stacked"] .team-card__sidebar {
+    padding: 12px 16px;
+  }
+  .app[data-card-style="crest"] .team-card__icon {
+    position: relative;
+    width: 88px; height: 88px;
+    filter: drop-shadow(0 4px 10px rgba(0,0,0,.25));
+  }
+  /* "Don't set text directly on the lattice — use a plain band."
+     The name sits on a flat strip of the team's family color, pinned to
+     the crest's bottom edge. */
+  .app[data-card-style="crest"] .team-card__name {
+    position: relative;
+    color: #26282E;
+    align-self: stretch;
+    max-width: none;
+    margin: auto -10px -18px;
+    padding: 9px 8px 11px;
+    background: var(--team-color, #C6CCAA);
+  }
+  .app[data-card-style="crest"][data-card-layout="stacked"] .team-card__name {
+    align-self: center;
+    margin: 0;
+    padding: 6px 12px;
+    border-radius: 4px;
+  }
+  /* the crest carries the color — accent strip + surveyor tick retire */
+  .app[data-card-style="crest"] .team-card::before,
+  .app[data-card-style="crest"] .team-card::after { display: none; }
+  .team-card__icon {
+    width: 76px; height: 76px;
+    flex-shrink: 0;
+    object-fit: contain;
+    margin-bottom: 6px;
+  }
+  .team-card__name {
+    font-family: var(--font-serif);
+    font-size: 22px;
+    font-weight: 500;
+    color: var(--fg);
+    letter-spacing: -0.01em;
+    line-height: 1.1;
+    max-width: 100%;
+    text-overflow: ellipsis; overflow: hidden; white-space: nowrap;
+  }
+
+  /* ── Stacked layout — icon + name on top, members flex-wrapped below ───
+     Engaged via [data-card-layout="stacked"] on .app */
+  .app[data-card-layout="stacked"] .team-card {
+    flex-direction: column;
+    gap: var(--sp-3);
+  }
+  .app[data-card-layout="stacked"] .team-card__sidebar {
+    width: auto;
+    flex-direction: row;
+    align-items: center;
+    text-align: left;
+    gap: 12px;
+    justify-content: flex-start;
+  }
+  .app[data-card-layout="stacked"] .team-card__icon {
+    width: 36px; height: 36px;
+    margin-bottom: 0;
+  }
+  .app[data-card-layout="stacked"] .team-card__name {
+    flex: 1;
+    font-size: 22px;
+  }
+  .app[data-card-layout="stacked"] .team-card__members {
+    display: flex; flex-wrap: wrap;
+    grid-template-columns: none;
+    gap: var(--sp-2) var(--sp-3);
+    align-content: flex-start;
+    justify-content: flex-start;
+  }
+
+  .team-card__members {
+    flex: 1; min-width: 0; min-height: 0;
+    display: grid;
+    /* Fixed pill-width columns + center the whole grid in the available
+       space, so pills sit close together as one tight cluster regardless
+       of card width (instead of spreading via 1fr). */
+    grid-template-columns: repeat(3, 72px);
+    gap: var(--sp-2) 8px;
+    align-content: start;
+    justify-content: center;
+    overflow: hidden;
+  }
+  .member-pill {
+    display: flex; flex-direction: column;
+    align-items: center; gap: 6px;
+    min-width: 0;
+    max-width: 72px;
+  }
+  /* Neutral white avatar — team identity is already carried by the card's
+     accent strip + icon + count, so the member circles stay calm. */
+  .member-pill__circle {
+    width: 48px; height: 48px;
+    border-radius: 50%;
+    background: var(--bg-overlay);
+    border: 1.5px solid color-mix(in srgb, var(--fg) 25%, transparent);
+    display: inline-flex; align-items: center; justify-content: center;
+    font-family: var(--font-sans);
+    font-size: 18px; font-weight: 600;
+    color: var(--fg);
+    letter-spacing: 0.02em;
+    flex-shrink: 0;
+  }
+  .member-pill__name {
+    font-family: var(--font-sans);
+    font-size: 11px;
+    color: var(--fg-muted);
+    line-height: 1.2;
+    text-align: center;
+    text-overflow: ellipsis; overflow: hidden; white-space: nowrap;
+    max-width: 72px;
+  }
+
+  /* ── Still-picking strip — no panel: the waiting students float
+     directly over the pin field at the bottom of the screen. The label
+     keeps the ember voice (Heat owns urgency) as a small map annotation. */
+  .teamup__picking {
+    flex-shrink: 0;
+    background: transparent;
+    border: none;
+    padding: var(--sp-3) 0;
+    display: flex; flex-direction: column;
+    gap: var(--sp-3);
+    overflow: hidden;
+    /* Lock the height so the grid doesn't jump as pills come and go
+       (label + one row of 48px avatar pills with names) */
+    height: 142px;
+  }
+  .teamup__picking-label {
+    display: flex; align-items: center; gap: 8px;
+    font-family: var(--font-mono);
+    font-size: 10px;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--fg-subtle);
+  }
+  .teamup__picking-label svg {
+    width: 14px; height: 14px;
+    color: var(--fg-subtle);
+  }
+  /* same cell rhythm as the card member grid (72px pills), a touch
+     looser since they sit on the open pin field */
+  .teamup__picking-list {
+    display: flex; flex-wrap: nowrap;
+    gap: 14px;
+    overflow: hidden;
+    min-width: 0;
+  }
+  /* same grammar as the member pills on the cards: 48px circle with the
+     name beneath — just floating on the pin field instead of boxed */
+  .picking-pill {
+    display: inline-flex; flex-direction: column; align-items: center;
+    gap: 6px;
+    padding: 0;
+    background: transparent;
+    border: none;
+    font-family: var(--font-sans);
+    font-size: 11px;
+    font-weight: 400;
+    color: var(--fg-muted);
+    letter-spacing: -0.005em;
+    white-space: nowrap;
+    width: 72px;
+    overflow: hidden; text-overflow: ellipsis;
+    flex-shrink: 0;
+    transition: color 280ms ease, opacity 280ms ease;
+  }
+  .picking-pill__circle {
+    width: 48px; height: 48px;
+    border-radius: 50%;
+    background: var(--bg-overlay);
+    border: 1.5px solid color-mix(in srgb, var(--fg) 25%, transparent);
+    display: inline-flex; align-items: center; justify-content: center;
+    font-family: var(--font-sans);
+    font-size: 18px; font-weight: 600;
+    color: var(--fg);
+    flex-shrink: 0;
+    transition: background-color 280ms ease, border-color 280ms ease,
+                border-style 0ms ease 280ms, color 280ms ease;
+  }
+  /* "Not yet joined the session" — solid gray outline (muted) so they read
+     as background info rather than action items. Promoted to ember styling
+     once the student arrives. */
+  .picking-pill.is-absent {
+    background: transparent;
+    border: none;
+    color: var(--fg-faint);
+    opacity: 0.6;
+  }
+  .picking-pill.is-absent .picking-pill__circle {
+    background: transparent;
+    border: 1.5px dashed color-mix(in srgb, var(--fg) 25%, transparent);
+    color: var(--fg-faint);
+  }
+
+  /* ── Empty state messaging ───────────────────────────────────────────── */
+  .teamup__empty-msg {
+    color: var(--fg-faint);
+    font-family: var(--font-serif);
+    font-style: italic;
+    font-size: 16px;
+    text-align: center;
+    padding: var(--sp-5);
+  }
+
+  /* ── Entrance animations — cascade in as the lobby fills ────────────── */
+  @keyframes teamup-pop {
+    0%   { opacity: 0; transform: translateY(8px) scale(0.96); }
+    100% { opacity: 1; transform: translateY(0)   scale(1); }
+  }
+  .team-card {
+    animation: teamup-pop 420ms cubic-bezier(.34, 1.46, .64, 1) both;
+    animation-delay: calc(var(--i, 0) * 70ms);
+  }
+  .member-pill {
+    animation: teamup-pop 300ms cubic-bezier(.34, 1.46, .64, 1) both;
+    animation-delay: calc(var(--i, 0) * 28ms + 180ms);
+  }
+  .picking-pill {
+    animation: teamup-pop 260ms cubic-bezier(.34, 1.46, .64, 1) both;
+    animation-delay: calc(var(--i, 0) * 22ms);
+  }
+  .attendee {
+    animation: teamup-pop 240ms cubic-bezier(.34, 1.46, .64, 1) both;
+    animation-delay: calc(var(--i, 0) * 10ms);
+  }
+  /* Picking strip slides + fades in/out as it appears or empties */
+  .teamup__picking {
+    transition: opacity 380ms ease, max-height 460ms ease, padding 380ms ease,
+                border-color 380ms ease;
+    overflow: hidden;
+  }
+  .teamup__picking.is-empty {
+    opacity: 0;
+    max-height: 0;
+    padding-top: 0; padding-bottom: 0;
+    border-color: transparent;
+    pointer-events: none;
+  }
+  /* Empty-state grid fades when scenario flips to having teams */
+  .team-grid {
+    transition: opacity 280ms ease;
+  }
+
+  /* ── Solo mode: attendance grid ──────────────────────────────────────── */
+  .app[data-mode="solo"] .team-grid,
+  .app[data-mode="solo"] .teamup__picking { display: none; }
+  .app:not([data-mode="solo"]) .attendance-grid { display: none; }
+
+  .attendance-grid {
+    flex: 1; min-height: 0;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(96px, 1fr));
+    gap: var(--sp-3) var(--sp-2);
+    align-content: flex-start;
+    overflow-y: auto;
+    padding-right: var(--sp-3);
+  }
+  .attendee {
+    display: flex; flex-direction: column;
+    align-items: center; gap: 6px;
+    min-width: 0;
+  }
+  .attendee__circle {
+    width: 52px; height: 52px;
+    border-radius: 50%;
+    background: color-mix(in srgb, var(--accent) 14%, transparent);
+    border: 1px solid color-mix(in srgb, var(--accent) 35%, transparent);
+    display: inline-flex; align-items: center; justify-content: center;
+    font-family: var(--font-sans);
+    font-size: 18px; font-weight: 600;
+    color: var(--accent);
+    letter-spacing: 0.02em;
+  }
+  .attendee__name {
+    font-family: var(--font-sans);
+    font-size: 12px;
+    color: var(--fg-muted);
+    text-align: center;
+    line-height: 1.2;
+    max-width: 88px;
+    text-overflow: ellipsis; overflow: hidden; white-space: nowrap;
+  }
+
+  /* ──────────────────────────────────────────────────────────────────────
+     SLIDE VIEW — same across all styles
+     ────────────────────────────────────────────────────────────────────── */
+  .slide-area {
+    position: absolute; inset: 0; z-index: 1;
+    padding: var(--sp-5);
+    display: grid;
+    grid-template-columns: minmax(0,1fr) 320px;
+    /* Lock the row to the available height — otherwise the chat list grows
+       the row vertically and shoves the slide canvas downward as messages
+       arrive. minmax(0, 1fr) lets children opt into internal scrolling. */
+    grid-template-rows: minmax(0, 1fr);
+    gap: var(--sp-5);
+    opacity: 0; transform: scale(0.96);
+    transition: opacity 700ms ease 200ms, transform 700ms ease 200ms;
+    pointer-events: none;
+  }
+  .app[data-phase="slides"] .slide-area {
+    opacity: 1; transform: scale(1); pointer-events: auto;
+  }
+  .app[data-phase="slides"] .main { padding-top: var(--sp-5); }
+  .stage-wrap {
+    display: flex; align-items: center; justify-content: center;
+    min-width: 0; min-height: 0; overflow: hidden;
+  }
+  .stage {
+    position: relative; aspect-ratio: 16/9;
+    width: 100%; max-width: 100%; max-height: 100%;
+    border-radius: var(--r-4);
+    background: var(--signal); overflow: hidden;
+    box-shadow: inset 0 0 0 1px rgba(38,40,46,0.10),
+                0 1px 0 rgba(241,235,221,0.04),
+                0 8px 32px rgba(0,0,0,0.35);
+    /* container units let the 1920×1080 Figma cover scale with the stage */
+    container-type: size;
+  }
+  /* ── Slide cover — "EQ · Chemistry · Focus + balance"
+     (Figma aNBtu6DNlGsgvdSFfUI83T · 15868:748). Terracotta hero surface
+     dressed with the Khatam texture — the sanctioned use of terracotta on
+     ink screens. All sizes in cqw/cqh (design px ÷ 19.2 / ÷ 10.8). ── */
+  .slide-khatam {
+    position: absolute; inset: 0;
+    width: 100%; height: 100%;
+    display: block;
+  }
+  .slide-icon {
+    position: absolute; left: 3.9cqw; top: 50%;
+    width: 29cqw; height: auto;
+    transform: translateY(-50%);
+  }
+  .slide-cover-title {
+    position: absolute; right: 5.2cqw; top: 29cqh;
+    width: 60cqw; margin: 0;
+    font-family: var(--font-arabic);
+    font-weight: 700;
+    font-size: 6.25cqw; line-height: 1.12;
+    letter-spacing: -0.02em;
+    color: #F1EBDD;
+    text-align: right; direction: rtl;
+  }
+  .slide-tag {
+    position: absolute; right: 5.2cqw; top: 8.9cqh;
+    width: 13cqw; height: auto;
+  }
+  .slide-logo {
+    position: absolute; right: 3.33cqw; bottom: 2cqh;
+    display: flex; align-items: center; gap: 0.6cqw;
+  }
+  .slide-logo__mark {
+    width: 4.2cqw; height: 1.92cqw;
+    display: block;
+  }
+  .slide-logo__tracks {
+    font-family: var(--font-sans);
+    font-size: 0.85cqw;
+    color: rgba(241,235,221,0.55);
+  }
+  /* slide style switch — tag (15868:748) vs band (15931:32630) */
+  .app[data-slide="band"] .slide-v1 { display: none; }
+  .app[data-slide="tag"]  .slide-v2 { display: none; }
+  .slide-band {
+    position: absolute; left: 0; top: 0; bottom: 0;
+    width: 12.5cqw;
+    background: #DDBA62;   /* Saffron — Chemistry's decorative family */
+  }
+  .slide-band-name {
+    position: absolute; left: 6.25cqw; top: 19cqh;
+    margin: 0;
+    transform: translate(-50%, -50%) rotate(-90deg);
+    font-family: var(--font-arabic); font-weight: 700;
+    font-size: 6.25cqw; line-height: 1;
+    color: #BC5A37;
+    white-space: nowrap;
+  }
+  .slide-icon--mono {
+    position: absolute; left: 2.2cqw; bottom: 10cqh;
+    width: 21.7cqw; height: auto;
+  }
+  .sidebar {
+    display: flex; flex-direction: column; gap: var(--sp-4);
+    /* min-height:0 lets the inner flex children (chat) actually shrink and
+       hand the overflow to .messages — without it, the flex column inflates
+       to fit its content and pushes everything around it. */
+    min-height: 0;
+  }
+  /* Focus tile — coral signal MOVES between the tile (classroom speaking)
+     and the teacher PiP (teacher speaking), keyed off data-speaker on
+     .focus. Rim is drawn with an INSET box-shadow (not border) — that way
+     it renders cleanly inside the rounded corners; using `border` here
+     produced a 1px clipping artifact at the bottom-right where the photo
+     background and the border didn't anti-alias to the same curve. */
+  .focus {
+    position: relative; border-radius: var(--r-4);
+    overflow: hidden; aspect-ratio: 16/9;
+    background-image: url('assets/classroom-a.jpg');
+    background-size: cover; background-position: center;
+    box-shadow: inset 0 0 0 1px var(--border);  /* near-invisible default rim */
+    transition: box-shadow 600ms ease;
+  }
+  /* Classroom is speaking → green voice ring (Action · Live). Both INSET
+     (the rim itself) and OUTER (the soft glow halo) shadows animate
+     together. Heat never marks speech — it owns mute. */
+  .focus[data-speaker="classroom"] {
+    animation: focus-speak-breath 3s ease-in-out infinite;
+  }
+  @keyframes focus-speak-breath {
+    0%, 100% {
+      box-shadow: inset 0 0 0 1px rgba(100,216,174,0.5),
+                  0 0 0 1px rgba(100,216,174,0.16),
+                  0 0 18px rgba(100,216,174,0.18);
+    }
+    50% {
+      box-shadow: inset 0 0 0 1.5px rgba(100,216,174,0.8),
+                  0 0 0 1.5px rgba(100,216,174,0.35),
+                  0 0 32px rgba(100,216,174,0.35);
+    }
+  }
+  .focus__overlay {
+    position: absolute; inset: 0;
+    background: linear-gradient(to top, rgba(38,40,46,0.88) 0%, rgba(38,40,46,0) 50%);
+  }
+  /* Teacher PiP — top-left. Default chrome is a neutral chalk frame;
+     when teacher is speaker, a coral box-shadow breath takes over. */
+  .focus__pip {
+    position: absolute; top: var(--sp-3); left: var(--sp-3);
+    width: 56px; height: 56px; border-radius: var(--r-3);
+    background: center/cover no-repeat url('assets/teacher-ali.jpg.png');
+    background-position: center 20%;
+    box-shadow: 0 0 0 1.5px rgba(241,235,221,0.30),
+                0 4px 12px rgba(0,0,0,0.4);
+    transition: box-shadow 600ms ease;
+  }
+  .focus[data-speaker="teacher"] .focus__pip {
+    animation: pip-speak-breath 3s ease-in-out infinite;
+  }
+  @keyframes pip-speak-breath {
+    0%, 100% {
+      box-shadow: 0 0 0 1.5px rgba(100,216,174,0.45),
+                  0 0 10px rgba(100,216,174,0.16),
+                  0 4px 12px rgba(0,0,0,0.4);
+    }
+    50% {
+      box-shadow: 0 0 0 2.5px rgba(100,216,174,0.8),
+                  0 0 22px rgba(100,216,174,0.35),
+                  0 4px 12px rgba(0,0,0,0.4);
+    }
+  }
+  .focus__label {
+    position: absolute; left: var(--sp-3); bottom: var(--sp-3); color: var(--fg);
+  }
+  .focus__name { font-family: var(--font-serif); font-size: 16px; }
+  .focus__sub  { font-family: var(--font-mono); font-size: 11px;
+    letter-spacing: 0.22em; text-transform: uppercase; color: var(--fg-subtle); }
+
+  /* ── Stage roster — avatar + name underneath, evenly spaced ── */
+  .roster {
+    display: flex; align-items: flex-start; justify-content: space-between;
+    gap: var(--sp-2); padding: var(--sp-3) var(--sp-2);
+    border-top: 1px solid var(--divider);
+    border-bottom: 1px solid var(--divider);
+  }
+  .roster__item {
+    display: flex; flex-direction: column; align-items: center; gap: 6px;
+    flex: 1; min-width: 0;
+    cursor: pointer;
+    transition: opacity 200ms ease;
+  }
+  .roster__avatar {
+    width: 40px; height: 40px;
+    border-radius: 50%;
+    background-color: var(--bg-overlay);
+    background-size: 70% 70%;
+    background-position: center;
+    background-repeat: no-repeat;
+    border: 1px solid var(--border-strong);
+    transition: box-shadow 200ms ease, border-color 200ms ease;
+  }
+  .roster__name {
+    font-family: var(--font-sans);
+    font-size: 11px; font-weight: 400;
+    color: var(--fg-subtle);
+    text-align: center;
+    white-space: nowrap;
+    overflow: hidden; text-overflow: ellipsis;
+    max-width: 100%;
+    transition: color 200ms ease;
+  }
+  .roster__item.is-speaking .roster__name {
+    color: var(--accent); font-weight: 600;
+  }
+  .roster__item.is-speaking .roster__avatar {
+    border-color: rgba(100,216,174,0.5);
+    box-shadow: 0 0 14px rgba(100,216,174,0.3);
+  }
+
+  /* ── Class chat — heading + flowing message cards ── */
+  .chat {
+    display: flex; flex-direction: column;
+    min-height: 0; flex: 1;
+  }
+  .chat__head {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: var(--sp-3) var(--sp-1) var(--sp-3);
+  }
+  .chat__title {
+    font-family: var(--font-mono); font-size: 11px;
+    text-transform: uppercase; letter-spacing: 0.22em;
+    color: var(--fg-faint);
+  }
+  .messages {
+    overflow-y: auto; overflow-x: hidden;
+    display: flex; flex-direction: column;
+    gap: var(--sp-3);
+    padding: var(--sp-3) var(--sp-1) var(--sp-4);
+    scrollbar-width: thin;
+    scrollbar-color: var(--border) transparent;
+  }
+  .messages::-webkit-scrollbar { width: 6px; }
+  .messages::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+  .messages::-webkit-scrollbar-thumb:hover { background: var(--border-strong); }
+
+  /* Message card — dark rounded rectangle, avatar + body */
+  .msg {
+    display: flex; gap: var(--sp-3);
+    align-items: flex-start;
+    padding: var(--sp-3) var(--sp-3);
+    background: var(--hover-overlay);
+    border: 1px solid transparent;
+    border-radius: var(--r-4);
+    transition: background 200ms ease, border-color 200ms ease;
+    /* Fresh-message arrival animation */
+    animation: msg-in 320ms cubic-bezier(.16,.8,.24,1) backwards;
+  }
+  .msg.is-fresh { border-color: rgba(100,216,174,0.18); }
+  @keyframes msg-in {
+    from { opacity: 0; transform: translateY(8px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+  .msg__avatar {
+    width: 32px; height: 32px;
+    border-radius: 50%;
+    background-color: var(--bg-overlay);
+    background-size: 70% 70%;
+    background-position: center;
+    background-repeat: no-repeat;
+    flex-shrink: 0;
+    border: 1px solid var(--border-strong);
+  }
+  .msg__body { min-width: 0; flex: 1; }
+  .msg__name {
+    font-family: var(--font-sans);
+    font-size: 13px; font-weight: 600;
+    color: var(--fg);
+    letter-spacing: -0.005em;
+    margin-bottom: 3px;
+    display: flex; align-items: center; gap: 6px;
+  }
+  .msg__time {
+    margin-left: auto;
+    font-family: var(--font-mono);
+    font-size: 9px;
+    color: var(--fg-faint);
+    letter-spacing: 0.06em;
+    font-weight: 400;
+    display: flex; align-items: center; gap: 6px;
+  }
+  /* Tiny green pin next to "just now" marks a brand-new message — the
+     live/arrival grammar — fades after a beat */
+  .msg__fresh-dot {
+    width: 5px; height: 5px;
+    border-radius: 50%;
+    background: var(--accent);
+    box-shadow: 0 0 6px rgba(100,216,174,0.4);
+    opacity: 0;
+    transition: opacity 400ms ease;
+  }
+  .msg.is-fresh .msg__fresh-dot { opacity: 1; }
+  .msg__text {
+    font-family: var(--font-sans);
+    font-size: 13px; line-height: 1.5;
+    color: var(--fg-muted);
+    word-wrap: break-word;
+  }
+
+  /* ──────────────────────────────────────────────────────────────────────
+     CONTROL PANEL — bottom-left, collapsible (mirrors presenter-screen.html)
+     ────────────────────────────────────────────────────────────────────── */
+  .controls-panel {
+    position: fixed;
+    bottom: var(--sp-5); left: var(--sp-5);
+    z-index: 100;
+    font-family: var(--font-mono);
+    color: var(--fg);
+    min-width: 260px;
+  }
+  .cp-handle {
+    display: inline-flex; align-items: center; gap: var(--sp-2);
+    padding: 6px 12px;
+    background: var(--bg-overlay);
+    border: 1px solid var(--border);
+    border-radius: var(--r-2);
+    color: var(--fg-muted);
+    font-family: var(--font-mono); font-size: 10px;
+    text-transform: uppercase; letter-spacing: 0.18em;
+    cursor: pointer;
+    transition: color 160ms ease, background 160ms ease;
+  }
+  .cp-handle:hover { color: var(--fg); background: var(--bg-raised); }
+  .cp-diamond { width: 6px; height: 6px; background: var(--fg-muted); transform: rotate(45deg); }
+  .cp-quick { margin-top: var(--sp-2); }
+  .cp-quick .cp-tabs {
+    background: rgba(38,40,46,0.92);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+  }
+  .cp-panel {
+    display: none;
+    margin-top: var(--sp-2);
+    padding: var(--sp-3) var(--sp-4);
+    background: rgba(38,40,46,0.92);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border: 1px solid var(--border);
+    border-radius: var(--r-3);
+    box-shadow: 0 8px 32px rgba(0,0,0,0.45);
+    max-height: 80vh; overflow: auto;
+  }
+  .controls-panel.is-open .cp-panel { display: block; }
+  .cp-section {
+    text-transform: uppercase; letter-spacing: 0.22em;
+    font-size: 9px; color: var(--fg-faint);
+    margin: var(--sp-3) 0 var(--sp-2);
+    padding-bottom: 4px;
+    border-bottom: 1px solid var(--divider);
+  }
+  .cp-section:first-child { margin-top: 0; }
+  .cp-row {
+    display: flex; align-items: center; justify-content: space-between;
+    gap: var(--sp-3); padding: 4px 0;
+    font-size: 11px; color: var(--fg-muted);
+  }
+  .cp-row--stack { flex-direction: column; align-items: stretch; gap: 8px; }
+  .cp-row--stack > span { font-size: 11px; color: var(--fg-faint); }
+  .cp-tabs {
+    display: inline-flex;
+    border: 1px solid var(--border);
+    border-radius: var(--r-2);
+    background: var(--hover-overlay);
+    padding: 2px;
+    gap: 1px;
+  }
+  .cp-tabs button {
+    padding: 4px 8px;
+    border: none; background: transparent;
+    color: var(--fg-faint);
+    font-family: var(--font-mono); font-size: 9px;
+    text-transform: uppercase; letter-spacing: 0.06em;
+    cursor: pointer; border-radius: 3px;
+    transition: background 160ms ease, color 160ms ease;
+    min-width: 26px;
+  }
+  .cp-tabs button:hover { color: var(--fg-muted); }
+  .cp-tabs button.is-active {
+    background: var(--bg-overlay); color: var(--fg);
+  }
+  .cp-tabs--grid {
+    display: grid; grid-template-columns: repeat(4, 1fr);
+    gap: 3px; width: 100%;
+  }
+  .cp-tabs--grid-3 {
+    display: grid; grid-template-columns: repeat(3, 1fr);
+    gap: 3px; width: 100%;
+  }
+  .cp-tabs--grid button,
+  .cp-tabs--grid-3 button { min-width: 0; padding: 6px 4px; font-size: 10px; }
+  .cp-actions { display: flex; gap: var(--sp-2); margin-top: var(--sp-3); }
+  .cp-btn {
+    flex: 1;
+    padding: 8px 10px;
+    background: var(--hover-overlay);
+    border: 1px solid var(--border);
+    border-radius: var(--r-2);
+    color: var(--fg-muted);
+    font-family: var(--font-mono); font-size: 10px;
+    letter-spacing: 0.18em; text-transform: uppercase;
+    cursor: pointer;
+    transition: color 160ms ease, background 160ms ease, border-color 160ms ease;
+  }
+  .cp-btn:hover { color: var(--fg); background: var(--active-overlay); border-color: var(--border-strong); }
+  .cp-btn--primary {
+    color: var(--accent);
+    border-color: rgba(100,216,174,0.4);
+  }
+  .cp-btn--primary:hover {
+    background: rgba(100,216,174,0.08);
+    color: var(--accent);
+  }
+</style>
+</head>
+<body>
+
+<div class="app" id="app"
+     data-countdown="sands"
+     data-slide="band"
+     data-card-style="crest"
+     data-phase="teamup"
+     data-mode="team"
+     data-card-layout="row"
+     data-duration="10"
+     data-teacher-hold="5"
+     data-sound="on"
+     data-bg-landscape="pins"
+     data-bg-khatam="on">
+
+  <!-- ── Backdrop: The Empty Quarter terrain — painted by JS from the
+       canonical algorithms (empty-quarter-main). Three directions,
+       switchable in the control panel. ── -->
+  <div class="terrain terrain--quiet" aria-hidden="true">
+    <svg id="terrainQuiet" viewBox="0 0 1440 420" preserveAspectRatio="xMidYMax slice"></svg>
+  </div>
+  <div class="terrain terrain--mural" aria-hidden="true">
+    <svg id="terrainMural" viewBox="0 0 1440 260" preserveAspectRatio="xMidYMax slice"></svg>
+  </div>
+  <div class="terrain terrain--pins" aria-hidden="true">
+    <svg id="terrainPins" viewBox="0 0 1440 300" preserveAspectRatio="xMidYMax slice"></svg>
+  </div>
+
+  <!-- ── Khatam — the single ceremonial ornament behind the countdown.
+       Canonical square + diamond interlock, line only, never filled. ── -->
+  <div class="khatam" aria-hidden="true">
+    <svg class="khatam__outer" viewBox="-100 -100 200 200">
+      <g fill="none" stroke="#F1EBDD" stroke-opacity=".11" stroke-width=".45">
+        <rect x="-52" y="-52" width="104" height="104"/>
+        <polygon points="0,-73.5 73.5,0 0,73.5 -73.5,0"/>
+      </g>
+    </svg>
+    <svg class="khatam__inner" viewBox="-100 -100 200 200">
+      <g fill="none" stroke="#F1EBDD" stroke-opacity=".07" stroke-width=".32">
+        <rect x="-30" y="-30" width="60" height="60"/>
+        <polygon points="0,-42.4 42.4,0 0,42.4 -42.4,0"/>
+      </g>
+    </svg>
+  </div>
+
+  <!-- Ambient grain canvas — visible only in sands mode -->
+  <canvas class="grain-canvas" id="grain"></canvas>
+
+  <!-- Vignette — cinematic only -->
+  <div class="vignette" aria-hidden="true"></div>
+
+  <!-- ── Topbar (visible in slides phase only) ── -->
+  <header class="topbar">
+    <div class="session-meta">
+      <div class="time">
+        <span class="time__diamond" aria-hidden="true"></span>
+        <span class="time__value" id="timer">00:00</span>
+      </div>
+      <span class="session-title"><em>Ratios, Percentages &amp; Equations</em></span>
+    </div>
+
+    <div class="controls">
+      <!-- Mic — pressed = muted. The diagonal "strike" line is hidden by
+           default; the [aria-pressed="true"] state reveals it. -->
+      <button class="icon-btn" id="mic" aria-pressed="false"
+              aria-label="Toggle microphone" data-tip="Mute">
+        <svg width="18" height="18" viewBox="0 0 18 18" fill="none"
+             stroke="currentColor" stroke-width="2"
+             stroke-linecap="round" stroke-linejoin="round">
+          <rect x="6.5" y="2" width="5" height="9" rx="2.5"/>
+          <path d="M3.5 8.5a5.5 5.5 0 0 0 11 0"/>
+          <line x1="9" y1="14" x2="9" y2="16.5"/>
+          <line x1="6.5" y1="16.5" x2="11.5" y2="16.5"/>
+          <line class="strike" x1="2.5" y1="2.5" x2="15.5" y2="15.5"/>
+        </svg>
+      </button>
+
+      <!-- Camera — pressed = video off. Same strike treatment as mic. -->
+      <button class="icon-btn" id="cam" aria-pressed="false"
+              aria-label="Toggle camera" data-tip="Stop video">
+        <svg width="18" height="18" viewBox="0 0 18 18" fill="none"
+             stroke="currentColor" stroke-width="2"
+             stroke-linecap="round" stroke-linejoin="round">
+          <rect x="2" y="5" width="10" height="8" rx="1.5"/>
+          <path d="M12 8.2 16 6v6l-4-2.2z"/>
+          <line class="strike" x1="2.5" y1="2.5" x2="15.5" y2="15.5"/>
+        </svg>
+      </button>
+
+      <div class="me-avatar" title="You" aria-label="Your profile">JI</div>
+    </div>
+  </header>
+
+  <!-- ── Main ── -->
+  <main class="main">
+
+    <!-- Shared SVG defs (sand-grain filter + gradient) — used by sands countdown -->
+    <svg width="0" height="0" aria-hidden="true" style="position:absolute;">
+      <defs>
+        <filter id="sand-grain" x="-20%" y="-20%" width="140%" height="140%">
+          <feTurbulence type="fractalNoise" baseFrequency="0.7" numOctaves="2" seed="3" result="noise"/>
+          <feDisplacementMap in="SourceGraphic" in2="noise" scale="3"/>
+        </filter>
+        <linearGradient id="sand-fill" x1="0" x2="0" y1="0" y2="1">
+          <stop offset="0%"   stop-color="#DDC09A"/>
+          <stop offset="45%"  stop-color="#CB7A50"/>
+          <stop offset="100%" stop-color="#BC5A37"/>
+        </linearGradient>
+      </defs>
+    </svg>
+
+    <!-- ── Countdown B — Mission Control ── -->
+    <div class="countdown cd-mission">
+      <div class="mc-cross" aria-hidden="true"></div>
+      <div class="mc-scanlines" aria-hidden="true"></div>
+
+      <div class="mc-strip">
+        <span class="mc-strip__dot"></span>
+        <span class="mc-strip__title"><em>Ratios, Percentages &amp; Equations</em></span>
+      </div>
+
+      <div class="mc-readout mc-readout--tl">
+        <div>Session</div><div class="mc-readout__value">MATH · RATIOS · % · EQ</div>
+        <div>Channel</div><div class="mc-readout__value">Live · Studio 04</div>
+      </div>
+      <div class="mc-readout mc-readout--tr">
+        <div>Viewers</div><div class="mc-readout__value" id="mcViewers">000 102</div>
+        <div>Classrooms</div><div class="mc-readout__value">02 active · 02 standby</div>
+      </div>
+      <div class="mc-readout mc-readout--bl">
+        <div>Presenter</div><div class="mc-readout__value">Sara Al-Otaibi</div>
+      </div>
+      <div class="mc-readout mc-readout--br">
+        <div>Stream</div><div class="mc-readout__value">1080p · 30fps · OK</div>
+      </div>
+
+      <div class="mc-ring-wrap">
+        <svg class="mc-ring-bg" viewBox="0 0 200 200" aria-hidden="true">
+          <circle cx="100" cy="100" r="92"/>
+        </svg>
+        <svg class="mc-ring-fg" viewBox="0 0 200 200" aria-hidden="true">
+          <circle id="mcRing" cx="100" cy="100" r="92"
+                  stroke-dasharray="578.05" stroke-dashoffset="0"/>
+        </svg>
+        <svg class="mc-ticks" viewBox="0 0 200 200" aria-hidden="true" id="mcTicks"></svg>
+        <div class="mc-number">
+          <div class="mc-number__digit" id="mcDigit">10</div>
+          <div class="mc-number__unit">Seconds to live</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── Countdown C — Cinematic ── -->
+    <div class="countdown cd-cinema">
+      <!-- Bilingual label sits up top, away from the massive numeric in the
+           middle of the stage. Same wording as Sands / Grain for continuity. -->
+      <div class="cin-label">
+        <div class="cin-label__en">Class begins in</div>
+      </div>
+      <div class="cin-horizon" id="cinHorizon"></div>
+      <div class="cin-stage" id="cinStage"></div>
+      <div class="cin-underline"></div>
+    </div>
+
+    <!-- ── Countdown D — Drifting Sands ── -->
+    <div class="countdown cd-sands">
+      <div class="sands-label">
+        <div class="sands-label__en">Class begins in</div>
+      </div>
+      <div class="sands-numeral" id="sandsNumeral">
+        <svg class="num-in" viewBox="0 0 520 420" preserveAspectRatio="xMidYMid meet">
+          <text x="260" y="210">10</text>
+        </svg>
+      </div>
+      <div class="sands-streaks" id="sandsStreaks">
+        <div class="sands-streak" data-row="0"></div>
+        <div class="sands-streak" data-row="1"></div>
+        <div class="sands-streak" data-row="2"></div>
+      </div>
+      <div class="sands-marks" id="sandsMarks" aria-hidden="true"></div>
+    </div>
+
+    <!-- ── Teacher solo ── -->
+    <div class="teacher-solo">
+      <div class="teacher-circle"></div>
+      <div class="teacher-label">
+        <div class="teacher-label__name">Sara Al-Otaibi</div>
+        <div class="teacher-label__sub">Teacher · Live</div>
+      </div>
+    </div>
+
+    <!-- ── Team-up view (lobby before countdown) — populated by renderTeamup() ── -->
+    <div class="teamup-view" aria-label="Team-up lobby">
+      <div class="teamup__counts">
+        <span class="count-chip count-chip--students" id="tuStudents">
+          <span class="count-chip__dot"></span>
+          <span id="tuStudentsN">0</span><span class="count-chip__total"> / 24</span> here
+        </span>
+        <span class="count-chip count-chip--teams" id="tuTeams">
+          <span id="tuTeamsN">0</span> teams
+        </span>
+      </div>
+
+      <div class="teamup__body">
+        <!-- Team mode: grid -->
+        <div class="team-grid" id="tuGrid" data-teams="0"></div>
+        <!-- Solo mode: attendance grid -->
+        <div class="attendance-grid" id="tuAttendance"></div>
+        <!-- Bottom strip: students still picking a team -->
+        <div class="teamup__picking" id="tuPicking" hidden>
+          <div class="teamup__picking-label">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+            <span id="tuPickingLabel">0 students still picking a team</span>
+          </div>
+          <div class="teamup__picking-list" id="tuPickingList"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── Slide view ── -->
+    <div class="slide-area">
+      <div class="stage-wrap">
+        <section class="stage" aria-label="Slide — Chemistry cover">
+          <!-- Khatam texture — canonical square+diamond tile, tone-on-tone
+               deep rust on terracotta (line only, never filled) -->
+          <svg class="slide-khatam" viewBox="0 0 1920 1080" preserveAspectRatio="xMidYMid slice" aria-hidden="true">
+            <defs>
+              <pattern id="slide-oct" width="160" height="160" patternUnits="userSpaceOnUse">
+                <g fill="none" stroke="#96431F" stroke-opacity=".33" stroke-width="1.4">
+                  <rect x="23.3" y="23.3" width="113.4" height="113.4"/>
+                  <polygon points="80,0 160,80 80,160 0,80"/>
+                </g>
+              </pattern>
+            </defs>
+            <rect width="1920" height="1080" fill="url(#slide-oct)"/>
+          </svg>
+
+          <!-- Style B (band) — saffron side band with the rotated subject
+               name; the mark re-voiced in deep rust at bottom-left -->
+          <div class="slide-band slide-v2" aria-hidden="true"></div>
+          <p class="slide-band-name slide-v2" dir="rtl" lang="ar">كيمياء</p>
+          <svg class="slide-icon--mono slide-v2" viewBox="0 0 175 156" aria-hidden="true">
+            <path d="M56.5 66.7V97.3L83 112.7L109.5 97.3V66.7L83 51.4L56.5 66.7Z" fill="#96431F"/>
+            <path d="M130.9 91.2V116.4L152.7 129L174.5 116.4V91.2L152.7 78.6L130.9 91.2Z" fill="#96431F"/>
+            <path d="M113.4 12.6V37.8L135.3 50.4L157.1 37.8V12.6L135.3 0L113.4 12.6Z" fill="#96431F"/>
+            <path d="M0 117.4V142.6L21.8 155.2L43.6 142.6V117.4L21.8 104.8L0 117.4Z" fill="#96431F"/>
+            <path d="M130.1 37.6C131.3 37.4 131.9 39.2 130.6 39.5C113.1 43.2 98.5 53.2 88 67.5C87.1 68.7 85.1 67.6 85.9 66.3C96.1 51.4 112.4 41.1 130.1 37.6ZM64.9 89.5C49.7 94.5 36 104.7 27.6 118.4C26.8 119.7 28.8 120.8 29.6 119.6C38.5 106.5 50.3 96.7 65.4 91.6C66.8 91.1 66.2 89.1 64.9 89.5ZM95.4 82.6C104.9 95.5 119.2 104.9 135.2 107.2C136.7 107.4 137.4 105.1 135.8 104.8C120.3 101.9 106.8 94.1 97.4 81.4C96.5 80.3 94.5 81.4 95.4 82.6Z" fill="#F1EBDD"/>
+          </svg>
+
+          <!-- Style A (tag) — the illustrative mark (hexagon chain), saffron
+               with cream connectors on the terracotta ground -->
+          <svg class="slide-icon slide-v1" viewBox="0 0 175 156" aria-hidden="true">
+            <path d="M56.5 66.7V97.3L83 112.7L109.5 97.3V66.7L83 51.4L56.5 66.7Z" fill="#DDBA62"/>
+            <path d="M130.9 91.2V116.4L152.7 129L174.5 116.4V91.2L152.7 78.6L130.9 91.2Z" fill="#DDBA62"/>
+            <path d="M113.4 12.6V37.8L135.3 50.4L157.1 37.8V12.6L135.3 0L113.4 12.6Z" fill="#DDBA62"/>
+            <path d="M0 117.4V142.6L21.8 155.2L43.6 142.6V117.4L21.8 104.8L0 117.4Z" fill="#DDBA62"/>
+            <path d="M130.1 37.6C131.3 37.4 131.9 39.2 130.6 39.5C113.1 43.2 98.5 53.2 88 67.5C87.1 68.7 85.1 67.6 85.9 66.3C96.1 51.4 112.4 41.1 130.1 37.6ZM64.9 89.5C49.7 94.5 36 104.7 27.6 118.4C26.8 119.7 28.8 120.8 29.6 119.6C38.5 106.5 50.3 96.7 65.4 91.6C66.8 91.1 66.2 89.1 64.9 89.5ZM95.4 82.6C104.9 95.5 119.2 104.9 135.2 107.2C136.7 107.4 137.4 105.1 135.8 104.8C120.3 101.9 106.8 94.1 97.4 81.4C96.5 80.3 94.5 81.4 95.4 82.6Z" fill="#F1EBDD"/>
+          </svg>
+
+          <!-- Title -->
+          <p class="slide-cover-title" dir="rtl" lang="ar">العنوان: مهمتي في الحياة ليست مجرد البقاء على قيد الحياة</p>
+
+          <!-- Subject tag — saffron with a folded rust corner -->
+          <svg class="slide-tag slide-v1" viewBox="0 0 250 90" role="img" aria-label="كيمياء">
+            <path d="M0 0 H250 V90 H0 Z" fill="#DDBA62"/>
+            <path d="M226 0 H250 V24 Z" fill="#A94E2A"/>
+            <text x="125" y="46" text-anchor="middle" dominant-baseline="central" font-family="IBM Plex Sans Arabic, sans-serif" font-weight="700" font-size="40" fill="#26282E">كيمياء</text>
+          </svg>
+
+          <!-- noon · Tracks lockup -->
+          <div class="slide-logo" aria-hidden="true">
+            <svg class="slide-logo__mark" viewBox="0 0 140 64" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+<path d="M82.7222 21.2108C76.868 21.2108 72.1168 25.962 72.1168 31.8162C72.1168 37.6704 76.868 42.4217 82.7222 42.4217C88.5764 42.4217 93.3277 37.6704 93.3277 31.8162C93.3277 25.962 88.5764 21.2108 82.7222 21.2108ZM82.7222 38.9007C78.8194 38.9007 75.6378 35.719 75.6378 31.8162C75.6378 27.9134 78.8194 24.7318 82.7222 24.7318C86.625 24.7318 89.8067 27.9134 89.8067 31.8162C89.8067 35.719 86.625 38.9007 82.7222 38.9007Z" fill="#F1EBDD"></path>
+<path d="M57.2692 21.2108C51.415 21.2108 46.6638 25.962 46.6638 31.8162C46.6638 37.6704 51.415 42.4217 57.2692 42.4217C63.1234 42.4217 67.8747 37.6704 67.8747 31.8162C67.8747 25.962 63.1234 21.2108 57.2692 21.2108Z" fill="#F1EBDD"></path>
+<path d="M31.8162 21.2108C25.962 21.2108 21.2108 25.962 21.2108 31.8162V41.149C21.2108 41.6156 21.5926 41.9974 22.0592 41.9974H23.8834C24.35 41.9974 24.7318 41.6156 24.7318 41.149V31.8162C24.7318 27.9134 27.9134 24.7318 31.8162 24.7318C35.719 24.7318 38.9007 27.9134 38.9007 31.8162V41.149C38.9007 41.6156 39.2824 41.9974 39.7491 41.9974H41.5732C42.0399 41.9974 42.4217 41.6156 42.4217 41.149V31.8162C42.4217 25.962 37.6704 21.2108 31.8162 21.2108Z" fill="#F1EBDD"></path>
+<path d="M108.175 21.2108C102.321 21.2108 97.5698 25.962 97.5698 31.8162V41.149C97.5698 41.6156 97.9516 41.9974 98.4183 41.9974H100.242C100.709 41.9974 101.091 41.6156 101.091 41.149V31.8162C101.091 27.9134 104.272 24.7318 108.175 24.7318C112.078 24.7318 115.26 27.9134 115.26 31.8162V41.149C115.26 41.6156 115.641 41.9974 116.108 41.9974H117.932C118.399 41.9974 118.781 41.6156 118.781 41.149V31.8162C118.781 25.962 114.029 21.2108 108.175 21.2108Z" fill="#F1EBDD"></path>
+<path d="M57.0995 36.9068C60.3236 40.046 65.6263 40.046 68.8503 36.9068C69.3594 36.3978 68.511 35.7614 68.0868 36.2281C65.2869 38.9855 60.7478 38.9855 57.9056 36.2281C57.4389 35.7614 56.5905 36.3978 57.0995 36.9068Z" fill="#F1EBDD"></path>
+</svg>
+            <span class="slide-logo__tracks">Tracks</span>
+          </div>
+        </section>
+      </div>
+      <aside class="sidebar">
+        <div class="focus" id="focus" data-speaker="teacher" aria-label="Active speaker">
+          <div class="focus__pip"></div>
+          <div class="focus__overlay"></div>
+          <div class="focus__label">
+            <div class="focus__name">Sara Al-Otaibi</div>
+            <div class="focus__sub">Teacher</div>
+          </div>
+        </div>
+
+        <!-- Roster — avatars + names; populated by JS so we can highlight speakers -->
+        <div class="roster" id="roster" role="list" aria-label="On stage"></div>
+
+        <!-- Class chat — heading + flowing messages container, populated by firehose JS -->
+        <div class="chat">
+          <div class="messages" id="messages"></div>
+        </div>
+      </aside>
+    </div>
+
+    <!-- ── Stage view — opt-in only, reached via "Stage" in Skip-to. ── -->
+    <div class="stage-view" aria-label="Stage view">
+      <div class="stage-cluster" role="list" aria-label="Stage participants">
+        <!-- Teacher (lead party — large circle, breathing coral rim) -->
+        <div class="member member--teacher" role="listitem">
+          <div class="member__circle">
+            <div class="member__photo" style="background-image: url('assets/teacher-ali.jpg.png');"></div>
+          </div>
+          <div class="member__label">
+            <div class="member__name">Sara Al-Otaibi</div>
+            <div class="member__sub">Teacher · Live</div>
+          </div>
+        </div>
+
+        <!-- 2x2 classroom grid (4 outposts, all muted by default) -->
+        <div class="classrooms-grid">
+          <div class="member member--classroom" role="listitem">
+            <div class="member__circle">
+              <div class="member__photo" style="background-image: url('assets/classroom-a.jpg');"></div>
+            </div>
+            <div class="member__label"><div class="member__name">Classroom A</div></div>
+          </div>
+          <div class="member member--classroom" role="listitem">
+            <div class="member__circle">
+              <div class="member__photo" style="background-image: url('assets/classroom-b.jpg');"></div>
+              <span class="member__mute" aria-label="Muted">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="1" y1="1" x2="23" y2="23"/><path d="M9 9v3a3 3 0 0 0 5.12 2.12M15 9.34V4a3 3 0 0 0-5.94-.6"/><path d="M17 16.95A7 7 0 0 1 5 12v-2m14 0v2a7 7 0 0 1-.11 1.23"/></svg>
+              </span>
+            </div>
+            <div class="member__label"><div class="member__name">Classroom B</div></div>
+          </div>
+          <div class="member member--classroom" role="listitem">
+            <div class="member__circle">
+              <div class="member__photo" style="background-image: url('assets/classroom-d.jpg');"></div>
+            </div>
+            <div class="member__label"><div class="member__name">Classroom D</div></div>
+          </div>
+          <div class="member member--classroom" role="listitem">
+            <div class="member__circle">
+              <div class="member__photo" style="background-image: url('assets/classroom-a.jpg');"></div>
+              <span class="member__mute" aria-label="Muted">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="1" y1="1" x2="23" y2="23"/><path d="M9 9v3a3 3 0 0 0 5.12 2.12M15 9.34V4a3 3 0 0 0-5.94-.6"/><path d="M17 16.95A7 7 0 0 1 5 12v-2m14 0v2a7 7 0 0 1-.11 1.23"/></svg>
+              </span>
+            </div>
+            <div class="member__label"><div class="member__name">Classroom E</div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <!-- ── Control panel ── -->
+  <aside class="controls-panel" id="cp" aria-label="Sequence controls">
+    <button class="cp-handle" id="cpHandle">
+      <span class="cp-diamond"></span> Sequence controls
+    </button>
+    <!-- Skip-to lives outside the panel — always visible, even folded -->
+    <div class="cp-quick">
+      <div class="cp-tabs" data-attr="data-phase">
+        <button data-value="teamup">Team-up</button>
+        <button data-value="countdown">Count</button>
+        <button data-value="teacher">Teacher</button>
+        <button data-value="slides">Slides</button>
+        <button data-value="stage">Stage</button>
+      </div>
+    </div>
+    <div class="cp-panel">
+
+      <div class="cp-section">Countdown style</div>
+      <div class="cp-row cp-row--stack">
+        <div class="cp-tabs cp-tabs--grid-3" data-attr="data-countdown">
+          <button data-value="mission">A · Mission</button>
+          <button data-value="cinema">B · Cinema</button>
+          <button data-value="sands">C · Sands</button>
+        </div>
+      </div>
+
+      <div class="cp-section">Sequence</div>
+      <div class="cp-row">
+        <span>Card layout</span>
+        <div class="cp-tabs" data-attr="data-card-layout">
+          <button data-value="row">Side</button>
+          <button data-value="stacked">Stacked</button>
+        </div>
+      </div>
+      <div class="cp-row">
+        <span>Card style</span>
+        <div class="cp-tabs" data-attr="data-card-style">
+          <button data-value="plain">Plain</button>
+          <button data-value="crest">Crest</button>
+        </div>
+      </div>
+      <div class="cp-row">
+        <span>Slide style</span>
+        <div class="cp-tabs" data-attr="data-slide">
+          <button data-value="tag">A · Tag</button>
+          <button data-value="band">B · Band</button>
+        </div>
+      </div>
+      <div class="cp-row">
+        <span>Duration</span>
+        <div class="cp-tabs" data-attr="data-duration">
+          <button data-value="5">5s</button>
+          <button data-value="10">10s</button>
+          <button data-value="15">15s</button>
+        </div>
+      </div>
+      <div class="cp-row">
+        <span>Sound</span>
+        <div class="cp-tabs" data-attr="data-sound">
+          <button data-value="on">On</button>
+          <button data-value="off">Off</button>
+        </div>
+      </div>
+
+      <div class="cp-section">Backdrop · Empty Quarter</div>
+      <div class="cp-row cp-row--stack">
+        <span>Landscape direction</span>
+        <div class="cp-tabs cp-tabs--grid" data-attr="data-bg-landscape">
+          <button data-value="off">Off</button>
+          <button data-value="quiet" title="Ridge terrain in the quiet line voice — stroke-only cream on ink (the Register's resolved countdown ground)">Quiet</button>
+          <button data-value="mural" title="Filled terrain artwork ramp — low horizon band, dimmed">Mural</button>
+          <button data-value="pins"  title="Pinboard horizon — bounded pin field with the facade dissolve">Pins</button>
+        </div>
+      </div>
+      <div class="cp-row">
+        <span>Khatam ceremony</span>
+        <div class="cp-tabs" data-attr="data-bg-khatam">
+          <button data-value="off">Off</button>
+          <button data-value="on">On</button>
+        </div>
+      </div>
+
+      <div class="cp-actions">
+        <button class="cp-btn cp-btn--primary" id="cpReplay">▷ Replay</button>
+      </div>
+    </div>
+  </aside>
+</div>
+
+<script>
+  /* ──────────────────────────────────────────────────────────────────────
+     THE EMPTY QUARTER TERRAIN — painted once from the canonical algorithms
+     (empty-quarter-main: the mural ridge recipe + the Kingdom pin grammar).
+     ────────────────────────────────────────────────────────────────────── */
+  (function () {
+    function mulberry(seed) {
+      let st = seed;
+      return () => { st = (st * 16807) % 2147483647; return (st - 1) / 2147483646; };
+    }
+
+    // Canonical ridge builder — sinusoid dune crests with per-ridge seam
+    // breakpoints so no vertical line runs straight through; ridges are
+    // clamped never to cross.
+    function buildRidges(TW, layers, seedVal, plateauY) {
+      const trnd = mulberry(seedVal);
+      const mStep = TW / 26;
+      layers.forEach((ly, i) => { ly.ph0 = i * 1.7; ly.ph1 = i * 0.8 + 1.1; });
+      const rawY = (ly, x) => ly.y + ly.amp * Math.sin((x / mStep) * 0.9 + ly.ph0)
+                                   + ly.amp * 0.4 * Math.sin((x / mStep) * 2.1 + ly.ph1);
+      const yEff = (i, x) => i < 0 ? 0 : Math.max(rawY(layers[i], x), yEff(i - 1, x) + 5);
+      const ridges = layers.map((ly, i) => {
+        const pts = [[0, yEff(i, 0)]];
+        let x = 0;
+        while (x < TW) { x = Math.min(TW, x + 78 + trnd() * 120); pts.push([x, yEff(i, x)]); }
+        return pts;
+      });
+      // Plateau rule — the bottom edge settles to an unbroken plane with
+      // one seam at its top edge. Fingers (and chrome) land on calm ground.
+      const floor = [[0, plateauY]];
+      { let x = 0; while (x < TW) { x = Math.min(TW, x + 90 + trnd() * 140); floor.push([x, plateauY]); } }
+      ridges.push(floor);
+      return ridges;
+    }
+    function triangulate(ridges, layers) {
+      const P = p => p[0].toFixed(1) + ',' + p[1].toFixed(1);
+      const tris = [];
+      for (let i = 0; i < layers.length; i++) {
+        const A = ridges[i], B = ridges[i + 1], fills = layers[i].fills;
+        let a = 0, b = 0, n = i;
+        while (a < A.length - 1 || b < B.length - 1) {
+          if (b >= B.length - 1 || (a < A.length - 1 && A[a + 1][0] <= B[b + 1][0])) {
+            tris.push({ pts: [A[a], A[a + 1], B[b]].map(P).join(' '), fill: fills ? fills[n++ % 2] : null }); a++;
+          } else {
+            tris.push({ pts: [A[a], B[b + 1], B[b]].map(P).join(' '), fill: fills ? fills[n++ % 2] : null }); b++;
+          }
+        }
+      }
+      return tris;
+    }
+    function paint(el, tris, stroke, sw, filled) {
+      el.innerHTML = tris.map(t =>
+        '<polygon points="' + t.pts + '" fill="' + (filled && t.fill ? t.fill : 'none') + '"' +
+        (stroke ? ' stroke="' + stroke + '" stroke-width="' + (sw || 1) + '"' : '') + '/>').join('');
+    }
+
+    // A · QUIET — the quiet line voice: the same lattice rendered
+    // stroke-only in cream on ink. The Register's resolved countdown ground.
+    (function () {
+      const el = document.getElementById('terrainQuiet'); if (!el) return;
+      const TW = 1440, H = 420;
+      const layers = [
+        { y: 120, amp: 14 }, { y: 158, amp: 18 }, { y: 196, amp: 20 },
+        { y: 236, amp: 22 }, { y: 278, amp: 20 }, { y: 318, amp: 17 },
+        { y: 352, amp: 13 },
+      ];
+      const ridges = buildRidges(TW, layers, 29, H - 72);
+      paint(el, triangulate(ridges, layers), 'rgba(241,235,221,.10)', 1, false);
+      // one seam at the plateau's top edge
+      el.innerHTML += '<line x1="0" y1="' + (H - 72) + '" x2="' + TW + '" y2="' + (H - 72) +
+        '" stroke="rgba(241,235,221,.14)" stroke-width="1"/>';
+    })();
+
+    // B · MURAL — the filled artwork ramp, cream → deep rust, held to a
+    // low horizon band. White seams at .4, as drawn. The deepest plane
+    // runs unbroken to the bottom edge (plateau rule).
+    (function () {
+      const el = document.getElementById('terrainMural'); if (!el) return;
+      const TW = 1440, H = 260;
+      const layers = [
+        { y: 52,  amp: 11, fills: ['#EBDFC8', '#E2D2B2'] },
+        { y: 80,  amp: 13, fills: ['#DBC49C', '#D2B586'] },
+        { y: 108, amp: 14, fills: ['#D2AE7C', '#C49A60'] },
+        { y: 136, amp: 15, fills: ['#CB7A50', '#B8633C'] },
+        { y: 164, amp: 13, fills: ['#BC5A37', '#AC5230'] },
+        { y: 192, amp: 11, fills: ['#A44C2C', '#964526'] },
+        { y: 216, amp: 8,  fills: ['#8A3F26', '#7C3620'] },
+      ];
+      const ridges = buildRidges(TW, layers, 29, H);
+      paint(el, triangulate(ridges, layers), 'rgba(255,255,255,.4)', 1, true);
+    })();
+
+    // C · PINS — Pinboard horizon: the dune silhouette drawn in pins.
+    // No outline — where the pins stop, the ridge is. The facade dissolve
+    // thins the field under center stage by discrete parity rings; no
+    // opacity fades, ever. Green pins mark the live rooms.
+    (function () {
+      const el = document.getElementById('terrainPins'); if (!el) return;
+      const TW = 1440, H = 300, step = 24;
+      const horizon = x => 90 + 46 * Math.sin(x * 0.0042 + 1.2) + 24 * Math.sin(x * 0.0093 + 0.4);
+      const cx = TW / 2, cy = 30;   // clear zone sits under the countdown numeral
+      const greens = [[9, 7], [33, 9], [48, 6]];
+      let out = '';
+      for (let j = 0; j < Math.floor(H / step); j++) {
+        for (let i = 0; i <= Math.floor(TW / step); i++) {
+          const x = step / 2 + i * step, y = step / 2 + j * step;
+          if (y < horizon(x)) continue;
+          const d = Math.hypot(x - cx, (y - cy) * 1.15);
+          let keep;
+          if (d < 170)      keep = false;
+          else if (d < 230) keep = (i + j) % 2 === 0;
+          else if (d < 290) keep = (i + j) % 4 !== 0;
+          else              keep = true;
+          if (!keep) continue;
+          const hot = greens.some(g => g[0] === i && g[1] === j);
+          out += '<circle cx="' + x + '" cy="' + y + '" r="2.4" fill="' +
+                 (hot ? '#64D8AE' : 'rgba(241,235,221,.15)') + '"/>';
+        }
+      }
+      el.innerHTML = out;
+    })();
+  })();
+
+  /* ──────────────────────────────────────────────────────────────────────
+     SAND-GRAIN AMBIENT PARTICLE FIELD (canvas) — only animated when sands mode
+     ────────────────────────────────────────────────────────────────────── */
+  const grainCtl = (function () {
+    const canvas = document.getElementById('grain');
+    const ctx = canvas.getContext('2d');
+    let W = 0, H = 0, dpr = Math.min(window.devicePixelRatio || 1, 2);
+    let grains = [];
+    let windPulse = 0;
+    let rafId = 0;
+
+    function resize() {
+      W = window.innerWidth; H = window.innerHeight;
+      canvas.width  = W * dpr; canvas.height = H * dpr;
+      canvas.style.width  = W + 'px'; canvas.style.height = H + 'px';
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    }
+    window.addEventListener('resize', resize);
+    resize();
+
+    function seed() {
+      grains = [];
+      const count = Math.round((W * H) / 9000);
+      for (let i = 0; i < count; i++) {
+        grains.push({
+          x: Math.random() * W,
+          y: H * 0.25 + Math.random() * H * 0.7,
+          vx: 0.15 + Math.random() * 0.5,
+          vy: -0.05 + Math.random() * 0.1,
+          r: 0.4 + Math.random() * 1.3,
+          a: 0.18 + Math.random() * 0.45,
+          mix: Math.random()
+        });
+      }
+    }
+    seed();
+
+    function tick() {
+      ctx.clearRect(0, 0, W, H);
+      windPulse *= 0.94;
+      for (const g of grains) {
+        const wind = 1 + windPulse * 6;
+        g.x += g.vx * wind;
+        g.y += g.vy + (Math.random() - 0.5) * 0.15;
+        if (g.x > W + 6) g.x = -6;
+        if (g.x < -6)    g.x = W + 6;
+        if (g.y > H + 6) g.y -= H + 12;
+        if (g.y < -6)    g.y += H + 12;
+        const r = Math.round(212 + (240-212) * g.mix);
+        const gg= Math.round(149 + (207-149) * g.mix);
+        const b = Math.round(110 + (90-110)  * g.mix);
+        ctx.beginPath();
+        ctx.fillStyle = `rgba(${r},${gg},${b},${g.a})`;
+        ctx.arc(g.x, g.y, g.r, 0, Math.PI * 2);
+        ctx.fill();
+      }
+      rafId = requestAnimationFrame(tick);
+    }
+    tick();
+
+    return { gust(s) { windPulse = Math.min(1, windPulse + s); } };
+  })();
+
+  /* ──────────────────────────────────────────────────────────────────────
+     COUNTDOWN ENGINES — one per style.
+     Each exposes { reset(), tick(secondsRemaining, totalSeconds) }.
+     ────────────────────────────────────────────────────────────────────── */
+
+  // ── B · Mission Control ──
+  const ENGINE_mission = (function () {
+    const digit   = document.getElementById('mcDigit');
+    const ring    = document.getElementById('mcRing');
+    const ticks   = document.getElementById('mcTicks');
+    const viewers = document.getElementById('mcViewers');
+    const C = 578.05;
+
+    function rebuildTicks(count) {
+      ticks.replaceChildren();
+      const cx = 100, cy = 100, r0 = 80, r1 = 86;
+      const ns = 'http://www.w3.org/2000/svg';
+      for (let i = 0; i < count; i++) {
+        // Positive angle step lays out ticks clockwise from 12 o'clock;
+        // array-order lighting then sweeps clockwise.
+        const angle = (i / count) * Math.PI * 2 - Math.PI / 2;
+        const x0 = cx + Math.cos(angle) * r0, y0 = cy + Math.sin(angle) * r0;
+        const x1 = cx + Math.cos(angle) * r1, y1 = cy + Math.sin(angle) * r1;
+        const line = document.createElementNS(ns, 'line');
+        line.setAttribute('x1', x0); line.setAttribute('y1', y0);
+        line.setAttribute('x2', x1); line.setAttribute('y2', y1);
+        ticks.appendChild(line);
+      }
+    }
+    function reset(total) {
+      digit.textContent = total;
+      ring.style.strokeDashoffset = '0';
+      rebuildTicks(total);
+      viewers.textContent = '000 102';
+      const lines = ticks.querySelectorAll('line');
+      if (lines[0]) lines[0].classList.add('is-lit');
+    }
+    function tick(secLeft, total) {
+      digit.textContent = secLeft;
+      digit.classList.remove('is-ticking');
+      void digit.offsetWidth;
+      digit.classList.add('is-ticking');
+      const prog = (total - secLeft) / total;
+      // Negative dashoffset shifts the dash pattern BACKWARD along the SVG
+      // path direction. Since the <circle> path runs clockwise from 12 o'clock
+      // (after the parent's rotate(-90deg)), shifting backward makes the gap
+      // grow counterclockwise — the visible arc retracts from the upper-left
+      // through 9, 6, 3, back to 12.
+      ring.style.strokeDashoffset = String(-C * prog);
+      const idx = total - secLeft;
+      const lines = ticks.querySelectorAll('line');
+      if (lines[idx]) lines[idx].classList.add('is-lit');
+      const v = 102 + Math.floor(Math.random() * 3) * idx;
+      viewers.textContent = '000 ' + String(v).padStart(3,'0');
+    }
+    return { reset, tick };
+  })();
+
+  // ── C · Cinematic ──
+  const ENGINE_cinema = (function () {
+    const stage   = document.getElementById('cinStage');
+    const horizon = document.getElementById('cinHorizon');
+    function makeDigit(text, isFirst) {
+      const d = document.createElement('div');
+      d.className = 'cin-digit' + (isFirst ? '' : ' is-entering');
+      d.textContent = text;
+      return d;
+    }
+    function reset(total) {
+      stage.replaceChildren(makeDigit(total, true));
+      horizon.style.transition = '';
+      horizon.style.width = '12%';
+      // re-trigger the widening transition on next frame
+      requestAnimationFrame(() => {
+        horizon.style.transition = `width ${total}s linear, opacity 700ms ease`;
+        horizon.style.width = '64%';
+      });
+    }
+    function tick(secLeft, total) {
+      // Mark existing digits as leaving — they exit in 280ms (see cin-out),
+      // so DOM removal matches that timeline. The incoming digit holds
+      // invisible for its first 15% (~120ms) so the ghosting overlap is
+      // minimal — by the time the new digit starts blooming, the old one
+      // is nearly gone.
+      stage.querySelectorAll('.cin-digit').forEach(el => {
+        el.classList.remove('is-entering');
+        el.classList.add('is-leaving');
+        setTimeout(() => el.remove(), 280);
+      });
+      stage.appendChild(makeDigit(secLeft, false));
+    }
+    return { reset, tick };
+  })();
+
+  // ── D · Drifting Sands ──
+  const ENGINE_sands = (function () {
+    const numeral = document.getElementById('sandsNumeral');
+    const marks   = document.getElementById('sandsMarks');
+    const streaks = document.getElementById('sandsStreaks');
+    // build marks once
+    for (let i = 0; i < 10; i++) {
+      const d = document.createElement('div'); d.className = 'sands-mark'; marks.appendChild(d);
+    }
+    function makeSvg(text, cls) {
+      const ns = 'http://www.w3.org/2000/svg';
+      const svg = document.createElementNS(ns, 'svg');
+      svg.setAttribute('viewBox', '0 0 520 420');
+      svg.setAttribute('preserveAspectRatio', 'xMidYMid meet');
+      svg.setAttribute('class', cls);
+      const t = document.createElementNS(ns, 'text');
+      t.setAttribute('x', '260'); t.setAttribute('y', '210');
+      t.textContent = text; svg.appendChild(t);
+      return svg;
+    }
+    function pulseStreaks() {
+      const el = streaks.querySelectorAll('.sands-streak');
+      el.forEach(s => s.classList.remove('is-active'));
+      void streaks.offsetWidth;
+      el.forEach(s => s.classList.add('is-active'));
+    }
+    function reset(total) {
+      // remove existing numerals
+      numeral.querySelectorAll('svg').forEach(s => s.remove());
+      numeral.appendChild(makeSvg(total, 'num-in'));
+      const dots = marks.querySelectorAll('.sands-mark');
+      dots.forEach((d, i) => {
+        d.classList.remove('is-filled', 'is-arrival');
+        d.style.display = i < total ? '' : 'none';
+      });
+      if (dots[0]) dots[0].classList.add('is-filled');
+      pulseStreaks();
+    }
+    function tick(secLeft, total) {
+      numeral.querySelectorAll('svg.num-in, svg.num-out').forEach(el => {
+        el.classList.remove('num-in');
+        el.classList.add('num-out');
+        setTimeout(() => el.remove(), 750);
+      });
+      const next = makeSvg(secLeft, 'num-in');
+      next.classList.add('is-incoming');
+      numeral.appendChild(next);
+      requestAnimationFrame(() => {
+        requestAnimationFrame(() => next.classList.remove('is-incoming'));
+      });
+      const dots = marks.querySelectorAll('.sands-mark');
+      const idx = total - secLeft;
+      if (dots[idx]) {
+        dots[idx].classList.add('is-filled');
+        // the last waypoint is arrival — the one green moment on the route
+        if (idx === total - 1) dots[idx].classList.add('is-arrival');
+      }
+      grainCtl.gust(0.7);
+      pulseStreaks();
+    }
+    return { reset, tick };
+  })();
+
+  const ENGINES = {
+    mission: ENGINE_mission,
+    cinema:  ENGINE_cinema,
+    sands:   ENGINE_sands,
+  };
+
+  /* ──────────────────────────────────────────────────────────────────────
+     SEQUENCE CONDUCTOR — reads attrs off .app, drives the engines + phases
+     ────────────────────────────────────────────────────────────────────── */
+  const app     = document.getElementById('app');
+  const timerEl = document.getElementById('timer');
+
+  /* ── COUNTDOWN SOUND — synthesized with WebAudio, no assets.
+     A soft wood tap each second (weight landing, not bouncing); the last
+     three seconds lift a fourth; a warm arrival chime when class goes
+     live. The AudioContext is created lazily inside user-gesture call
+     chains (Start / control panel clicks) so autoplay policy is happy. */
+  const SOUND = (function () {
+    let ctx = null;
+    function ensure() {
+      if (!ctx) {
+        const AC = window.AudioContext || window.webkitAudioContext;
+        if (!AC) return null;
+        ctx = new AC();
+      }
+      if (ctx.state === 'suspended') ctx.resume();
+      return ctx;
+    }
+    const enabled = () => app.dataset.sound !== 'off';
+    function note(c, freq, t0, dur, peak, type) {
+      const osc = c.createOscillator(), g = c.createGain();
+      osc.type = type || 'sine';
+      osc.frequency.value = freq;
+      g.gain.setValueAtTime(0.0001, t0);
+      g.gain.exponentialRampToValueAtTime(peak, t0 + 0.008);
+      g.gain.exponentialRampToValueAtTime(0.0001, t0 + dur);
+      osc.connect(g); g.connect(c.destination);
+      osc.start(t0); osc.stop(t0 + dur + 0.05);
+    }
+    return {
+      tick(secLeft) {
+        if (!enabled()) return;
+        const c = ensure(); if (!c) return;
+        const t = c.currentTime;
+        const lift = secLeft <= 3 ? 4 / 3 : 1;   // the ear feels arrival approaching
+        note(c, 220 * lift, t, 0.12, 0.10);
+        note(c, 110 * lift, t, 0.18, 0.06);
+      },
+      arrival() {
+        if (!enabled()) return;
+        const c = ensure(); if (!c) return;
+        const t = c.currentTime;
+        note(c, 392,    t,        0.5, 0.09);
+        note(c, 523.25, t + 0.12, 0.7, 0.09);
+        note(c, 261.63, t,        0.8, 0.05);
+      }
+    };
+  })();
+
+  let timers = [];
+  let liveTimer = null;
+  function schedule(fn, ms) { const id = setTimeout(fn, ms); timers.push(id); return id; }
+  function clearAll() {
+    timers.forEach(clearTimeout); timers = [];
+    if (liveTimer) { clearInterval(liveTimer); liveTimer = null; }
+  }
+
+  // Halt any engines that own a render loop (e.g. canvas-based ones).
+  function stopAllEngines() {
+    Object.values(ENGINES).forEach(e => { if (e.stop) e.stop(); });
+  }
+
+  // Starts the full countdown → teacher → slides sequence.
+  // Note: team-up is NOT part of this auto-sequence — it's the lobby phase
+  // before countdown, advanced only by clicking the Start button.
+  function startSequence() {
+    clearAll();
+    stopAllEngines();
+
+    const style = app.dataset.countdown;
+    const duration = Math.max(2, parseInt(app.dataset.duration, 10) || 10);
+    const hold = Math.max(1, parseInt(app.dataset.teacherHold, 10) || 3);
+
+    app.dataset.phase = 'countdown';
+    syncPhaseControl();
+    timerEl.textContent = '00:00';
+
+    const engine = ENGINES[style];
+    if (!engine) return;
+    engine.reset(duration);
+    SOUND.tick(duration);
+
+    // schedule each tick
+    for (let i = 1; i < duration; i++) {
+      schedule(() => { engine.tick(duration - i, duration); SOUND.tick(duration - i); }, i * 1000);
+    }
+
+    // teacher phase — stop any render-loop engines once countdown is done
+    schedule(() => {
+      app.dataset.phase = 'teacher';
+      syncPhaseControl();
+      stopAllEngines();
+      SOUND.arrival();
+    }, duration * 1000);
+
+    // slides phase
+    schedule(() => {
+      app.dataset.phase = 'slides';
+      syncPhaseControl();
+      let m = 0, s = 0;
+      liveTimer = setInterval(() => {
+        s++; if (s >= 60) { s = 0; m++; }
+        timerEl.textContent = String(m).padStart(2,'0') + ':' + String(s).padStart(2,'0');
+      }, 1000);
+    }, (duration + hold) * 1000);
+  }
+
+  function jumpToPhase(phase) {
+    clearAll();
+    stopAllEngines();
+    app.dataset.phase = phase;
+    if (phase === 'countdown') {
+      // restart the full sequence — feels more natural than freezing on "10"
+      startSequence();
+      return;
+    }
+    if (phase === 'slides') {
+      let m = 0, s = 0;
+      liveTimer = setInterval(() => {
+        s++; if (s >= 60) { s = 0; m++; }
+        timerEl.textContent = String(m).padStart(2,'0') + ':' + String(s).padStart(2,'0');
+      }, 1000);
+    }
+    // 'teamup' and 'teacher' and 'stage' just need the attribute flip; the
+    // CSS handles the rest. team-up keeps the timer at 00:00 and restarts
+    // the lifecycle auto-cycle from state 1.
+    if (phase === 'teamup') {
+      timerEl.textContent = '00:00';
+      startTeamupCycle();
+    } else {
+      // Leaving team-up — kill the cycle so it doesn't keep mutating state
+      stopTeamupCycle();
+    }
+  }
+
+  /* ──────────────────────────────────────────────────────────────────────
+     TEAM-UP — lobby phase data + render.
+     5 demo scenarios cover the lifecycle: empty → few picking → 2 teams
+     forming → 6 teams + many unteamed → all teamed.
+     Mode toggle: team (default) vs solo (attendance grid).
+     ────────────────────────────────────────────────────────────────────── */
+  const TEAM_POOL = [
+    { id: 'cloud',     name: 'Meteor',    avatar: 'assets/teams/Cloud.svg',     color: 'var(--team-cloud)',     hex: '#B7CEDD' },
+    { id: 'crystal',   name: 'Crystal',   avatar: 'assets/teams/Crystal.svg',   color: 'var(--team-crystal)',   hex: '#D3B4C4' },
+    { id: 'fire',      name: 'Fire',      avatar: 'assets/teams/Fire.svg',      color: 'var(--team-fire)',      hex: '#C98A87' },
+    { id: 'lightning', name: 'Lightning', avatar: 'assets/teams/Lightening.svg',color: 'var(--team-lightning)', hex: '#EFD9A0' },
+    { id: 'rainstorm', name: 'Rainstorm', avatar: 'assets/teams/Rainstorm.svg', color: 'var(--team-rainstorm)', hex: '#86A7BE' },
+    { id: 'tornado',   name: 'Tornado',   avatar: 'assets/teams/Tornado.svg',   color: 'var(--team-tornado)',   hex: '#C6CCAA' },
+    { id: 'tsunami',   name: 'Tsunami',   avatar: 'assets/teams/Tsunami.svg',   color: 'var(--team-tsunami)',   hex: '#9FAA7D' },
+    { id: 'volcano',   name: 'Volcano',   avatar: 'assets/teams/Volcano.svg',   color: 'var(--team-volcano)',   hex: '#E7B9B4' },
+  ];
+
+  /* ── Facet-banner crest — the canonical lattice on a narrow tonal ramp
+     of the team's decorative family (the style guide's Banner voice).
+     Seeded per team id so a team's crest is stable across renders. ── */
+  function crestFacetGeo(W, HH, cell, seed, jitter, splitP) {
+    let sv = seed;
+    const rnd = () => { sv = (sv * 16807) % 2147483647; return (sv - 1) / 2147483646; };
+    const cols = Math.ceil(W / cell), rows = Math.ceil(HH / cell), grid = [];
+    for (let j = 0; j <= rows; j++) { grid[j] = [];
+      for (let i = 0; i <= cols; i++) {
+        const bx = Math.min(i * cell, W), by = Math.min(j * cell, HH);
+        grid[j][i] = [bx + (i===0||i===cols?0:(rnd()-.5)*2*jitter*cell),
+                      by + (j===0||j===rows?0:(rnd()-.5)*2*jitter*cell)];
+      }
+    }
+    const tone = (x, y) => (Math.sin(x*.006+seed)*Math.cos(y*.008-seed)+Math.sin((x+y)*.003+seed*2)+2)/4;
+    const P = pt => pt[0].toFixed(1)+','+pt[1].toFixed(1);
+    const out = [];
+    const push = (...ps) => {
+      const cx = ps.reduce((t,pt)=>t+pt[0],0)/ps.length, cy = ps.reduce((t,pt)=>t+pt[1],0)/ps.length;
+      out.push({ pts: ps.map(P).join(' '), u: Math.max(0, Math.min(1, tone(cx,cy)+(rnd()-.5)*.24)) });
+    };
+    for (let j = 0; j < rows; j++) for (let i = 0; i < cols; i++) {
+      const a=grid[j][i], b=grid[j][i+1], c=grid[j+1][i+1], d=grid[j+1][i];
+      if (rnd() < splitP) { if (rnd() < .5) { push(a,b,c); push(a,c,d); } else { push(a,b,d); push(b,c,d); } }
+      else push(a,b,c,d);
+    }
+    return out;
+  }
+  function shadeHex(hex, f) {
+    const n = parseInt(hex.slice(1), 16);
+    let r = (n>>16)&255, g = (n>>8)&255, b = n&255;
+    const t = f > 0 ? 255 : 0, a = Math.abs(f);
+    r = Math.round(r+(t-r)*a); g = Math.round(g+(t-g)*a); b = Math.round(b+(t-b)*a);
+    return 'rgb('+r+','+g+','+b+')';
+  }
+  function teamBannerSVG(team) {
+    const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+    svg.setAttribute('class', 'team-card__banner');
+    svg.setAttribute('viewBox', '0 0 132 190');
+    svg.setAttribute('preserveAspectRatio', 'xMidYMid slice');
+    svg.setAttribute('aria-hidden', 'true');
+    const h = team.hex || '#C6CCAA';
+    const fills = [shadeHex(h,-.12), shadeHex(h,-.06), h, shadeHex(h,.06), shadeHex(h,.12)];
+    const seed = [...team.id].reduce((t, ch) => t + ch.charCodeAt(0), 7);
+    svg.innerHTML = crestFacetGeo(132, 190, 62, seed, .44, .5).map(g =>
+      '<polygon points="'+g.pts+'" fill="'+fills[Math.round(g.u*4)]+'" stroke="rgba(241,235,221,.25)" stroke-width="1"/>').join('');
+    return svg;
+  }
+
+  const FIRST_NAMES = ['Aisha','Yousef','Layla','Omar','Maya','Khalid','Sara','Hassan','Noor','Tariq','Fatima','Ibrahim','Reem','Mostafa','Salma','Yara','Ali','Hala','Mariam','Ziad','Lina','Mohammed','Hana','Karim','Nadia','Faris','Dalia','Rakan','Saad','Jana','Adam','Lubna','Ahmed','Bushra','Tarek','Hadi','Eman','Walid','Asma','Rashed','Mira','Amal','Sami','Dana','Khaled','Rami','Lara','Bilal','Hind','Nour','Said','Maya','Tamer','Salwa','Ramy','Lara','Joud','Ramzi','Hala','Wael'];
+  const LAST_INITIALS = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+  function rosterName(i) { return FIRST_NAMES[i % FIRST_NAMES.length] + ' ' + LAST_INITIALS[i % LAST_INITIALS.length] + '.'; }
+
+  // Each scenario = { teamSizes: [n,...], pickingN, absentN }
+  // expected pool of CLASS_CAP. teamSizes sum + pickingN + absentN = CLASS_CAP.
+  const CLASS_CAP = 24;
+  const SCENARIOS = {
+    1: { teamSizes: [],            pickingN: 0,  absentN: 24 }, // empty
+    2: { teamSizes: [],            pickingN: 4,  absentN: 20 }, // few picking
+    3: { teamSizes: [3, 4],        pickingN: 4,  absentN: 13 }, // 2 teams + picking (11/24)
+    4: { teamSizes: [3, 4, 3, 4, 3], pickingN: 5, absentN: 2 }, // 5 teams + picking (22/24)
+    5: { teamSizes: [4, 4, 4, 4, 4, 4], pickingN: 0, absentN: 0 }, // 6 teams of 4, all teamed (24/24)
+  };
+
+  // Smooth integer tween for the count chips
+  function tweenNumber(el, from, to, duration) {
+    if (!el || from === to) { if (el) el.textContent = to; return; }
+    const start = performance.now();
+    function frame(now) {
+      const t = Math.min(1, (now - start) / duration);
+      const eased = 1 - Math.pow(1 - t, 3);
+      el.textContent = Math.round(from + (to - from) * eased);
+      if (t < 1) requestAnimationFrame(frame);
+    }
+    requestAnimationFrame(frame);
+  }
+
+  function renderTeamup() {
+    const mode = app.dataset.mode || 'team';
+    const state = parseInt(app.dataset.demoState, 10) || 3;
+    const scenario = SCENARIOS[state] || SCENARIOS[3];
+
+    const totalAssigned = scenario.teamSizes.reduce((a,b) => a+b, 0);
+    const here = totalAssigned + scenario.pickingN;
+    const teams = scenario.teamSizes.length;
+    const absent = scenario.absentN;
+
+    // Count chips — capture previous values and tween
+    const tuStudentsN = document.getElementById('tuStudentsN');
+    const tuTeamsN    = document.getElementById('tuTeamsN');
+    const tuTeamsChip = document.getElementById('tuTeams');
+    const prevStudents = parseInt(tuStudentsN && tuStudentsN.textContent, 10) || 0;
+    const prevTeams    = parseInt(tuTeamsN    && tuTeamsN.textContent,    10) || 0;
+    tweenNumber(tuStudentsN, prevStudents, here,  500);
+    tweenNumber(tuTeamsN,    prevTeams,    teams, 500);
+    if (tuTeamsChip) tuTeamsChip.style.display = mode === 'solo' ? 'none' : '';
+
+    if (mode === 'solo') {
+      renderAttendance(here);
+      // collapse team-up specific UI
+      document.getElementById('tuPicking').classList.add('is-empty');
+      document.getElementById('tuGrid').innerHTML = '';
+    } else {
+      renderTeamGrid(scenario);
+      renderPicking(scenario);
+      document.getElementById('tuAttendance').innerHTML = '';
+    }
+
+  }
+
+  function renderTeamGrid(scenario) {
+    const grid  = document.getElementById('tuGrid');
+    const teams = scenario.teamSizes.length;
+    grid.dataset.teams = teams;
+    grid.innerHTML = '';
+    if (teams === 0) {
+      grid.classList.add('team-grid--empty');
+      grid.textContent = 'Teams will appear here as students group up';
+      return;
+    }
+    grid.classList.remove('team-grid--empty');
+    grid.textContent = '';
+
+    let nameIdx = 0;
+    scenario.teamSizes.forEach((size, i) => {
+      const team = TEAM_POOL[i % TEAM_POOL.length];
+      const card = document.createElement('div');
+      card.className = 'team-card';
+      card.dataset.team = team.id;
+      card.style.setProperty('--team-color', team.color);
+      card.style.setProperty('--i', i);
+
+      // sidebar — crest banner (crest mode) + icon + name; the member
+      // count is gone — the pills already say it
+      const sidebar = document.createElement('div');
+      sidebar.className = 'team-card__sidebar';
+      sidebar.appendChild(teamBannerSVG(team));
+      const icon = document.createElement('img');
+      icon.className = 'team-card__icon';
+      icon.src = team.avatar; icon.alt = '';
+      const nameEl = document.createElement('span');
+      nameEl.className = 'team-card__name';
+      nameEl.textContent = team.name;
+      sidebar.append(icon, nameEl);
+      card.appendChild(sidebar);
+
+      // members
+      const members = document.createElement('div');
+      members.className = 'team-card__members';
+      for (let j = 0; j < size; j++) {
+        const name = rosterName(nameIdx++);
+        const pill = document.createElement('div');
+        pill.className = 'member-pill';
+        pill.style.setProperty('--i', j);
+        const circle = document.createElement('span');
+        circle.className = 'member-pill__circle';
+        circle.textContent = name[0];
+        const label = document.createElement('span');
+        label.className = 'member-pill__name';
+        label.textContent = name;
+        pill.append(circle, label);
+        members.appendChild(pill);
+      }
+      card.appendChild(members);
+      grid.appendChild(card);
+    });
+  }
+
+  function renderPicking(scenario) {
+    const picking = document.getElementById('tuPicking');
+    const list    = document.getElementById('tuPickingList');
+    const label   = document.getElementById('tuPickingLabel');
+    const pickingN = scenario.pickingN;
+    const absentN  = scenario.absentN;
+
+    // Hide the panel only when every expected student is teamed up.
+    if (pickingN === 0 && absentN === 0) {
+      picking.classList.add('is-empty');
+      list.innerHTML = '';
+      label.textContent = 'All teamed up';
+      return;
+    }
+    picking.classList.remove('is-empty');
+    if (pickingN === 1) label.textContent = '1 student still picking a team';
+    else                label.textContent = `${pickingN} students still picking a team`;
+
+    list.innerHTML = '';
+    // Names AFTER the teamed students so we don't show duplicates:
+    //   sids 1..teamed       → in a team (already rendered in the grid)
+    //   sids teamed+1..+N    → picking (ember ring)
+    //   sids past that       → absent  (dashed + muted)
+    const start = scenario.teamSizes.reduce((a,b) => a+b, 0);
+    let idx = 0;
+    for (let i = 0; i < pickingN; i++) {
+      const sid = start + i + 1;
+      const pill = buildPickingPillDOM(sid);
+      pill.style.setProperty('--i', idx++);
+      list.appendChild(pill);
+    }
+    for (let i = 0; i < absentN; i++) {
+      const sid = start + pickingN + i + 1;
+      const pill = buildPickingPillDOM(sid);
+      pill.classList.add('is-absent');
+      pill.style.setProperty('--i', idx++);
+      list.appendChild(pill);
+    }
+  }
+
+  function renderAttendance(here) {
+    const grid = document.getElementById('tuAttendance');
+    grid.innerHTML = '';
+    for (let i = 0; i < here; i++) {
+      const name = rosterName(i);
+      const item = document.createElement('div');
+      item.className = 'attendee';
+      item.style.setProperty('--i', i);
+      const circle = document.createElement('span');
+      circle.className = 'attendee__circle';
+      circle.textContent = name[0];
+      const label = document.createElement('span');
+      label.className = 'attendee__name';
+      label.textContent = name;
+      item.append(circle, label);
+      grid.appendChild(item);
+    }
+  }
+
+  /* ── Auto-cycle: continuous simulation 0 → 24 students ─────────────────
+     Generates a deterministic sequence of micro-events (arrive, form team,
+     fill team) every ~320ms instead of snapping through scenario snapshots.
+     The end state is the same as SCENARIOS[5] — 6 teams × 4 students each.
+     Total cycle length ≈ 11–12s. Stops automatically when the user manually
+     scrubs the Demo state tabs, switches mode, or leaves the team-up phase. */
+  const SIM_STEP_MS = 320;
+  const TEAM_CAP    = 4;
+  const MAX_TEAMS   = 6;
+  let teamupTimers = [];
+  let teamupCycleArmed = false;
+
+  function stopTeamupCycle() {
+    teamupTimers.forEach(clearTimeout);
+    teamupTimers = [];
+    teamupCycleArmed = false;
+  }
+
+  // Fisher–Yates shuffle (returns a new array; doesn't mutate the input)
+  function shuffleArray(arr) {
+    const a = arr.slice();
+    for (let i = a.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [a[i], a[j]] = [a[j], a[i]];
+    }
+    return a;
+  }
+  // Pick and remove a random element from an array (Knuth-style)
+  function pickRandom(arr) {
+    const idx = Math.floor(Math.random() * arr.length);
+    return arr.splice(idx, 1)[0];
+  }
+
+  function generateTeamOperations() {
+    const ops = [];
+    let t = 0;
+    const teams = [];   // [[sid, sid, ...], ...]
+    const picking = []; // [sid, ...]
+    let arrived = 0;
+    // Each run shuffles which avatars come into play, so cycle 1 might lead
+    // with Tornado and cycle 2 with Crystal instead of Cloud every time.
+    const poolOrder = shuffleArray([0, 1, 2, 3, 4, 5, 6, 7]);
+
+    while (arrived < CLASS_CAP || picking.length > 0) {
+      const incompleteIdxs = teams
+        .map((t, i) => (t.length < TEAM_CAP ? i : -1))
+        .filter(i => i !== -1);
+      const canFill = incompleteIdxs.length > 0 && picking.length >= 1;
+      const canForm = teams.length < MAX_TEAMS && picking.length >= 3;
+      const cycle = ops.length % 5;
+      let acted = false;
+
+      if (cycle < 3 && arrived < CLASS_CAP) {
+        // 3 arrivals in a row, then 2 settle actions — gives picking pool a
+        // chance to grow visibly before teams gather them up
+        arrived++;
+        picking.push(arrived);
+        ops.push({ at: t, op: 'arrive', sid: arrived });
+        acted = true;
+      } else if (canForm && canFill) {
+        // Mid-cycle: when both form and fill are possible, split ~70/30 in
+        // favor of forming a new team, so teams stop appearing only AFTER
+        // existing ones fully populate.
+        if (Math.random() < 0.7) {
+          const sids = [pickRandom(picking), pickRandom(picking), pickRandom(picking)];
+          const poolIdx = poolOrder[teams.length];
+          teams.push(sids.slice());
+          ops.push({ at: t, op: 'form', teamIdx: teams.length - 1, poolIdx, sids });
+        } else {
+          const incompleteIdx = incompleteIdxs[Math.floor(Math.random() * incompleteIdxs.length)];
+          const sid = pickRandom(picking);
+          teams[incompleteIdx].push(sid);
+          ops.push({ at: t, op: 'fill', teamIdx: incompleteIdx, sid });
+        }
+        acted = true;
+      } else if (canForm) {
+        const sids = [pickRandom(picking), pickRandom(picking), pickRandom(picking)];
+        const poolIdx = poolOrder[teams.length];
+        teams.push(sids.slice());
+        ops.push({ at: t, op: 'form', teamIdx: teams.length - 1, poolIdx, sids });
+        acted = true;
+      } else if (canFill) {
+        // Random target — picks an arbitrary incomplete team, not the first
+        const incompleteIdx = incompleteIdxs[Math.floor(Math.random() * incompleteIdxs.length)];
+        const sid = pickRandom(picking);
+        teams[incompleteIdx].push(sid);
+        ops.push({ at: t, op: 'fill', teamIdx: incompleteIdx, sid });
+        acted = true;
+      } else if (arrived < CLASS_CAP) {
+        // Fallback: keep students arriving even when nothing else applies
+        arrived++;
+        picking.push(arrived);
+        ops.push({ at: t, op: 'arrive', sid: arrived });
+        acted = true;
+      }
+
+      if (!acted) break;
+      t += SIM_STEP_MS;
+    }
+    return ops;
+  }
+
+  function generateSoloOperations() {
+    // Solo mode: 24 students just arrive into the attendance grid, no teams
+    const ops = [];
+    for (let i = 0; i < CLASS_CAP; i++) {
+      ops.push({ at: i * SIM_STEP_MS, op: 'arrive', sid: i + 1 });
+    }
+    return ops;
+  }
+
+  /* ── DOM helpers used by the simulation ───────────────────────────────── */
+  function buildPickingPillDOM(sid) {
+    const name = rosterName(sid - 1);
+    const pill = document.createElement('span');
+    pill.className = 'picking-pill';
+    pill.dataset.student = sid;
+    const circle = document.createElement('span');
+    circle.className = 'picking-pill__circle';
+    circle.textContent = name[0];
+    pill.append(circle, document.createTextNode(' ' + name));
+    return pill;
+  }
+  function buildMemberPillDOM(sid, team) {
+    const name = rosterName(sid - 1);
+    const pill = document.createElement('div');
+    pill.className = 'member-pill';
+    pill.dataset.student = sid;
+    const circle = document.createElement('span');
+    circle.className = 'member-pill__circle';
+    // bg / border stay neutral — team identity lives in the card chrome
+    circle.textContent = name[0];
+    const label = document.createElement('span');
+    label.className = 'member-pill__name';
+    label.textContent = name;
+    pill.append(circle, label);
+    return pill;
+  }
+  function buildTeamCardDOM(team, teamIdx) {
+    const card = document.createElement('div');
+    card.className = 'team-card';
+    card.dataset.team = team.id;
+    card.dataset.teamIdx = teamIdx;
+    card.style.setProperty('--team-color', team.color);
+    // No --i stagger here — simulation adds cards one at a time, each at its
+    // own moment; --i would just hide them behind a 70ms × idx delay.
+    const sidebar = document.createElement('div');
+    sidebar.className = 'team-card__sidebar';
+    sidebar.appendChild(teamBannerSVG(team));
+    const icon = document.createElement('img');
+    icon.className = 'team-card__icon';
+    icon.src = team.avatar; icon.alt = '';
+    const nameEl = document.createElement('span');
+    nameEl.className = 'team-card__name';
+    nameEl.textContent = team.name;
+    sidebar.append(icon, nameEl);
+    card.appendChild(sidebar);
+    const members = document.createElement('div');
+    members.className = 'team-card__members';
+    card.appendChild(members);
+    return card;
+  }
+  function buildAttendeeDOM(sid) {
+    const name = rosterName(sid - 1);
+    const item = document.createElement('div');
+    item.className = 'attendee';
+    item.dataset.student = sid;
+    const circle = document.createElement('span');
+    circle.className = 'attendee__circle';
+    circle.textContent = name[0];
+    const label = document.createElement('span');
+    label.className = 'attendee__name';
+    label.textContent = name;
+    item.append(circle, label);
+    return item;
+  }
+
+  /* ── DOM operations used by the simulator ─────────────────────────────── */
+  function addPickingPill(sid) {
+    const list = document.getElementById('tuPickingList');
+    const picking = document.getElementById('tuPicking');
+    picking.classList.remove('is-empty');
+    list.appendChild(buildPickingPillDOM(sid));
+  }
+  function removePickingPill(sid) {
+    const list = document.getElementById('tuPickingList');
+    const pill = list.querySelector(`[data-student="${sid}"]`);
+    if (!pill) return;
+    pill.classList.add('is-leaving');
+    const tid = setTimeout(() => {
+      pill.remove();
+      // Hide only when every expected student is teamed — not just when
+      // the picking list happens to be empty (might mean "no one picking
+      // right now but students are still arriving").
+      const teamed = document.querySelectorAll('.member-pill').length;
+      if (teamed >= CLASS_CAP) {
+        document.getElementById('tuPicking').classList.add('is-empty');
+      }
+    }, 220);
+    teamupTimers.push(tid);
+  }
+  function addMemberPill(teamIdx, sid) {
+    const card = document.querySelector(`.team-card[data-team-idx="${teamIdx}"]`);
+    if (!card) return;
+    // Look up the team by id stored on the card — works regardless of which
+    // pool index was chosen at form time.
+    const team = TEAM_POOL.find(t => t.id === card.dataset.team);
+    if (!team) return;
+    const members = card.querySelector('.team-card__members');
+    members.appendChild(buildMemberPillDOM(sid, team));
+  }
+  function addTeamCard(teamIdx, sids, poolIdx) {
+    const grid = document.getElementById('tuGrid');
+    if (grid.classList.contains('team-grid--empty')) {
+      grid.classList.remove('team-grid--empty');
+      grid.textContent = '';
+    }
+    // poolIdx is the SHUFFLED index — comes from the form op
+    const team = TEAM_POOL[poolIdx % TEAM_POOL.length];
+    grid.appendChild(buildTeamCardDOM(team, teamIdx));
+    // Founding members cascade in over the first ~400ms after the card
+    sids.forEach((sid, i) => {
+      const tid = setTimeout(() => {
+        if (!teamupCycleArmed) return;
+        addMemberPill(teamIdx, sid);
+        updateCountChips();
+      }, i * 90 + 160);
+      teamupTimers.push(tid);
+    });
+  }
+  function addAttendee(sid) {
+    const grid = document.getElementById('tuAttendance');
+    grid.appendChild(buildAttendeeDOM(sid));
+  }
+  function updateCountChips() {
+    // "arrived" excludes absent placeholders — only count students actually
+    // in the session (ember picking pills + teamed members + attendees)
+    const arrived = document.querySelectorAll('.picking-pill:not(.is-absent):not(.is-leaving)').length
+                  + document.querySelectorAll('.member-pill').length
+                  + document.querySelectorAll('.attendee').length;
+    const teams = document.querySelectorAll('.team-card').length;
+    const tuStudentsN = document.getElementById('tuStudentsN');
+    const tuTeamsN = document.getElementById('tuTeamsN');
+    if (tuStudentsN) {
+      const prev = parseInt(tuStudentsN.textContent, 10) || 0;
+      tweenNumber(tuStudentsN, prev, arrived, 240);
+    }
+    if (tuTeamsN) {
+      const prev = parseInt(tuTeamsN.textContent, 10) || 0;
+      tweenNumber(tuTeamsN, prev, teams, 240);
+    }
+    // Picking strip label — three states:
+    //   • someone is actively picking → "N students still picking a team"
+    //   • no one is picking yet some haven't joined → "Waiting for N
+    //     student(s) to join the session"
+    //   • all 24 are in teams → "All teamed up"
+    const teamed   = document.querySelectorAll('.member-pill').length;
+    const pickingN = document.querySelectorAll('.picking-pill:not(.is-leaving)').length;
+    const absentN  = Math.max(0, CLASS_CAP - teamed - pickingN);
+    const labelEl  = document.getElementById('tuPickingLabel');
+    if (labelEl) {
+      if (teamed >= CLASS_CAP) {
+        labelEl.textContent = 'All teamed up';
+      } else if (pickingN > 0) {
+        labelEl.textContent = pickingN === 1
+          ? '1 student still picking a team'
+          : `${pickingN} students still picking a team`;
+      } else {
+        labelEl.innerHTML = (absentN === 1
+          ? 'Waiting for 1 student to join the session'
+          : `Waiting for ${absentN} students to join the session`)
+          + '';
+      }
+    }
+  }
+
+  function applyOp(op) {
+    const mode = app.dataset.mode || 'team';
+    if (op.op === 'arrive') {
+      if (mode === 'solo') addAttendee(op.sid);
+      else                 addPickingPill(op.sid);
+    } else if (mode === 'team') {
+      if (op.op === 'fill') {
+        removePickingPill(op.sid);
+        addMemberPill(op.teamIdx, op.sid);
+      } else if (op.op === 'form') {
+        op.sids.forEach(sid => removePickingPill(sid));
+        addTeamCard(op.teamIdx, op.sids, op.poolIdx);
+      }
+    }
+    updateCountChips();
+  }
+
+  function resetTeamupDOM() {
+    const grid = document.getElementById('tuGrid');
+    const list = document.getElementById('tuPickingList');
+    const picking = document.getElementById('tuPicking');
+    const att = document.getElementById('tuAttendance');
+    const mode = app.dataset.mode || 'team';
+    if (grid) {
+      grid.innerHTML = '';
+      grid.classList.add('team-grid--empty');
+      grid.textContent = 'Teams will appear here as students group up';
+    }
+    if (list) list.innerHTML = '';
+    if (picking) {
+      // Panel starts visible in team mode (empty pill list, label shows
+      // "0 students still picking a team"). Hides only when all 24 teamed.
+      if (mode === 'team') picking.classList.remove('is-empty');
+      else                 picking.classList.add('is-empty');
+    }
+    if (att) att.innerHTML = '';
+    const tuStudentsN = document.getElementById('tuStudentsN');
+    const tuTeamsN    = document.getElementById('tuTeamsN');
+    const tuTeamsChip = document.getElementById('tuTeams');
+    if (tuStudentsN) tuStudentsN.textContent = '0';
+    if (tuTeamsN)    tuTeamsN.textContent = '0';
+    if (tuTeamsChip) tuTeamsChip.style.display = (app.dataset.mode === 'solo') ? 'none' : '';
+    // Seed the panel label with the empty-room copy ("Waiting for 24 …")
+    updateCountChips();
+  }
+
+  function startTeamupCycle() {
+    stopTeamupCycle();
+    teamupCycleArmed = true;
+    resetTeamupDOM();
+    const mode = app.dataset.mode || 'team';
+    const ops = mode === 'solo' ? generateSoloOperations() : generateTeamOperations();
+    ops.forEach(op => {
+      const tid = setTimeout(() => {
+        if (!teamupCycleArmed) return;
+        applyOp(op);
+      }, op.at);
+      teamupTimers.push(tid);
+    });
+    // Hold open until the last op's animation settles, then disarm
+    const lastT = ops.length ? ops[ops.length - 1].at : 0;
+    const endId = setTimeout(() => { teamupCycleArmed = false; }, lastT + 600);
+    teamupTimers.push(endId);
+    // Everyone is in — hold the full lobby for a beat (~3.5s), then the
+    // class starts itself. No Start button; arrival is the trigger.
+    const goId = setTimeout(() => {
+      if (app.dataset.phase === 'teamup') jumpToPhase('countdown');
+    }, lastT + 3500);
+    teamupTimers.push(goId);
+  }
+
+  // Initial render
+  renderTeamup();
+
+  // (Removed demo-state MutationObserver — mode + phase changes are wired
+  // through cp-tabs handler / jumpToPhase directly.)
+
+  /* ──────────────────────────────────────────────────────────────────────
+     CONTROL PANEL WIRING
+     ────────────────────────────────────────────────────────────────────── */
+  function syncTabs(group) {
+    const attr = group.dataset.attr;
+    const current = app.getAttribute(attr);
+    group.querySelectorAll('button').forEach(b => {
+      b.classList.toggle('is-active', b.dataset.value === current);
+    });
+  }
+  // Sync every group bound to the same attribute (e.g. landscape has two: built-in + lab)
+  function syncAttrGroups(attr) {
+    document.querySelectorAll(`.cp-tabs[data-attr="${attr}"]`).forEach(syncTabs);
+  }
+  function syncPhaseControl() {
+    syncAttrGroups('data-phase');
+  }
+
+  (function () {
+    const cp = document.getElementById('cp');
+    document.getElementById('cpHandle').addEventListener('click', () => cp.classList.toggle('is-open'));
+
+    document.querySelectorAll('.cp-tabs').forEach(group => {
+      syncTabs(group);
+      group.addEventListener('click', e => {
+        const btn = e.target.closest('button');
+        if (!btn || !btn.dataset.value) return;
+        const attr = group.dataset.attr;
+        const value = btn.dataset.value;
+        app.setAttribute(attr, value);
+        // Sync ALL groups bound to this attribute (landscape has two)
+        syncAttrGroups(attr);
+
+        // Behaviors per control
+        if (attr === 'data-countdown') {
+          // restart the sequence with the new style — unless we're holding
+          // in team-up, in which case just update the setting silently so
+          // the change takes effect when the teacher clicks Start.
+          if (app.dataset.phase !== 'teamup') startSequence();
+        } else if (attr === 'data-phase') {
+          jumpToPhase(value);
+        } else if (attr === 'data-duration' || attr === 'data-teacher-hold') {
+          // changing durations restarts the sequence so the new timing applies
+          if (app.dataset.phase !== 'teamup') startSequence();
+        } else if (attr === 'data-mode') {
+          // Mode toggle while in team-up — restart the cycle in the new mode
+          // (team-grid → attendance-grid or vice versa). Otherwise just stash
+          // the setting for the next time team-up loads.
+          if (app.dataset.phase === 'teamup') startTeamupCycle();
+        }
+        // bg-* changes are purely CSS — no JS restart needed
+      });
+    });
+
+    // Replay restarts the full prototype from team-up (empty lobby → arrivals
+     // → countdown → teacher → slides), not just from countdown.
+    document.getElementById('cpReplay').addEventListener('click', () => jumpToPhase('teamup'));
+  })();
+
+  /* ──────────────────────────────────────────────────────────────────────
+     ROSTER + CLASS CHAT — sidebar life during the slides phase
+     ────────────────────────────────────────────────────────────────────── */
+  const ROSTER = [
+    { id: "alwaleed", name: "Alwaleed" },
+    { id: "faris",    name: "Faris"    },
+    { id: "maheer",   name: "Maheer"   },
+    { id: "saad",     name: "Saad"     },
+    { id: "rakan",    name: "Rakan"    },
+  ];
+  const ROSTER_BY_ID = Object.fromEntries(ROSTER.map(s => [s.id, s]));
+
+  // Letter-avatar as inline SVG data URL — serif letter on the current bg.
+  // Returned as a CSS background-image value so it can be assigned to
+  // .roster__avatar / .msg__avatar without splicing HTML.
+  function letterAvatar(letter) {
+    const svg =
+      '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">' +
+      '<text x="32" y="42" text-anchor="middle" font-family="Hanken Grotesk, sans-serif" ' +
+      'font-size="32" font-weight="600" fill="white">' + letter + '</text>' +
+      '</svg>';
+    return 'url("data:image/svg+xml;utf8,' + encodeURIComponent(svg) + '")';
+  }
+
+  // Render roster items once — names sit under avatars
+  (function renderRoster () {
+    const root = document.getElementById('roster');
+    if (!root) return;
+    root.replaceChildren(...ROSTER.map(s => {
+      const item = document.createElement('div');
+      item.className = 'roster__item';
+      item.dataset.id = s.id;
+      item.setAttribute('role', 'listitem');
+
+      const av = document.createElement('div');
+      av.className = 'roster__avatar';
+      av.style.backgroundImage = letterAvatar(s.name[0]);
+
+      const nm = document.createElement('div');
+      nm.className = 'roster__name';
+      nm.textContent = s.name;
+
+      item.append(av, nm);
+      return item;
+    }));
+  })();
+
+  // Chat lines — same set as presenter-screen.html
+  const CHAT_LINES = [
+    { who: "maheer",   text: "Hi Sir, looking forward to learning this class" },
+    { who: "alwaleed", text: "Sir, can you repeat the formula?" },
+    { who: "saad",     text: "Got it, thank you" },
+    { who: "faris",    text: "Is x = -b/2a the vertex?" },
+    { who: "rakan",    text: "Yes, I have understood" },
+    { who: "maheer",   text: "Could you do another example please" },
+    { who: "alwaleed", text: "I think the discriminant is 16" },
+    { who: "saad",     text: "Wait, where did the +4 come from?" },
+    { who: "faris",    text: "On it" },
+    { who: "rakan",    text: "Sir my mic isn't working, sorry" },
+    { who: "maheer",   text: "So roots are 2 and -2, right?" },
+    { who: "alwaleed", text: "Yes Sir" },
+    { who: "saad",     text: "Got the answer: x² + 4x + 4 = (x+2)²" },
+    { who: "faris",    text: "Done with question 3" },
+    { who: "rakan",    text: "Can we get the slides afterwards?" },
+  ];
+
+  function appendChatMessage(line, label) {
+    const list = document.getElementById('messages');
+    if (!list) return;
+    const s = ROSTER_BY_ID[line.who];
+    if (!s) return;
+
+    const node = document.createElement('div');
+    node.className = 'msg is-fresh';
+
+    const av = document.createElement('div');
+    av.className = 'msg__avatar';
+    av.style.backgroundImage = letterAvatar(s.name[0]);
+
+    const body = document.createElement('div');
+    body.className = 'msg__body';
+
+    const nameRow = document.createElement('div');
+    nameRow.className = 'msg__name';
+    nameRow.appendChild(document.createTextNode(s.name));
+
+    const time = document.createElement('span');
+    time.className = 'msg__time';
+    const dot = document.createElement('span');
+    dot.className = 'msg__fresh-dot';
+    time.append(dot, document.createTextNode(label));
+    nameRow.appendChild(time);
+
+    const text = document.createElement('div');
+    text.className = 'msg__text';
+    text.textContent = line.text;
+
+    body.append(nameRow, text);
+    node.append(av, body);
+    list.appendChild(node);
+
+    // Cap scrollback so the DOM doesn't grow unbounded over a long class
+    while (list.children.length > 30) list.removeChild(list.firstChild);
+    list.scrollTop = list.scrollHeight;
+
+    // Drop the "fresh" highlight after a beat
+    setTimeout(() => node.classList.remove('is-fresh'), 2400);
+  }
+
+  // Chat firehose state — guarded so we only ever have one stream running
+  let chatIdx = 0;
+  let chatTimer = null;
+  let chatStarted = false;
+
+  function startChatFlow() {
+    if (chatStarted) return;
+    chatStarted = true;
+    const list = document.getElementById('messages');
+    if (!list) return;
+    list.replaceChildren();
+
+    // Pre-seed a few messages so the chat doesn't open empty
+    const seed = 3;
+    for (let i = 0; i < seed; i++) {
+      appendChatMessage(CHAT_LINES[chatIdx % CHAT_LINES.length], (seed - i) + 'm');
+      chatIdx++;
+    }
+    // Strip the "fresh" highlight from the pre-seeded ones immediately —
+    // they shouldn't pretend to be brand new
+    list.querySelectorAll('.msg').forEach(m => m.classList.remove('is-fresh'));
+
+    function tick() {
+      const line = CHAT_LINES[chatIdx % CHAT_LINES.length];
+      chatIdx++;
+      appendChatMessage(line, 'just now');
+      chatTimer = setTimeout(tick, 2200 + Math.random() * 1400);
+    }
+    chatTimer = setTimeout(tick, 1800);
+  }
+
+  function stopChatFlow() {
+    if (chatTimer) { clearTimeout(chatTimer); chatTimer = null; }
+    chatStarted = false;
+  }
+
+  /* ──────────────────────────────────────────────────────────────────────
+     SPEAKER ROTATION — randomly swaps the coral pulse between the teacher
+     PiP and the classroom focus tile. Slow cadence (5–11s holds) so it
+     reads as a natural conversation rather than a flicker. Teacher is
+     weighted heavier — they hold the floor; classroom interjects.
+     ────────────────────────────────────────────────────────────────────── */
+  let speakerTimer = null;
+  function startSpeakerRotation() {
+    const focusEl = document.getElementById('focus');
+    if (!focusEl) return;
+    stopSpeakerRotation();
+
+    // Reset to teacher whenever the cycle starts (slides phase entered)
+    focusEl.dataset.speaker = 'teacher';
+
+    function next() {
+      const current = focusEl.dataset.speaker || 'teacher';
+      // Teacher: 35% chance to hand off; Classroom: 70% chance to hand back.
+      // Net effect over many turns ≈ teacher 67% / classroom 33%.
+      const handoff = Math.random();
+      const nextSpeaker = current === 'teacher'
+        ? (handoff < 0.35 ? 'classroom' : 'teacher')
+        : (handoff < 0.70 ? 'teacher'   : 'classroom');
+      focusEl.dataset.speaker = nextSpeaker;
+      // Hold 5–11s before re-rolling
+      const hold = 5000 + Math.random() * 6000;
+      speakerTimer = setTimeout(next, hold);
+    }
+    // First switch lands 6–10s into the slides phase, so the entrance
+    // gets a beat of clean "teacher speaking" before things start moving.
+    speakerTimer = setTimeout(next, 6000 + Math.random() * 4000);
+  }
+  function stopSpeakerRotation() {
+    if (speakerTimer) { clearTimeout(speakerTimer); speakerTimer = null; }
+  }
+
+  /* ── Stage-view speaker rotation — the unmuted classrooms (no mute pip)
+     take the floor occasionally and get the green voice ring. Cadence is
+     slow (4–8s holds, with silent gaps where the teacher holds the floor)
+     so it reads as conversation, not flicker. ── */
+  let stageTimer = null;
+  function startStageRotation() {
+    stopStageRotation();
+    const open = [...document.querySelectorAll('.stage-view .member--classroom')]
+      .filter(m => !m.querySelector('.member__mute'));
+    if (!open.length) return;
+    function next() {
+      open.forEach(m => m.classList.remove('is-speaking'));
+      // ~60% of turns a classroom speaks; otherwise the teacher holds the floor
+      if (Math.random() < 0.6) {
+        open[Math.floor(Math.random() * open.length)].classList.add('is-speaking');
+      }
+      stageTimer = setTimeout(next, 4000 + Math.random() * 4000);
+    }
+    stageTimer = setTimeout(next, 1800);
+  }
+  function stopStageRotation() {
+    if (stageTimer) { clearTimeout(stageTimer); stageTimer = null; }
+    document.querySelectorAll('.stage-view .member.is-speaking')
+      .forEach(m => m.classList.remove('is-speaking'));
+  }
+
+  // Drive chat + speaker lifecycles from phase changes — start when slides
+  // reveal, stop on any leave (so Replay or skip resets cleanly).
+  new MutationObserver(() => {
+    if (app.dataset.phase === 'slides') {
+      startChatFlow();
+      startSpeakerRotation();
+    } else {
+      stopChatFlow();
+      stopSpeakerRotation();
+    }
+    if (app.dataset.phase === 'stage') startStageRotation();
+    else stopStageRotation();
+  }).observe(app, { attributes: true, attributeFilter: ['data-phase'] });
+
+  /* ──────────────────────────────────────────────────────────────────────
+     TOPBAR ICON BUTTONS — mic + camera toggles
+     ────────────────────────────────────────────────────────────────────── */
+  function toggleBtn(id, tipOn, tipOff) {
+    const btn = document.getElementById(id);
+    if (!btn) return;
+    btn.addEventListener('click', () => {
+      const pressed = btn.getAttribute('aria-pressed') === 'true';
+      btn.setAttribute('aria-pressed', String(!pressed));
+      btn.dataset.tip = !pressed ? tipOn : tipOff;
+    });
+  }
+  toggleBtn('mic', 'Unmute', 'Mute');
+  toggleBtn('cam', 'Start video', 'Stop video');
+
+  // First run — respect the initial data-phase (team-up auto-cycles through
+  // the lifecycle and then holds at "all teamed" until Start is clicked;
+  // any other phase runs the countdown auto-sequence).
+  if (app.dataset.phase === 'teamup') {
+    syncPhaseControl();
+    startTeamupCycle();
+  } else {
+    startSequence();
+  }
+</script>
+</body>
+</html>
