@@ -1,0 +1,619 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Empty Quarter v3 · what changes, and how it lands</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&family=IBM+Plex+Sans+Arabic:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  /* sky — the new field. abstract, never scenery */
+  --sky-high:#DDCAA6; --sky-mid:#EFE6D4; --sky-low:#F8F3E9;
+  --terrace:#D4BB8E; --terrace-deep:#CBAF7E;
+  /* surfaces */
+  --plaster:#F1EBDD; --cream:#F6F0E4; --warm-white:#FBF8F1; --oak:#E2D6BE;
+  /* material */
+  --sand:#DDC09A; --sand-deep:#D2A47A;
+  /* frame + heat */
+  --clay:#CB7A50; --clay-deep:#B26440; --rust:#8A3F26; --ember:#E8663A;
+  /* instrument + state */
+  --ink:#26282E; --ink-soft:rgba(38,40,46,.62); --ink-faint:rgba(38,40,46,.38);
+  --water:#4A6B8A; --water-light:#7C99B4; --noon:#6BAE93; --purple:#5A4A7D;
+  /* night, presenter only */
+  --night-top:#1B1C21; --night-mid:#2A252A; --night-horizon:#5A3526;
+}
+*{box-sizing:border-box}
+body{margin:0;background:#1F2126;color:#F1EBDD;font-family:'Hanken Grotesk',sans-serif;
+  -webkit-font-smoothing:antialiased}
+.wrap{max-width:1560px;margin:0 auto;padding:56px 40px 120px}
+.kicker{font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:.2em;color:#D2A47A;margin-bottom:14px}
+h1{font-size:34px;font-weight:600;letter-spacing:-.02em;margin:0 0 12px}
+.lede{color:rgba(241,235,221,.66);font-size:15px;max-width:94ch;line-height:1.7;margin:0}
+h2{font-size:19px;font-weight:600;margin:64px 0 6px;padding-top:22px;border-top:1px solid rgba(241,235,221,.14)}
+h3{font-size:14px;font-weight:600;margin:30px 0 8px;color:#E9E0CC}
+p{color:rgba(241,235,221,.6);font-size:14px;line-height:1.65;max-width:92ch;margin:8px 0}
+b,strong{color:#F1EBDD}
+code{font-family:'JetBrains Mono',monospace;font-size:12px;background:rgba(241,235,221,.07);padding:1px 6px;border-radius:4px;color:#E4C9A8}
+table{border-collapse:collapse;width:100%;font-size:13.5px;margin:16px 0 0}
+th{text-align:left;font-family:'JetBrains Mono',monospace;font-size:10.5px;letter-spacing:.14em;
+   color:rgba(241,235,221,.45);padding:9px 18px 9px 0;border-bottom:1px solid rgba(241,235,221,.2);vertical-align:bottom}
+td{padding:11px 18px 11px 0;border-bottom:1px solid rgba(241,235,221,.08);vertical-align:top;color:rgba(241,235,221,.72)}
+td.was{color:rgba(241,235,221,.42)}
+.sw{display:inline-block;width:14px;height:14px;border-radius:3px;vertical-align:-2px;margin-inline-end:8px;border:1px solid rgba(241,235,221,.2)}
+.note{background:rgba(241,235,221,.05);border-left:3px solid var(--clay);padding:15px 18px;font-size:13.5px;
+  max-width:94ch;margin:22px 0 0;line-height:1.65;color:rgba(241,235,221,.78)}
+.note b{color:#F1EBDD}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:30px 26px;margin-top:22px}
+.grid4{display:grid;grid-template-columns:repeat(2,1fr);gap:26px 24px;margin-top:22px}
+figure{margin:0}
+figcaption{padding:12px 2px 0;font-size:12.5px;color:rgba(241,235,221,.55);line-height:1.5}
+figcaption b{font-family:'JetBrains Mono',monospace;font-size:10.5px;letter-spacing:.18em;color:#D2A47A;display:block;margin-bottom:5px}
+.frame{position:relative;width:100%;aspect-ratio:16/9;overflow:hidden;border-radius:8px;
+  border:1px solid rgba(241,235,221,.14);box-shadow:0 18px 50px rgba(0,0,0,.45)}
+.stage{position:absolute;top:0;left:0;width:1920px;height:1080px;transform-origin:0 0;overflow:hidden;
+  font-family:'IBM Plex Sans Arabic','Hanken Grotesk',sans-serif}
+/* phone */
+.phone{position:relative;flex:0 0 390px;width:390px;height:844px;border-radius:34px;overflow:hidden;
+  border:1px solid rgba(241,235,221,.16);box-shadow:0 24px 70px rgba(0,0,0,.5);background:var(--plaster)}
+.phonewrap{display:flex;gap:40px;align-items:flex-start;flex-wrap:wrap;margin-top:24px}
+.legend{font-size:13px;color:rgba(241,235,221,.6);line-height:1.7;max-width:46ch}
+.legend li{margin-bottom:9px}
+.legend b{color:#F1EBDD}
+.rulebox{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:16px;margin-top:20px}
+.rule{background:rgba(241,235,221,.045);border:1px solid rgba(241,235,221,.09);border-radius:8px;padding:16px 17px}
+.rule h4{margin:0 0 7px;font-size:13px;font-weight:600;color:#F1EBDD}
+.rule p{margin:0;font-size:12.5px;color:rgba(241,235,221,.58);line-height:1.6}
+.rule .n{font-family:'JetBrains Mono',monospace;font-size:10.5px;letter-spacing:.16em;color:#CB7A50;display:block;margin-bottom:8px}
+</style></head>
+<body><div class="wrap">
+
+<div class="kicker">EMPTY QUARTER · V3 · CHANGE SPEC + APPLICATIONS</div>
+<h1>What changes in the guide, and what it looks like applied</h1>
+<p class="lede">v4 is not wrong, it is inverted. It took a retro-futurist source built on a luminous sky with sandstone
+structure and terracotta framing, and made the framing colour the field. Everything below is the smallest set of changes
+that puts the source's logic back, plus the three surfaces it has to survive: a subject-agnostic slide cover, the
+presenter stage view, and the student journey page. No new hexes — every value is from the locked ten, the Tracks
+families, or the approved cover material.</p>
+
+<!-- ============================== PART 1 : THE DELTA ============================== -->
+<h2>01 · The seven changes</h2>
+<p>Everything else in v4 stays. These are the elements that have to move.</p>
+<table>
+<tr><th>#</th><th>ELEMENT</th><th>V4 TODAY</th><th>V3</th></tr>
+<tr><td class="n">1</td><td><b>The field</b></td><td class="was">Saturated terracotta holds the ground on covers and ceremonial pages.</td>
+    <td>A graded sky holds the ground. Terracotta drops to <b>≤12%</b>, used as frame and heat.</td></tr>
+<tr><td class="n">2</td><td><b>Atmosphere</b></td><td class="was">Flat fills. No light source anywhere in the system.</td>
+    <td><b>One sun, three planes.</b> Aerial perspective: distant planes lighter and flatter, near planes darker.</td></tr>
+<tr><td class="n">3</td><td><b>Faceting</b></td><td class="was">A pattern swatch applied as surface texture.</td>
+    <td>A <b>construction grammar</b> — how every form is built. Planes, value steps, hard edges, one light direction.</td></tr>
+<tr><td class="n">4</td><td><b>Movement</b></td><td class="was">Dune waves. Geological, static, going nowhere.</td>
+    <td>The <b>ribbon</b> — one flowing route per view, carrying progress and journey.</td></tr>
+<tr><td class="n">5</td><td><b>Subject identity</b></td><td class="was">Carried by full-bleed family colour.</td>
+    <td>Carried by the <b>facet tint, rail and chip</b>. The ground stays neutral so one background serves every subject.</td></tr>
+<tr><td class="n">6</td><td><b>Captions</b></td><td class="was">Caps mono at 0.18–0.22em tracking on every label.</td>
+    <td>Mono is for <b>numerals only</b>. Labels become sentence-case Hanken. This is the biggest age tell in the system.</td></tr>
+<tr><td class="n">7</td><td><b>Voice</b></td><td class="was">Surveyor's field notebook — "specimen", "closed transmission".</td>
+    <td>Plain and warm. Keep "route" and "journey"; lose the affectation.</td></tr>
+</table>
+
+<div class="note"><b>What is deliberately not changing.</b> The v10 grain edge recipe, the Option D slim band and
+occlusion, the khatam and pinboard patterns, the foil seam, the noon Tracks lockup, Hanken Grotesk + IBM Plex Sans
+Arabic, and the 60/30/10 ratio discipline on working pages. v3 is a re-weighting, not a redraw.</div>
+
+<!-- ============================== PART 2 : SKY ============================== -->
+<h2>02 · The sky — atmosphere, never scenery</h2>
+<p>The sky is the new field, and it is <b>abstract by rule</b>. It carries no content of its own, because it has to sit
+behind chemistry and behind poetry without favouring either. Anything recognisable — a city, a dune ridge, a landmark —
+belongs to the subject illustration, not the ground.</p>
+
+<div class="rulebox">
+  <div class="rule"><span class="n">S1</span><h4>Three stops, one direction</h4><p>Deeper above, palest at the horizon. <code>#DDCAA6</code> → <code>#EFE6D4</code> → <code>#F8F3E9</code>. Never a flat fill, never a radial.</p></div>
+  <div class="rule"><span class="n">S2</span><h4>One sun, and it is pale</h4><p>A soft core no larger than 80px on a 1080 stage, with a wide low-opacity bloom. It is a light source, not a graphic. One per view.</p></div>
+  <div class="rule"><span class="n">S3</span><h4>The horizon sits at 55–62%</h4><p>Below it, one terrace plane a value step darker than the sand material, so sand-bodied forms separate from the ground.</p></div>
+  <div class="rule"><span class="n">S4</span><h4>Cool lives in the haze</h4><p>Water <code>#7C99B4</code> at 15–30%, banded at the horizon only. It is atmospheric shadow. It never becomes a fill, a chip, or a brand colour.</p></div>
+  <div class="rule"><span class="n">S5</span><h4>Nothing else in the ground</h4><p>Sky, horizon, terrace, terracotta frame. That is the whole background. If a cover needs more, the illustration provides it.</p></div>
+</div>
+
+<h3>Applied — the same ground under four subjects</h3>
+<p>Identical background in all four. Only the facet tint, the rail and the chip change.</p>
+<div class="grid4" id="covers"></div>
+
+<!-- ============================== PART 3 : FACETS ============================== -->
+<h2>03 · Faceting as construction</h2>
+<p>In the source illustration every rock, tower and ridge is built the same way: a small number of flat planes meeting at
+hard edges, with two or three value steps and a single light direction. That is a spec, and it is what makes the style
+read as designed-in-1994-about-2050 rather than merely textured. It governs icons, covers, illustration, empty states
+and the monument moment.</p>
+<div class="rulebox">
+  <div class="rule"><span class="n">F1</span><h4>3 to 7 planes</h4><p>Fewer than three and it is a shape; more than seven and it is noise. Slivers below 12° are not planes — merge them.</p></div>
+  <div class="rule"><span class="n">F2</span><h4>Two or three value steps</h4><p>Family light on the lit plane, family core on the body, family deep in shadow. Steps 6–10% lightness apart. Never four.</p></div>
+  <div class="rule"><span class="n">F3</span><h4>Hard edges, no outline</h4><p>Planes meet directly. No strokes, no gradients inside a plane, no soft shadow between them.</p></div>
+  <div class="rule"><span class="n">F4</span><h4>One light, declared</h4><p>Upper-left by default, and it must agree with the sun in the sky. Every form on the screen is lit from the same side.</p></div>
+  <div class="rule"><span class="n">F5</span><h4>Grain at the edge only</h4><p>The approved v10 edge recipe still applies to sand-bodied forms. Flat core, fine dense grain at the silhouette, no blur, no halo.</p></div>
+</div>
+<div class="grid2" id="facetdemo" style="grid-template-columns:1fr 1fr"></div>
+
+<!-- ============================== PART 4 : TERRACOTTA + RIBBON ============================== -->
+<h2>04 · Terracotta's new job, and the ribbon</h2>
+<p>Terracotta is not reduced in importance — it is given a role it can actually hold. As a field it was wallpaper. As a
+frame and as heat it becomes the thing that identifies the brand at a glance and the thing that signals urgency.</p>
+<table>
+<tr><th>TOKEN</th><th>ROLE IN V3</th><th>WHERE</th></tr>
+<tr><td><span class="sw" style="background:#CB7A50"></span>Clay <code>#CB7A50</code></td><td>Frame</td><td>Edge masses on ceremonial surfaces. Margins only, never crossing into the content block.</td></tr>
+<tr><td><span class="sw" style="background:#B26440"></span>Clay deep <code>#B26440</code></td><td>Frame shadow</td><td>The shadowed planes of the frame mass. Foreground shards.</td></tr>
+<tr><td><span class="sw" style="background:#8A3F26"></span>Rust <code>#8A3F26</code></td><td>Frame core</td><td>Deepest plane, nearest the viewer.</td></tr>
+<tr><td><span class="sw" style="background:#E8663A"></span>Ember <code>#E8663A</code></td><td>Heat</td><td>Behind-schedule, streak at risk, time running out. Never decoration.</td></tr>
+</table>
+<h3>The ribbon</h3>
+<p>One flowing route per view, with a lighter leading edge. At poster scale it is a 46px band with an 8px highlight; in
+UI it collapses to a 4px spine with a 2px highlight and becomes the journey's backbone. It replaces the dune wave
+wherever the dune was standing in for motion.</p>
+
+<!-- ============================== PART 5 : TYPE + VOICE ============================== -->
+<h2>05 · Type and voice</h2>
+<table>
+<tr><th>LAYER</th><th>V4</th><th>V3</th></tr>
+<tr><td>Headline</td><td class="was">Hanken 700, same tracking as UI</td><td>Hanken 700 at <code>-0.03em</code>, sizes 76 / 104 / 130. Bigger optical jump from body.</td></tr>
+<tr><td>UI</td><td class="was">Hanken 400–600</td><td>Unchanged.</td></tr>
+<tr><td>Caps mono</td><td class="was">Every label, 0.18–0.22em</td><td><b>Numerals only</b> — timers, counters, slide numbers, dates, durations.</td></tr>
+<tr><td>Labels</td><td class="was">CAPS MONO</td><td>Sentence-case Hanken 600. <code>Section 03</code>, not <code>SECTION 03</code>.</td></tr>
+</table>
+<h3>Voice — before and after</h3>
+<table>
+<tr><th>V4</th><th>V3</th><th>WHY</th></tr>
+<tr><td class="was">Specimen</td><td>Slide</td><td>Nobody under 20 calls a slide a specimen.</td></tr>
+<tr><td class="was">Closed transmission</td><td>Muted</td><td>The dashed line already carries the meaning.</td></tr>
+<tr><td class="was">In transit</td><td>Loading / On the way</td><td>Keep the journey metaphor, drop the logistics register.</td></tr>
+<tr><td class="was">LIVE · 47:32 ELAPSED · SLIDE 04 / 12</td><td>Live · 47:32 · Slide 4 of 12</td><td>Same information, half the shouting.</td></tr>
+<tr><td class="was">Party</td><td>Team</td><td>"Party" is a games term borrowed sideways.</td></tr>
+<tr><td class="was">Waypoint</td><td>Waypoint</td><td>Keep. It is plain English and it earns the map metaphor.</td></tr>
+</table>
+
+<!-- ============================== PART 6 : APPLICATIONS ============================== -->
+<h2>06 · Application A — presenter stage view</h2>
+<p>Dark stays presenter-only, per the depth grammar. v3 does not make the presenter light; it gives the dark the same
+atmosphere the covers get. The night sky is graded the same way — one light source, low on the horizon, warm — and the
+cool haze does the same work it does in daylight. Terracotta appears as heat at the frame, and the ribbon becomes the
+route the classroom cameras sit on.</p>
+<div style="margin-top:22px"><div class="frame" id="stageframe"></div></div>
+<ul class="legend" style="max-width:none;columns:2;column-gap:44px;margin-top:18px">
+<li><b>Night sky, one light.</b> Ink at the top grading to a warm afterglow at the horizon — the same three-stop rule, inverted.</li>
+<li><b>Cameras as waypoints on the ribbon.</b> The route replaces the scattered map; position on it means order of speaking.</li>
+<li><b>Coral rim, unchanged.</b> Active speaker keeps its reserved signal and its 3s breath.</li>
+<li><b>Mono for numerals only.</b> The status strip now reads <code>Live · 47:32 · Slide 4 of 12</code>.</li>
+<li><b>Ember at the frame.</b> Heat sits at the edge, where terracotta belongs.</li>
+<li><b>Faceted horizon.</b> Low-contrast, three planes, no scenery — it is atmosphere, not a landscape.</li>
+</ul>
+
+<h2>07 · Application B — student journey</h2>
+<p>The prototype is the system's hardest test: dense, functional, mobile, and currently generic. Nothing here needs
+illustration. The whole v3 story is carried by a plaster ground, a sky band at the head, the ribbon as the spine, and
+faceted waypoints instead of circles.</p>
+<div class="phonewrap">
+  <div class="phone" id="journey"></div>
+  <ul class="legend">
+    <li><b>The spine is the ribbon.</b> Completed run in noon green, current at the waypoint, upcoming dashed. One route, top to bottom.</li>
+    <li><b>Waypoints are faceted, not round.</b> Three planes, one light direction, tinted by state — the same construction rule as the covers, at 32px.</li>
+    <li><b>Ember carries "behind".</b> Heat is the role terracotta was given in §04, so the alert needs no red borrowed from outside the palette.</li>
+    <li><b>Water marks the current unit.</b> Progression is water's job in the locked ten; the generic system blue is gone.</li>
+    <li><b>Sky band at the head.</b> A 180px gradient with a hairline horizon. Enough atmosphere to place the screen in the world, no illustration to fight the content.</li>
+    <li><b>Mono only on numerals.</b> <code>24</code> days, <code>2</code> off track, <code>7</code> more units. Labels are sentence-case Hanken.</li>
+    <li><b>Strikethrough is gone.</b> Completed units carry a green waypoint and muted ink — striking out a finished unit reads as cancelled, not achieved.</li>
+  </ul>
+</div>
+
+<h2>08 · Don'ts</h2>
+<p>No scenery in the ground · no second sun · no light source disagreeing with the facet shading · no four-step facets ·
+no terracotta above 12% of a surface · no cool as a fill · no more than one ribbon per view · no caps mono on a word
+that is not a number · no full-bleed family core on ceremonial pages · no strikethrough on completed work · no ember as
+decoration.</p>
+
+</div>
+
+<svg width="0" height="0" style="position:absolute"><defs>
+<g id="khatam-t">
+  <rect x="-62" y="-62" width="124" height="124"/>
+  <rect x="-62" y="-62" width="124" height="124" transform="rotate(45)"/>
+  <rect x="-7" y="-7" width="14" height="14" transform="rotate(45)"/>
+</g></defs></svg>
+
+<script>
+/* ---------------- approved v10 material ---------------- */
+function mk(a){return function(){a|=0;a=a+0x6D2B79F5|0;var t=Math.imul(a^a>>>15,1|a);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296}}
+function dots(arr){return arr.map(d=>'M'+(d[0]-d[2]).toFixed(2)+','+d[1].toFixed(2)+'a'+d[2].toFixed(2)+','+d[2].toFixed(2)+' 0 1,0 '+(2*d[2]).toFixed(2)+',0a'+d[2].toFixed(2)+','+d[2].toFixed(2)+' 0 1,0 -'+(2*d[2]).toFixed(2)+',0').join('')}
+function dotPaths(b){let s='';for(const k of b){if(k.arr.length)s+='<path d="'+dots(k.arr)+'" fill="'+k.fill+'" fill-opacity="'+k.o+'"/>';}return s}
+function hex2rgb(h){h=h.replace('#','');return [parseInt(h.slice(0,2),16),parseInt(h.slice(2,4),16),parseInt(h.slice(4,6),16)]}
+function edgeGrain(cx,cy,r,seed,n,core,dark,light){
+  const R=mk(seed);
+  const DKS='rgb('+hex2rgb(dark).join(',')+')',LTS='rgb('+hex2rgb(light).join(',')+')',BODY='rgb('+hex2rgb(core).join(',')+')';
+  const T=[];const push=(f,o)=>{T.push({arr:[],fill:f,o});return T.length-1;};
+  const dk=[push(DKS,.55),push(DKS,.38),push(DKS,.22),push(DKS,.12)];
+  const lt=[push(LTS,.45),push(LTS,.30),push(LTS,.18),push(LTS,.10)];
+  const bd=[push(BODY,.85),push(BODY,.55),push(BODY,.28),push(BODY,.10)];
+  const dx=[push(DKS,.35),push(DKS,.18)];
+  for(let i=0;i<n;i++){
+    const a=R()*2*Math.PI, inside=R()<0.85;
+    const d=inside?8*Math.pow(R(),1.8):-4*Math.pow(R(),2.2);
+    const rad=r-d, x=cx+Math.cos(a)*rad, y=cy+Math.sin(a)*rad, sz=0.12+R()*0.18;
+    let ti;
+    if(inside){const band=Math.min(3,Math.floor(d/2));ti=R()<0.55?dk[band]:lt[band];}
+    else{const od=-d,band=Math.min(3,Math.floor(od/1));ti=R()<0.75?bd[Math.min(3,band)]:dx[od<2?0:1];}
+    T[ti].arr.push([x,y,sz]);}
+  return dotPaths(T);
+}
+
+/* ---------------- S1–S5 : the sky ---------------- */
+function sky(o){
+  o=o||{};
+  const sunX=o.sunX!=null?o.sunX:520, sunY=o.sunY!=null?o.sunY:150;
+  const frame=o.frame!==false, left=o.left!=null?o.left:0;
+  return ''
+  +'<div style="position:absolute;inset:0;background:linear-gradient(180deg,'
+    +'#DDCAA6 0%, #E8DABF 24%, #F0E7D6 46%, #F8F3E9 60%, #F2E9D8 70%)"></div>'
+  /* S2 — one pale sun */
+  +'<div style="position:absolute;left:'+(sunX-125)+'px;top:'+(sunY-125)+'px;width:250px;height:250px;border-radius:50%;'
+    +'background:radial-gradient(circle,#FCF9F1 0%,#F8F1E2 40%,rgba(248,241,226,0) 70%)"></div>'
+  +'<div style="position:absolute;left:'+(sunX-38)+'px;top:'+(sunY-38)+'px;width:76px;height:76px;border-radius:50%;background:#FDFBF5;opacity:.96"></div>'
+  /* S4 — cool haze, horizon band only */
+  +'<div style="position:absolute;left:0;right:0;top:512px;height:250px;'
+    +'background:linear-gradient(180deg,rgba(124,153,180,0) 0%,rgba(124,153,180,.19) 55%,rgba(124,153,180,.04) 100%)"></div>'
+  /* S3 — horizon + terrace, two planes, no scenery */
+  +'<svg width="1920" height="1080" style="position:absolute;inset:0">'
+    +'<path d="M0,660 L1920,632 L1920,1080 L0,1080 Z" fill="#E7DAC1"/>'
+    +'<path d="M0,834 L1920,806 L1920,1080 L0,1080 Z" fill="#D4BB8E"/>'
+    +'<path d="M0,832 L1920,804" stroke="#F2E9D8" stroke-width="2.5" fill="none" opacity=".55"/>'
+  +'</svg>'
+  /* the ribbon — one per view */
+  +(o.ribbon? '<svg width="1920" height="1080" style="position:absolute;inset:0">'
+    +'<path d="M-40,1040 C 320,972 520,930 800,916 C 1090,902 1300,930 1560,884 C 1720,856 1840,868 1960,846" fill="none" stroke="#E8D9B8" stroke-width="46" stroke-linecap="round"/>'
+    +'<path d="M-40,1024 C 320,956 520,914 800,900 C 1090,886 1300,914 1560,868 C 1720,840 1840,852 1960,830" fill="none" stroke="#F4EBD9" stroke-width="8" stroke-linecap="round"/>'
+    +'</svg>':'')
+  /* frame — margins only */
+  +(frame? '<svg width="1920" height="1080" style="position:absolute;inset:0">'
+    +'<path d="M'+left+',312 L'+(left+54)+',208 L'+(left+114)+',372 L'+(left+92)+',636 L'+(left+42)+',792 L'+left+',768 Z" fill="#CB7A50"/>'
+    +'<path d="M'+(left+54)+',208 L'+(left+114)+',372 L'+(left+92)+',636 L'+(left+124)+',514 L'+(left+120)+',300 Z" fill="#B26440"/>'
+    +'<path d="M'+left+',768 L'+(left+42)+',792 L'+(left+92)+',636 L'+(left+114)+',730 L'+(left+66)+',932 L'+left+',960 Z" fill="#8A3F26" opacity=".92"/>'
+    +'<path d="M'+left+',1080 L'+left+',962 L'+(left+72)+',998 L'+(left+108)+',1080 Z" fill="#B26440" opacity=".9"/>'
+    +'<path d="M1920,0 L1920,232 L1862,174 L1872,40 Z" fill="#CB7A50"/>'
+    +'<path d="M1872,40 L1862,174 L1920,232 L1920,266 L1828,182 L1844,32 Z" fill="#8A3F26" opacity=".55"/>'
+    +'</svg>':'');
+}
+function khatam(stroke){
+  let out='';
+  for(let row=0,y=-100;y<1200;y+=196,row++)
+    for(let x=-150+(row%2?98:0);x<2100;x+=196) out+='<use href="#khatam-t" x="'+x+'" y="'+y+'"/>';
+  return '<div style="position:absolute;inset:0;'
+    +'-webkit-mask-image:radial-gradient(120% 115% at 72% 40%, transparent 30%, rgba(0,0,0,.5) 60%, #000 85%);'
+    +'mask-image:radial-gradient(120% 115% at 72% 40%, transparent 30%, rgba(0,0,0,.5) 60%, #000 85%)">'
+    +'<svg width="1920" height="1080"><g stroke-width="1.1" stroke="'+stroke+'" fill="none">'+out+'</g></svg></div>';
+}
+
+/* ---------------- F1–F5 : subject forms, built to spec ---------------- */
+/* each: 3–7 planes, 3 value steps (light / core / deep), hard edges, light upper-left */
+const FAM={
+  saffron:{l:'#EFD9A0',c:'#DDBA62',d:'#A8873E',ar:'الكيمياء',en:'Chemistry'},
+  plum   :{l:'#D3B4C4',c:'#AC7F97',d:'#7D5468',ar:'الأحياء',en:'Biology'},
+  sage   :{l:'#C6CCAA',c:'#9FAA7D',d:'#6F7C52',ar:'مهارات المستقبل',en:'Future skills'},
+  skyf   :{l:'#B7CEDD',c:'#86A7BE',d:'#5C7E96',ar:'القدرات كمي',en:'Quant'},
+};
+function formOrb(f){   /* sphere + orbit, the existing quant mark, retinted */
+  return '<g transform="translate(300,720)">'
+   +'<g transform="rotate(-16)"><ellipse cx="0" cy="16" rx="252" ry="80" fill="none" stroke="'+f.d+'" stroke-width="3" opacity=".5"/></g>'
+   +'<circle cx="0" cy="0" r="118" fill="'+f.c+'"/>'
+   +edgeGrain(0,0,118,8,9000,f.c,f.d,f.l)
+   +'<path d="M-118,0 A118,118 0 0 1 0,-118 L0,0 Z" fill="'+f.l+'" opacity=".55"/>'
+   +'<path d="M0,118 A118,118 0 0 0 118,0 L0,0 Z" fill="'+f.d+'" opacity=".35"/>'
+   +'<g transform="rotate(-16)"><path d="M-262,16 A252,80 0 0 0 252,16" fill="none" stroke="'+f.l+'" stroke-width="3.5"/></g>'
+   +'</g>';
+}
+function formPrism(f){ /* faceted crystal — 5 planes, 3 steps */
+  return '<g transform="translate(300,720)">'
+   +'<path d="M-150,60 L-40,-190 L60,-150 L60,150 L-70,190 Z" fill="'+f.c+'"/>'
+   +'<path d="M-40,-190 L60,-150 L60,150 L130,96 L112,-142 Z" fill="'+f.d+'"/>'
+   +'<path d="M-150,60 L-40,-190 L-64,-38 Z" fill="'+f.l+'"/>'
+   +'<path d="M-150,60 L-64,-38 L60,150 L-70,190 Z" fill="'+f.c+'" opacity=".72"/>'
+   +'<path d="M-40,-190 L-40,-244 L118,-186 L112,-142 Z" fill="'+f.l+'"/>'
+   +'</g>';
+}
+function formLeaf(f){  /* faceted leaf — 4 planes */
+  return '<g transform="translate(300,720)">'
+   +'<path d="M-176,120 L-30,-186 L86,-96 L104,110 L-40,196 Z" fill="'+f.c+'"/>'
+   +'<path d="M-30,-186 L86,-96 L104,110 L-40,196 Z" fill="'+f.d+'" opacity=".55"/>'
+   +'<path d="M-176,120 L-30,-186 L-40,196 Z" fill="'+f.l+'" opacity=".8"/>'
+   +'<path d="M-30,-186 L-40,196" stroke="'+f.l+'" stroke-width="4" opacity=".7"/>'
+   +'</g>';
+}
+function formStack(f){ /* three stacked faceted plates */
+  return '<g transform="translate(290,730)">'
+   +'<path d="M-190,120 L0,40 L190,120 L0,200 Z" fill="'+f.d+'"/>'
+   +'<path d="M-160,10 L0,-60 L160,10 L0,80 Z" fill="'+f.c+'"/>'
+   +'<path d="M-160,10 L0,80 L0,10 Z" fill="'+f.d+'" opacity=".4"/>'
+   +'<path d="M-120,-110 L0,-170 L120,-110 L0,-50 Z" fill="'+f.l+'"/>'
+   +'<path d="M-120,-110 L0,-50 L0,-110 Z" fill="'+f.c+'" opacity=".5"/>'
+   +'</g>';
+}
+
+function cover(famKey,form,title){
+  const f=FAM[famKey];
+  return '<div class="stage" data-fit>'
+   + sky({sunX:640,sunY:150,frame:true,left:132})
+   + khatam('rgba(38,40,46,.085)')
+   /* the subject illustration is the only object in the view */
+   + '<svg width="1920" height="1080" style="position:absolute;inset:0;z-index:5">'
+     +'<g transform="translate(250,-90) scale(1.05)">'+form(f)+'</g></svg>'
+   /* band + seam, unchanged */
+   + '<div style="position:absolute;left:0;top:0;bottom:0;width:132px;background:#232529;z-index:3;display:flex;justify-content:center;padding-top:64px">'
+     +'<div style="writing-mode:vertical-rl;color:'+f.l+';font-size:38px;font-weight:600;letter-spacing:.06em">'+f.ar+'</div></div>'
+   + '<div style="position:absolute;top:0;bottom:0;left:131px;width:2px;z-index:4;'
+     +'background:linear-gradient(to bottom,#B26440 0%,#D2A47A 18%,#F6F0E4 38%,#DDC09A 60%,#B26440 88%,#8A3F26 100%);box-shadow:0 0 14px rgba(221,192,154,.4)"></div>'
+   /* chip — subject identity via tint, not via ground */
+   + '<div style="position:absolute;right:110px;top:132px;z-index:6;background:'+f.l+';color:'+f.d+';'
+     +'padding:11px 30px;border-radius:28px;font-size:26px;font-weight:600;direction:rtl">'+f.ar+'</div>'
+   + '<div style="position:absolute;right:110px;top:250px;width:1080px;text-align:right;direction:rtl;z-index:6;'
+     +'color:#26282E;font-size:78px;line-height:1.42;font-weight:700;letter-spacing:-.02em">'+title+'</div>'
+   + '<div style="position:absolute;right:110px;top:648px;width:220px;height:4px;border-radius:2px;z-index:6;'
+     +'background:linear-gradient(105deg,#B26440 0%,#DDC09A 22%,#F6F0E4 50%,#DDC09A 78%,#B26440 100%)"></div>'
+   + '<div style="position:absolute;right:110px;bottom:56px;display:flex;align-items:baseline;gap:12px;direction:ltr;z-index:6">'
+     +'<span style="font-family:\'Hanken Grotesk\',sans-serif;font-size:20px;font-weight:500;color:rgba(38,40,46,.5)">Tracks</span>'
+     +'<span style="font-family:\'Hanken Grotesk\',sans-serif;font-weight:700;font-size:32px;letter-spacing:-.03em;color:#26282E">noon</span></div>'
+   + '</div>';
+}
+
+const COVERS=[
+ ['skyf',formOrb,'العنوان: مهمتي في الحياة ليست مجرد البقاء','Quant · sphere and orbit'],
+ ['saffron',formPrism,'التفاعلات والروابط الكيميائية','Chemistry · faceted crystal'],
+ ['sage',formLeaf,'مهارات المستقبل: كيف تتعلم','Future skills · faceted leaf'],
+ ['plum',formStack,'الخلية ووظائفها الحيوية','Biology · stacked plates'],
+];
+document.getElementById('covers').innerHTML = COVERS.map(c=>
+  '<figure><div class="frame">'+cover(c[0],c[1],c[2])+'</div>'
+  +'<figcaption><b>'+c[3].toUpperCase()+'</b>Same sky, same horizon, same terracotta frame. Identity comes from the facet tint, the rail and the chip.</figcaption></figure>'
+).join('');
+
+/* facet demo — right vs wrong */
+function facetDemo(ok){
+  const f=FAM.saffron;
+  const body = ok
+   ? '<path d="M-150,60 L-40,-190 L60,-150 L60,150 L-70,190 Z" fill="'+f.c+'"/>'
+    +'<path d="M-40,-190 L60,-150 L60,150 L130,96 L112,-142 Z" fill="'+f.d+'"/>'
+    +'<path d="M-150,60 L-40,-190 L-64,-38 Z" fill="'+f.l+'"/>'
+    +'<path d="M-40,-190 L-40,-244 L118,-186 L112,-142 Z" fill="'+f.l+'"/>'
+   : '<defs><linearGradient id="badg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="'+f.l+'"/><stop offset="1" stop-color="'+f.d+'"/></linearGradient></defs>'
+    +'<path d="M-150,60 L-40,-190 L60,-150 L60,150 L-70,190 Z" fill="url(#badg)" stroke="'+f.d+'" stroke-width="6"/>'
+    +'<path d="M-40,-190 L60,-150 L60,150 L130,96 L112,-142 Z" fill="url(#badg)" stroke="'+f.d+'" stroke-width="6" opacity=".8"/>'
+    +'<path d="M-150,60 L-152,54 L-40,-190 L-38,-186 Z" fill="#fff" opacity=".5"/>';
+  return '<div class="stage" data-fit><div style="position:absolute;inset:0;background:linear-gradient(180deg,#E8DABF,#F6F0E4)"></div>'
+   +'<svg width="1920" height="1080" style="position:absolute;inset:0"><g transform="translate(960,540) scale(1.5)">'+body+'</g></svg></div>';
+}
+document.getElementById('facetdemo').innerHTML =
+  '<figure><div class="frame">'+facetDemo(true)+'</div><figcaption><b>TO SPEC</b>Four planes, three value steps, hard edges, light from upper-left, no stroke.</figcaption></figure>'
+ +'<figure><div class="frame">'+facetDemo(false)+'</div><figcaption><b>OFF SPEC</b>Gradients inside the planes, an outline, a specular sliver below 12°. Reads as a generic vector icon, not as built form.</figcaption></figure>';
+
+/* ---------------- Application A : presenter stage view (night) ---------------- */
+function nightSky(){
+  return ''
+  /* S1 inverted — three stops, deepest at the top, warm at the horizon */
+  +'<div style="position:absolute;inset:0;background:linear-gradient(180deg,#131418 0%,#191A20 26%,#232028 48%,#332529 66%,#3E2823 78%)"></div>'
+  /* S2 — one light, low and warm. the sun after it has set */
+  +'<div style="position:absolute;left:1000px;top:560px;width:620px;height:340px;'
+    +'background:radial-gradient(ellipse at center,rgba(232,102,58,.30) 0%,rgba(203,122,80,.10) 46%,rgba(203,122,80,0) 74%)"></div>'
+  /* S4 — cool haze, horizon band only */
+  +'<div style="position:absolute;left:0;right:0;top:540px;height:230px;'
+    +'background:linear-gradient(180deg,rgba(74,107,138,0) 0%,rgba(74,107,138,.22) 58%,rgba(74,107,138,0) 100%)"></div>'
+  /* S3 — horizon + terrace, two planes, no scenery */
+  +'<svg width="1920" height="1080" style="position:absolute;inset:0">'
+    +'<path d="M0,760 L1920,734 L1920,1080 L0,1080 Z" fill="#2B2226"/>'
+    +'<path d="M0,880 L1920,854 L1920,1080 L0,1080 Z" fill="#1E191D"/>'
+    +'<path d="M0,758 L1920,732" stroke="#8A3F26" stroke-width="2" opacity=".55"/>'
+  +'</svg>'
+  /* frame — slim edge slivers only */
+  +'<svg width="1920" height="1080" style="position:absolute;inset:0">'
+    +'<path d="M0,236 L46,168 L104,300 L86,552 L38,700 L0,684 Z" fill="#8A3F26" opacity=".7"/>'
+    +'<path d="M46,168 L104,300 L86,552 L116,452 L112,244 Z" fill="#5A2818" opacity=".8"/>'
+    +'<path d="M1920,176 L1874,120 L1832,262 L1854,486 L1908,626 L1920,620 Z" fill="#8A3F26" opacity=".55"/>'
+  +'</svg>';
+}
+function stageView(){
+  const CREAM='#F6F0E4', MUT='rgba(246,240,228,.62)', FAINT='rgba(246,240,228,.38)';
+  /* four classrooms seated ON the ribbon — position means order of speaking */
+  const rooms=[
+    {n:'Classroom A',x:330,y:706,active:true,c:14},
+    {n:'Classroom B',x:718,y:676,active:false,c:22},
+    {n:'Classroom D',x:1126,y:700,active:false,c:18},
+    {n:'Classroom E',x:1512,y:678,active:false,c:11},
+  ];
+  let marks='';
+  rooms.forEach(r=>{
+    const rim = r.active? '#E8755A' : 'rgba(246,240,228,.26)';
+    const dash= r.active? '' : ' stroke-dasharray="6 9"';
+    marks += '<g transform="translate('+r.x+','+r.y+')">'
+      +(r.active? '<circle r="58" fill="none" stroke="rgba(232,117,90,.18)" stroke-width="18"/>':'')
+      +'<circle r="58" fill="#22201F"/>'
+      +'<circle r="58" fill="none" stroke="'+rim+'" stroke-width="'+(r.active?4:2)+'"'+dash+'/>'
+      +'<text y="12" text-anchor="middle" fill="'+(r.active?'#F6F0E4':MUT)+'" font-family="Hanken Grotesk, sans-serif" font-size="34" font-weight="600">'+r.n.slice(-1)+'</text>'
+      /* gold waypoint diamond above — landmark, static */
+      +'<g transform="translate(0,-84) rotate(45)"><rect x="-7" y="-7" width="14" height="14" fill="#DDC09A"/></g>'
+      +'<text y="104" text-anchor="middle" fill="'+(r.active?'rgba(246,240,228,.9)':MUT)+'" font-family="Hanken Grotesk, sans-serif" font-size="25" font-weight="500">'+r.n+'</text>'
+      +'<text y="140" text-anchor="middle" fill="'+FAINT+'" font-family="JetBrains Mono, monospace" font-size="22">'+r.c+'</text>'
+      +'</g>';
+  });
+  return '<div class="stage" data-fit>'
+  + nightSky()
+  /* the ribbon — the route the classrooms sit on */
+  + '<svg width="1920" height="1080" style="position:absolute;inset:0">'
+    +'<path d="M-40,742 C 260,724 520,668 760,676 C 1000,684 1180,716 1440,690 C 1650,668 1840,690 1960,700" fill="none" stroke="rgba(221,192,154,.10)" stroke-width="52" stroke-linecap="round"/>'
+    +'<path d="M-40,730 C 260,712 520,656 760,664 C 1000,672 1180,704 1440,678 C 1650,656 1840,678 1960,688" fill="none" stroke="rgba(246,240,228,.42)" stroke-width="3.5" stroke-linecap="round"/>'
+    +marks
+  +'</svg>'
+  /* status strip — mono for numerals only */
+  + '<div style="position:absolute;left:84px;top:64px;display:flex;align-items:center;gap:20px;z-index:6">'
+    +'<span style="width:14px;height:14px;border-radius:50%;background:#E8755A;display:inline-block"></span>'
+    +'<span style="font-family:\'Hanken Grotesk\',sans-serif;font-size:26px;font-weight:600;color:'+CREAM+'">Live</span>'
+    +'<span style="color:'+FAINT+';font-size:26px">·</span>'
+    +'<span style="font-family:\'JetBrains Mono\',monospace;font-size:25px;color:'+MUT+'">47:32</span>'
+    +'<span style="color:'+FAINT+';font-size:26px">·</span>'
+    +'<span style="font-family:\'Hanken Grotesk\',sans-serif;font-size:25px;color:'+MUT+'">Slide <span style="font-family:\'JetBrains Mono\',monospace">4</span> of <span style="font-family:\'JetBrains Mono\',monospace">12</span></span>'
+  +'</div>'
+  + '<div style="position:absolute;left:84px;top:132px;z-index:6;font-family:\'Hanken Grotesk\',sans-serif;'
+    +'font-size:62px;font-weight:700;letter-spacing:-.03em;color:'+CREAM+'">Quadratic equations</div>'
+  + '<div style="position:absolute;left:84px;top:218px;z-index:6;font-family:\'Hanken Grotesk\',sans-serif;font-size:27px;color:'+MUT+'">'
+    +'Sara Al-Otaibi · <span style="font-family:\'JetBrains Mono\',monospace">65</span> students on the route</div>'
+  /* teacher PiP — coral rim reserved, unchanged */
+  + '<div style="position:absolute;right:84px;top:104px;width:196px;height:196px;border-radius:50%;z-index:6;'
+    +'background:linear-gradient(150deg,#463A34,#241E1F);border:4px solid #E8755A;'
+    +'box-shadow:0 0 0 13px rgba(232,117,90,.09);display:flex;align-items:center;justify-content:center;'
+    +'font-family:\'Hanken Grotesk\',sans-serif;font-size:66px;font-weight:600;color:#F6F0E4">S</div>'
+  + '<div style="position:absolute;right:84px;top:316px;width:196px;text-align:center;z-index:6;'
+    +'font-family:\'Hanken Grotesk\',sans-serif;font-size:23px;color:'+MUT+'">Speaking now</div>'
+  /* heat at the frame */
+  + '<div style="position:absolute;left:0;right:0;bottom:0;height:5px;z-index:6;'
+    +'background:linear-gradient(90deg,#8A3F26,#E8663A 42%,#CB7A50 70%,transparent)"></div>'
+  + '<div style="position:absolute;left:84px;bottom:56px;z-index:6;display:flex;align-items:center;gap:12px">'
+    +'<span style="font-family:\'Hanken Grotesk\',sans-serif;font-size:20px;font-weight:500;color:rgba(246,240,228,.45)">Tracks</span>'
+    +'<span style="font-family:\'Hanken Grotesk\',sans-serif;font-weight:700;font-size:30px;letter-spacing:-.03em;color:'+CREAM+'">noon</span></div>'
+  + '</div>';
+}
+document.getElementById('stageframe').innerHTML = stageView();
+
+/* ---------------- Application B : student journey ---------------- */
+function waypoint(state){
+  /* 32px faceted marker — 3 planes, 3 value steps, light upper-left */
+  const P={done:{l:'#9BCFB8',c:'#6BAE93',d:'#3F7D66'},
+           now :{l:'#7C99B4',c:'#4A6B8A',d:'#2F4B64'},
+           alert:{l:'#F3A183',c:'#E8663A',d:'#A8401F'},
+           lock:{l:'#EFE7D6',c:'#E2D6BE',d:'#C3B192'}}[state];
+  const glyph = state==='done'
+    ? '<path d="M-7,0 L-2,6 L8,-6" fill="none" stroke="#F6F0E4" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round"/>'
+    : state==='now' ? '<circle r="5" fill="#F6F0E4"/>'
+    : state==='alert' ? '<rect x="-1.6" y="-8" width="3.2" height="9" rx="1.6" fill="#F6F0E4"/><circle cy="5" r="2" fill="#F6F0E4"/>'
+    : '<rect x="-5" y="-1" width="10" height="8" rx="1.5" fill="rgba(38,40,46,.4)"/><path d="M-3,-1 v-3 a3,3 0 0 1 6,0 v3" fill="none" stroke="rgba(38,40,46,.4)" stroke-width="2"/>';
+  return '<svg width="34" height="34" viewBox="-17 -17 34 34" style="display:block">'
+    +'<path d="M0,-16 L14,-8 L14,8 L0,16 L-14,8 L-14,-8 Z" fill="'+P.c+'"/>'
+    +'<path d="M0,-16 L14,-8 L0,0 L-14,-8 Z" fill="'+P.l+'"/>'
+    +'<path d="M14,-8 L14,8 L0,16 L0,0 Z" fill="'+P.d+'"/>'
+    +glyph+'</svg>';
+}
+function unitCard(n,name,sub,state){
+  const done=state==='done', now=state==='now';
+  const bg = now? '#FBF8F1' : '#FBF8F1';
+  const border = now? '2px solid #4A6B8A' : '1px solid rgba(38,40,46,.09)';
+  const numCol = now? '#4A6B8A' : 'rgba(38,40,46,.42)';
+  const nameCol= done? 'rgba(38,40,46,.5)' : '#26282E';
+  return '<div style="flex:1;background:'+bg+';border:'+border+';border-radius:10px;padding:13px 15px;'
+    +(now?'box-shadow:0 3px 14px rgba(74,107,138,.14)':'')+'">'
+    +'<div style="display:flex;align-items:center;justify-content:space-between">'
+      +'<div style="font-size:10.5px;font-weight:600;letter-spacing:.02em;color:'+numCol+'">Unit <span style="font-family:\'JetBrains Mono\',monospace">'+n+'</span></div>'
+      +'<svg width="7" height="12" viewBox="0 0 7 12" fill="none"><path d="M1,1 L6,6 L1,11" stroke="rgba(38,40,46,.3)" stroke-width="1.8" stroke-linecap="round"/></svg>'
+    +'</div>'
+    +'<div style="font-size:15px;font-weight:600;color:'+nameCol+';margin-top:3px;letter-spacing:-.01em">'+name+'</div>'
+    +'<div style="font-size:12.5px;color:rgba(38,40,46,.45);margin-top:2px">'+sub+'</div>'
+    +'</div>';
+}
+function journey(){
+  const row=(wp,card,line)=>
+    '<div style="display:flex;gap:13px;align-items:stretch">'
+     +'<div style="width:34px;display:flex;flex-direction:column;align-items:center;flex-shrink:0">'
+       +wp
+       +(line? '<div style="flex:1;width:'+(line==='dash'?'0':'4px')+';'
+          +(line==='dash'
+             ? 'border-left:2px dashed rgba(38,40,46,.18);width:0'
+             : 'background:'+(line==='done'?'#6BAE93':'#DDC09A')+';border-radius:2px;position:relative')
+          +';margin:5px 0"></div>' : '')
+     +'</div>'
+     + card +'</div>';
+
+  return ''
+  /* sky band at the head — atmosphere, no illustration */
+  + '<div style="position:absolute;left:0;right:0;top:0;height:186px;'
+    +'background:linear-gradient(180deg,#E8DABF 0%,#F1E8D8 52%,#F5EFE3 86%,#F1EBDD 100%)"></div>'
+  + '<div style="position:absolute;left:262px;top:34px;width:120px;height:120px;border-radius:50%;'
+    +'background:radial-gradient(circle,#FDFBF5 0%,rgba(253,251,245,.5) 42%,rgba(253,251,245,0) 70%)"></div>'
+  + '<div style="position:absolute;left:302px;top:74px;width:34px;height:34px;border-radius:50%;background:#FDFBF5"></div>'
+  + '<div style="position:absolute;left:0;right:0;top:184px;height:1px;background:rgba(38,40,46,.12)"></div>'
+  /* header */
+  + '<div style="position:absolute;left:0;right:0;top:0;bottom:0;overflow:hidden;font-family:\'Hanken Grotesk\',sans-serif">'
+  + '<div style="padding:52px 20px 0">'
+    +'<div style="font-size:30px;font-weight:700;letter-spacing:-.03em;color:#26282E">Journey</div>'
+    /* tabs — active marked in noon green, the reserved state colour */
+    +'<div style="display:flex;gap:22px;margin-top:16px">'
+      +['Quant','Verbal','Math'].map((t,i)=>
+        '<div style="display:flex;align-items:center;gap:7px;padding-bottom:9px;'
+        +(i===0?'border-bottom:2.5px solid #6BAE93':'border-bottom:2.5px solid transparent')+'">'
+        +'<svg width="15" height="15" viewBox="-9 -9 18 18"><path d="M0,-8 L7,-4 L7,4 L0,8 L-7,4 L-7,-4 Z" fill="'
+          +(i===0?'#DDC09A':'#E6DCC8')+'"/><path d="M0,-8 L7,-4 L0,0 L-7,-4 Z" fill="'+(i===0?'#EFE7D6':'#F1EBDD')+'"/></svg>'
+        +'<span style="font-size:14.5px;font-weight:'+(i===0?'700':'500')+';color:'+(i===0?'#26282E':'rgba(38,40,46,.48)')+'">'+t+'</span></div>').join('')
+    +'</div>'
+  +'</div>'
+  /* progress strip */
+  + '<div style="display:flex;align-items:center;gap:10px;padding:14px 20px;border-bottom:1px solid rgba(38,40,46,.09)">'
+    +'<svg width="15" height="15" viewBox="-9 -9 18 18"><g transform="rotate(45)"><rect x="-6" y="-6" width="12" height="12" rx="1.5" fill="#DDBA62"/></g></svg>'
+    +'<span style="font-size:14.5px;font-weight:600;color:#26282E">Progress mock</span>'
+    +'<span style="color:rgba(38,40,46,.3)">·</span>'
+    +'<span style="font-size:14.5px;font-weight:600;color:#B26440">in <span style="font-family:\'JetBrains Mono\',monospace">24</span> days</span>'
+    +'<svg width="12" height="8" viewBox="0 0 12 8" style="margin-left:auto"><path d="M1,1 L6,6 L11,1" stroke="rgba(38,40,46,.4)" stroke-width="1.8" fill="none" stroke-linecap="round"/></svg>'
+  +'</div>'
+  /* the route */
+  + '<div style="padding:20px 20px 0;display:flex;flex-direction:column;gap:11px">'
+    + row(waypoint('done'), unitCard(1,'Ratios and proportion','Builds chapter 1','done'), 'done')
+    + row(waypoint('done'), unitCard(2,'Percentages','Builds chapter 1','done'), 'done')
+    /* heat — behind schedule */
+    + '<div style="display:flex;gap:13px;align-items:stretch">'
+      +'<div style="width:34px;display:flex;flex-direction:column;align-items:center;flex-shrink:0">'
+        + waypoint('alert')
+        +'<div style="flex:1;width:4px;background:#DDC09A;border-radius:2px;margin:5px 0"></div></div>'
+      +'<div style="flex:1;background:rgba(232,102,58,.09);border-left:3px solid #E8663A;border-radius:8px;'
+        +'padding:12px 14px;display:flex;align-items:center;justify-content:space-between">'
+        +'<span style="font-size:14px;font-weight:600;color:#26282E;white-space:nowrap">You&rsquo;re behind your class</span>'
+        +'<span style="font-size:13px;font-weight:600;color:#B24A1E;display:flex;align-items:center;gap:6px;white-space:nowrap;flex-shrink:0">'
+          +'<span style="font-family:\'JetBrains Mono\',monospace">2</span> off track'
+          +'<svg width="6" height="10" viewBox="0 0 7 12"><path d="M1,1 L6,6 L1,11" stroke="#B24A1E" stroke-width="1.8" fill="none" stroke-linecap="round"/></svg></span>'
+      +'</div></div>'
+    + row(waypoint('now'), unitCard(3,'Linear equations','Builds chapter 1','now'), 'dash')
+  +'</div>'
+  /* coming later */
+  + '<div style="display:flex;align-items:center;gap:12px;padding:16px 20px 10px 67px">'
+    +'<div style="height:1px;flex:1;background:rgba(38,40,46,.14)"></div>'
+    +'<span style="font-size:11.5px;font-weight:600;color:rgba(38,40,46,.42)">Coming later</span>'
+    +'<div style="height:1px;flex:1;background:rgba(38,40,46,.14)"></div>'
+  +'</div>'
+  + '<div style="padding:0 20px;display:flex;gap:13px;align-items:center">'
+    +'<div style="width:34px;display:flex;justify-content:center;flex-shrink:0">'+waypoint('lock')+'</div>'
+    +'<div style="flex:1;background:rgba(251,248,241,.6);border:1px dashed rgba(38,40,46,.16);border-radius:10px;'
+      +'padding:13px 15px;display:flex;align-items:center;justify-content:space-between">'
+      +'<span style="font-size:14.5px;font-weight:500;color:rgba(38,40,46,.55)">'
+        +'<span style="font-family:\'JetBrains Mono\',monospace">7</span> more units</span>'
+      +'<svg width="12" height="8" viewBox="0 0 12 8"><path d="M1,1 L6,6 L11,1" stroke="rgba(38,40,46,.4)" stroke-width="1.8" fill="none" stroke-linecap="round"/></svg>'
+    +'</div></div>'
+  /* bottom nav */
+  + '<div style="position:absolute;left:0;right:0;bottom:0;height:84px;background:#FBF8F1;'
+    +'border-top:1px solid rgba(38,40,46,.09);display:flex;align-items:flex-start;padding-top:13px">'
+    + [['Schedule',0,'cal'],['Mastery',0,'grid'],['Journey',1,'route'],['Profile',0,'me']].map(([t,on,k])=>{
+        const C = on? '#6BAE93' : 'rgba(38,40,46,.40)';
+        const g = {
+          cal:'<rect x="-8" y="-6.5" width="16" height="14.5" rx="2.5" fill="none" stroke="'+C+'" stroke-width="1.9"/>'
+             +'<path d="M-8,-1.5 h16" stroke="'+C+'" stroke-width="1.9"/><path d="M-4,-9.5 v3 M4,-9.5 v3" stroke="'+C+'" stroke-width="1.9" stroke-linecap="round"/>',
+          grid:'<rect x="-8.5" y="-8.5" width="7" height="7" rx="1.6" fill="'+C+'"/><rect x="1.5" y="-8.5" width="7" height="7" rx="1.6" fill="'+C+'" opacity=".55"/>'
+              +'<rect x="-8.5" y="1.5" width="7" height="7" rx="1.6" fill="'+C+'" opacity=".55"/><rect x="1.5" y="1.5" width="7" height="7" rx="1.6" fill="'+C+'"/>',
+          route:'<path d="M-8.5,6 C -4,6 -3,-1 1,-1 C 5,-1 6,-7 9,-7" fill="none" stroke="'+C+'" stroke-width="2" stroke-linecap="round"/>'
+               +'<g transform="translate(-8.5,6) rotate(45)"><rect x="-2.6" y="-2.6" width="5.2" height="5.2" fill="'+C+'"/></g>'
+               +'<g transform="translate(9,-7) rotate(45)"><rect x="-2.6" y="-2.6" width="5.2" height="5.2" fill="'+C+'"/></g>',
+          me:'<circle cy="-3" r="4" fill="none" stroke="'+C+'" stroke-width="1.9"/>'
+            +'<path d="M-7,9 a7,6.5 0 0 1 14,0" fill="none" stroke="'+C+'" stroke-width="1.9" stroke-linecap="round"/>'
+        }[k];
+        return '<div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:5px">'
+        +'<svg width="22" height="22" viewBox="-11 -11 22 22">'+g+'</svg>'
+        +'<span style="font-size:10.5px;font-weight:'+(on?'700':'500')+';color:'+(on?'#26282E':'rgba(38,40,46,.45)')+'">'+t+'</span></div>';
+      }).join('')
+  +'</div>'
+  + '</div>';
+}
+document.getElementById('journey').innerHTML = journey();
+
+function fit(){
+  document.querySelectorAll('.frame').forEach(f=>{
+    const s=f.querySelector('.stage');
+    if(s) s.style.transform='scale('+(f.clientWidth/1920)+')';
+  });
+}
+addEventListener('resize',fit);fit();
+</script>
+</body></html>

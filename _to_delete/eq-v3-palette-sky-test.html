@@ -1,0 +1,345 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Empty Quarter v3 · palette + sky test</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&family=IBM+Plex+Sans+Arabic:wght@500;600;700&family=Vazirmatn:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+  *{box-sizing:border-box}
+  body{margin:0;background:#1F2126;color:#F1EBDD;font-family:'Hanken Grotesk',sans-serif;padding:52px 40px 110px}
+  .wrap{max-width:1680px;margin:0 auto}
+  .meta{font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:.2em;color:#D2A47A;margin-bottom:14px}
+  h1{font-size:30px;font-weight:600;margin:0 0 10px;letter-spacing:-.015em}
+  .sub{color:rgba(241,235,221,.62);font-size:14.5px;max-width:96ch;line-height:1.65;margin:0 0 14px}
+  h2{font-size:17px;font-weight:600;margin:52px 0 4px;padding-top:20px;border-top:1px solid rgba(241,235,221,.14)}
+  .h2note{color:rgba(241,235,221,.5);font-size:13.5px;margin:0 0 22px;max-width:90ch;line-height:1.6}
+  .grid{display:grid;grid-template-columns:1fr 1fr;gap:30px 26px}
+  .frame{position:relative;width:100%;aspect-ratio:16/9;overflow:hidden;border-radius:8px;
+    border:1px solid rgba(241,235,221,.14);box-shadow:0 18px 50px rgba(0,0,0,.45)}
+  .stage{position:absolute;top:0;left:0;width:1920px;height:1080px;transform-origin:0 0;overflow:hidden;
+    font-family:'IBM Plex Sans Arabic','Vazirmatn',sans-serif}
+  figure{margin:0}
+  figcaption{padding:13px 4px 0}
+  figcaption b{font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:.2em;color:#D2A47A}
+  figcaption p{margin:5px 0 0;font-size:13px;color:rgba(241,235,221,.6);line-height:1.55;max-width:60ch}
+  table{border-collapse:collapse;width:100%;max-width:900px;font-size:13.5px;margin:18px 0 0}
+  th{text-align:left;font-family:'JetBrains Mono',monospace;font-size:10.5px;letter-spacing:.14em;
+     color:rgba(241,235,221,.45);padding:9px 16px 9px 0;border-bottom:1px solid rgba(241,235,221,.2)}
+  td{padding:10px 16px 10px 0;border-bottom:1px solid rgba(241,235,221,.08);vertical-align:top}
+  td.n{font-family:'JetBrains Mono',monospace}
+  .sw{display:inline-block;width:14px;height:14px;border-radius:3px;vertical-align:-2px;margin-inline-end:8px;
+      border:1px solid rgba(241,235,221,.2)}
+  .note{background:rgba(241,235,221,.05);border-left:3px solid #CB7A50;padding:14px 16px;font-size:13.5px;
+        max-width:92ch;margin:20px 0 0;line-height:1.6;color:rgba(241,235,221,.78)}
+  .note b{color:#F1EBDD}
+</style></head>
+<body><div class="wrap">
+
+<div class="meta">EMPTY QUARTER · V3 PROPOSAL · TEST 01 · PALETTE + SKY ONLY</div>
+<h1>Does inverting figure and ground fix the seriousness?</h1>
+<p class="sub">One cover and one ceremonial slide, each shown as v4 today and as v3 proposed. <b>Layout, type, illustration,
+band, seam and lockup are identical in every pair.</b> The only changes are which colour holds the field, the addition of
+an atmospheric sky, and the demotion of saturated terracotta to a framing role. No new hexes are introduced — every value
+below comes from the colleague's locked ten or the approved cover material set.</p>
+
+<h2>01 · Tracks cover — Option D anatomy, two grounds</h2>
+<p class="h2note">Same slim 132px ink band, same foil seam, same v10-grain planet stacked over the band, same title
+position and lockup. Left is today's stage ground <code>#B65534</code>. Right replaces it with a three-plane haze sky.</p>
+<div class="grid" id="covers"></div>
+
+<h2>02 · Ceremonial slide — "turn the lights up", two ways</h2>
+<p class="h2note">The Tracks spec sends ceremonial pages to a full-bleed family core. Left is that, in saffron
+<code>#DDBA62</code>. Right keeps the drama but produces it with light instead of saturation: luminous sky field, one
+monumental faceted form, saffron kept as the sun and the accent furniture.</p>
+<div class="grid" id="slides"></div>
+
+<h2>03 · Measured colour share</h2>
+<p class="h2note">Pixel-counted from the rendered stages, not estimated. Saturated warm = warm hue at saturation ≥ 30%
+and lightness ≤ 68%. Light warm = plaster, cream, sand. The target from the proposal was saturated terracotta at or below
+12–15%; both v3 surfaces land inside it. <b>Cool reads 0.0% and that is the honest result</b> — water at 15% over a warm
+ground desaturates rather than shifting hue, so the atmospheric shadow shows up as the fall in saturated warm, not as
+blue pixels. If you want cool to be legible as cool, it has to go up to roughly 30% opacity or move to the deepest plane.</p>
+<table id="ratios"><tr><th>SURFACE</th><th>SATURATED WARM</th><th>LIGHT WARM (SKY / SAND)</th><th>COOL HAZE</th><th>INK</th></tr><tr><td>Cover · v4 today</td><td class="n">89.1%</td><td class="n">4.1%</td><td class="n">0.0%</td><td class="n">6.7%</td></tr><tr><td>Cover · v3 proposed</td><td class="n">12.9%</td><td class="n">78.8%</td><td class="n">0.0%</td><td class="n">7.9%</td></tr><tr><td>Ceremonial slide · v4 today</td><td class="n">96.2%</td><td class="n">2.4%</td><td class="n">0.0%</td><td class="n">1.3%</td></tr><tr><td>Ceremonial slide · v3 proposed</td><td class="n">17.5%</td><td class="n">80.9%</td><td class="n">0.0%</td><td class="n">1.3%</td></tr></table>
+
+<div class="note"><b>Two forced changes, declared.</b> On the v3 cover the title flips from cream
+<code>#F6F0E4</code> to ink <code>#26282E</code> — unavoidable once the ground goes light, and it is the same ink the
+Tracks working pages already use for reading. On the v3 slide the hero does the same. Everything else in both pairs is
+untouched, so any difference you feel is attributable to ground and atmosphere alone.</div>
+
+<div class="note"><b>Palette used in v3, all pre-existing.</b>
+<span class="sw" style="background:#F6F0E4"></span>cream <code>#F6F0E4</code> ·
+<span class="sw" style="background:#F1EBDD"></span>plaster <code>#F1EBDD</code> ·
+<span class="sw" style="background:#E2D6BE"></span>warm oak <code>#E2D6BE</code> ·
+<span class="sw" style="background:#DDC09A"></span>sand <code>#DDC09A</code> ·
+<span class="sw" style="background:#D2A47A"></span>sand deep <code>#D2A47A</code> ·
+<span class="sw" style="background:#CB7A50"></span>clay <code>#CB7A50</code> ·
+<span class="sw" style="background:#B26440"></span>clay deep <code>#B26440</code> ·
+<span class="sw" style="background:#8A3F26"></span>rust <code>#8A3F26</code> ·
+<span class="sw" style="background:#7C99B4"></span>water light <code>#7C99B4</code> ·
+<span class="sw" style="background:#26282E"></span>ink <code>#26282E</code>.
+The cool haze is water at 10–18% opacity — atmospheric shadow, not a new brand colour.</div>
+
+</div>
+
+<svg width="0" height="0" style="position:absolute">
+  <defs>
+    <g id="khatam-t">
+      <rect x="-62" y="-62" width="124" height="124"/>
+      <rect x="-62" y="-62" width="124" height="124" transform="rotate(45)"/>
+      <rect x="-7" y="-7" width="14" height="14" transform="rotate(45)"/>
+    </g>
+  </defs>
+</svg>
+
+<script>
+/* ---------- v10 approved material (verbatim from band-crop-options.html) ---------- */
+function mk(a){return function(){a|=0;a=a+0x6D2B79F5|0;var t=Math.imul(a^a>>>15,1|a);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296}}
+function dots(arr){return arr.map(d=>'M'+(d[0]-d[2]).toFixed(2)+','+d[1].toFixed(2)+'a'+d[2].toFixed(2)+','+d[2].toFixed(2)+' 0 1,0 '+(2*d[2]).toFixed(2)+',0a'+d[2].toFixed(2)+','+d[2].toFixed(2)+' 0 1,0 -'+(2*d[2]).toFixed(2)+',0').join('')}
+function dotPaths(b){let s='';for(const k of b){if(k.arr.length)s+='<path d="'+dots(k.arr)+'" fill="'+k.fill+'" fill-opacity="'+k.o+'"/>';}return s}
+function edgeGrain(cx,cy,r,seed,n){
+  const R=mk(seed);
+  const DKS='rgb(210,164,122)',LTS='rgb(246,240,228)',BODY='rgb(221,192,154)';
+  const T=[];const push=(f,o)=>{T.push({arr:[],fill:f,o});return T.length-1;};
+  const dk=[push(DKS,.55),push(DKS,.38),push(DKS,.22),push(DKS,.12)];
+  const lt=[push(LTS,.45),push(LTS,.30),push(LTS,.18),push(LTS,.10)];
+  const bd=[push(BODY,.85),push(BODY,.55),push(BODY,.28),push(BODY,.10)];
+  const dx=[push(DKS,.35),push(DKS,.18)];
+  for(let i=0;i<n;i++){
+    const a=R()*2*Math.PI, inside=R()<0.85;
+    const d=inside?8*Math.pow(R(),1.8):-4*Math.pow(R(),2.2);
+    const rad=r-d;
+    const x=cx+Math.cos(a)*rad,y=cy+Math.sin(a)*rad;
+    const sz=0.12+R()*0.18;
+    let ti;
+    if(inside){const band=Math.min(3,Math.floor(d/2));ti=R()<0.55?dk[band]:lt[band];}
+    else{const od=-d,band=Math.min(3,Math.floor(od/1));ti=R()<0.75?bd[Math.min(3,band)]:dx[od<2?0:1];}
+    T[ti].arr.push([x,y,sz]);}
+  return dotPaths(T);
+}
+function interior(cx,cy,r,seed,n){
+  const R=mk(seed);
+  const b=[{arr:[],fill:'rgb(210,164,122)',o:0.15},{arr:[],fill:'rgb(246,240,228)',o:0.12}];
+  for(let i=0;i<n;i++){const a=R()*2*Math.PI,rr=(r-9)*Math.sqrt(R());
+    b[R()<0.5?0:1].arr.push([cx+Math.cos(a)*rr,cy+Math.sin(a)*rr,0.10+R()*0.15]);}
+  return dotPaths(b);
+}
+function halo(cx,cy,r,seed,n,tint){
+  const R=mk(seed);
+  const c1 = tint||'rgb(221,192,154)';
+  const b=[{arr:[],fill:c1,o:0.45},{arr:[],fill:c1,o:0.25},
+           {arr:[],fill:'rgb(246,240,228)',o:0.35},{arr:[],fill:'rgb(246,240,228)',o:0.2}];
+  for(let i=0;i<n;i++){const a=R()*2*Math.PI,d=r+12+Math.pow(R(),1.7)*80;
+    const x=cx+Math.cos(a)*d,y=cy+Math.sin(a)*d*0.92;
+    const near=(d-r)<46;const sz=R()<0.1?0.9+R()*0.6:0.35+R()*0.6;
+    b[(R()<0.55?0:2)+(near?0:1)].arr.push([x,y,sz]);}
+  return dotPaths(b);
+}
+const spark=(x,y,s,o,c)=>'<path transform="translate('+x+','+y+') scale('+s+')" d="M 0,-24 L 7,-7 L 24,0 L 7,7 L 0,24 L -7,7 L -24,0 L -7,-7 Z" fill="'+(c||'rgba(246,240,228,'+o+')')+'"/>';
+
+function planetSVG(mode){
+  const orbitFar   = mode==='v3' ? 'rgba(94,36,18,0.22)'   : 'rgba(94,36,18,0.35)';
+  const orbitNear  = mode==='v3' ? 'rgba(38,40,46,0.62)'   : 'rgba(246,240,228,0.85)';
+  const sparkCol   = mode==='v3' ? 'rgba(178,100,64,0.75)' : null;
+  return '<svg width="1920" height="1080" style="position:absolute;inset:0">'
+  +'<defs><linearGradient id="foil'+mode+'" gradientUnits="userSpaceOnUse" x1="200" y1="345" x2="260" y2="315"><stop offset="0" stop-color="#F6F0E4"/><stop offset="0.55" stop-color="#DDC09A"/><stop offset="1" stop-color="#B26440"/></linearGradient></defs>'
+  +'<g transform="translate(110,0)">'
+  +'<g transform="rotate(-16 250 845)"><ellipse cx="250" cy="845" rx="265" ry="84" fill="none" stroke="'+orbitFar+'" stroke-width="3"/></g>'
+  +'<circle cx="250" cy="830" r="120" fill="#DDC09A"/>'
+  +edgeGrain(250,830,120,8,15000)
+  +interior(250,830,118,9,150)
+  +'<g transform="rotate(-16 250 845)">'
+  +'<path d="M -15,845 A 265,84 0 0 0 515,845" fill="none" stroke="'+orbitNear+'" stroke-width="3.5"/>'
+  +'<path d="M 25,873 A 265,84 0 0 1 3,830" fill="none" stroke="url(#foil'+mode+')" stroke-width="4" stroke-linecap="round"/>'
+  +'</g>'
+  +spark(430,657,1,0.85,sparkCol)+spark(140,666,0.55,0.6,sparkCol)+spark(452,1015,0.6,0.9,sparkCol)
+  +halo(250,830,120,17,36)
+  +'</g></svg>';
+}
+function khatam(op){
+  let out='';
+  for(let row=0,y=-100;y<1200;y+=196,row++)
+    for(let x=-150+(row%2?98:0);x<2100;x+=196)
+      out+='<use href="#khatam-t" x="'+x+'" y="'+y+'"/>';
+  return '<div class="etch" style="position:absolute;inset:0;'
+    +'-webkit-mask-image:radial-gradient(120% 115% at 72% 40%, transparent 30%, rgba(0,0,0,.5) 60%, #000 85%);'
+    +'mask-image:radial-gradient(120% 115% at 72% 40%, transparent 30%, rgba(0,0,0,.5) 60%, #000 85%)">'
+    +'<svg width="1920" height="1080"><g stroke-width="1.1" stroke="'+op+'" fill="none">'+out+'</g></svg></div>';
+}
+
+/* ---------- v3 atmosphere: one sun, three planes, one ribbon ----------
+   RTL note: content is right-aligned, so the framing mass sits LEFT and the
+   right side gets only a corner facet clear of the title and the lockup. */
+function sky(o){
+  o = o || {};
+  const sunX = o.sunX!=null ? o.sunX : 604;
+  const sunY = o.sunY!=null ? o.sunY : 152;
+  const road = o.road !== false;
+  const rightFacet = o.rightFacet !== false;
+  return ''
+  /* PLANE 0 — graded sky. deeper above, pale at the horizon (aerial perspective) */
+  +'<div style="position:absolute;inset:0;background:linear-gradient(180deg,'
+    +'#DDCAA6 0%, #E8DABF 24%, #F2E9D8 46%, #F8F3E9 61%, #F1E7D4 72%)"></div>'
+  /* the sun — one, pale, never a bright disc */
+  +'<div style="position:absolute;left:'+(sunX-105)+'px;top:'+(sunY-105)+'px;width:250px;height:250px;border-radius:50%;'
+    +'background:radial-gradient(circle,#FCF9F1 0%,#F8F1E2 40%,rgba(248,241,226,0) 70%)"></div>'
+  +'<div style="position:absolute;left:'+(sunX-38)+'px;top:'+(sunY-38)+'px;width:76px;height:76px;border-radius:50%;'
+    +'background:#FDFBF5;opacity:.96"></div>'
+  /* cool atmospheric shadow gathering at the horizon — water, 15% */
+  +'<div style="position:absolute;left:0;right:0;top:512px;height:250px;'
+    +'background:linear-gradient(180deg,rgba(124,153,180,0) 0%,rgba(124,153,180,.17) 55%,rgba(124,153,180,.04) 100%)"></div>'
+  /* PLANE 1 — far ridge. faceted, hard edges, two value steps, lowest contrast */
+  +'<svg width="1920" height="1080" style="position:absolute;inset:0">'
+    +'<path d="M0,748 L232,646 L438,712 L612,600 L806,684 L1006,586 L1226,676 L1432,606 L1636,690 L1840,632 L1920,672 L1920,1080 L0,1080 Z" fill="#E8DCC5"/>'
+    +'<path d="M612,600 L806,684 L806,1080 L612,1080 Z" fill="#E3D5B9"/>'
+    +'<path d="M1006,586 L1226,676 L1226,1080 L1006,1080 Z" fill="#E3D5B9"/>'
+    +'<path d="M1432,606 L1636,690 L1636,1080 L1432,1080 Z" fill="#E3D5B9"/>'
+  +'</svg>'
+  /* PLANE 2 — the sandstone terrace the content stands on. darker so sand material reads against it */
+  +'<svg width="1920" height="1080" style="position:absolute;inset:0">'
+    +'<path d="M0,872 L286,816 L556,858 L852,798 L1148,850 L1444,804 L1716,852 L1920,818 L1920,1080 L0,1080 Z" fill="#D4BB8E"/>'
+    +'<path d="M852,798 L1148,850 L1148,1080 L852,1080 Z" fill="#CBAF7E"/>'
+    +'<path d="M1444,804 L1716,852 L1716,1080 L1444,1080 Z" fill="#CBAF7E"/>'
+  +'</svg>'
+  /* the ribbon — one flowing route across the terrace, light leading edge */
+  +(road ? '<svg width="1920" height="1080" style="position:absolute;inset:0">'
+    +'<path d="M-40,1046 C 300,984 470,930 760,916 C 1060,902 1290,930 1560,884 C 1720,858 1840,872 1960,850"'
+      +' fill="none" stroke="#E8D9B8" stroke-width="46" stroke-linecap="round"/>'
+    +'<path d="M-40,1030 C 300,968 470,914 760,900 C 1060,886 1290,914 1560,868 C 1720,842 1840,856 1960,834"'
+      +' fill="none" stroke="#F4EBD9" stroke-width="8" stroke-linecap="round"/>'
+    +'</svg>' : '')
+  /* PLANE 3 — the terracotta frame. faceted, hard-edged, margins only */
+  +'<svg width="1920" height="1080" style="position:absolute;inset:0">'
+    /* left mass — the reference image's foreground wing */
+    +'<path d="M132,286 L214,182 L306,352 L272,624 L196,792 L132,762 Z" fill="#CB7A50"/>'
+    +'<path d="M214,182 L306,352 L272,624 L322,498 L318,282 Z" fill="#B26440"/>'
+    +'<path d="M132,762 L196,792 L272,624 L306,724 L232,930 L132,962 Z" fill="#8A3F26" opacity=".92"/>'
+    /* lower-left foreground shard, in front of everything on the terrace */
+    +'<path d="M132,1080 L132,930 L246,974 L302,1080 Z" fill="#B26440" opacity=".9"/>'
+    /* right corner facet — top only, clear of the title block and the lockup */
+    +(rightFacet ? '<path d="M1920,0 L1920,238 L1858,178 L1868,40 Z" fill="#CB7A50"/>'
+      +'<path d="M1868,40 L1858,178 L1920,238 L1920,272 L1822,186 L1838,32 Z" fill="#8A3F26" opacity=".55"/>' : '')
+  +'</svg>';
+}
+
+/* ---------- cover ---------- */
+function cover(mode){
+  const v3 = mode==='v3';
+  const ground = v3
+    ? '<div style="position:absolute;inset:0">'+sky({sunX:520,sunY:146,road:true})+'</div>'
+    : '<div style="position:absolute;inset:0;background:#B65534"></div>';
+  const etch = v3 ? khatam('rgba(38,40,46,.10)') : khatam('rgba(246,240,228,.13)');
+  const titleCol = v3 ? '#26282E' : '#F6F0E4';
+  const brandCol = v3 ? '#26282E' : '#F6F0E4';
+  const tracksCol= v3 ? 'rgba(38,40,46,.5)' : 'rgba(246,240,228,.5)';
+  return '<div class="stage" data-fit data-shot="cover-'+mode+'">'
+  + ground + etch
+  + '<div style="position:absolute;inset:0;z-index:5">'+planetSVG(mode)+'</div>'
+  + '<div style="position:absolute;left:0;top:0;bottom:0;width:132px;background:#232529;z-index:3;'
+    +'display:flex;justify-content:center;padding-top:64px">'
+    +'<div style="writing-mode:vertical-rl;color:#B7CEDD;font-size:40px;font-weight:600;letter-spacing:.06em">علوم</div></div>'
+  + '<div style="position:absolute;top:0;bottom:0;left:131px;width:2px;z-index:4;'
+    +'background:linear-gradient(to bottom,#B26440 0%,#D2A47A 18%,#F6F0E4 38%,#DDC09A 60%,#B26440 88%,#8A3F26 100%);'
+    +'box-shadow:0 0 14px rgba(221,192,154,.4)"></div>'
+  + '<div style="position:absolute;right:110px;top:250px;width:1100px;text-align:right;direction:rtl;z-index:2;'
+    +'color:'+titleCol+';font-size:78px;line-height:1.45;font-weight:700">العنوان: مهمتي في الحياة ليست مجرد البقاء على قيد الحياة</div>'
+  + '<div style="position:absolute;right:110px;top:700px;width:220px;height:4px;border-radius:2px;z-index:2;'
+    +'background:linear-gradient(105deg,#B26440 0%,#DDC09A 22%,#F6F0E4 50%,#DDC09A 78%,#B26440 100%);'
+    +'box-shadow:0 0 10px rgba(221,192,154,.4)"></div>'
+  + '<div style="position:absolute;right:110px;bottom:56px;display:flex;align-items:baseline;gap:12px;direction:ltr;z-index:2">'
+    +'<span style="font-family:\'JetBrains Mono\',monospace;font-size:12px;letter-spacing:.3em;color:'+tracksCol+'">TRACKS</span>'
+    +'<span style="font-family:\'Hanken Grotesk\',sans-serif;font-weight:700;font-size:32px;letter-spacing:-.03em;color:'+brandCol+'">noon</span></div>'
+  + '</div>';
+}
+
+/* ---------- ceremonial slide ---------- */
+function slide(mode){
+  const v3 = mode==='v3';
+  const SAFF_CORE='#DDBA62', SAFF_LIGHT='#EFD9A0', SAFF_DEEP='#A8873E', INK='#26282E', CREAM='#F6F0E4';
+  const ground = v3
+    ? '<div style="position:absolute;inset:0">'+sky({sunX:520,sunY:140,road:true,rightFacet:false})+'</div>'
+    : '<div style="position:absolute;inset:0;background:'+SAFF_CORE+'"></div>';
+
+  /* the monument — v3 only. one oversized faceted landmark, low contrast, behind content.
+     built the way the reference builds rock: flat planes, hard edges, two value steps, no outline. */
+  const monument = v3 ? '<svg width="1920" height="1080" style="position:absolute;inset:0;z-index:1">'
+    /* left tower */
+    +'<path d="M392,872 L392,470 L486,414 L486,872 Z" fill="#DCC79F"/>'
+    +'<path d="M486,414 L486,872 L556,850 L556,452 Z" fill="#C9B084"/>'
+    +'<path d="M392,470 L486,414 L486,368 L392,420 Z" fill="#EADEC4"/>'
+    /* keep — the tall mass */
+    +'<path d="M596,872 L596,392 L716,326 L716,872 Z" fill="#DFCBA5"/>'
+    +'<path d="M716,326 L716,872 L806,846 L806,376 Z" fill="#C6AC7E"/>'
+    +'<path d="M596,392 L716,326 L716,272 L596,336 Z" fill="#EDE2CA"/>'
+    /* right shoulder */
+    +'<path d="M846,872 L846,556 L918,516 L918,872 Z" fill="#D8C29A"/>'
+    +'<path d="M918,516 L918,872 L968,858 L968,542 Z" fill="#C3A87A"/>'
+    /* slit windows — 3 per face, aligned, never square */
+    +'<g fill="#A98F63" opacity=".45">'
+    +'<rect x="424" y="556" width="12" height="44"/><rect x="452" y="556" width="12" height="44"/>'
+    +'<rect x="636" y="480" width="14" height="52"/><rect x="668" y="480" width="14" height="52"/>'
+    +'<rect x="866" y="618" width="11" height="38"/>'
+    +'</g></svg>' : '';
+
+  /* scale figures — the reference image's best trick: tiny people at the base of the monument */
+  const figures = v3 ? '<svg width="1920" height="1080" style="position:absolute;inset:0;z-index:2">'
+    +'<g fill="'+INK+'" opacity=".5">'
+    +'<path d="M1016,872 l0,-30 a7,7 0 0 1 14,0 l0,30 z"/><circle cx="1023" cy="833" r="6.5"/>'
+    +'<path d="M1048,874 l0,-27 a6.5,6.5 0 0 1 13,0 l0,27 z"/><circle cx="1054.5" cy="838" r="6"/>'
+    +'<path d="M1090,871 l0,-32 a7,7 0 0 1 14,0 l0,32 z"/><circle cx="1097" cy="830" r="6.5"/>'
+    +'</g></svg>' : '';
+
+  const heroCol = v3 ? INK : INK;
+  const kickerCol = v3 ? SAFF_DEEP : 'rgba(38,40,46,.62)';
+  const swipe = v3 ? SAFF_LIGHT : CREAM;
+
+  return '<div class="stage" data-fit data-shot="slide-'+mode+'">'
+  + ground + monument + figures
+  /* subject rail — 20px, family core, right edge (unchanged in both) */
+  + '<div style="position:absolute;right:0;top:0;bottom:0;width:20px;background:'+SAFF_CORE+';z-index:6"></div>'
+  /* kicker */
+  + '<div style="position:absolute;right:84px;top:120px;direction:rtl;z-index:6;'
+    +'font-family:\'JetBrains Mono\',monospace;font-size:26px;letter-spacing:.22em;color:'+kickerCol+'">SECTION 03</div>'
+  /* hero with swipe behind the final words */
+  + '<div style="position:absolute;right:84px;top:300px;width:1500px;text-align:right;direction:rtl;z-index:6">'
+    +'<span style="position:relative;display:inline;font-size:130px;line-height:1.25;font-weight:700;color:'+heroCol+';'
+    +'background:linear-gradient(to top,'+swipe+' 0 46%,transparent 46%)">المعادلات التربيعية</span></div>'
+  /* wave — one per page, family core, 7px */
+  + '<svg width="1920" height="1080" style="position:absolute;inset:0;z-index:6"><path d="M1836,640 C1740,600 1644,680 1548,640 C1452,600 1356,680 1260,640" '
+    +'fill="none" stroke="'+SAFF_CORE+'" stroke-width="7" stroke-linecap="round"/></svg>'
+  /* diamond sequence markers */
+  + '<svg width="1920" height="1080" style="position:absolute;inset:0;z-index:6">'
+    +'<g transform="translate(1808,752) rotate(45)"><rect x="-28" y="-28" width="56" height="56" rx="5" fill="'+SAFF_CORE+'"/></g>'
+    +'<g transform="translate(1712,752) rotate(45)"><rect x="-28" y="-28" width="56" height="56" rx="5" fill="'+SAFF_CORE+'" opacity=".4"/></g>'
+    +'<g transform="translate(1616,752) rotate(45)"><rect x="-28" y="-28" width="56" height="56" rx="5" fill="'+SAFF_CORE+'" opacity=".22"/></g>'
+    +'</svg>'
+  + '<div style="position:absolute;right:84px;top:730px;width:56px;text-align:center;z-index:7;'
+    +'font-size:24px;font-weight:700;color:'+INK+'">3</div>'
+  /* lockup */
+  + '<div style="position:absolute;right:84px;bottom:52px;display:flex;align-items:baseline;gap:12px;direction:ltr;z-index:6">'
+    +'<span style="font-family:\'JetBrains Mono\',monospace;font-size:12px;letter-spacing:.3em;color:rgba(38,40,46,.5)">TRACKS</span>'
+    +'<span style="font-family:\'Hanken Grotesk\',sans-serif;font-weight:700;font-size:32px;letter-spacing:-.03em;color:'+INK+'">noon</span></div>'
+  + '</div>';
+}
+
+/* ---------- render ---------- */
+document.getElementById('covers').innerHTML =
+  '<figure><div class="frame">'+cover('v4')+'</div><figcaption><b>V4 · TODAY</b>'
+  +'<p>Saturated clay holds the whole field. The planet, the title and the seam all have to fight it, so everything reads at the same weight and the cover feels heavy and formal.</p></figcaption></figure>'
+ +'<figure><div class="frame">'+cover('v3')+'</div><figcaption><b>V3 · SKY FIELD, TERRACOTTA AS FRAME</b>'
+  +'<p>One sun, three planes, terracotta wings at the margins. Same material, same anatomy — the clay now frames and warms instead of flooding, and the sand planet finally has air to sit in.</p></figcaption></figure>';
+
+document.getElementById('slides').innerHTML =
+  '<figure><div class="frame">'+slide('v4')+'</div><figcaption><b>V4 · FULL-BLEED FAMILY CORE</b>'
+  +'<p>Ceremonial tier as specified: saffron edge to edge. Dramatic, but a desaturated heritage mid-tone at full bleed reads editorial and adult rather than exciting.</p></figcaption></figure>'
+ +'<figure><div class="frame">'+slide('v3')+'</div><figcaption><b>V3 · DRAMA FROM LIGHT</b>'
+  +'<p>Same rail, wave, diamonds, swipe and lockup. The lights go up with a luminous sky and one monumental faceted landmark; three figure-scale marks do the wonder. Saffron stays as accent furniture.</p></figcaption></figure>';
+
+function fit(){
+  document.querySelectorAll('.frame').forEach(f=>{
+    const s=f.querySelector('.stage');
+    if(s) s.style.transform='scale('+(f.clientWidth/1920)+')';
+  });
+}
+addEventListener('resize',fit);fit();
+</script>
+</body></html>

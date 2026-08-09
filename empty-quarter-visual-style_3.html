@@ -1,0 +1,481 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>The Empty Quarter — Visual Style · الرُّبع الخالي</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@300;400;500;600&family=IBM+Plex+Sans+Arabic:wght@300;400;500&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root{
+  --ink:#26282E; --ink-2:#2C2F36; --ink-3:#30333B;
+  --fog:#EFF1EE; --plaster:#F1EBDD; --cream:#F1EBDD; --cream-warm:#FDF6EC;
+  --terra:#BC5A37; --clay:#CB7A50; --teal:#4F6157; --oak:#E2D6BE;
+  --green:#6BAE93; --green-ink:#64D8AE;
+  --water:#4A6B8A; --water-ink:#7C99B4;
+  --ember:#E8663A; --purple:#5A4A7D; --purple-ink:#9D8CFF;
+  --mut:#8A8272; --sans:'Hanken Grotesk',sans-serif; --ar:'IBM Plex Sans Arabic',sans-serif; --mono:'JetBrains Mono',monospace;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--plaster);color:var(--ink);font-family:var(--sans);-webkit-font-smoothing:antialiased;line-height:1.55}
+.wrap{max-width:1080px;margin:0 auto;padding:72px 32px 140px}
+.arf{font-family:var(--ar)}
+.mono{font-family:var(--mono)}
+header{border-bottom:1px solid rgba(38,40,46,.25);padding-bottom:34px;margin-bottom:20px}
+header .meta{font-family:var(--mono);font-size:11px;letter-spacing:.18em;color:var(--terra);margin-bottom:18px}
+header h1{font-size:52px;font-weight:400;letter-spacing:-.015em;line-height:1.08}
+header .artitle{font-family:var(--ar);font-size:24px;color:var(--mut);margin-top:14px;font-weight:300}
+header p{max-width:620px;margin-top:22px;color:#55524A;font-size:15px}
+section{padding:54px 0;border-bottom:1px solid rgba(38,40,46,.14)}
+.shead{display:flex;align-items:baseline;gap:16px;margin-bottom:8px}
+.shead .num{font-family:var(--mono);font-size:12px;color:var(--terra)}
+.shead h2{font-size:30px;font-weight:400;letter-spacing:-.01em}
+.shead .ar{margin-left:auto;font-family:var(--ar);font-size:18px;color:var(--mut);font-weight:300}
+.lede{max-width:640px;color:#55524A;font-size:14.5px;margin-bottom:30px}
+.rule{background:#EAE2CF;border-left:3px solid var(--terra);padding:12px 16px;font-size:13.5px;margin:18px 0;max-width:680px}
+.rule b{font-weight:600}
+.lab{font-family:var(--mono);font-size:10px;letter-spacing:.18em;color:var(--mut);margin:26px 0 10px;text-transform:uppercase}
+.grid{display:grid;gap:14px}
+.g3{grid-template-columns:repeat(auto-fit,minmax(220px,1fr))}
+.g4{grid-template-columns:repeat(auto-fit,minmax(160px,1fr))}
+.sw{border-radius:8px;overflow:hidden;border:1px solid rgba(38,40,46,.1)}
+.sw .c{height:84px}
+.sw .l{padding:10px 12px;background:#F7F2E6}
+.sw .l b{display:block;font-size:13px;font-weight:600}
+.sw .l span{font-family:var(--mono);font-size:10.5px;color:var(--mut)}
+.sw .l i{font-style:normal;float:right;font-family:var(--ar);font-size:12px;color:var(--mut)}
+table.roles{width:100%;border-collapse:collapse;font-size:13px;margin-top:8px}
+table.roles th{text-align:left;font-family:var(--mono);font-size:10px;letter-spacing:.16em;color:var(--mut);font-weight:500;padding:8px 10px;border-bottom:1px solid rgba(38,40,46,.2)}
+table.roles td{padding:11px 10px;border-bottom:1px solid rgba(38,40,46,.1);vertical-align:top}
+.dot{display:inline-block;width:15px;height:15px;border-radius:4px;vertical-align:-3px;margin-right:7px}
+.hexes{font-family:var(--mono);font-size:11px;color:#55524A;white-space:nowrap}
+.demo{background:var(--ink);border-radius:12px;padding:24px;color:var(--cream)}
+.demo.light{background:var(--fog);color:var(--ink);border:1px solid rgba(38,40,46,.12)}
+.two{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:16px;margin-top:20px}
+.type-row{display:flex;align-items:baseline;gap:18px;padding:12px 0;border-bottom:1px solid rgba(38,40,46,.1)}
+.type-row:last-child{border-bottom:none}
+.type-name{font-family:var(--mono);font-size:11px;color:var(--mut);width:190px;flex-shrink:0}
+.bil{display:flex;justify-content:space-between;align-items:baseline;max-width:340px;border:1px dashed rgba(38,40,46,.25);border-radius:8px;padding:10px 14px;margin-top:14px}
+.bil .en{font-family:var(--mono);font-size:10.5px;letter-spacing:.18em;color:var(--terra)}
+.bil .arl{font-family:var(--ar);font-size:12.5px;color:var(--terra)}
+.frame{border-radius:6px;overflow:hidden;border:1px solid rgba(38,40,46,.14)}
+.frame svg{display:block;width:100%;height:auto}
+.cap{font-size:12.5px;color:#55524A;margin-top:8px;max-width:640px}
+.iconrow{display:flex;flex-wrap:wrap;gap:26px;align-items:flex-start;margin-top:8px}
+.iconrow .ic{text-align:center}
+.iconrow .ic p{font-family:var(--mono);font-size:9px;letter-spacing:.12em;color:var(--mut);margin-top:6px}
+.reg{font-size:13.5px}
+.reg h3{font-size:13px;font-family:var(--mono);letter-spacing:.14em;font-weight:500;margin:22px 0 8px}
+.reg h3.a{color:var(--teal)}.reg h3.r{color:var(--terra)}.reg h3.o{color:var(--water)}
+.reg li{margin:5px 0 5px 18px;color:#3E3B34}
+footer{padding-top:40px;font-family:var(--mono);font-size:10.5px;letter-spacing:.14em;color:var(--mut);display:flex;justify-content:space-between}
+</style>
+</head>
+<body>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true"><defs>
+<pattern id="oct-tc" width="96" height="96" patternUnits="userSpaceOnUse"><g fill="none" stroke="rgba(38,40,46,.22)" stroke-width="1.1"><rect x="14" y="14" width="68" height="68"/><polygon points="48,0 96,48 48,96 0,48"/></g></pattern>
+<pattern id="oct-cream" width="96" height="96" patternUnits="userSpaceOnUse"><g fill="none" stroke="rgba(241,235,221,.14)" stroke-width="1.1"><rect x="14" y="14" width="68" height="68"/><polygon points="48,0 96,48 48,96 0,48"/></g></pattern>
+</defs></svg>
+<div class="wrap">
+
+<header>
+  <div class="meta">NOON ACADEMY · HYBRID CLASSROOM · VISUAL STYLE · V2.2 · JULY 2026</div>
+  <h1>The Empty Quarter</h1>
+  <div class="artitle">الرُّبع الخالي — نظام الهوية البصرية</div>
+  <p>A Saudi-native visual system for the hybrid classroom. Heritage moves to future, left to right — earth, timber, intelligence. The rooms are warm matter; the screens are warm light. Every session is an expedition: routes, waypoints, water, terrain, crews. Pattern constructions in this document are generated by the canonical algorithms from <span class="mono" style="font-size:12px">empty-quarter-main</span>; the color layer is the amended palette.</p>
+</header>
+
+<!-- ══ 01 COLOR ══ -->
+<section>
+  <div class="shead"><span class="num">01</span><h2>Color</h2><span class="ar">اللون</span></div>
+  <p class="lede">Surfaces carry place; roles carry meaning. Screens do not copy the room's pigment — they harmonize under its light. The interior palette is reflective; the UI palette is emissive, so accents brighten on ink.</p>
+
+  <p class="lab">Surfaces · الأسطح</p>
+  <div class="grid g3">
+    <div class="sw"><div class="c" style="background:var(--fog)"></div><div class="l"><b>Fog</b><i>ضباب</i><span>#EFF1EE · light UI ground</span></div></div>
+    <div class="sw"><div class="c" style="background:var(--plaster)"></div><div class="l"><b>Plaster</b><i>جص</i><span>#F1EBDD · paper — reading &amp; print only</span></div></div>
+    <div class="sw"><div class="c" style="background:var(--ink)"></div><div class="l"><b>Ink</b><i>حبر</i><span>#26282E · instrument, focus, presenter</span></div></div>
+    <div class="sw"><div class="c" style="background:var(--terra)"></div><div class="l"><b>Terracotta</b><i>طين</i><span>#BC5A37 · voice &amp; hero surface</span></div></div>
+    <div class="sw"><div class="c" style="background:linear-gradient(90deg,#CB7A50 0 33%,#A94E2A 33% 66%,#96431F 66%)"></div><div class="l"><b>Clay → deep rust</b><i>صلصال</i><span>#CB7A50 · #A94E2A · #96431F</span></div></div>
+    <div class="sw"><div class="c" style="background:var(--teal)"></div><div class="l"><b>Future teal</b><i>المستقبل</i><span>#4F6157 · the intelligent layer</span></div></div>
+  </div>
+  <p class="lab">Timber · materials — physical &amp; artwork only · خشب</p>
+  <div class="grid g3">
+    <div class="sw"><div class="c" style="background:var(--oak)"></div><div class="l"><b>Warm oak</b><i>خشب</i><span>#E2D6BE · timber, acoustic, signage</span></div></div>
+    <div class="sw"><div class="c" style="background:#BC9F7B"></div><div class="l"><b>Oak deep</b><i>خشب داكن</i><span>#BC9F7B · dark timber, furniture, wood in illustration · adjusted from #C2A171</span></div></div>
+  </div>
+  <div class="rule"><b>Timber is material, not ornament.</b> Warm oak and oak deep exist for the physical world and for depicting wood — interiors collateral, signage, furniture, illustration, artwork ramps. Neither appears as a UI surface or accent; on ink, oak's warmth survives only as the type color. And oak deep is <b>not a decorative gold</b> — Saffron decorates, oak builds; using timber as ornament would resurrect the retired gold through the back door. Cream fields were the notebook; the fix was inversion, not saturation. The artwork ramps inside the patterns (dunes, plaster voices, the mural strata) are pattern-intrinsic and remain as drawn.</div>
+
+  <p class="lab">Semantic roles · per-surface stops</p>
+  <table class="roles">
+    <tr><th>ROLE</th><th>ON FOG / PLASTER</th><th>ON INK</th><th>OWNS</th></tr>
+    <tr><td><span class="dot" style="background:var(--green)"></span><b>Action · Live</b></td><td class="hexes">#6BAE93</td><td class="hexes">#64D8AE</td><td>The only button color. Live states, the highlighted pin, arrival.</td></tr>
+    <tr><td><span class="dot" style="background:var(--water)"></span><b>Water · Progression</b></td><td class="hexes">#4A6B8A</td><td class="hexes">#7C99B4</td><td>Path travelled, current position, chosen answer, active tab, selection. The currency of ground covered.</td></tr>
+    <tr><td><span class="dot" style="background:var(--ember)"></span><b>Heat · Signal</b></td><td class="hexes">#BC5A37</td><td class="hexes">#E8663A</td><td>Weak zones, urgency, mute, the now-node. Never a field on ink; never a button anywhere.</td></tr>
+    <tr><td><span class="dot" style="background:var(--teal)"></span><b>Intelligence</b></td><td class="hexes">#4F6157</td><td class="hexes">#5E8C7F</td><td>The intelligent layer speaking: scores, objectives, analysis accents.</td></tr>
+    <tr><td><span class="dot" style="background:var(--purple)"></span><b>AI voice</b></td><td class="hexes">#5A4A7D</td><td class="hexes">#9D8CFF</td><td>The tutor only — its messages, speaking state, glyph. When you see purple, the AI is present.</td></tr>
+    <tr><td><span class="dot" style="background:#C5524E"></span><b>Danger</b> <span class="mono" style="font-size:9px;color:var(--terra)">OPEN</span></td><td class="hexes">—</td><td class="hexes">—</td><td>Destructive &amp; error states. Required; hue unresolved (must not collide with the terracotta family). Heat is not danger.</td></tr>
+  </table>
+  <div class="rule"><b>One heat source per screen.</b> On ink, terracotta appears only as the facet-dressed hero card — never as a plain fill. If every surface speaks in the bold voice, none of them do.</div>
+
+  <p class="lab">Decorative · ornament only · للزينة فقط</p>
+  <p style="font-size:13px;color:#55524A;max-width:660px;margin-bottom:16px">Five families for subject tags, avatar fills, and illustrative icons — desaturated, warm-gray undertone, three steps each (light · core · deep). Orange is deliberately absent: Heat owns that hue, and ornamental orange reads as a warning. Violet is absent too: the AI owns it. Plum is built pink-leaning, a quarter-wheel from the tutor's violet; Sky is lighter and airier than Water and is barred from selection or progression UI.</p>
+  <div class="grid g3">
+    <div class="sw"><div class="c" style="background:linear-gradient(90deg,#B7CEDD 0 33%,#86A7BE 33% 66%,#5C7E96 66%)"></div><div class="l"><b>Sky</b><i>سماء</i><span>#B7CEDD · #86A7BE · #5C7E96</span></div></div>
+    <div class="sw"><div class="c" style="background:linear-gradient(90deg,#EFD9A0 0 33%,#DDBA62 33% 66%,#A8873E 66%)"></div><div class="l"><b>Saffron</b><i>زعفران</i><span>#EFD9A0 · #DDBA62 · #A8873E</span></div></div>
+    <div class="sw"><div class="c" style="background:linear-gradient(90deg,#E7B9B4 0 33%,#C98A87 33% 66%,#9C5F5E 66%)"></div><div class="l"><b>Rose</b><i>ورد</i><span>#E7B9B4 · #C98A87 · #9C5F5E</span></div></div>
+    <div class="sw"><div class="c" style="background:linear-gradient(90deg,#C6CCAA 0 33%,#9FAA7D 33% 66%,#6F7C52 66%)"></div><div class="l"><b>Sage</b><i>مريمية</i><span>#C6CCAA · #9FAA7D · #6F7C52</span></div></div>
+    <div class="sw"><div class="c" style="background:linear-gradient(90deg,#D3B4C4 0 33%,#AC7F97 33% 66%,#7D5468 66%)"></div><div class="l"><b>Plum</b><i>برقوق</i><span>#D3B4C4 · #AC7F97 · #7D5468</span></div></div>
+  </div>
+  <div class="rule"><b>Ration it.</b> Decorative color never carries state and never leads a screen. Functional icons stay monochrome — decorative color applies only to subject tags, avatar fills, and spot illustration, in small areas, <b>one family per element and rarely more than two families in view</b>. Assignments are stable: a subject keeps its family everywhere (Reading is always Sky). Steps by surface: core on fog, light on ink, deep only as text on its own tint. Semantic accents always outrank ornament. When in doubt, leave it cream.</div>
+</section>
+
+<!-- ══ 02 TYPOGRAPHY ══ -->
+<section>
+  <div class="shead"><span class="num">02</span><h2>Typography</h2><span class="ar">الخط</span></div>
+  <p class="lede">Three families, each with a job. Arabic is designed alongside the Latin, never as a translation pass.</p>
+  <div class="type-row"><span class="type-name">UI · Latin</span><span style="font-size:24px">Hanken Grotesk — the working voice</span></div>
+  <div class="type-row"><span class="type-name">UI · Arabic</span><span class="arf" style="font-size:22px">آي بي إم بلكس سانس عربي — بجانب اللاتينية دائماً</span></div>
+  <div class="type-row"><span class="type-name">Cartographic · data</span><span class="mono" style="font-size:17px">JetBrains Mono — 00:14:22 · DAY 14 / 28 · 92 PACE</span></div>
+  <div class="type-row"><span class="type-name">Display numerals</span><span style="font-size:30px;font-weight:300;color:var(--ember)">3 <span style="font-size:14px;color:var(--mut)">Hanken Light — countdowns, hero scores</span></span></div>
+  <div class="rule"><b>Numerals are tabular</b> wherever digits stack or align. Micro-labels are uppercase, wide-tracked (14–34%), and set in mono — they are the system's map annotations.</div>
+  <p class="lab">The bilingual label — one line, two directions</p>
+  <div class="bil"><span class="en">TODAY'S PASSAGE</span><span class="arl">فقرة اليوم</span></div>
+</section>
+
+<!-- ══ 03 SURFACES & DEPTH ══ -->
+<section>
+  <div class="shead"><span class="num">03</span><h2>Surfaces &amp; depth</h2><span class="ar">السطوح</span></div>
+  <p class="lede">Surface is assigned by function: <b>instrument screens live on ink</b> (data, navigation, state, the presenter), <b>sustained reading lives on paper</b>. Depth on ink is a brighter cream hairline; depth on fog is a border and a breath of shadow. A layout must survive both models.</p>
+  <div class="two">
+    <div>
+      <p class="lab" style="margin-top:0">On ink</p>
+      <div class="demo">
+        <div style="background:var(--ink-3);border:1px solid rgba(241,235,221,.08);border-radius:12px;padding:14px">
+          <div style="display:flex;justify-content:space-between"><span class="mono" style="font-size:9.5px;letter-spacing:.16em;color:var(--ember)">TODAY'S PASSAGE</span><span class="arf" style="font-size:11px;color:var(--ember)">فقرة اليوم</span></div>
+          <p style="font-size:14.5px;color:var(--cream);margin-top:6px">Linear dune systems &amp; ridge formation</p>
+          <div style="height:4px;background:rgba(241,235,221,.12);border-radius:2px;margin-top:12px"><div style="width:55%;height:4px;background:var(--ember);border-radius:2px"></div></div>
+        </div>
+      </div>
+    </div>
+    <div>
+      <p class="lab" style="margin-top:0">On fog</p>
+      <div class="demo light">
+        <div style="background:#F7F8F5;border:1px solid rgba(38,40,46,.1);border-radius:12px;padding:14px;box-shadow:0 1px 3px rgba(38,40,46,.06)">
+          <div style="display:flex;justify-content:space-between"><span class="mono" style="font-size:9.5px;letter-spacing:.16em;color:#899088">NEXT UP</span><span class="arf" style="font-size:11px;color:#899088">التالي</span></div>
+          <div style="display:flex;justify-content:space-between;font-size:13px;margin-top:10px"><span>Analogy sets</span><span style="font-variant-numeric:tabular-nums">12 min</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══ 04 PATTERN SYSTEM ══ -->
+<section>
+  <div class="shead"><span class="num">04</span><h2>Pattern system</h2><span class="ar">الأنماط</span></div>
+  <p class="lede">Three pattern languages — Facet, Khatam, Pinboard — each with a construction, a set of voices, and a scope. Everything below is generated live by the canonical algorithms.</p>
+
+  <p class="lab">Facet — one lattice, three voices · كثبان</p>
+  <p class="cap" style="margin-bottom:10px">A jittered grid of planes: roughly half the cells split into triangle pairs, the rest remain quads. A low-frequency tone field clusters shades into larger masses, like the murals. The geometry is generated once; the voices are palettes mapped onto the <b>identical planes</b>.</p>
+  <div class="frame"><svg id="facet-dunes" viewBox="0 0 1180 240" preserveAspectRatio="xMidYMid slice" style="background:#BC5A37"></svg></div>
+  <p class="cap"><b>Dunes</b> — the orange voice, cream seams (rgba 241,235,221 · .35). Hero brand moments: session titles, the one hero card per ink screen, murals.</p>
+  <div class="frame" style="margin-top:14px"><svg id="facet-plaster" viewBox="0 0 1180 240" preserveAspectRatio="xMidYMid slice" style="background:#EFE7D5"></svg></div>
+  <p class="cap"><b>Plaster</b> — the light voice, white seams (.5). Quiet faceted grounds that content sits on.</p>
+  <div class="frame" style="margin-top:14px"><svg id="facet-banner" viewBox="0 0 560 130" preserveAspectRatio="xMidYMid slice" style="background:#BC5A37"></svg></div>
+  <p class="cap"><b>Banner</b> — a quiet dune: the same lattice on a deliberately narrow tonal range (#B04F30 → #C6663F) so UI text stays legible on top. For announcement banners and dressed cards.</p>
+
+  <p class="lab">Scale study — same seed, three densities</p>
+  <div class="grid g3">
+    <div class="frame"><svg id="scale-1" viewBox="0 0 380 220" style="background:#BC5A37"></svg><p class="cap" style="padding:8px 10px;margin:0">Wall · 1×</p></div>
+    <div class="frame"><svg id="scale-2" viewBox="0 0 380 220" style="background:#BC5A37"></svg><p class="cap" style="padding:8px 10px;margin:0">Card · 2×</p></div>
+    <div class="frame"><svg id="scale-3" viewBox="0 0 380 220" style="background:#BC5A37"></svg><p class="cap" style="padding:8px 10px;margin:0">Texture · 4×</p></div>
+  </div>
+
+  <p class="lab">Applied · terrain, built from the lattice</p>
+  <div class="frame"><svg id="mural" viewBox="0 0 1180 460"><rect width="1180" height="460" fill="#EFE7D5"/></svg></div>
+  <p class="cap">Eight sinusoid dune ridges from cream to deep rust, strip-triangulated. Every ridge carries its own seam breakpoints, so no vertical line runs straight through; ridges are clamped never to cross. White seams at .4.</p>
+  <div class="rule"><b>UI additions (amended):</b> the <b>quiet line voice</b> — the same lattice rendered stroke-only in cream on ink, one pen with the Khatam — for ambient grounds on instrument screens; and the <b>plateau rule</b> — any terrain under a navigation zone settles to an unbroken plane (min ~72px + safe area, one seam at its top edge). Fingers land on calm ground.</div>
+  <div class="frame"><svg id="facet-quiet" viewBox="0 0 1180 200" preserveAspectRatio="xMidYMid slice" style="background:#26282E"></svg></div>
+
+  <p class="lab" style="margin-top:36px">Khatam · خاتم</p>
+  <div class="two" style="margin-top:6px">
+    <div>
+      <div class="frame"><svg viewBox="0 0 560 190"><rect width="560" height="190" fill="#F1EBDD"/><rect width="560" height="190" fill="url(#oct-tc)"/></svg></div>
+      <p class="cap">The canonical form is a <b>96px repeating tile</b> — square and diamond interlocking, stroke 1.1, ink at .22 on light (teal and cream variants exist). Line only, never filled, never dense.</p>
+    </div>
+    <div>
+      <div class="frame"><svg viewBox="0 0 560 190" style="background:#26282E"><g fill="none" stroke="#F1EBDD"><g stroke-opacity=".11" stroke-width="1.4"><rect x="222" y="37" width="116" height="116"/><polygon points="280,13 362,95 280,177 198,95"/></g><g stroke-opacity=".07" stroke-width="1"><rect x="247" y="62" width="66" height="66"/><polygon points="280,49 326,95 280,141 234,95"/></g></g></svg></div>
+      <p class="cap">Enlarged as a single <b>ceremonial ornament</b>: the countdown, certificates, milestones. It rotates glacially (150s / 210s counter) or not at all. Scope: signage, watermarks, dividers — sparing, always.</p>
+    </div>
+  </div>
+
+  <p class="lab" style="margin-top:36px">Pinboard · لوحة الدبابيس</p>
+  <div class="two" style="margin-top:6px">
+    <div>
+      <div class="frame"><svg id="kingdom" viewBox="0 0 400 320" style="background:#F1EBDD"></svg></div>
+      <p class="cap"><b>The Kingdom, drawn in pins.</b> No outline — the perforation itself is the territory; where the pins stop, the border is. Even 12.5 grid, terracotta at .38 on light (cream on ink). Green pins mark the highlight: a city, a live room, an active crew.</p>
+    </div>
+    <div>
+      <div class="frame"><svg id="facade" viewBox="0 0 380 230" style="background:#F1EBDD"></svg></div>
+      <p class="cap"><b>The facade dissolve</b> — the one sanctioned thinning: around a clear zone the field drops pins by discrete parity rings, so it reads as perforation thinning out, not a punched hole. No opacity fades, ever.</p>
+    </div>
+  </div>
+  <div class="rule"><b>Scope (amended):</b> Pinboard lives in bounded zones — maps, attendance, facades, empty states — and as data (present / absent / highlighted pins). Never a full-screen wallpaper behind data displays.</div>
+</section>
+
+<!-- ══ 05 THE ROUTE ══ -->
+<section>
+  <div class="shead"><span class="num">05</span><h2>The route</h2><span class="ar">المسار</span></div>
+  <p class="lede">The waypoint grammar — inherited from Proven Routes, now the system's spine. Every journey is drawn the same way, from a two-row list to a full concept map.</p>
+  <svg viewBox="0 0 760 96" style="width:100%;max-width:760px;display:block;background:var(--ink);border-radius:12px">
+    <line x1="70" y1="48" x2="330" y2="48" stroke="#BC5A37" stroke-width="1.6"/>
+    <line x1="330" y1="48" x2="690" y2="48" stroke="#F1EBDD" stroke-opacity=".35" stroke-width="1.6" stroke-dasharray="2 6"/>
+    <rect x="63" y="41" width="14" height="14" transform="rotate(45 70 48)" fill="#BC5A37"/>
+    <rect x="193" y="41" width="14" height="14" transform="rotate(45 200 48)" fill="#BC5A37"/>
+    <polygon points="330,38 341,58 319,58" fill="#E8663A"/>
+    <rect x="453" y="41" width="14" height="14" transform="rotate(45 460 48)" fill="none" stroke="#F1EBDD" stroke-opacity=".6" stroke-width="1.5"/>
+    <rect x="565" y="43" width="10" height="10" transform="rotate(45 570 48)" fill="none" stroke="#F1EBDD" stroke-opacity=".25" stroke-width="1.4"/>
+    <rect x="683" y="41" width="14" height="14" transform="rotate(45 690 48)" fill="#3E8E6E"/>
+    <g font-family="'JetBrains Mono',monospace" font-size="8.5" letter-spacing="1.5" fill="#8B8578" text-anchor="middle">
+      <text x="70" y="80">CLEARED</text><text x="200" y="80">CLEARED</text>
+      <text x="330" y="80" fill="#E8663A">YOU · النقطة الحالية</text>
+      <text x="460" y="80">OPEN</text><text x="570" y="80" fill-opacity=".6">LOCKED</text>
+      <text x="690" y="80" fill="#3E8E6E">ARRIVAL</text>
+    </g>
+  </svg>
+  <div class="rule" style="margin-top:20px"><b>Diamond = waypoint. Triangle = you.</b> Solid line behind, dotted line ahead. Filled = done or present; hollow = open; hairline = locked; green = arrival. Fill is a state, never a style. Water marks the current position wherever the route grammar meets selection (tabs, chosen answers).</div>
+</section>
+
+<!-- ══ 06 ICONOGRAPHY ══ -->
+<section>
+  <div class="shead"><span class="num">06</span><h2>Iconography</h2><span class="ar">الأيقونات</span></div>
+  <p class="lede">Icons join the drawing language instead of importing one. Line-only, 1.7 stroke on a 24px grid, miter joins, flat terminals. Angles snap to 0°/45°/90°; where a generic set rounds a corner, this one cuts it at 45°. Curves survive only where meaning demands them — heads, lenses, clock faces. Directional icons mirror in RTL. If an icon is missing, it is drawn to these rules — never dropped in from a third-party set.</p>
+  <div class="iconrow">
+    <div class="ic"><svg width="38" height="38" viewBox="0 0 24 24" fill="none" stroke="#26282E" stroke-width="1.7"><path d="M12 4.5 20 19H4Z"/></svg><p>YOU</p></div>
+    <div class="ic"><svg width="38" height="38" viewBox="0 0 24 24" fill="none" stroke="#26282E" stroke-width="1.7"><rect x="7.5" y="7.5" width="9" height="9" transform="rotate(45 12 12)"/></svg><p>WAYPOINT</p></div>
+    <div class="ic"><svg width="38" height="38" viewBox="0 0 24 24" fill="none" stroke="#26282E" stroke-width="1.7"><path d="M12 3.2 16.6 9.6 17 13.8 14.2 18H9.8L7 13.8 7.4 9.6Z"/></svg><p>WATER</p></div>
+    <div class="ic"><svg width="38" height="38" viewBox="0 0 24 24" fill="none" stroke="#26282E" stroke-width="1.7"><path d="M3.5 18.5 9 9l3.5 5.5 2.5-4 5.5 8z"/></svg><p>TERRAIN</p></div>
+    <div class="ic"><svg width="38" height="38" viewBox="0 0 24 24" fill="none" stroke="#26282E" stroke-width="1.7"><polygon points="8.5,3.5 15.5,3.5 20.5,8.5 20.5,15.5 15.5,20.5 8.5,20.5 3.5,15.5 3.5,8.5"/><rect x="9.9" y="9.9" width="4.2" height="4.2" transform="rotate(45 12 12)"/></svg><p>SETTINGS</p></div>
+    <div class="ic"><svg width="38" height="38" viewBox="0 0 24 24" fill="none" stroke="#26282E" stroke-width="1.7"><circle cx="12" cy="13.2" r="6.8"/><rect x="10.8" y="2.6" width="2.4" height="2.4" transform="rotate(45 12 3.8)" fill="#26282E" stroke="none"/><path d="M12 13.2V9.6M12 13.2l2.7 1.8"/></svg><p>TIMER</p></div>
+    <div class="ic"><svg width="38" height="38" viewBox="0 0 24 24" fill="none" stroke="#5A4A7D" stroke-width="1.5"><rect x="6.8" y="6.8" width="10.4" height="10.4"/><rect x="6.8" y="6.8" width="10.4" height="10.4" transform="rotate(45 12 12)"/></svg><p style="color:#5A4A7D">TUTOR</p></div>
+  </div>
+  <p class="lab">State grammar — fill means present</p>
+  <div class="iconrow">
+    <div class="ic"><svg width="38" height="38" viewBox="0 0 24 24" fill="none" stroke="#8A8272" stroke-width="1.7"><path d="M12 4.5 20 19H4Z"/></svg><p>REST · OUTLINE</p></div>
+    <div class="ic"><svg width="38" height="38" viewBox="0 0 24 24"><path d="M12 4.5 20 19H4Z" fill="#4A6B8A"/></svg><p style="color:#4A6B8A">SELECTED · WATER</p></div>
+    <div class="ic"><svg width="38" height="38" viewBox="0 0 24 24"><path d="M12 4.5 20 19H4Z" fill="none" stroke="#26282E" stroke-width="1.7"/><circle cx="19.5" cy="5.5" r="3" fill="#3E8E6E"/></svg><p style="color:#3E8E6E">LIVE · GREEN PIN</p></div>
+    <div class="ic"><svg width="38" height="38" viewBox="0 0 24 24" fill="none" stroke="#BC5A37" stroke-width="1.7"><path d="M9.2 4h3.4l1.6 1.6V13a2.8 2.8 0 0 1-5.6 0V4.6Z"/><path d="M4.5 4.5l15 15"/></svg><p style="color:#BC5A37">BLOCKED · HEAT</p></div>
+  </div>
+  <div class="rule">Below ~16px rendered, chamfers simplify away; the angle grammar survives in the silhouette. Stroke steps: 1.5 at 20px · 1.7 at 24 · 2 at 32.</div>
+</section>
+
+<!-- ══ 07 MOTION ══ -->
+<section>
+  <div class="shead"><span class="num">07</span><h2>Motion</h2><span class="ar">الحركة</span></div>
+  <p class="lede">Restraint is the personality. Three working durations — 120 / 200 / 320ms — cover all UI transitions. Beyond them, only two registers exist:</p>
+  <div class="reg">
+    <li><b>Ceremony is glacial.</b> The Khatam turns at 150s per revolution, its inner ring counter-rotating at 210s. At that speed it doesn't spin — it lives.</li>
+    <li><b>Ticks settle.</b> A countdown digit arrives at scale .94 → 1 with a soft ease — weight landing, not bouncing.</li>
+    <li><b>Emergence is the transition.</b> When a classroom takes the stage, nearby field pins drift into its ring (~600ms). The metaphor is performed, not stated.</li>
+    <li><b>One thing glows.</b> The live element may breathe; nothing else moves at rest.</li>
+  </div>
+</section>
+
+<!-- ══ 08 THE AI VOICE ══ -->
+<section>
+  <div class="shead"><span class="num">08</span><h2>The AI voice</h2><span class="ar">المرشد</span></div>
+  <p class="lede">Purple belongs to the tutor and to nothing else — its messages, its speaking state, its eight-point glyph, its aura. The exclusivity is the feature: when you see purple, the AI is present.</p>
+  <div class="demo" style="max-width:460px">
+    <div style="display:flex;align-items:center;gap:10px;background:rgba(157,140,255,.1);border:1px solid rgba(157,140,255,.25);border-radius:10px;padding:10px 14px">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#9D8CFF" stroke-width="1.5"><rect x="6.8" y="6.8" width="10.4" height="10.4"/><rect x="6.8" y="6.8" width="10.4" height="10.4" transform="rotate(45 12 12)"/></svg>
+      <span style="font-size:13px;color:#BFB4FF" class="arf">سؤال جميل — راقب الشكل في الشريحة القادمة</span>
+    </div>
+  </div>
+</section>
+
+<!-- ══ 09 SURFACE RHYTHM ══ -->
+<section>
+  <div class="shead"><span class="num">09</span><h2>Surface rhythm</h2><span class="ar">إيقاع الأسطح</span></div>
+  <p class="lede">Applied across an artifact, the surfaces form a deliberate rhythm rather than a random mix.</p>
+  <div class="grid g4">
+    <div class="sw"><div class="c" style="background:var(--terra);display:flex;align-items:center;justify-content:center"><span class="arf" style="color:var(--cream-warm);font-size:13px">العنوان</span></div><div class="l"><b>Hero / title</b><span>Terracotta · Facet dunes</span></div></div>
+    <div class="sw"><div class="c" style="background:var(--fog);display:flex;align-items:center;justify-content:center"><span style="color:var(--ink);font-size:12px">Content ×3</span></div><div class="l"><b>Content</b><span>Fog</span></div></div>
+    <div class="sw"><div class="c" style="background:var(--teal);display:flex;align-items:center;justify-content:center"><span class="arf" style="color:var(--cream);font-size:13px">أهداف</span></div><div class="l"><b>Objectives</b><span>Future teal</span></div></div>
+    <div class="sw"><div class="c" style="background:var(--ink);display:flex;align-items:center;justify-content:center"><span class="arf" style="color:var(--cream);font-size:13px">إعلان</span></div><div class="l"><b>Announcement</b><span>Ink — dark is the attention</span></div></div>
+  </div>
+  <p class="cap" style="margin-top:16px">The app: fog for the everyday, ink for the instrument. The presenter: always ink — the projector is the one dark, luminous object in a warm room. Reading passages: paper. The quote closes on clay.</p>
+</section>
+
+<!-- ══ 10 REGISTER ══ -->
+<section style="border-bottom:none">
+  <div class="shead"><span class="num">10</span><h2>Register</h2><span class="ar">السجل</span></div>
+  <p class="lede">Provenance and open questions — so the system remembers why it looks the way it does.</p>
+  <div class="reg">
+    <h3 class="a">◆ PATTERN AUTHORITY</h3>
+    <li>All pattern constructions in this document run the canonical algorithms from <span class="mono" style="font-size:12px">empty-quarter-main</span> (facetGeo, the mural ridges, the Kingdom pins, the facade dissolve) — this thread's earlier Delaunay terrain recipe is superseded</li>
+    <h3 class="a">◆ INHERITED FROM PROVEN ROUTES</h3>
+    <li>The waypoint grammar (Section 05); purple-is-the-tutor; green as the action color; JetBrains Mono as the cartographic voice</li>
+    <li>"Design the Arabic alongside, not as a translation pass"; motion restraint; the two-theme depth-model rule; the draw-to-match icon policy</li>
+    <h3 class="a">◆ ADDED IN V2.2</h3>
+    <li>Decorative families (Sky, Saffron, Rose, Sage, Plum) — rationed ornament for tags, avatars, and illustration; orange and violet deliberately excluded to protect Heat and the AI voice</li>
+    <li>The three voice states for cams (muted · mic open · talking) — the ring is a pure realtime voice channel; identity and queue live in labels and glyphs</li>
+    <li>Timber pair reinstated as documented materials — warm oak #E2D6BE and oak deep #BC9F7B (desaturated from the source #C2A171); material, never ornament</li>
+    <h3 class="r">◆ RETIRED, WITH THANKS</h3>
+    <li>Grid paper — the surveyor's notebook was the origin of the "outdated notebook" reading; Pinboard and mono labels carry that spirit without the parchment</li>
+    <li>Gold as a hue — Water absorbed its role; Void navy → Ink; Vazirmatn/Crimson Pro → Hanken + Plex Arabic; the starfield → the terrain; warm oak as a UI surface</li>
+    <h3 class="o">◆ OPEN</h3>
+    <li>Danger hue — required, unresolved; must hold distance from the terracotta family</li>
+    <li>AI purple unification — #9D8CFF (on ink) vs iris #B08AF9: pick one ramp</li>
+    <li>The countdown ground — resolved in application: canonical ridge terrain rendered in the quiet line voice (filled facets were too heavy; floating crests fought the Khatam) — pending final sign-off at projector scale</li>
+  </div>
+</section>
+
+<footer>
+  <span>THE EMPTY QUARTER · الرُّبع الخالي</span>
+  <span>NOON ACADEMY · V2.2 · 07/2026</span>
+</footer>
+
+</div>
+<script>
+// ── Canonical generators, ported from empty-quarter-main ──
+const facetGeo = (W, HH, cell, seed, jitter, splitP) => {
+  let s = seed;
+  const rnd = () => { s = (s * 16807) % 2147483647; return (s - 1) / 2147483646; };
+  const cols = Math.ceil(W / cell), rows = Math.ceil(HH / cell);
+  const grid = [];
+  for (let j = 0; j <= rows; j++) {
+    grid[j] = [];
+    for (let i = 0; i <= cols; i++) {
+      const bx = Math.min(i * cell, W), by = Math.min(j * cell, HH);
+      grid[j][i] = [
+        bx + (i === 0 || i === cols ? 0 : (rnd() - .5) * 2 * jitter * cell),
+        by + (j === 0 || j === rows ? 0 : (rnd() - .5) * 2 * jitter * cell),
+      ];
+    }
+  }
+  const tone = (x, y) => {
+    const v = Math.sin(x * .006 + seed) * Math.cos(y * .008 - seed) + Math.sin((x + y) * .003 + seed * 2);
+    return (v + 2) / 4;
+  };
+  const P = (p) => p[0].toFixed(1) + ',' + p[1].toFixed(1);
+  const out = [];
+  const push = (...ps) => {
+    const cx = ps.reduce((t, p) => t + p[0], 0) / ps.length;
+    const cy = ps.reduce((t, p) => t + p[1], 0) / ps.length;
+    const u = Math.max(0, Math.min(1, tone(cx, cy) + (rnd() - .5) * .24));
+    out.push({ pts: ps.map(P).join(' '), u });
+  };
+  for (let j = 0; j < rows; j++) for (let i = 0; i < cols; i++) {
+    const a = grid[j][i], b = grid[j][i + 1], c = grid[j + 1][i + 1], d = grid[j + 1][i];
+    if (rnd() < splitP) {
+      if (rnd() < .5) { push(a, b, c); push(a, c, d); }
+      else { push(a, b, d); push(b, c, d); }
+    } else push(a, b, c, d);
+  }
+  return out;
+};
+const voice = (geo, fills) => geo.map(g => ({ pts: g.pts, fill: fills[Math.round(g.u * (fills.length - 1))] }));
+const duneFills = ['#8A3F26','#A44C2C','#B26440','#BC5A37','#C4714A','#CB7A50','#C98F62','#D2A47A','#DDC09A'];
+const plasterFills = ['#E4D8BE','#E9DECA','#EDE4D0','#EFE7D5','#F2ECDE','#F6F0E4'];
+const bannerFills = ['#B04F30','#B65534','#BC5A37','#C1603B','#C6663F'];
+function paint(id, polys, stroke, sw) {
+  const el = document.getElementById(id); if (!el) return;
+  el.innerHTML += polys.map(t => '<polygon points="' + t.pts + '" fill="' + (t.fill || 'none') + '"' +
+    (stroke ? ' stroke="' + stroke + '" stroke-width="' + (sw || 1) + '"' : '') + '/>').join('');
+}
+const heroGeo = facetGeo(1180, 320, 168, 11, .46, .5);
+paint('facet-dunes', voice(heroGeo, duneFills), 'rgba(241,235,221,.35)');
+paint('facet-plaster', voice(heroGeo, plasterFills), 'rgba(255,255,255,.5)');
+paint('facet-banner', voice(facetGeo(560, 190, 120, 5, .44, .5), bannerFills), 'rgba(241,235,221,.3)');
+const scaleGeos = [150, 76, 38].map(c => facetGeo(380, 220, c, 9, .45, .55));
+paint('scale-1', voice(scaleGeos[0], duneFills), 'rgba(241,235,221,.35)');
+paint('scale-2', voice(scaleGeos[1], duneFills), 'rgba(241,235,221,.35)');
+paint('scale-3', voice(scaleGeos[2], duneFills), 'rgba(241,235,221,.35)');
+// quiet line voice — amended: same lattice, stroke-only cream on ink
+const quiet = facetGeo(1180, 200, 150, 11, .46, .5).map(g => ({ pts: g.pts }));
+paint('facet-quiet', quiet, 'rgba(241,235,221,.15)');
+// mural terrain — canonical
+(function () {
+  let ts = 29;
+  const trnd = () => { ts = (ts * 16807) % 2147483647; return (ts - 1) / 2147483646; };
+  const TW = 1180, H = 460, mStep = TW / 26;
+  const layers = [
+    { y: 138, amp: 14, fills: ['#EBDFC8','#E2D2B2'] },
+    { y: 172, amp: 18, fills: ['#DBC49C','#D2B586'] },
+    { y: 210, amp: 20, fills: ['#D2AE7C','#C49A60'] },
+    { y: 250, amp: 22, fills: ['#CB7A50','#B8633C'] },
+    { y: 295, amp: 20, fills: ['#BC5A37','#AC5230'] },
+    { y: 340, amp: 18, fills: ['#A44C2C','#964526'] },
+    { y: 385, amp: 16, fills: ['#8A3F26','#7C3620'] },
+    { y: 425, amp: 12, fills: ['#733321','#662C1C'] },
+  ];
+  layers.forEach((ly, i) => { ly.ph0 = i * 1.7; ly.ph1 = i * 0.8 + 1.1; });
+  const rawY = (ly, x) => ly.y + ly.amp * Math.sin((x / mStep) * 0.9 + ly.ph0) + ly.amp * 0.4 * Math.sin((x / mStep) * 2.1 + ly.ph1);
+  const yEff = (i, x) => i < 0 ? 0 : Math.max(rawY(layers[i], x), yEff(i - 1, x) + 5);
+  const ridges = layers.map((ly, i) => {
+    const pts = [[0, yEff(i, 0)]];
+    let x = 0;
+    while (x < TW) { x = Math.min(TW, x + 78 + trnd() * 120); pts.push([x, yEff(i, x)]); }
+    return pts;
+  });
+  const floor = [[0, H]];
+  { let x = 0; while (x < TW) { x = Math.min(TW, x + 90 + trnd() * 140); floor.push([x, H]); } }
+  ridges.push(floor);
+  const P = (p) => p[0].toFixed(1) + ',' + p[1].toFixed(1);
+  const tris = [];
+  for (let i = 0; i < layers.length; i++) {
+    const A = ridges[i], B = ridges[i + 1], fills = layers[i].fills;
+    let a = 0, b = 0, n = i;
+    while (a < A.length - 1 || b < B.length - 1) {
+      if (b >= B.length - 1 || (a < A.length - 1 && A[a + 1][0] <= B[b + 1][0])) {
+        tris.push({ pts: [A[a], A[a + 1], B[b]].map(P).join(' '), fill: fills[n++ % 2] }); a++;
+      } else {
+        tris.push({ pts: [A[a], B[b + 1], B[b]].map(P).join(' '), fill: fills[n++ % 2] }); b++;
+      }
+    }
+  }
+  paint('mural', tris, 'rgba(255,255,255,.4)');
+})();
+// Kingdom pinboard — canonical
+(function () {
+  const poly = [[60,70],[250,40],[300,70],[322,128],[338,120],[330,152],[362,176],[312,262],[232,300],[150,232],[118,176],[88,128]];
+  const inside = (x, y) => {
+    let c = false;
+    for (let i = 0, j = poly.length - 1; i < poly.length; j = i++) {
+      const xi = poly[i][0], yi = poly[i][1], xj = poly[j][0], yj = poly[j][1];
+      if (((yi > y) !== (yj > y)) && (x < (xj - xi) * (y - yi) / (yj - yi) + xi)) c = !c;
+    }
+    return c;
+  };
+  const cities = [[225,168],[112,210],[312,122]];
+  let out = '';
+  const step = 12.5;
+  for (let y = step / 2; y < 320; y += step) for (let x = step / 2; x < 400; x += step) {
+    if (inside(x, y)) {
+      const hot = cities.some(c => Math.hypot(x - c[0], y - c[1]) < 8);
+      out += '<circle cx="' + x + '" cy="' + y + '" r="2.3" fill="' + (hot ? '#6BAE93' : 'rgba(188,90,55,.38)') + '"/>';
+    }
+  }
+  document.getElementById('kingdom').innerHTML += out;
+})();
+// Facade dissolve — canonical
+(function () {
+  const fCX = 182, fCY = 110, fCell = 15;
+  let out = '';
+  for (let j = 0; j < 15; j++) for (let i = 0; i < 25; i++) {
+    const x = 7.5 + i * fCell, y = 7.5 + j * fCell;
+    const d = Math.hypot(x - fCX, y - fCY);
+    let keep;
+    if (d < 56) keep = false;
+    else if (d < 74) keep = (i + j) % 2 === 0;
+    else if (d < 92) keep = (i + j) % 4 !== 0;
+    else keep = true;
+    if (keep) out += '<circle cx="' + x + '" cy="' + y + '" r="2.3" fill="rgba(188,90,55,.38)"/>';
+  }
+  out += '<text x="182" y="117" text-anchor="middle" font-family="Hanken Grotesk,sans-serif" font-weight="600" font-size="24" fill="#26282E">noon</text>';
+  document.getElementById('facade').innerHTML += out;
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,270 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Empty Quarter — Colour Handoff · V2.2 palette · الرُّبع الخالي</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@300;400;500;600;700&family=IBM+Plex+Sans+Arabic:wght@300;400;500&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root{
+  --ink:#26282E; --ink-2:#2C2F36; --ink-3:#30333B;
+  --fog:#EFF1EE; --plaster:#F1EBDD; --cream:#F1EBDD; --cream-warm:#FDF6EC;
+  --terra:#BC5A37; --clay:#CB7A50; --teal:#4F6157; --oak:#E2D6BE;
+  --green:#6BAE93; --green-ink:#64D8AE;
+  --water:#4A6B8A; --water-ink:#7C99B4;
+  --ember:#E8663A; --purple:#5A4A7D; --purple-ink:#9D8CFF;
+  --mut:#8A8272; --sans:'Hanken Grotesk',sans-serif; --ar:'IBM Plex Sans Arabic',sans-serif; --mono:'JetBrains Mono',monospace;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--plaster);color:var(--ink);font-family:var(--sans);-webkit-font-smoothing:antialiased;line-height:1.55}
+.wrap{max-width:1080px;margin:0 auto;padding:72px 32px 140px}
+.arf{font-family:var(--ar)}
+.mono{font-family:var(--mono)}
+
+header{border-bottom:1px solid rgba(38,40,46,.25);padding-bottom:34px;margin-bottom:20px}
+header .meta{font-family:var(--mono);font-size:11px;letter-spacing:.18em;color:var(--terra);margin-bottom:18px}
+header h1{font-size:52px;font-weight:400;letter-spacing:-.015em;line-height:1.08}
+header .artitle{font-family:var(--ar);font-size:24px;color:var(--mut);margin-top:14px;font-weight:300}
+header p{max-width:660px;margin-top:22px;color:#55524A;font-size:15px}
+
+.note{background:var(--ink);color:var(--cream);border-radius:12px;padding:22px 24px;margin:26px 0 6px;max-width:780px}
+.note .to{font-family:var(--mono);font-size:10px;letter-spacing:.18em;color:var(--ember);margin-bottom:10px}
+.note p{color:rgba(241,235,221,.82);font-size:14px;margin:0}
+.note p+p{margin-top:10px}
+.note b{color:var(--cream);font-weight:600}
+
+section{padding:52px 0;border-bottom:1px solid rgba(38,40,46,.14)}
+.shead{display:flex;align-items:baseline;gap:16px;margin-bottom:8px}
+.shead .num{font-family:var(--mono);font-size:12px;color:var(--terra)}
+.shead h2{font-size:30px;font-weight:400;letter-spacing:-.01em}
+.shead .ar{margin-left:auto;font-family:var(--ar);font-size:18px;color:var(--mut);font-weight:300}
+.lede{max-width:680px;color:#55524A;font-size:14.5px;margin-bottom:26px}
+.lede b{color:var(--ink);font-weight:600}
+
+.lab{font-family:var(--mono);font-size:10px;letter-spacing:.18em;color:var(--mut);margin:30px 0 12px;text-transform:uppercase}
+
+/* kept grid — quick confirmation swatches */
+.kept{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:12px}
+.kc{border:1px solid rgba(38,40,46,.1);border-radius:8px;overflow:hidden;background:#F7F2E6}
+.kc .c{height:56px;position:relative}
+.kc .c .ok{position:absolute;top:6px;right:7px;font-family:var(--mono);font-size:8px;letter-spacing:.1em;background:rgba(107,174,147,.9);color:#123;padding:2px 5px;border-radius:3px}
+.kc .l{padding:8px 10px}
+.kc .l b{display:block;font-size:12.5px;font-weight:600}
+.kc .l span{font-family:var(--mono);font-size:10px;color:var(--mut)}
+
+/* delta card — before→after */
+.deltas{display:grid;gap:14px}
+.d{border:1px solid rgba(38,40,46,.12);border-radius:10px;overflow:hidden;background:#F7F2E6}
+.d .top{display:flex;align-items:stretch}
+.d .pair{display:flex;flex:0 0 auto}
+.chip{width:74px;position:relative}
+.chip .hx{position:absolute;left:0;right:0;bottom:0;font-family:var(--mono);font-size:8.5px;text-align:center;padding:3px 2px;background:rgba(255,255,255,.72);color:#3E3B34;letter-spacing:.02em}
+.chip.dark .hx{background:rgba(38,40,46,.55);color:#F1EBDD}
+.arrow{display:flex;align-items:center;justify-content:center;width:30px;color:var(--mut);font-size:16px;background:#F7F2E6}
+.d .body{flex:1;padding:14px 18px;min-width:0}
+.d .name{display:flex;align-items:baseline;gap:10px;flex-wrap:wrap}
+.d .name b{font-size:15px;font-weight:600}
+.d .name .arn{font-family:var(--ar);font-size:13px;color:var(--mut)}
+.d .name .tag{font-family:var(--mono);font-size:8.5px;letter-spacing:.14em;padding:2px 7px;border-radius:3px;text-transform:uppercase}
+.tag.new{background:rgba(107,174,147,.16);color:#3E7A61}
+.tag.changed{background:rgba(188,90,55,.14);color:var(--terra)}
+.tag.added{background:rgba(74,107,138,.14);color:#3C5872}
+.tag.open{background:rgba(38,40,46,.1);color:#6E6A5F}
+.d .delta{font-size:13px;color:#4A4842;margin-top:7px}
+.d .delta b{font-weight:600;color:var(--ink)}
+.d .use{font-size:12.5px;color:#55524A;margin-top:6px}
+.d .use .k{font-family:var(--mono);font-size:9px;letter-spacing:.14em;color:var(--mut);text-transform:uppercase;margin-right:6px}
+
+.rule{background:#EAE2CF;border-left:3px solid var(--terra);padding:12px 16px;font-size:13.5px;margin:20px 0;max-width:720px}
+.rule b{font-weight:600}
+
+table.sum{width:100%;border-collapse:collapse;font-size:12.5px;margin-top:10px}
+table.sum th{text-align:left;font-family:var(--mono);font-size:9.5px;letter-spacing:.14em;color:var(--mut);font-weight:500;padding:9px 10px;border-bottom:1px solid rgba(38,40,46,.2)}
+table.sum td{padding:10px;border-bottom:1px solid rgba(38,40,46,.1);vertical-align:top}
+.dot{display:inline-block;width:13px;height:13px;border-radius:3px;vertical-align:-2px;margin-right:7px;border:1px solid rgba(38,40,46,.14)}
+.sw2{display:inline-flex;gap:3px;vertical-align:-3px;margin-right:8px}
+.sw2 i{display:block;width:15px;height:15px;border-radius:3px;border:1px solid rgba(38,40,46,.14)}
+.hexes{font-family:var(--mono);font-size:11px;color:#55524A;white-space:nowrap}
+
+.open li{margin:9px 0 9px 18px;font-size:13.5px;color:#3E3B34}
+.open li b{font-weight:600}
+
+footer{padding-top:40px;font-family:var(--mono);font-size:10.5px;letter-spacing:.14em;color:var(--mut);display:flex;justify-content:space-between;flex-wrap:wrap;gap:10px}
+@media(max-width:640px){.d .top{flex-direction:column}.chip{width:100%;height:52px}.d .pair{width:100%}.chip{flex:1}.arrow{width:100%;height:24px}}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<header>
+  <div class="meta">NOON ACADEMY · EMPTY QUARTER · COLOUR HANDOFF · V2.2 · JULY 2026</div>
+  <h1>What changed since your palette</h1>
+  <div class="artitle">اللون — من لوحتك الأصلية إلى النسخة المعدّلة</div>
+  <p>A colour-only diff between <b>your original Empty Quarter palette</b> (the ten locked colours) and the current <b>V2.2</b> application of it. Short version: your palette is intact. V2.2 adds a thin layer on top so the colours work on the dark instrument surface, plus a small set of new supporting colours. Geometry, patterns, typography, and motion are untouched.</p>
+</header>
+
+<div class="note">
+  <div class="to">FROM JI · TO THE AUTHOR OF THE EMPTY QUARTER PALETTE</div>
+  <p>Every colour you locked is kept at the <b>same hex</b> — with one exception: oak deep is desaturated a touch. What V2.2 introduces is mostly an <b>"on-ink" layer</b> (brighter counterparts so accents read on the dark presenter/instrument surface), one new signal colour, a light ground, and a rationed decorative set.</p>
+  <p>Two things still need your call — flagged at the end. Nothing here overrides your definitions; treat it as a proposal on top of them.</p>
+</div>
+
+<!-- 01 KEPT -->
+<section>
+  <div class="shead"><span class="num">01</span><h2>Kept, unchanged</h2><span class="ar">كما هي</span></div>
+  <p class="lede">Nine of your ten colours carry into V2.2 at the <b>identical hex</b>. No retuning, no renaming of the values.</p>
+  <div class="kept">
+    <div class="kc"><div class="c" style="background:#BC5A37"><span class="ok">SAME</span></div><div class="l"><b>Terracotta</b><span>#BC5A37</span></div></div>
+    <div class="kc"><div class="c" style="background:#E2D6BE"><span class="ok">SAME</span></div><div class="l"><b>Warm oak</b><span>#E2D6BE</span></div></div>
+    <div class="kc"><div class="c" style="background:#4F6157"><span class="ok">SAME</span></div><div class="l"><b>Future teal</b><span>#4F6157</span></div></div>
+    <div class="kc"><div class="c" style="background:#CB7A50"><span class="ok">SAME</span></div><div class="l"><b>Clay</b><span>#CB7A50</span></div></div>
+    <div class="kc"><div class="c" style="background:#F1EBDD"><span class="ok">SAME</span></div><div class="l"><b>Plaster</b><span>#F1EBDD</span></div></div>
+    <div class="kc"><div class="c" style="background:#26282E"><span class="ok">SAME</span></div><div class="l"><b>Ink</b><span>#26282E</span></div></div>
+    <div class="kc"><div class="c" style="background:#6BAE93"><span class="ok">SAME</span></div><div class="l"><b>Noon green</b><span>#6BAE93</span></div></div>
+    <div class="kc"><div class="c" style="background:#4A6B8A"><span class="ok">SAME</span></div><div class="l"><b>Water</b><span>#4A6B8A → #7C99B4</span></div></div>
+    <div class="kc"><div class="c" style="background:#5A4A7D"><span class="ok">SAME</span></div><div class="l"><b>Royal purple</b><span>#5A4A7D</span></div></div>
+  </div>
+  <div class="rule">Roles are honoured too: <b>Noon green</b> stays the live digital accent (state &amp; the mark, never a field), <b>Water</b> stays selection/progression and still lightens to #7C99B4 on dark, and <b>Royal purple</b> stays the AI tutor's colour and nothing else.</div>
+</section>
+
+<!-- 02 CHANGED -->
+<section>
+  <div class="shead"><span class="num">02</span><h2>Changed</h2><span class="ar">تعديل</span></div>
+  <p class="lede">One hex adjustment, and one scope change to warm oak. That's the whole of it.</p>
+  <div class="deltas">
+
+    <div class="d"><div class="top">
+      <div class="pair">
+        <div class="chip" style="background:#C2A171"><span class="hx">#C2A171</span></div>
+        <div class="arrow">→</div>
+        <div class="chip" style="background:#BC9F7B"><span class="hx">#BC9F7B</span></div>
+      </div>
+      <div class="body">
+        <div class="name"><b>Oak deep</b><span class="arn">خشب داكن</span><span class="tag changed">desaturated</span></div>
+        <div class="delta"><b>#C2A171 → #BC9F7B.</b> Nudged down in saturation so it reads clearly as dark timber and can't be mistaken for a decorative gold. The reasoning: saffron decorates, oak builds — keeping oak muted stops timber from doing ornament's job.</div>
+        <div class="use"><span class="k">UI</span>Dark timber, furniture, wood in illustration — material only.</div>
+      </div>
+    </div></div>
+
+    <div class="d"><div class="top">
+      <div class="pair">
+        <div class="chip" style="background:#E2D6BE"><span class="hx">#E2D6BE</span></div>
+        <div class="arrow">→</div>
+        <div class="chip" style="background:#E2D6BE"><span class="hx">#E2D6BE</span></div>
+      </div>
+      <div class="body">
+        <div class="name"><b>Warm oak — scope</b><span class="arn">خشب</span><span class="tag changed">role narrowed</span></div>
+        <div class="delta">Hex unchanged, but its use narrowed. Your original had <b>oak carrying surface</b> alongside terracotta; V2.2 proposes making timber <b>material only</b> — physical spaces, signage, furniture, illustration — and no longer a UI surface. On ink, oak survives just as a type colour.</div>
+        <div class="use"><span class="k">UI</span>Timber / material &amp; artwork. <b>No longer a UI surface fill.</b></div>
+      </div>
+    </div></div>
+
+  </div>
+  <div class="rule"><b>This one is a proposal, not a done deal.</b> If you'd rather oak keep carrying surface, say so — it's your call.</div>
+</section>
+
+<!-- 03 ADDED: on-ink stops -->
+<section>
+  <div class="shead"><span class="num">03</span><h2>Added — the "on-ink" layer</h2><span class="ar">على الحبر</span></div>
+  <p class="lede">Your palette was defined as flat swatches. Because the UI is emissive — accents need to brighten on the dark instrument surface — V2.2 pairs each role with a brighter <b>on-ink</b> stop. Your value becomes the <b>on-fog</b> stop; a new value is added for ink. (You already specified this for Water.)</p>
+  <table class="sum">
+    <tr><th>ROLE</th><th>ON FOG / PLASTER — YOURS</th><th>ON INK — ADDED</th><th>OWNS</th></tr>
+    <tr>
+      <td><span class="sw2"><i style="background:#6BAE93"></i><i style="background:#64D8AE"></i></span><b>Action · Live</b></td>
+      <td class="hexes">#6BAE93</td><td class="hexes">#64D8AE <span style="color:var(--mut)">· new</span></td>
+      <td>The only button colour; live states, arrival. <b>Note:</b> #64D8AE is the heritage green you desaturated from — it returns only as the ink stop.</td>
+    </tr>
+    <tr>
+      <td><span class="sw2"><i style="background:#4A6B8A"></i><i style="background:#7C99B4"></i></span><b>Water · Progression</b></td>
+      <td class="hexes">#4A6B8A</td><td class="hexes">#7C99B4 <span style="color:var(--mut)">· yours</span></td>
+      <td>Path travelled, current position, chosen answer, selection. Already in your spec.</td>
+    </tr>
+    <tr>
+      <td><span class="sw2"><i style="background:#4F6157"></i><i style="background:#5E8C7F"></i></span><b>Intelligence</b></td>
+      <td class="hexes">#4F6157</td><td class="hexes">#5E8C7F <span style="color:var(--mut)">· new</span></td>
+      <td>Future teal as surface; brighter teal for scores/objectives/analysis on ink.</td>
+    </tr>
+    <tr>
+      <td><span class="sw2"><i style="background:#5A4A7D"></i><i style="background:#9D8CFF"></i></span><b>AI voice</b></td>
+      <td class="hexes">#5A4A7D</td><td class="hexes">#9D8CFF <span style="color:var(--mut)">· new</span></td>
+      <td>Royal purple for the tutor; its messages, speaking state, glyph, aura on ink.</td>
+    </tr>
+  </table>
+  <div class="rule">These are additions, not edits — your on-fog values are untouched. The only question is whether the specific on-ink brightnesses are right (see open items).</div>
+</section>
+
+<!-- 04 ADDED: new colours -->
+<section>
+  <div class="shead"><span class="num">04</span><h2>Added — new supporting colours</h2><span class="ar">ألوان جديدة</span></div>
+  <p class="lede">A few colours V2.2 introduces that weren't in the locked ten — each with a narrow, non-competing job.</p>
+  <div class="deltas">
+
+    <div class="d"><div class="top">
+      <div class="pair"><div class="chip dark" style="background:#E8663A"><span class="hx">#E8663A</span></div></div>
+      <div class="body">
+        <div class="name"><b>Heat · Signal (ember)</b><span class="arn">حرارة</span><span class="tag new">new role</span></div>
+        <div class="delta">A dedicated <b>signal</b> colour split out from terracotta, so terracotta stays a surface and never has to double as an alert. Terracotta #BC5A37 on fog, brighter ember #E8663A on ink. Never a field on ink, never a button. Heat is not danger.</div>
+        <div class="use"><span class="k">UI</span>Weak zones, urgency, mute, the "you are here" now-node.</div>
+      </div>
+    </div></div>
+
+    <div class="d"><div class="top">
+      <div class="pair"><div class="chip" style="background:#EFF1EE"><span class="hx">#EFF1EE</span></div></div>
+      <div class="body">
+        <div class="name"><b>Fog</b><span class="arn">ضباب</span><span class="tag new">new surface</span></div>
+        <div class="delta">A near-white <b>light UI ground</b> for the everyday app, distinct from Plaster (which stays reading/print only). Gives the app a calm surface that isn't ink and isn't the reading paper.</div>
+        <div class="use"><span class="k">UI</span>Default app content ground.</div>
+      </div>
+    </div></div>
+
+    <div class="d"><div class="top">
+      <div class="pair">
+        <div class="chip" style="background:#CB7A50"><span class="hx">#CB7A50</span></div>
+        <div class="arrow">→</div>
+        <div class="chip dark" style="background:#96431F"><span class="hx">#96431F</span></div>
+      </div>
+      <div class="body">
+        <div class="name"><b>Clay → deep rust</b><span class="arn">صلصال</span><span class="tag added">extended</span></div>
+        <div class="delta">Your Clay #CB7A50 is extended into a deeper ramp — <span class="hexes">#CB7A50 · #A94E2A · #96431F</span> — used inside the Facet dune fills and hero gradients for depth within the terracotta family.</div>
+        <div class="use"><span class="k">UI</span>Pattern fills, hero gradients.</div>
+      </div>
+    </div></div>
+
+    <div class="d"><div class="top">
+      <div class="pair">
+        <div class="chip" style="background:#86A7BE"></div>
+        <div class="chip" style="background:#DDBA62"></div>
+        <div class="chip" style="background:#C98A87"></div>
+        <div class="chip" style="background:#9FAA7D"></div>
+        <div class="chip" style="background:#AC7F97"></div>
+      </div>
+      <div class="body">
+        <div class="name"><b>Decorative families</b><span class="arn">للزينة</span><span class="tag new">new set</span></div>
+        <div class="delta">Five rationed families for subject tags, avatars, and spot illustration — three steps each: <b>Sky</b> #B7CEDD·#86A7BE·#5C7E96, <b>Saffron</b> #EFD9A0·#DDBA62·#A8873E, <b>Rose</b> #E7B9B4·#C98A87·#9C5F5E, <b>Sage</b> #C6CCAA·#9FAA7D·#6F7C52, <b>Plum</b> #D3B4C4·#AC7F97·#7D5468. Orange and violet are deliberately excluded — Heat owns orange, the AI owns violet — so ornament never impersonates state.</div>
+        <div class="use"><span class="k">UI</span>Subject tags, avatar fills, illustration — one family per element, never carrying state.</div>
+      </div>
+    </div></div>
+
+  </div>
+</section>
+
+<!-- 05 OPEN -->
+<section style="border-bottom:none">
+  <div class="shead"><span class="num">05</span><h2>Two decisions we need from you</h2><span class="ar">للبتّ فيه</span></div>
+  <ul class="open">
+    <li><b>Danger hue — still unresolved.</b> Destructive/error states need a colour, but it must hold clear distance from the terracotta / ember family (so an alert never reads as heat, and heat never reads as an alert). What should danger be?</li>
+    <li><b>Sign off the on-ink stops.</b> The added brights — Action #64D8AE, Intelligence #5E8C7F, AI purple #9D8CFF — are proposals for how your colours brighten on ink. Do these match your intent, or would you tune them? (Water #7C99B4 is already yours.)</li>
+  </ul>
+  <div class="rule">Everything else is a faithful application of your palette. If any addition here conflicts with how you intended a colour to behave, your definition wins — this handoff sits on top of your locked ten, it doesn't replace them.</div>
+</section>
+
+<footer>
+  <span>THE EMPTY QUARTER · الرُّبع الخالي · COLOUR HANDOFF</span>
+  <span>NOON ACADEMY · V2.2 · 07/2026</span>
+</footer>
+
+</div>
+</body>
+</html>

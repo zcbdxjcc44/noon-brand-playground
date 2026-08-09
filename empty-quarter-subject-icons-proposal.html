@@ -1,0 +1,261 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Empty Quarter — Subject Icons Proposal</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@300;400;500;600&family=IBM+Plex+Sans+Arabic:wght@300;400;500&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root{
+  --ink:#26282E; --fog:#EFF1EE; --plaster:#F1EBDD; --terra:#BC5A37; --teal:#4F6157;
+  --mut:#8A8272; --cream:#F1EBDD;
+  --sky:#86A7BE; --sky-l:#B7CEDD; --sky-d:#5C7E96;
+  --saf:#DDBA62; --saf-l:#EFD9A0; --saf-d:#A8873E;
+  --rose:#C98A87; --rose-l:#E7B9B4; --rose-d:#9C5F5E;
+  --sage:#9FAA7D; --sage-l:#C6CCAA; --sage-d:#6F7C52;
+  --plum:#AC7F97; --plum-l:#D3B4C4; --plum-d:#7D5468;
+  --sans:'Hanken Grotesk',sans-serif; --ar:'IBM Plex Sans Arabic',sans-serif; --mono:'JetBrains Mono',monospace;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--plaster);color:var(--ink);font-family:var(--sans);-webkit-font-smoothing:antialiased;line-height:1.55}
+.wrap{max-width:1080px;margin:0 auto;padding:64px 32px 120px}
+.mono{font-family:var(--mono)}
+header{border-bottom:1px solid rgba(38,40,46,.25);padding-bottom:30px;margin-bottom:8px}
+header .meta{font-family:var(--mono);font-size:11px;letter-spacing:.18em;color:var(--terra);margin-bottom:16px}
+header h1{font-size:46px;font-weight:400;letter-spacing:-.015em;line-height:1.08}
+header .artitle{font-family:var(--ar);font-size:22px;color:var(--mut);margin-top:12px;font-weight:300}
+header p{max-width:660px;margin-top:18px;color:#55524A;font-size:14.5px}
+section{padding:46px 0;border-bottom:1px solid rgba(38,40,46,.14)}
+.shead{display:flex;align-items:baseline;gap:16px;margin-bottom:8px}
+.shead .num{font-family:var(--mono);font-size:12px;color:var(--terra)}
+.shead h2{font-size:27px;font-weight:400;letter-spacing:-.01em}
+.shead .ar{margin-left:auto;font-family:var(--ar);font-size:17px;color:var(--mut);font-weight:300}
+.lede{max-width:660px;color:#55524A;font-size:14px;margin-bottom:22px}
+.rule{background:#EAE2CF;border-left:3px solid var(--terra);padding:12px 16px;font-size:13px;margin:18px 0;max-width:700px}
+.rule b{font-weight:600}
+.lab{font-family:var(--mono);font-size:10px;letter-spacing:.18em;color:var(--mut);margin:24px 0 12px;text-transform:uppercase}
+table.map{width:100%;border-collapse:collapse;font-size:13px;margin-top:6px;max-width:720px}
+table.map th{text-align:left;font-family:var(--mono);font-size:10px;letter-spacing:.16em;color:var(--mut);font-weight:500;padding:8px 10px;border-bottom:1px solid rgba(38,40,46,.2)}
+table.map td{padding:11px 10px;border-bottom:1px solid rgba(38,40,46,.1);vertical-align:middle}
+.dot{display:inline-block;width:14px;height:14px;border-radius:4px;vertical-align:-2px;margin-right:8px}
+.hex{font-family:var(--mono);font-size:11px;color:#55524A}
+.board{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:6px}
+@media(max-width:720px){.board{grid-template-columns:1fr}}
+.surf{border-radius:12px;padding:22px 20px 18px}
+.surf.fog{background:var(--fog);border:1px solid rgba(38,40,46,.12)}
+.surf.ink{background:var(--ink)}
+.surf .tag{font-family:var(--mono);font-size:10px;letter-spacing:.16em;margin-bottom:16px}
+.surf.fog .tag{color:var(--mut)}
+.surf.ink .tag{color:#9a9384}
+.row{display:flex;justify-content:space-between;gap:8px}
+.cell{text-align:center;flex:1}
+.cell svg{width:42px;height:42px;display:block;margin:0 auto}
+.cell p{font-family:var(--mono);font-size:9px;letter-spacing:.1em;margin-top:9px}
+.surf.fog .cell p{color:var(--mut)}
+.surf.ink .cell p{color:#8f887a}
+.tags{display:flex;gap:14px;flex-wrap:wrap;margin-top:6px}
+.tags .t{text-align:center}
+.tags .t svg{width:62px;height:62px;display:block}
+.tags .t p{font-family:var(--mono);font-size:9px;letter-spacing:.1em;color:var(--mut);margin-top:8px}
+.specs{font-size:13px;color:#3E3B34}
+.specs li{margin:5px 0 5px 18px}
+footer{padding-top:36px;font-family:var(--mono);font-size:10.5px;letter-spacing:.14em;color:var(--mut);display:flex;justify-content:space-between}
+</style>
+</head>
+<body>
+
+<!-- ═══ reusable line glyphs (Direction A) — currentColor drives stroke ═══ -->
+<svg width="0" height="0" style="position:absolute" aria-hidden="true"><defs>
+  <g id="g-defs" fill="none" stroke-width="1.7" stroke-linecap="butt" stroke-linejoin="miter"></g>
+
+  <symbol id="a-phys" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7">
+    <ellipse cx="12" cy="12" rx="9.2" ry="3.8" transform="rotate(45 12 12)"/>
+    <ellipse cx="12" cy="12" rx="9.2" ry="3.8" transform="rotate(-45 12 12)"/>
+    <circle cx="12" cy="12" r="1.5" fill="currentColor" stroke="none"/>
+  </symbol>
+  <symbol id="a-chem" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="miter">
+    <path d="M9.7 3.5 H14.3 M14 3.5 V8.2 L19 17.8 L17.5 19.2 H6.5 L5 17.8 L10 8.2 V3.5"/>
+    <path d="M6.9 14 H17.1"/>
+  </symbol>
+  <symbol id="a-bio" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="miter">
+    <path d="M6 19 C4.8 12.5 8.5 5.5 18.5 4.5 C19.5 13 14 19.6 6 19 Z"/>
+    <path d="M6.4 18.6 L16.5 7"/>
+    <path d="M10.6 14.4 L13.1 11.7"/>
+    <path d="M8.7 16.5 L10.3 14.7"/>
+  </symbol>
+  <symbol id="a-math" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7">
+    <path d="M5 8 H9 M7 6 V10"/>
+    <path d="M14.5 8 H18.5"/>
+    <path d="M5.6 14.6 L8.6 17.6 M8.6 14.6 L5.6 17.6"/>
+    <path d="M14 16 H19"/>
+    <circle cx="16.5" cy="13.9" r=".95" fill="currentColor" stroke="none"/>
+    <circle cx="16.5" cy="18.1" r=".95" fill="currentColor" stroke="none"/>
+  </symbol>
+  <symbol id="a-eng" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="miter">
+    <path d="M12 6.5 V18.4"/>
+    <path d="M12 6.5 C9.3 5 6 5 4 6 V17.8 C6 16.8 9.3 16.8 12 18.4"/>
+    <path d="M12 6.5 C14.7 5 18 5 20 6 V17.8 C18 16.8 14.7 16.8 12 18.4"/>
+  </symbol>
+</defs></svg>
+
+<div class="wrap">
+
+<header>
+  <div class="meta">NOON ACADEMY · HYBRID CLASSROOM · SUBJECT ICONS · PROPOSAL · JULY 2026</div>
+  <h1>Subject Icons — Empty Quarter</h1>
+  <div class="artitle">أيقونات المواد — الرُّبع الخالي</div>
+  <p>Five subjects — Physics, Chemistry, Biology, Math, English — drawn to the Empty Quarter iconography rules: line-only, 1.7 stroke on a 24px grid, miter joins, flat terminals, angles snapped to 0°/45°/90°, corners cut rather than rounded, curves kept only where meaning demands. Three directions below, from an evolved take on conventional subject marks to a fully faceted expedition language. Note: I could not open the linked Figma file (the Figma connector isn't authorized in this session), so "close to current" is inferred from standard subject metaphors — send a screenshot and I'll tune Direction A to match exactly.</p>
+</header>
+
+<!-- ══ COLOR MAPPING ══ -->
+<section>
+  <div class="shead"><span class="num">00</span><h2>Family assignment</h2><span class="ar">توزيع العائلات</span></div>
+  <p class="lede">Each subject takes one stable decorative family and keeps it everywhere (per the guide: "a subject keeps its family everywhere"). Five subjects, five families — a clean one-to-one. Heat/Water/AI hues are untouched, so these never collide with state color.</p>
+  <table class="map">
+    <tr><th>SUBJECT</th><th>FAMILY</th><th>CORE · fog</th><th>LIGHT · ink</th><th>DEEP · text</th></tr>
+    <tr><td><span class="dot" style="background:var(--sky)"></span><b>Physics</b> · فيزياء</td><td>Sky · سماء</td><td class="hex">#86A7BE</td><td class="hex">#B7CEDD</td><td class="hex">#5C7E96</td></tr>
+    <tr><td><span class="dot" style="background:var(--plum)"></span><b>Chemistry</b> · كيمياء</td><td>Plum · برقوق</td><td class="hex">#AC7F97</td><td class="hex">#D3B4C4</td><td class="hex">#7D5468</td></tr>
+    <tr><td><span class="dot" style="background:var(--sage)"></span><b>Biology</b> · أحياء</td><td>Sage · مريمية</td><td class="hex">#9FAA7D</td><td class="hex">#C6CCAA</td><td class="hex">#6F7C52</td></tr>
+    <tr><td><span class="dot" style="background:var(--saf)"></span><b>Math</b> · رياضيات</td><td>Saffron · زعفران</td><td class="hex">#DDBA62</td><td class="hex">#EFD9A0</td><td class="hex">#A8873E</td></tr>
+    <tr><td><span class="dot" style="background:var(--rose)"></span><b>English</b> · إنجليزي</td><td>Rose · ورد</td><td class="hex">#C98A87</td><td class="hex">#E7B9B4</td><td class="hex">#9C5F5E</td></tr>
+  </table>
+  <div class="rule"><b>Why these pairings.</b> Sky for Physics (motion, waves, the airy analytic layer). Sage for Biology (the only living-green family). Plum for Chemistry (reaction, transformation — a quarter-wheel off the AI's violet but clearly ornamental). Saffron for Math (numeric, structural, the abacus gold). Rose for English (letters, voice, warmth of language). All are stable and swappable if you'd rather trade any two.</div>
+</section>
+
+<!-- ══ DIRECTION A ══ -->
+<section>
+  <div class="shead"><span class="num">A</span><h2>Evolved classics</h2><span class="ar">التطوير — قريب من الحالي</span></div>
+  <p class="lede">The familiar subject metaphors — atom, flask, leaf, operators, book — kept recognizable, but redrawn to Empty Quarter line rules: single 1.7 weight, flat ends, cut corners on the flask base, curves retained only where the meaning lives (orbits, leaf, pages). Functional default is monochrome; the subject family enters only as an optional tint. This is the low-risk migration path.</p>
+  <div class="board">
+    <div class="surf fog">
+      <div class="tag">ON FOG · MONOCHROME INK · #26282E</div>
+      <div class="row" style="color:var(--ink)">
+        <div class="cell"><svg><use href="#a-phys"/></svg><p>PHYSICS</p></div>
+        <div class="cell"><svg><use href="#a-chem"/></svg><p>CHEMISTRY</p></div>
+        <div class="cell"><svg><use href="#a-bio"/></svg><p>BIOLOGY</p></div>
+        <div class="cell"><svg><use href="#a-math"/></svg><p>MATH</p></div>
+        <div class="cell"><svg><use href="#a-eng"/></svg><p>ENGLISH</p></div>
+      </div>
+    </div>
+    <div class="surf ink">
+      <div class="tag">ON INK · OPTIONAL FAMILY TINT (LIGHT STEP)</div>
+      <div class="row">
+        <div class="cell" style="color:var(--sky-l)"><svg><use href="#a-phys"/></svg><p>PHYSICS</p></div>
+        <div class="cell" style="color:var(--plum-l)"><svg><use href="#a-chem"/></svg><p>CHEMISTRY</p></div>
+        <div class="cell" style="color:var(--sage-l)"><svg><use href="#a-bio"/></svg><p>BIOLOGY</p></div>
+        <div class="cell" style="color:var(--saf-l)"><svg><use href="#a-math"/></svg><p>MATH</p></div>
+        <div class="cell" style="color:var(--rose-l)"><svg><use href="#a-eng"/></svg><p>ENGLISH</p></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══ DIRECTION B ══ -->
+<section>
+  <div class="shead"><span class="num">B</span><h2>Facet geometry</h2><span class="ar">الأوجه — الاتجاه الجذري</span></div>
+  <p class="lede">The radical take. Every subject is rebuilt from the expedition geometry — waypoint diamonds, octagons, cut facets, zero incidental curves. The atom's orbits become nested rotated squares; the flask becomes a faceted vessel with a coloured liquid facet; biology is an angular sprout of diamond leaves; math sits inside the settings-octagon; English is a faceted capital with a filled counter. One family facet per icon carries the colour. This is the direction that looks unmistakably Empty Quarter.</p>
+  <div class="board">
+    <div class="surf fog">
+      <div class="tag">ON FOG · INK LINE + CORE FACET</div>
+      <div class="row">
+        <!-- physics -->
+        <div class="cell"><svg viewBox="0 0 24 24" fill="none" stroke="#26282E" stroke-width="1.7" stroke-linejoin="miter">
+          <rect x="4.2" y="4.2" width="15.6" height="15.6" transform="rotate(45 12 12)"/>
+          <rect x="7.4" y="7.4" width="9.2" height="9.2"/>
+          <rect x="10.1" y="10.1" width="3.8" height="3.8" transform="rotate(45 12 12)" fill="#86A7BE" stroke="none"/>
+        </svg><p>PHYSICS</p></div>
+        <!-- chemistry -->
+        <div class="cell"><svg viewBox="0 0 24 24" fill="none" stroke="#26282E" stroke-width="1.7" stroke-linejoin="miter">
+          <path d="M7.32 13 H16.68 L18 17 L15 20 H9 L6 17 Z" fill="#AC7F97" stroke="none"/>
+          <path d="M9.3 4 H14.7 V7 L18 17 L15 20 H9 L6 17 L9.3 7 Z"/>
+        </svg><p>CHEMISTRY</p></div>
+        <!-- biology -->
+        <div class="cell"><svg viewBox="0 0 24 24" fill="none" stroke="#26282E" stroke-width="1.7" stroke-linejoin="miter">
+          <path d="M12 20 V7.6 M12 14.6 L8 10.6 M12 12 L16 8"/>
+          <rect x="6.4" y="8.9" width="3.2" height="3.2" transform="rotate(45 8 10.5)" fill="#9FAA7D" stroke="none"/>
+          <rect x="14.4" y="6.4" width="3.2" height="3.2" transform="rotate(45 16 8)" fill="#9FAA7D" stroke="none"/>
+          <rect x="10.4" y="5.4" width="3.2" height="3.2" transform="rotate(45 12 7)" fill="#9FAA7D" stroke="none"/>
+        </svg><p>BIOLOGY</p></div>
+        <!-- math -->
+        <div class="cell"><svg viewBox="0 0 24 24" fill="none" stroke="#26282E" stroke-width="1.7" stroke-linejoin="miter">
+          <polygon points="8.7,3.5 15.3,3.5 20.5,8.7 20.5,15.3 15.3,20.5 8.7,20.5 3.5,15.3 3.5,8.7"/>
+          <path d="M12 7.5 V16.5 M7.5 12 H16.5"/>
+          <rect x="10.2" y="10.2" width="3.6" height="3.6" transform="rotate(45 12 12)" fill="#DDBA62" stroke="none"/>
+        </svg><p>MATH</p></div>
+        <!-- english -->
+        <div class="cell"><svg viewBox="0 0 24 24" fill="none" stroke="#26282E" stroke-width="1.7" stroke-linejoin="miter">
+          <path d="M11.9 9 L14.3 14 H9.5 Z" fill="#C98A87" stroke="none"/>
+          <path d="M4.5 19.5 L10.4 6 H13.6 L19.5 19.5"/>
+          <path d="M7.7 14.6 H16.3"/>
+        </svg><p>ENGLISH</p></div>
+      </div>
+    </div>
+    <div class="surf ink">
+      <div class="tag">ON INK · CREAM LINE + LIGHT FACET</div>
+      <div class="row">
+        <div class="cell"><svg viewBox="0 0 24 24" fill="none" stroke="#F1EBDD" stroke-width="1.7" stroke-linejoin="miter">
+          <rect x="4.2" y="4.2" width="15.6" height="15.6" transform="rotate(45 12 12)"/>
+          <rect x="7.4" y="7.4" width="9.2" height="9.2"/>
+          <rect x="10.1" y="10.1" width="3.8" height="3.8" transform="rotate(45 12 12)" fill="#B7CEDD" stroke="none"/>
+        </svg><p>PHYSICS</p></div>
+        <div class="cell"><svg viewBox="0 0 24 24" fill="none" stroke="#F1EBDD" stroke-width="1.7" stroke-linejoin="miter">
+          <path d="M7.32 13 H16.68 L18 17 L15 20 H9 L6 17 Z" fill="#D3B4C4" stroke="none"/>
+          <path d="M9.3 4 H14.7 V7 L18 17 L15 20 H9 L6 17 L9.3 7 Z"/>
+        </svg><p>CHEMISTRY</p></div>
+        <div class="cell"><svg viewBox="0 0 24 24" fill="none" stroke="#F1EBDD" stroke-width="1.7" stroke-linejoin="miter">
+          <path d="M12 20 V7.6 M12 14.6 L8 10.6 M12 12 L16 8"/>
+          <rect x="6.4" y="8.9" width="3.2" height="3.2" transform="rotate(45 8 10.5)" fill="#C6CCAA" stroke="none"/>
+          <rect x="14.4" y="6.4" width="3.2" height="3.2" transform="rotate(45 16 8)" fill="#C6CCAA" stroke="none"/>
+          <rect x="10.4" y="5.4" width="3.2" height="3.2" transform="rotate(45 12 7)" fill="#C6CCAA" stroke="none"/>
+        </svg><p>BIOLOGY</p></div>
+        <div class="cell"><svg viewBox="0 0 24 24" fill="none" stroke="#F1EBDD" stroke-width="1.7" stroke-linejoin="miter">
+          <polygon points="8.7,3.5 15.3,3.5 20.5,8.7 20.5,15.3 15.3,20.5 8.7,20.5 3.5,15.3 3.5,8.7"/>
+          <path d="M12 7.5 V16.5 M7.5 12 H16.5"/>
+          <rect x="10.2" y="10.2" width="3.6" height="3.6" transform="rotate(45 12 12)" fill="#EFD9A0" stroke="none"/>
+        </svg><p>MATH</p></div>
+        <div class="cell"><svg viewBox="0 0 24 24" fill="none" stroke="#F1EBDD" stroke-width="1.7" stroke-linejoin="miter">
+          <path d="M11.9 9 L14.3 14 H9.5 Z" fill="#E7B9B4" stroke="none"/>
+          <path d="M4.5 19.5 L10.4 6 H13.6 L19.5 19.5"/>
+          <path d="M7.7 14.6 H16.3"/>
+        </svg><p>ENGLISH</p></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══ DIRECTION C ══ -->
+<section>
+  <div class="shead"><span class="num">C</span><h2>Solid facet tags</h2><span class="ar">شارات المواد</span></div>
+  <p class="lede">The in-product subject tag, shown literally: a cut-corner tile filled with the family's core colour, glyph reversed out in cream. This is how the marks read at list/badge scale next to a subject name — the decorative colour doing exactly its sanctioned job (subject tags), one family per element. Glyphs reuse Direction A so any set can drop into this container.</p>
+  <div class="tags">
+    <div class="t"><svg viewBox="0 0 60 60"><path d="M0 0 H46 L60 14 V60 H0 Z" fill="#86A7BE"/><g style="color:#F1EBDD"><use href="#a-phys" x="18" y="18" width="24" height="24"/></g></svg><p>PHYSICS · فيزياء</p></div>
+    <div class="t"><svg viewBox="0 0 60 60"><path d="M0 0 H46 L60 14 V60 H0 Z" fill="#AC7F97"/><g style="color:#F1EBDD"><use href="#a-chem" x="18" y="18" width="24" height="24"/></g></svg><p>CHEMISTRY · كيمياء</p></div>
+    <div class="t"><svg viewBox="0 0 60 60"><path d="M0 0 H46 L60 14 V60 H0 Z" fill="#9FAA7D"/><g style="color:#F1EBDD"><use href="#a-bio" x="18" y="18" width="24" height="24"/></g></svg><p>BIOLOGY · أحياء</p></div>
+    <div class="t"><svg viewBox="0 0 60 60"><path d="M0 0 H46 L60 14 V60 H0 Z" fill="#DDBA62"/><g style="color:#F1EBDD"><use href="#a-math" x="18" y="18" width="24" height="24"/></g></svg><p>MATH · رياضيات</p></div>
+    <div class="t"><svg viewBox="0 0 60 60"><path d="M0 0 H46 L60 14 V60 H0 Z" fill="#C98A87"/><g style="color:#F1EBDD"><use href="#a-eng" x="18" y="18" width="24" height="24"/></g></svg><p>ENGLISH · إنجليزي</p></div>
+  </div>
+  <div class="rule"><b>Scale note.</b> Tags carry the colour; the small line icons inside lists/nav stay monochrome (Direction A) so semantic accents always outrank ornament. Reserve the filled tag for subject headers, cards, and pickers — not for dense rows.</div>
+</section>
+
+<!-- ══ SPECS ══ -->
+<section style="border-bottom:none">
+  <div class="shead"><span class="num">✎</span><h2>Grid &amp; rules used</h2><span class="ar">الشبكة والقواعد</span></div>
+  <ul class="specs">
+    <li>24×24 grid, single <b>1.7</b> stroke, <span class="mono">stroke-linecap:butt</span>, <span class="mono">stroke-linejoin:miter</span>.</li>
+    <li>Angles snap to 0° / 45° / 90°; corners are cut at 45° rather than rounded (see the flask base, the octagon).</li>
+    <li>Curves survive only where meaning demands — orbits, leaf, book pages, flask liquid.</li>
+    <li>Directional glyphs would mirror in RTL; none here are directional.</li>
+    <li>Decorative family colour is one facet per icon, never carrying state; heat / water / AI hues untouched.</li>
+  </ul>
+</section>
+
+<footer>
+  <span>EMPTY QUARTER · SUBJECT ICONS · V0.1</span>
+  <span>PHYSICS · CHEMISTRY · BIOLOGY · MATH · ENGLISH</span>
+</footer>
+
+</div>
+</body>
+</html>

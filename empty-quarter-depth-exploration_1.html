@@ -1,0 +1,779 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>The Empty Quarter — Depth Exploration · one light, five layers</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400&family=JetBrains+Mono:wght@400;500;600&family=IBM+Plex+Sans+Arabic:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+/* ══════════════════════════════════════════════════════════════════════
+   THE EMPTY QUARTER · DEPTH EXPLORATION — V2 "flat core, living edge"
+   Calibrated to the countdown numeral: FLAT is the main direction. Depth
+   never comes from lighting (no gradients, no shading, no cast shadows) —
+   it comes from edge quality, opacity steps, and scatter:
+
+     L1 AIR         flat field; at most a whisper vignette + sparse motes
+     L2 PATTERN     single hairline strokes, two opacity tiers, masked out
+                    of the title's airspace — no emboss, no lighting
+     L3 SAND-BODY   the countdown recipe: flat single-colour core, rough
+                    turbulence-chewed edge, speckle at the rim only, loose
+                    grains scattered around the shape
+     L4 SHIMMER     jewellery only: one cream→sand→clay seam per screen
+                    (never a new colour), dust gathered near it
+     L5 INK         type stays crisp and untextured — always
+
+   Motion is garnish, never structure: everything reads at 0fps.
+   ══════════════════════════════════════════════════════════════════════ */
+:root {
+  --bg: #26282E; --bg-sunken: #1F2126; --bg-raised: #2C2F36; --bg-overlay: #30333B;
+  --paper-100: #F1EBDD;
+  --fg: rgba(241,235,221,1); --fg-muted: rgba(241,235,221,.70);
+  --fg-subtle: rgba(241,235,221,.55); --fg-faint: rgba(241,235,221,.35);
+  --border: rgba(241,235,221,.10); --border-strong: rgba(241,235,221,.22);
+  --accent: #64D8AE; --water: #7C99B4; --teal: #5E8C7F;
+  --signal: #BC5A37; --signal-bright: #E8663A;
+  --sand-300: #CB7A50; --sand-200: #D2A47A; --sand-100: #DDC09A;
+  /* the shimmer — NO minted gold. "Gold" in EQ is sunlit sand: the existing
+     clay ramp catching the light. cream → sand-100 → sand-300/clay only. */
+  --foil-deep: #B26440; --foil-core: #DDC09A; --foil-lit: #F6F0E4;
+  --foil-css: linear-gradient(105deg,#B26440 0%,#DDC09A 22%,#F6F0E4 50%,#DDC09A 78%,#B26440 100%);
+  --sp-2:8px; --sp-3:12px; --sp-4:16px; --sp-5:20px; --sp-6:24px; --sp-7:32px; --sp-8:40px;
+  --r-2:4px; --r-3:6px; --r-4:8px; --r-pill:999px;
+  --font-sans:'Hanken Grotesk',system-ui,sans-serif;
+  --font-mono:'JetBrains Mono',ui-monospace,monospace;
+  --font-arabic:'IBM Plex Sans Arabic',sans-serif;
+}
+*{box-sizing:border-box}
+html,body{margin:0}
+body{
+  font-family:var(--font-sans); background:var(--bg-sunken); color:var(--fg);
+  -webkit-font-smoothing:antialiased;
+}
+
+/* ───── document chrome (the spec page around the screens) ───── */
+.doc{max-width:1480px;margin:0 auto;padding:56px 40px 120px}
+.doc-head{margin-bottom:12px}
+.doc-head .kicker{
+  font-family:var(--font-mono);font-size:11px;letter-spacing:.32em;
+  text-transform:uppercase;color:var(--fg-faint);margin-bottom:14px}
+.doc-head h1{
+  font-size:34px;font-weight:600;letter-spacing:-.02em;margin:0 0 10px}
+.doc-head p{max-width:76ch;color:var(--fg-muted);line-height:1.65;font-size:15px;margin:0}
+.legend{
+  display:flex;gap:26px;flex-wrap:wrap;margin:26px 0 40px;
+  padding:18px 22px;border:1px solid var(--border);border-radius:var(--r-4);
+  background:var(--bg);}
+.legend b{font-family:var(--font-mono);font-size:10.5px;letter-spacing:.22em;color:var(--sand-200);display:block;margin-bottom:4px}
+.legend span{font-size:12.5px;color:var(--fg-subtle)}
+.legend .cell{flex:1;min-width:170px}
+
+figure.screen{margin:0 0 72px}
+.frame{
+  position:relative;width:100%;aspect-ratio:16/9;overflow:hidden;
+  border-radius:10px;border:1px solid var(--border);
+  box-shadow:0 30px 80px rgba(0,0,0,.5)}
+.stage1920{position:absolute;top:0;left:0;width:1920px;height:1080px;transform-origin:0 0;overflow:hidden}
+figcaption{
+  display:flex;gap:28px;align-items:baseline;
+  padding:18px 6px 0}
+figcaption .num{
+  font-family:var(--font-mono);font-size:11px;color:var(--sand-300);
+  letter-spacing:.22em;white-space:nowrap}
+figcaption h2{font-size:16px;font-weight:600;margin:0 0 6px;letter-spacing:-.01em}
+figcaption p{margin:0;font-size:13px;line-height:1.6;color:var(--fg-subtle);max-width:100ch}
+
+/* ══════════════════════════════════════════════════════════════════════
+   SHARED DEPTH MACHINERY
+   ══════════════════════════════════════════════════════════════════════ */
+/* L1 · vignette — a whisper at most; the field itself stays flat */
+.vig{position:absolute;inset:0;pointer-events:none}
+/* L4 · dust — populated by JS with seeded positions; static by design,
+   drift is garnish */
+.dust{position:absolute;inset:0;pointer-events:none;overflow:hidden}
+.dust i{position:absolute;border-radius:50%;display:block}
+@media (prefers-reduced-motion: no-preference){
+  .dust i.drifts{animation:drift var(--dur,70s) ease-in-out var(--del,0s) infinite alternate}
+  @keyframes drift{
+    from{transform:translate(0,0)}
+    to{transform:translate(var(--dx,14px),var(--dy,-22px))}
+  }
+}
+
+/* ══════════════════════════════════════════════════════════════════════
+   SCREEN A — COVER · TERRACOTTA (V1 deepened)
+   ══════════════════════════════════════════════════════════════════════ */
+.cov-terra{background:#B65534;font-family:var(--font-arabic)}
+/* L1: the clay field is FLAT. The .atm div stays as a hook but paints nothing. */
+.cov-terra .atm{position:absolute;inset:0;background:#B65534}
+.cov-terra .vig{
+  background:radial-gradient(140% 125% at 50% 42%, transparent 62%, rgba(70,28,14,.10) 100%)}
+/* L2 hairline khatam field — countdown-style single strokes, kept out of
+   the title's airspace by the mask. Depth = the spatial fade, nothing else. */
+.cov-terra .etch{position:absolute;inset:0;
+  -webkit-mask-image:radial-gradient(135% 120% at 78% 30%, transparent 24%, rgba(0,0,0,.55) 55%, #000 82%);
+  mask-image:radial-gradient(135% 120% at 78% 30%, transparent 24%, rgba(0,0,0,.55) 55%, #000 82%)}
+.cov-terra svg .etched-dark{stroke:rgba(94,36,18,.30);fill:none}
+.cov-terra svg .etched-lit {stroke:rgba(246,240,228,.13);fill:none}
+
+/* left ink strip (kept from V1) + the shimmer seam */
+.cov-terra .strip{
+  position:absolute;left:0;top:0;bottom:0;width:132px;
+  background:#232529;
+  display:flex;align-items:flex-start;justify-content:center;padding-top:64px}
+.cov-terra .strip .subject{
+  writing-mode:vertical-rl;color:#B7CEDD;
+  font-size:40px;font-weight:600;letter-spacing:.06em}
+.cov-terra .seam{
+  position:absolute;left:132px;top:0;bottom:0;width:2px;
+  background:linear-gradient(to bottom,#B26440 0%,#D2A47A 18%,#F6F0E4 38%,#DDC09A 60%,#B26440 88%,#8A3F26 100%);
+  box-shadow:0 0 14px rgba(221,192,154,.4), 1px 0 0 rgba(60,22,10,.35)}
+.cov-terra .title{
+  position:absolute;right:110px;top:180px;width:980px;text-align:right;direction:rtl;
+  color:#F6F0E4;font-size:88px;line-height:1.42;font-weight:700}
+.cov-terra .rule{
+  position:absolute;right:110px;top:610px;width:130px;height:3px;border-radius:2px;
+  background:var(--foil-css);
+  box-shadow:0 1px 0 rgba(60,22,10,.4), 0 0 10px rgba(221,192,154,.4)}
+.cov-terra .meta{
+  position:absolute;right:110px;top:648px;text-align:right;direction:ltr;
+  font-family:var(--font-mono);font-size:15px;letter-spacing:.32em;
+  color:rgba(246,240,228,.55)}
+.cov-terra .brand{
+  position:absolute;right:110px;bottom:64px;display:flex;align-items:baseline;gap:12px;direction:ltr}
+.cov-terra .brand .noon{font-family:var(--font-sans);font-weight:700;font-size:34px;letter-spacing:-.03em;color:#F6F0E4}
+.cov-terra .brand .tracks{font-family:var(--font-mono);font-size:13px;letter-spacing:.3em;color:rgba(246,240,228,.5)}
+
+/* ══════════════════════════════════════════════════════════════════════
+   SCREEN B — COVER · SAFFRON (V2 deepened)
+   ══════════════════════════════════════════════════════════════════════ */
+.cov-gold{background:#DFB95F;font-family:var(--font-arabic)}
+.cov-gold .atm{position:absolute;inset:0;background:#DFB95F}
+.cov-gold .vig{
+  background:radial-gradient(140% 125% at 50% 42%, transparent 62%, rgba(108,76,18,.09) 100%)}
+.cov-gold .etch{position:absolute;inset:0;
+  -webkit-mask-image:radial-gradient(130% 130% at 76% 34%, transparent 26%, rgba(0,0,0,.6) 58%, #000 85%);
+  mask-image:radial-gradient(130% 130% at 76% 34%, transparent 26%, rgba(0,0,0,.6) 58%, #000 85%)}
+.cov-gold svg .etched-dark{stroke:rgba(112,78,20,.14);fill:none}
+.cov-gold svg .etched-lit {stroke:rgba(255,246,220,.30);fill:none}
+.cov-gold .title{
+  position:absolute;right:120px;top:150px;width:1000px;text-align:right;direction:rtl;
+  color:#2B2417;font-size:96px;line-height:1.44;font-weight:700}
+/* the plaster veil — a translucent reading surface floated over the scene,
+   carrying its own gilded lip (transparency states the layering) */
+.cov-gold .veil{
+  display:inline;background:rgba(246,240,228,.44);
+  -webkit-backdrop-filter:blur(3px);backdrop-filter:blur(3px);
+  box-shadow:0 2px 0 rgba(203,122,80,.55), 0 4px 0 rgba(138,63,38,.18);
+  padding:.04em .18em;
+  -webkit-box-decoration-break:clone;box-decoration-break:clone}
+.cov-gold .rule{
+  position:absolute;right:120px;top:648px;width:130px;height:3px;border-radius:2px;
+  background:var(--foil-css);
+  box-shadow:0 1px 0 rgba(138,63,38,.45), 0 0 10px rgba(241,235,221,.5)}
+.cov-gold .meta{
+  position:absolute;right:120px;top:688px;direction:rtl;
+  font-size:26px;color:rgba(66,50,18,.62)}
+.cov-gold .brand{
+  position:absolute;right:120px;bottom:64px;display:flex;align-items:baseline;gap:12px;direction:ltr}
+.cov-gold .brand .noon{font-weight:700;font-family:var(--font-sans);font-size:34px;letter-spacing:-.03em;color:#2B2417}
+.cov-gold .brand .tracks{font-family:var(--font-mono);font-size:13px;letter-spacing:.3em;color:rgba(66,50,18,.5)}
+/* corner ticks — the manuscript margin, in foil, top-left where light lands */
+.cov-gold .tick{position:absolute;width:34px;height:34px;pointer-events:none}
+.cov-gold .tick.tl{left:56px;top:56px;border-left:2px solid;border-top:2px solid;
+  border-image:linear-gradient(135deg,#F6F0E4,#CB7A50) 1}
+.cov-gold .tick.br{right:56px;bottom:56px;border-right:2px solid;border-bottom:2px solid;
+  border-image:linear-gradient(315deg,#8A3F26,#CB7A50) 1;opacity:.75}
+
+/* ══════════════════════════════════════════════════════════════════════
+   SCREEN C & D — PRESENTER (ink)  · shared atmosphere
+   ══════════════════════════════════════════════════════════════════════ */
+.pres{background:var(--bg)}
+.pres .atm{position:absolute;inset:0;background:var(--bg)}
+.pres .vig{background:radial-gradient(135% 115% at 50% 40%, transparent 64%, rgba(10,10,14,.16) 100%)}
+/* L2 · the ridge — the same dune line at three OPACITY tiers (countdown
+   logic: fainter = further). Single hairlines, no emboss, no blur. */
+.pres .ridge{position:absolute;left:0;right:0;bottom:0;height:400px;pointer-events:none}
+.pres .ridge svg{display:block;width:100%;height:100%}
+.pres .r-far {stroke:rgba(241,235,221,.07);fill:none}
+.pres .r-mid-d{display:none}
+.pres .r-mid-l{stroke:rgba(241,235,221,.15);fill:none}
+.pres .r-near{stroke:rgba(241,235,221,.22);fill:none}
+.pres .r-fill{fill:rgba(18,18,22,.26)}
+/* topbar — chrome floats as a veil; content owes it nothing */
+.pres .topbar{
+  position:absolute;left:0;right:0;top:0;height:88px;z-index:6;
+  display:flex;align-items:center;justify-content:space-between;
+  padding:0 40px;
+  background:rgba(31,33,38,.55);
+  -webkit-backdrop-filter:blur(14px);backdrop-filter:blur(14px);
+  border-bottom:1px solid rgba(241,235,221,.08)}
+/* the one gilded thread in the whole presenter — a hairline under the bar */
+.pres .topbar::after{content:'';position:absolute;left:0;right:0;bottom:-1px;height:1px;
+  background:linear-gradient(90deg,transparent 0%,rgba(210,164,122,0) 30%,rgba(221,192,154,.55) 50%,rgba(210,164,122,0) 70%,transparent 100%)}
+.pres .tb-title{display:flex;align-items:baseline;gap:16px}
+.pres .tb-title .ar{font-family:var(--font-arabic);font-size:22px;font-weight:600}
+.pres .tb-title .en{font-family:var(--font-mono);font-size:11px;letter-spacing:.3em;color:var(--fg-faint);text-transform:uppercase}
+.pres .tb-timer{
+  font-family:var(--font-mono);font-size:14px;letter-spacing:.14em;
+  color:var(--fg-muted);display:flex;align-items:center;gap:10px;
+  padding:8px 16px;border:1px solid var(--border);border-radius:var(--r-3);
+  background:rgba(44,47,54,.5)}
+.pres .tb-timer .dot{width:8px;height:8px;border-radius:50%;background:var(--accent)}
+
+/* ─── SCREEN C · TEAM-UP ─── */
+.tu-wrap{position:absolute;inset:88px 0 0 0;z-index:4;display:flex;flex-direction:column;
+  justify-content:center;align-items:center;padding:36px 56px 90px;gap:40px}
+.tu-counts{display:flex;gap:12px}
+.chip{
+  display:inline-flex;align-items:center;gap:10px;height:38px;padding:0 18px 0 14px;
+  border-radius:var(--r-2);font-size:15px;
+  background:var(--bg-overlay);border:1px solid var(--border)}
+.chip .dot{width:9px;height:9px;border-radius:50%}
+.chip--students .dot{background:var(--accent)}
+.chip--teams .dot{background:var(--water)}
+.chip .total{color:var(--fg-faint);font-feature-settings:'tnum'}
+.tu-counts{align-self:center}
+.tu-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:28px;width:100%;max-width:1660px}
+/* team card — a FLAT ink panel. Depth is not lighting: it is the grains
+   that visibly disappear behind the card's edges (occlusion). */
+.tcard{
+  position:relative;border-radius:10px;overflow:hidden;
+  background:var(--bg-raised);
+  border:1px solid rgba(241,235,221,.10);
+  padding:26px 26px 28px;min-height:228px;
+  display:flex;gap:20px}
+.tcard::before{content:'';position:absolute;top:0;left:0;right:0;height:2.5px;
+  background:var(--tc,var(--accent));opacity:.9}
+.tcard .side{width:128px;flex:0 0 auto;display:flex;flex-direction:column;align-items:center;gap:10px;text-align:center}
+/* L3: the team emblem is a mini countdown numeral — flat family colour,
+   chewed edge, a few grains breaking off. No shadow, no shading. */
+.tcard .emblem{position:relative;width:90px;height:90px}
+.tcard .emblem svg{position:absolute;inset:0;overflow:visible}
+.tcard .tname{font-family:var(--font-arabic);font-size:19px;font-weight:600}
+.tcard .tsub{font-family:var(--font-mono);font-size:10px;letter-spacing:.26em;color:var(--fg-faint);text-transform:uppercase}
+.tcard .members{flex:1;display:flex;flex-wrap:wrap;gap:10px;align-content:center;direction:rtl}
+.pill{
+  display:inline-flex;align-items:center;gap:9px;height:40px;padding:0 16px 0 6px;
+  border-radius:var(--r-pill);
+  background:var(--bg);border:1px solid rgba(241,235,221,.10);
+  font-family:var(--font-arabic);font-size:15px;color:var(--fg-muted)}
+.pill .av{width:30px;height:30px;border-radius:50%;flex:0 0 auto;
+  display:flex;align-items:center;justify-content:center;
+  font-size:13px;font-weight:600;color:#26282E}
+.tu-note{
+  align-self:center;margin-top:8px;
+  font-family:var(--font-sans);font-style:italic;font-size:16px;color:var(--fg-subtle)}
+
+/* ─── SCREEN D · STAGE VIEW ─── */
+.st-wrap{position:absolute;inset:88px 0 0 0;z-index:4;display:flex;align-items:center;justify-content:center}
+.st-cluster{display:flex;align-items:center;gap:110px;transform:translateY(26px)}
+.member{display:flex;flex-direction:column;align-items:center;gap:18px}
+.mc{position:relative;flex:0 0 auto}
+.mc .ph{position:absolute;inset:0;border-radius:50%;overflow:hidden}
+/* rim grammar preserved: cream = open, dashed = muted, green = on air */
+.mc::before{content:'';position:absolute;inset:-5%;border-radius:50%;
+  border:1.5px solid rgba(241,235,221,.32)}
+.member.is-muted .mc::before{border-style:dashed}
+.member.is-onair .mc::before{border:2.5px solid rgba(100,216,174,.75)}
+/* presence = material, not lighting: the on-air disc is chewed like the
+   countdown numeral, and a few grains break off it. Idle discs stay crisp. */
+.member.is-onair .ph{filter:url(#sandBody)}
+.mc .grains{position:absolute;left:-14%;top:-14%;width:128%;height:128%;
+  pointer-events:none;overflow:visible}
+.member--teacher .mc{width:360px;height:360px}
+.member--class .mc{width:172px;height:172px}
+.mc .init{
+  position:absolute;inset:0;display:flex;align-items:center;justify-content:center;
+  font-family:var(--font-arabic);font-weight:600;color:rgba(38,40,46,.85)}
+.member--teacher .init{font-size:120px}
+.member--class .init{font-size:52px}
+.mute{
+  position:absolute;right:3%;bottom:3%;width:34px;height:34px;z-index:2;
+  background:rgba(31,33,38,.9);border:1px solid var(--border-strong);border-radius:50%;
+  display:flex;align-items:center;justify-content:center;color:var(--signal-bright)}
+.mute svg{width:58%;height:58%}
+.member .name{font-family:var(--font-arabic);font-size:17px;font-weight:600;text-align:center}
+.member--teacher .name{font-size:28px;font-weight:500}
+.member .sub{font-family:var(--font-mono);font-size:11px;letter-spacing:.28em;color:var(--fg-subtle);text-transform:uppercase;margin-top:6px;text-align:center}
+.class-grid{display:grid;grid-template-columns:repeat(2,auto);gap:44px 56px}
+.member--class.is-onair .name{color:var(--accent)}
+</style>
+</head>
+<body>
+<div class="doc">
+
+  <header class="doc-head">
+    <div class="kicker">The Empty Quarter · V2.2 → depth study · rev 2</div>
+    <h1>Flat core, living edge</h1>
+    <p>Calibrated to the countdown numeral: flat is still the main direction. No screen below uses lighting
+    for depth — no gradient washes, no shading, no cast shadows. Depth comes from three flat-native moves:
+    edge quality (rough, turbulence-chewed silhouettes with grit at the rim), opacity steps (fainter hairline =
+    further away), and scatter (loose grains around bodies, occluded by whatever passes in front). The "gold"
+    is never a new colour — it is the existing cream→sand→clay ramp, one shimmer seam per screen. Type stays
+    ink-crisp on top. Motion is garnish: everything must read at a standstill.</p>
+  </header>
+
+  <div class="legend">
+    <div class="cell"><b>L1 · Air</b><span>flat field; a whisper vignette at most, sparse flat motes.</span></div>
+    <div class="cell"><b>L2 · Pattern</b><span>single hairlines, two opacity tiers, masked out of the title's airspace.</span></div>
+    <div class="cell"><b>L3 · Sand-body</b><span>flat core · chewed edge · grit at the rim · grains scattered around. No shading.</span></div>
+    <div class="cell"><b>L4 · Shimmer</b><span>one cream→sand→clay seam per screen — never a new colour; dust gathers near it.</span></div>
+    <div class="cell"><b>L5 · Ink</b><span>type is never textured. Restraint is the premium.</span></div>
+  </div>
+
+  <!-- ═══════════ SCREEN A · COVER TERRACOTTA ═══════════ -->
+  <figure class="screen">
+    <div class="frame"><div class="stage1920 cov-terra" id="scrA">
+      <div class="atm"></div>
+      <!-- L2 · etched khatam field -->
+      <div class="etch">
+        <svg width="1920" height="1080" aria-hidden="true">
+          <defs>
+            <g id="khatam-t">
+              <rect x="-62" y="-62" width="124" height="124"/>
+              <rect x="-62" y="-62" width="124" height="124" transform="rotate(45)"/>
+              <rect x="-7" y="-7" width="14" height="14" transform="rotate(45)"/>
+            </g>
+          </defs>
+          <g id="ktGridD" class="etched-dark" stroke-width="1.4" transform="translate(0,1.1)"></g>
+          <g id="ktGridL" class="etched-lit"  stroke-width="1.1" transform="translate(0,-0.6)"></g>
+        </svg>
+      </div>
+      <div class="vig"></div>
+
+      <!-- L2/L3 · the planet: orbit etched into clay, body gathered from sand -->
+      <svg width="1920" height="1080" style="position:absolute;inset:0" aria-hidden="true">
+        <defs>
+          <!-- rim band mask: grit lives only near the silhouette, fading inward -->
+          <radialGradient id="rimG">
+            <stop offset="72%" stop-color="#000"/>
+            <stop offset="92%" stop-color="#fff"/>
+            <stop offset="100%" stop-color="#fff"/>
+          </radialGradient>
+          <mask id="rimM"><circle cx="400" cy="740" r="153" fill="url(#rimG)"/></mask>
+          <linearGradient id="foil" x1="0" y1="0" x2="1" y2="1">
+            <stop offset="0%" stop-color="#F6F0E4"/>
+            <stop offset="55%" stop-color="#DDC09A"/>
+            <stop offset="100%" stop-color="#B26440"/>
+          </linearGradient>
+          <filter id="sandBody" x="-20%" y="-20%" width="140%" height="140%">
+            <feTurbulence type="fractalNoise" baseFrequency="0.7" numOctaves="2" seed="3" result="n"/>
+            <feDisplacementMap in="SourceGraphic" in2="n" scale="5"/>
+          </filter>
+          <!-- granular tooth: dark + lit speckle clipped to the shape's alpha -->
+          <filter id="grainDark" x="-10%" y="-10%" width="120%" height="120%">
+            <feTurbulence type="fractalNoise" baseFrequency="0.85" numOctaves="2" seed="8" result="n"/>
+            <feColorMatrix in="n" type="matrix" values="0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  1 1 1 0 -1.35" result="sp"/>
+            <feComposite in="sp" in2="SourceAlpha" operator="in"/>
+          </filter>
+          <filter id="grainLite" x="-10%" y="-10%" width="120%" height="120%">
+            <feTurbulence type="fractalNoise" baseFrequency="0.9" numOctaves="2" seed="21" result="n"/>
+            <feColorMatrix in="n" type="matrix" values="0 0 0 0 1  0 0 0 0 0.95  0 0 0 0 0.82  0.9 0.9 0.9 0 -1.45" result="sp"/>
+            <feComposite in="sp" in2="SourceAlpha" operator="in"/>
+          </filter>
+        </defs>
+        <!-- orbit: a single quiet hairline where it passes behind the planet -->
+        <g transform="rotate(-16 400 760)">
+          <ellipse cx="400" cy="760" rx="330" ry="104" fill="none" stroke="rgba(94,36,18,.35)" stroke-width="3"/>
+        </g>
+        <!-- planet body · countdown recipe: FLAT core, chewed edge, rim grit -->
+        <g filter="url(#sandBody)">
+          <circle cx="400" cy="740" r="150" fill="#DDC09A"/>
+        </g>
+        <g mask="url(#rimM)">
+          <circle cx="400" cy="740" r="150" fill="#000" filter="url(#grainDark)" opacity=".30"/>
+          <circle cx="400" cy="740" r="150" fill="#000" filter="url(#grainLite)" opacity=".26"/>
+        </g>
+        <!-- orbit foreground pass: crisp cream in front of the body, with ONE foil glint -->
+        <g transform="rotate(-16 400 760)">
+          <path d="M 70,760 A 330,104 0 0 0 730,760" fill="none" stroke="rgba(246,240,228,.85)" stroke-width="3.5"/>
+          <path d="M 120,795 A 330,104 0 0 1 92,742" fill="none" stroke="url(#foil)" stroke-width="4" stroke-linecap="round"/>
+        </g>
+        <!-- sparkles: cream family, one gilded -->
+        <g fill="rgba(246,240,228,.85)">
+          <path d="M 640,520 l 7,18 18,7 -18,7 -7,18 -7,-18 -18,-7 18,-7 z"/>
+          <path d="M 208,560 l 4,11 11,4 -11,4 -4,11 -4,-11 -11,-4 11,-4 z" opacity=".6"/>
+        </g>
+        <path d="M 700,940 l 5,13 13,5 -13,5 -5,13 -5,-13 -13,-5 13,-5 z" fill="url(#foil)"/>
+      </svg>
+
+      <!-- L3 · loose grains scattered around the planet, denser near its edge -->
+      <div class="dust" data-dust="halo" data-seed="17" data-cx="400" data-cy="740" data-r="150"
+           data-ca="221,192,154" data-cb="246,240,228"></div>
+      <!-- L4 · dust gathered along the shimmer seam -->
+      <div class="dust" data-dust="seam" data-seed="11"></div>
+
+      <div class="strip"><div class="subject">علوم</div></div>
+      <div class="seam"></div>
+
+      <!-- L5 · ink -->
+      <div class="title">مهمتي في الحياة ليست<br>مجرد البقاء على قيد الحياة</div>
+      <div class="rule"></div>
+      <div class="meta">UNIT 03 · SCIENCE</div>
+      <div class="brand"><span class="tracks">TRACKS</span><span class="noon">noon</span></div>
+    </div></div>
+    <figcaption>
+      <span class="num">A · COVER / TERRACOTTA</span>
+      <div>
+        <h2>Flat clay, hairline khatam, a planet built like the countdown numeral</h2>
+        <p>The field is one flat clay. The khatam wallpaper is a single hairline held out of the title's
+        airspace. The planet is the countdown recipe verbatim: flat sand core, rough chewed silhouette, grit
+        clinging to the rim, loose grains scattered in the air around it — no shading, no shadow. The orbit is
+        a quiet line behind, crisp cream in front, with one sunlit glint. The kept gesture: the shimmer seam
+        (cream→sand→clay) where ink strip meets clay, dust gathered against it.</p>
+      </div>
+    </figcaption>
+  </figure>
+
+  <!-- ═══════════ SCREEN B · COVER SAFFRON ═══════════ -->
+  <figure class="screen">
+    <div class="frame"><div class="stage1920 cov-gold" id="scrB">
+      <div class="atm"></div>
+      <div class="etch">
+        <svg width="1920" height="1080" aria-hidden="true">
+          <defs>
+            <g id="hexo">
+              <polygon points="0,-70 60.6,-35 60.6,35 0,70 -60.6,35 -60.6,-35"/>
+            </g>
+          </defs>
+          <g id="hxGridD" class="etched-dark" stroke-width="1.5" transform="translate(0,1.2)"></g>
+          <g id="hxGridL" class="etched-lit"  stroke-width="1.1" transform="translate(0,-0.6)"></g>
+        </svg>
+      </div>
+      <div class="vig"></div>
+
+      <!-- illustration · the ORIGINAL voice: thin cream lines, limited fills.
+           Overlapping hex cells, 14px dots at cell centres, sparkles.
+           Kept from the depth study: ONE shimmer edge. -->
+      <svg width="1920" height="1080" style="position:absolute;inset:0" aria-hidden="true">
+        <defs>
+          <linearGradient id="foilV" gradientUnits="userSpaceOnUse" x1="303" y1="445" x2="450" y2="360">
+            <stop offset="0%" stop-color="#F6F0E4"/>
+            <stop offset="55%" stop-color="#DDC09A"/>
+            <stop offset="100%" stop-color="#D2A47A"/>
+          </linearGradient>
+          <filter id="softBlur2"><feGaussianBlur stdDeviation="9"/></filter>
+        </defs>
+        <g fill="none" stroke="rgba(246,240,228,.85)" stroke-width="3" stroke-linejoin="round">
+          <!-- big cell -->
+          <path d="M 450,360 L 597,445 L 597,615 L 450,700 L 303,615 L 303,445 Z"/>
+          <!-- upper cell + its inner cell (thinner) -->
+          <path d="M 450,198 L 564,264 L 564,396 L 450,462 L 336,396 L 336,264 Z"/>
+          <path d="M 450,260 L 511,295 L 511,365 L 450,400 L 389,365 L 389,295 Z" stroke-width="2.2" opacity=".8"/>
+          <!-- satellite cells -->
+          <path d="M 690,354 L 786,410 L 786,521 L 690,576 L 594,521 L 594,410 Z"/>
+          <path d="M 240,441 L 326,490 L 326,590 L 240,639 L 154,590 L 154,490 Z" opacity=".9"/>
+          <path d="M 405,615 L 483,660 L 483,750 L 405,795 L 327,750 L 327,660 Z" opacity=".9"/>
+        </g>
+        <!-- ONE shimmer edge (kept from the depth study) -->
+        <path d="M 303,445 L 450,360" fill="none" stroke="rgba(246,240,228,.5)" stroke-width="10" filter="url(#softBlur2)"/>
+        <path d="M 303,445 L 450,360" fill="none" stroke="url(#foilV)" stroke-width="5" stroke-linecap="round"/>
+        <!-- limited fills: the 14px atom dots at cell centres -->
+        <g fill="rgba(246,240,228,.95)">
+          <circle cx="690" cy="465" r="7"/><circle cx="450" cy="330" r="7"/>
+          <circle cx="240" cy="540" r="7"/><circle cx="405" cy="705" r="7"/>
+        </g>
+        <!-- sparkles (original placement) -->
+        <g fill="rgba(255,248,228,.9)">
+          <path d="M 880,158 l 6.6,17 17.4,6.6 -17.4,6.6 -6.6,17 -6.6,-17 -17.4,-6.6 17.4,-6.6 z"/>
+          <path d="M 210,835 l 4.5,11.6 11.9,4.5 -11.9,4.5 -4.5,11.6 -4.5,-11.6 -11.9,-4.5 11.9,-4.5 z" opacity=".75"/>
+          <path d="M 940,746 l 4.2,10.8 11.1,4.2 -11.1,4.2 -4.2,10.8 -4.2,-10.8 -11.1,-4.2 11.1,-4.2 z" opacity=".7"/>
+          <path d="M 120,173 l 2.1,5.4 5.6,2.1 -5.6,2.1 -2.1,5.4 -2.1,-5.4 -5.6,-2.1 5.6,-2.1 z" opacity=".55"/>
+          <path d="M 820,884 l 1.8,4.6 4.8,1.8 -4.8,1.8 -1.8,4.6 -1.8,-4.6 -4.8,-1.8 4.8,-1.8 z" opacity=".5"/>
+        </g>
+      </svg>
+
+      <!-- L4 · gold dust gathered at the edges of the whole cover — sand
+           collecting against the frame -->
+      <div class="dust" data-dust="edge" data-seed="37" data-ca="119,98,47" data-cb="246,240,228"></div>
+
+      <div class="tick tl"></div><div class="tick br"></div>
+
+      <div class="title">التفاعلات<br>الكيميائية في<br>حياتنا اليومية</div>
+      <div class="rule"></div>
+      <div class="meta">الكيمياء</div>
+      <div class="brand"><span class="tracks">TRACKS</span><span class="noon">noon</span></div>
+    </div></div>
+    <figcaption>
+      <span class="num">B · COVER / SAFFRON</span>
+      <div>
+        <h2>Back to the original voice: thin lines, limited fills — plus sand at the frame</h2>
+        <p>The illustration returns to the original register: overlapping hex cells as thin cream lines, fills
+        limited to the 14px atom dots and the sparkles. Two things kept from the depth study: one edge of the
+        big cell catches the sun in the cream→sand ramp, and manuscript corner-ticks close the frame. New: gold
+        dust gathered against all four edges of the cover — sand collecting where the frame meets the desert —
+        densest right at the edge, gone within a hundred pixels.</p>
+      </div>
+    </figcaption>
+  </figure>
+
+  <!-- ═══════════ SCREEN C · PRESENTER TEAM-UP ═══════════ -->
+  <figure class="screen">
+    <div class="frame"><div class="stage1920 pres" id="scrC">
+      <div class="atm"></div>
+      <div class="ridge">
+        <svg viewBox="0 0 1920 400" preserveAspectRatio="none" aria-hidden="true">
+          <path class="r-far" stroke-width="1.5" d="M 0,150 C 260,110 470,190 760,160 C 1050,130 1240,60 1500,105 C 1660,133 1800,120 1920,96"/>
+          <path class="r-fill" d="M 0,265 C 300,215 560,300 900,262 C 1240,224 1460,160 1920,210 L 1920,400 L 0,400 Z"/>
+          <path class="r-mid-d" stroke-width="2" transform="translate(0,1.4)" d="M 0,265 C 300,215 560,300 900,262 C 1240,224 1460,160 1920,210"/>
+          <path class="r-mid-l" stroke-width="1.6" d="M 0,265 C 300,215 560,300 900,262 C 1240,224 1460,160 1920,210"/>
+          <path class="r-near" stroke-width="1.8" d="M 0,352 C 380,320 700,372 1080,348 C 1420,327 1660,300 1920,330"/>
+        </svg>
+      </div>
+      <div class="vig"></div>
+      <div class="dust" data-dust="field" data-seed="41"></div>
+
+      <div class="topbar">
+        <div class="tb-title"><span class="ar">الفصل الهجين · الكيمياء</span><span class="en">Hybrid classroom</span></div>
+        <div class="tb-timer"><span class="dot"></span>00:00</div>
+      </div>
+
+      <div class="tu-wrap">
+        <div class="tu-counts">
+          <div class="chip chip--students"><span class="dot"></span>وصل <b>23</b><span class="total">/ 30</span></div>
+          <div class="chip chip--teams"><span class="dot"></span>تشكّلت <b>3</b><span class="total">/ 5 فرق</span></div>
+        </div>
+        <div class="tu-grid" id="tuGrid"></div>
+        <div class="tu-note">…الرمال تتجمّع — بقية الفرق في الطريق</div>
+      </div>
+    </div></div>
+    <figcaption>
+      <span class="num">C · PRESENTER / TEAM-UP</span>
+      <div>
+        <h2>Flat ink, a dune in three opacity tiers, grains behind the cards</h2>
+        <p>The field is flat ink. The dune line repeats at three opacities — fainter is further — as single
+        hairlines, and sparse grains hang in the air behind the cards, so the flat panels visibly occlude them:
+        that occlusion is the only depth cue, and it is enough. Cards are flat panels with a flat family-colour
+        thread. Each team emblem is a mini countdown numeral — flat colour, chewed edge, a few grains breaking
+        off. The presenter's single shimmer thread: the sunlit-sand hairline under the top bar.</p>
+      </div>
+    </figcaption>
+  </figure>
+
+  <!-- ═══════════ SCREEN D · PRESENTER STAGE ═══════════ -->
+  <figure class="screen">
+    <div class="frame"><div class="stage1920 pres" id="scrD">
+      <div class="atm"></div>
+      <div class="ridge" style="height:340px;opacity:.85">
+        <svg viewBox="0 0 1920 340" preserveAspectRatio="none" aria-hidden="true">
+          <path class="r-far" stroke-width="1.5" d="M 0,120 C 300,84 560,150 900,120 C 1240,92 1500,40 1920,84"/>
+          <path class="r-fill" d="M 0,225 C 340,180 640,250 980,218 C 1320,188 1560,140 1920,180 L 1920,340 L 0,340 Z"/>
+          <path class="r-mid-d" stroke-width="2" transform="translate(0,1.4)" d="M 0,225 C 340,180 640,250 980,218 C 1320,188 1560,140 1920,180"/>
+          <path class="r-mid-l" stroke-width="1.6" d="M 0,225 C 340,180 640,250 980,218 C 1320,188 1560,140 1920,180"/>
+        </svg>
+      </div>
+      <div class="vig"></div>
+      <div class="dust" data-dust="field" data-seed="67"></div>
+
+      <div class="topbar">
+        <div class="tb-title"><span class="ar">الفصل الهجين · الكيمياء</span><span class="en">Stage view</span></div>
+        <div class="tb-timer"><span class="dot"></span>12:47</div>
+      </div>
+
+      <div class="st-wrap">
+        <div class="st-cluster">
+          <div class="member member--teacher is-onair">
+            <div class="mc">
+              <div class="ph" style="background:#D2A47A"><div class="init">ع</div></div>
+              <svg class="grains" viewBox="0 0 100 100" aria-hidden="true">
+                <circle cx="9" cy="30" r="1.2" fill="#D2A47A" opacity=".8"/>
+                <circle cx="14" cy="20" r=".8" fill="#F6F0E4" opacity=".6"/>
+                <circle cx="20" cy="11" r="1" fill="#D2A47A" opacity=".55"/>
+                <circle cx="90" cy="68" r="1.3" fill="#D2A47A" opacity=".8"/>
+                <circle cx="84" cy="80" r=".9" fill="#F6F0E4" opacity=".55"/>
+                <circle cx="95" cy="57" r=".7" fill="#D2A47A" opacity=".5"/>
+              </svg>
+            </div>
+            <div><div class="name">أ. عبدالله الحربي</div><div class="sub">ON AIR · CHEMISTRY</div></div>
+          </div>
+          <div class="class-grid">
+            <div class="member member--class is-onair">
+              <div class="mc">
+                <div class="ph" style="background:#B7CEDD"><div class="init">ر</div></div>
+                <svg class="grains" viewBox="0 0 100 100" aria-hidden="true">
+                  <circle cx="10" cy="26" r="1.4" fill="#B7CEDD" opacity=".8"/>
+                  <circle cx="17" cy="14" r="1" fill="#F6F0E4" opacity=".55"/>
+                  <circle cx="88" cy="72" r="1.5" fill="#B7CEDD" opacity=".75"/>
+                  <circle cx="94" cy="60" r=".9" fill="#B7CEDD" opacity=".5"/>
+                </svg>
+              </div>
+              <div class="name">فصل الرياض ١</div>
+            </div>
+            <div class="member member--class is-muted">
+              <div class="mc">
+                <div class="ph" style="background:#E7B9B4"><div class="init">ج</div></div>
+                <div class="mute"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 4 a3 3 0 0 1 3 3 v4 a3 3 0 0 1 -6 0 v-4 a3 3 0 0 1 3 -3 z"/><path d="M5 11 a7 7 0 0 0 14 0 M12 18 v3 M3 3 L21 21"/></svg></div>
+              </div>
+              <div class="name">فصل جدة ٢</div>
+            </div>
+            <div class="member member--class is-muted">
+              <div class="mc">
+                <div class="ph" style="background:#C6CCAA"><div class="init">د</div></div>
+                <div class="mute"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 4 a3 3 0 0 1 3 3 v4 a3 3 0 0 1 -6 0 v-4 a3 3 0 0 1 3 -3 z"/><path d="M5 11 a7 7 0 0 0 14 0 M12 18 v3 M3 3 L21 21"/></svg></div>
+              </div>
+              <div class="name">فصل الدمام</div>
+            </div>
+            <div class="member member--class">
+              <div class="mc">
+                <div class="ph" style="background:#EFD9A0"><div class="init">أ</div></div>
+              </div>
+              <div class="name">فصل أبها</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div></div>
+    <figcaption>
+      <span class="num">D · PRESENTER / STAGE</span>
+      <div>
+        <h2>Presence is material, not lighting</h2>
+        <p>No floors, no shadows, no speculars. Discs are flat family colours and the rim grammar is untouched
+        (cream = open, dashed = muted, green = on air). The one depth move: whoever is ON AIR turns to sand —
+        their disc's silhouette is chewed like the countdown numeral and a few grains break off it, while idle
+        discs stay perfectly crisp. The hairline dune and sparse grains sit far behind; nothing competes with
+        the people.</p>
+      </div>
+    </figcaption>
+  </figure>
+
+</div>
+
+<script>
+/* deterministic RNG so the "static" composition is identical every load */
+function mulberry32(a){return function(){a|=0;a=a+0x6D2B79F5|0;var t=Math.imul(a^a>>>15,1|a);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296}}
+
+/* ── etched pattern grids ── */
+(function(){
+  function fillGrid(id, ref, stepX, stepY, offX){
+    const g=document.getElementById(id); if(!g) return;
+    let out='';
+    for(let row=0,y=-100;y<1200;y+=stepY,row++){
+      for(let x=-150+(row%2?offX:0);x<2100;x+=stepX){
+        out+='<use href="#'+ref+'" x="'+x+'" y="'+y+'"/>';
+      }
+    }
+    g.innerHTML=out;
+  }
+  /* single hairline tier only — countdown-style; the faint "-D" tiers on a
+     1–2px offset read as emboss, so they stay empty */
+  fillGrid('ktGridL','khatam-t',196,196,98);
+  fillGrid('hxGridL','hexo',188,109,94);
+})();
+
+/* ── dust fields ── */
+(function(){
+  document.querySelectorAll('.dust').forEach(layer=>{
+    const kind=layer.dataset.dust, rnd=mulberry32(+layer.dataset.seed||1);
+    const N = kind==='field' ? 42 : kind==='halo' ? 40 : kind==='edge' ? 180 : 46;
+    const frag=document.createDocumentFragment();
+    for(let i=0;i<N;i++){
+      const el=document.createElement('i');
+      let x,y,s,o,c,blur=0;
+      if(kind==='seam'){
+        /* gathered against the gilded seam at x=133, thinning with distance;
+           settling low (gravity) */
+        const d=Math.pow(rnd(),2)*260;             // distance from seam
+        x=140+d;
+        y=120+Math.pow(rnd(),0.7)*920;
+        s=rnd()<.12?3.5+rnd()*2.5:1+rnd()*2;
+        o=(0.75-d/420)*(0.35+rnd()*0.65); if(o<0.05)continue;
+        c=rnd()<.55?'rgba(221,192,154,':'rgba(246,240,228,';
+        if(rnd()<.25)blur=1.5;
+      }else if(kind==='edge'){
+        /* sand gathering against the frame: all four edges, exponential
+           falloff inward, bottom weighted (gravity) */
+        const side=rnd(), d=Math.pow(rnd(),2.2)*110;
+        if(side<.34){ y=1080-4-d; x=rnd()*1920 }
+        else if(side<.56){ y=4+d; x=rnd()*1920 }
+        else if(side<.78){ x=4+d; y=rnd()*1080 }
+        else { x=1920-4-d; y=rnd()*1080 }
+        s=rnd()<.14?2.8+rnd()*2.4:1+rnd()*1.8;
+        o=(0.9-d/130)*(0.4+rnd()*0.55); if(o<0.05)continue;
+        const ea=layer.dataset.ca||'119,98,47', eb=layer.dataset.cb||'246,240,228';
+        c=rnd()<.6?'rgba('+ea+',':'rgba('+eb+',';
+        if(rnd()<.2)blur=1.2;
+      }else if(kind==='halo'){
+        /* loose grains around a sand-body: denser at the silhouette,
+           thinning with distance — the countdown's scattered sand */
+        const cx=+layer.dataset.cx, cy=+layer.dataset.cy, r=+layer.dataset.r;
+        const ca=layer.dataset.ca||'221,192,154', cb=layer.dataset.cb||'246,240,228';
+        const a=rnd()*Math.PI*2, d=r+3+Math.pow(rnd(),1.7)*95;
+        x=cx+Math.cos(a)*d; y=cy+Math.sin(a)*d*0.92;
+        s=rnd()<.12?2.6+rnd()*2:1+rnd()*1.8;
+        o=(0.85-(d-r)/130)*(0.3+rnd()*0.6); if(o<0.06)continue;
+        c=rnd()<.55?'rgba('+ca+',':'rgba('+cb+',';
+      }else if(kind==='title'){
+        /* drifting near the veil / rule block on the right */
+        x=1020+rnd()*800; y=560+rnd()*220;
+        s=rnd()<.15?3+rnd()*2:1+rnd()*1.6;
+        o=0.25+rnd()*0.5;
+        c=rnd()<.6?'rgba(138,63,38,':'rgba(246,240,228,';
+        if(rnd()<.3)blur=1.2;
+      }else{
+        /* ambient field: sparse, between ridge and cards */
+        x=rnd()*1920; y=180+rnd()*840;
+        s=rnd()<.1?2.6+rnd()*2:0.8+rnd()*1.6;
+        o=0.10+rnd()*0.30;
+        c=rnd()<.4?'rgba(210,164,122,':'rgba(241,235,221,';
+        if(rnd()<.35)blur=1.4;
+      }
+      el.style.cssText='left:'+x.toFixed(1)+'px;top:'+y.toFixed(1)+
+        'px;width:'+s.toFixed(1)+'px;height:'+s.toFixed(1)+
+        'px;background:'+c+o.toFixed(2)+')'+(blur?';filter:blur('+blur+'px)':'');
+      el.className='drifts';
+      el.style.setProperty('--dur',(50+rnd()*60).toFixed(0)+'s');
+      el.style.setProperty('--del',(-rnd()*60).toFixed(0)+'s');
+      el.style.setProperty('--dx',((rnd()-0.3)*26).toFixed(0)+'px');
+      el.style.setProperty('--dy',(-(6+rnd()*26)).toFixed(0)+'px');
+      frag.appendChild(el);
+    }
+    layer.appendChild(frag);
+  });
+})();
+
+/* ── team cards (screen C) ── */
+(function(){
+  const grid=document.getElementById('tuGrid'); if(!grid)return;
+  const teams=[
+    {ar:'فريق السحاب', en:'CLOUD', c:'#B7CEDD', members:['نورة','سلمى','فيصل','ريم','عمر']},
+    {ar:'فريق البرق', en:'LIGHTNING', c:'#EFD9A0', members:['لينا','خالد','سارة','مها']},
+    {ar:'فريق الإعصار', en:'TORNADO', c:'#C6CCAA', members:['يوسف','دانة','بدر','هند','طلال']},
+  ];
+  /* fixed grain offsets so every emblem sheds a little sand, deterministically */
+  const grains=[[5,26,1.3],[9,15,.9],[70,63,1.4],[66,71,1],[74,55,.8]];
+  grid.innerHTML=teams.map(t=>{
+    const pills=t.members.map(m=>
+      '<span class="pill"><span class="av" style="background:'+t.c+'">'+m[0]+'</span>'+m+'</span>').join('');
+    const dots=grains.map(g=>
+      '<circle cx="'+g[0]+'" cy="'+g[1]+'" r="'+g[2]+'" fill="'+t.c+'" opacity=".7"/>').join('');
+    return '<div class="tcard" style="--tc:'+t.c+'">'+
+      '<div class="side">'+
+        '<div class="emblem">'+
+          '<svg viewBox="0 0 76 76">'+
+            '<g filter="url(#sandBody)"><path d="M 38,6 L 66,22 L 66,54 L 38,70 L 10,54 L 10,22 Z" fill="'+t.c+'"/></g>'+
+            dots+
+          '</svg>'+
+        '</div>'+
+        '<div class="tname">'+t.ar+'</div>'+
+        '<div class="tsub">'+t.en+' · '+t.members.length+'</div>'+
+      '</div>'+
+      '<div class="members">'+pills+'</div>'+
+    '</div>';
+  }).join('');
+})();
+
+/* ── scale 1920 stages to their frames ── */
+(function(){
+  function fit(){
+    document.querySelectorAll('.frame').forEach(f=>{
+      const s=f.querySelector('.stage1920');
+      if(s) s.style.transform='scale('+(f.clientWidth/1920)+')';
+    });
+  }
+  addEventListener('resize',fit); fit();
+})();
+</script>
+</body>
+</html>

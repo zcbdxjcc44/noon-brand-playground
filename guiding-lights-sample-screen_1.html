@@ -1,0 +1,292 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Guiding Lights — Sample Screen · Journey Home</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@400;500;600;700;800&family=IBM+Plex+Sans+Arabic:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --night:#121015;--night-raise:#1A171E;--night-line:#2B2732;--starlight:#F2EFE7;
+  --gold:#D99C55;--gold-bright:#EFC183;--gold-deep:#9C6A33;
+  --gold-foil:linear-gradient(135deg,#B37B3C 0%,#EFC183 34%,#D99C55 55%,#8F5F2E 100%);
+  --plaster:#EDEAE2;--ink:#1D1B18;--ink-soft:#57534B;
+  --coral:#DE8E85;--mint:#7BCFC0;--sand:#E5D96E;--peri:#6F7FDD;
+  --coral-deep:#B9655C;--mint-deep:#3E9A8B;--sand-deep:#A99B31;--peri-deep:#4353AE;
+  --sans:'Hanken Grotesk',sans-serif;--arabic:'IBM Plex Sans Arabic',sans-serif;
+  --mono:ui-monospace,'SF Mono',Menlo,monospace;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:#0B0A0D;font-family:var(--sans);color:var(--starlight);min-height:100vh;display:flex;align-items:center;justify-content:center;padding:48px 20px;-webkit-font-smoothing:antialiased}
+.ar{font-family:var(--arabic)}
+.grain{position:relative;isolation:isolate}
+.grain::after{content:"";position:absolute;inset:0;pointer-events:none;z-index:1;opacity:.5;mix-blend-mode:overlay;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2'/%3E%3C/filter%3E%3Crect width='140' height='140' filter='url(%23n)' opacity='0.55'/%3E%3C/svg%3E")}
+.grain>*{position:relative;z-index:2}
+
+.stage{display:flex;gap:56px;align-items:center;flex-wrap:wrap;justify-content:center}
+.caption{max-width:280px}
+.caption .k{font-family:var(--mono);font-size:10.5px;letter-spacing:.26em;text-transform:uppercase;color:var(--gold);display:flex;align-items:center;gap:12px;margin-bottom:14px}
+.caption .k::before{content:"";width:28px;height:1px;background:var(--gold)}
+.caption h1{font-size:30px;font-weight:800;letter-spacing:-.02em;line-height:1.05}
+.caption h1 span{background:var(--gold-foil);-webkit-background-clip:text;background-clip:text;color:transparent}
+.caption p{margin-top:14px;font-size:13.5px;line-height:1.65;color:#8F8A80}
+.caption .legend{margin-top:22px;display:flex;flex-direction:column;gap:9px;font-size:12px;color:#B6B0A4}
+.caption .legend b{color:var(--starlight);font-weight:600}
+.caption .legend .row{display:flex;gap:10px;align-items:center}
+.caption .legend .sw{width:12px;height:12px;border-radius:4px;flex-shrink:0}
+
+/* ---------- phone ---------- */
+.phone{width:394px;height:826px;background:#000;border-radius:54px;padding:10px;box-shadow:0 40px 90px -30px rgba(0,0,0,.9),0 0 0 1px #26232B;flex-shrink:0}
+.screen{width:100%;height:100%;border-radius:44px;overflow:hidden;position:relative;background:var(--night);display:flex;flex-direction:column}
+.scroll{flex:1;overflow-y:auto;scrollbar-width:none}
+.scroll::-webkit-scrollbar{display:none}
+
+/* status bar */
+.status{position:absolute;top:0;left:0;right:0;z-index:40;display:flex;justify-content:space-between;align-items:center;padding:16px 28px 6px;font-size:13.5px;font-weight:600}
+.notch{position:absolute;top:12px;left:50%;transform:translateX(-50%);width:118px;height:32px;background:#000;border-radius:100px;z-index:50}
+
+/* ---------- NIGHT ZONE ---------- */
+.night-zone{position:relative;padding:76px 24px 0;overflow:hidden}
+.night-zone .skybits{position:absolute;inset:0;pointer-events:none}
+.star{position:absolute;border-radius:50%;background:var(--starlight);width:2px;height:2px;animation:tw 4s ease-in-out infinite}
+@keyframes tw{0%,100%{opacity:.15}50%{opacity:.8}}
+.greet{display:flex;justify-content:space-between;align-items:flex-start}
+.greet .who .sal{font-family:var(--arabic);font-size:22px;font-weight:700;line-height:1.4}
+.greet .who .sub{font-family:var(--mono);font-size:9.5px;letter-spacing:.2em;text-transform:uppercase;color:#8F8A80;margin-top:4px}
+.streak{display:flex;align-items:center;gap:7px;background:var(--night-raise);border:1px solid var(--night-line);border-radius:100px;padding:8px 14px;font-size:13px;font-weight:700;color:var(--gold-bright)}
+
+/* journey map */
+.map{position:relative;height:300px;margin-top:6px}
+.map svg.route{position:absolute;inset:0;width:100%;height:100%}
+.map .stn{position:absolute;transform:translate(-50%,-50%);text-align:center;width:74px}
+.map .stn .disc{width:46px;height:46px;border-radius:50%;margin:0 auto;display:flex;align-items:center;justify-content:center;border:1.5px solid;position:relative}
+.map .stn .disc::before{content:"";position:absolute;inset:4px;border-radius:50%;border:1px dashed rgba(0,0,0,.28)}
+.map .stn.ghost .disc::before{border-color:rgba(242,239,231,.15)}
+.map .stn .nm{margin-top:7px;font-family:var(--arabic);font-size:10.5px;font-weight:600;color:#B6B0A4}
+.map .stn.you .halo{position:absolute;top:50%;left:50%;width:74px;height:74px;transform:translate(-50%,-50%)}
+.map .stn.you .halo circle{animation:spin 26s linear infinite;transform-origin:center}
+@keyframes spin{to{transform:rotate(360deg)}}
+.map .stn.you .nm{color:var(--gold-bright);font-weight:700}
+.map .stn.ghost .disc{background:var(--night-raise);border-color:var(--night-line);color:#57524B}
+.map .stn.ghost .nm{color:#57524B}
+
+/* planet-rise bridge */
+.bridge{position:relative;height:118px;margin-top:-26px}
+.bridge svg{position:absolute;inset:0;width:100%;height:100%}
+
+/* ---------- PAPER ZONE ---------- */
+.paper-zone{background:var(--plaster);color:var(--ink);padding:8px 24px 120px;position:relative}
+.sect-head{display:flex;justify-content:space-between;align-items:baseline;margin:18px 2px 16px}
+.sect-head h2{font-family:var(--arabic);font-size:18px;font-weight:700}
+.sect-head .all{font-family:var(--mono);font-size:9.5px;letter-spacing:.18em;text-transform:uppercase;color:var(--coral-deep);text-decoration:none;font-weight:600}
+.tasks{display:flex;flex-direction:column;gap:14px}
+.task{border-radius:6px;padding:18px 18px 16px;position:relative;box-shadow:0 10px 22px -10px rgba(29,27,24,.28);display:flex;gap:14px;align-items:center;text-decoration:none;color:var(--ink);transition:transform .25s ease}
+.task:hover{transform:translateY(-2px) rotate(-.4deg)}
+.task .corner{position:absolute;width:11px;height:11px;border:1.5px solid rgba(0,0,0,.5)}
+.task .corner.tl{top:7px;left:7px;border-right:none;border-bottom:none}
+.task .corner.br{bottom:7px;right:7px;border-left:none;border-top:none}
+.task .ic{width:44px;height:44px;border-radius:50%;background:rgba(255,255,255,.4);display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.task .tx{flex:1;min-width:0}
+.task .tx h3{font-family:var(--arabic);font-size:14.5px;font-weight:700}
+.task .tx p{font-family:var(--arabic);font-size:11px;margin-top:3px;opacity:.72}
+.task .meta{font-family:var(--mono);font-size:9px;letter-spacing:.14em;text-transform:uppercase;text-align:right;line-height:1.8;opacity:.75;flex-shrink:0}
+.task.t-coral{background:var(--coral);transform:rotate(-.8deg)}
+.task.t-mint{background:var(--mint);transform:rotate(.6deg)}
+.task.t-sand{background:var(--sand);transform:rotate(-.5deg)}
+.task.t-done{background:#E2DED4;transform:rotate(.4deg);box-shadow:none;opacity:.82}
+.task.t-done .tx h3{text-decoration:line-through;text-decoration-thickness:1.5px}
+.zig{margin:24px auto 0;display:block}
+
+/* week strip */
+.week{margin-top:10px;background:#fff;border-radius:14px;border:1.5px solid #D7D2C5;padding:16px 18px;display:flex;justify-content:space-between;align-items:center}
+.week .d{text-align:center;font-family:var(--mono);font-size:9px;letter-spacing:.08em;color:var(--ink-soft)}
+.week .d .b{width:26px;height:26px;border-radius:50%;margin:0 auto 5px;display:flex;align-items:center;justify-content:center}
+.week .d.on .b{background:var(--ink);color:var(--gold-bright)}
+.week .d.off .b{border:1.5px dashed #C9C3B4}
+
+/* bottom nav */
+.nav{position:absolute;bottom:0;left:0;right:0;z-index:30;background:rgba(18,16,21,.92);backdrop-filter:blur(14px);border-top:1px solid var(--night-line);display:flex;justify-content:space-around;padding:14px 10px 26px}
+.nav a{display:flex;flex-direction:column;align-items:center;gap:5px;text-decoration:none;color:#6E6960;font-family:var(--arabic);font-size:10px;font-weight:600}
+.nav a.on{color:var(--gold-bright)}
+.nav svg{width:22px;height:22px}
+</style>
+</head>
+<body class="grain">
+<div class="stage">
+
+  <div class="caption">
+    <div class="k">GUIDING LIGHTS · APPLIED</div>
+    <h1>Journey home,<br><span>proved on a screen</span></h1>
+    <p>The dual system at work: the night sky carries the greeting and the star-map of stations; the planet-rise arc bridges into daylight paper, where today's work lives on pinned pastel notes.</p>
+    <div class="legend">
+      <div class="row"><span class="sw" style="background:#121015;border:1px solid #2B2732"></span><span><b>Night</b> — way-finding &amp; progression</span></div>
+      <div class="row"><span class="sw" style="background:linear-gradient(135deg,#B37B3C,#EFC183,#8F5F2E)"></span><span><b>Gold</b> — the current station only</span></div>
+      <div class="row"><span class="sw" style="background:#DE8E85"></span><span><b>Planet-rise</b> — the seam between worlds</span></div>
+      <div class="row"><span class="sw" style="background:#EDEAE2;border:1px solid #D7D2C5"></span><span><b>Paper</b> — today's tasks, ink &amp; pastels</span></div>
+    </div>
+  </div>
+
+  <div class="phone">
+    <div class="screen">
+      <div class="notch"></div>
+      <div class="status"><span>9:41</span>
+        <svg width="52" height="13" viewBox="0 0 52 13" fill="#F2EFE7"><rect x="0" y="3" width="3" height="7" rx="1"/><rect x="5" y="1.5" width="3" height="8.5" rx="1"/><rect x="10" y="0" width="3" height="10" rx="1"/><rect x="20" y="1" width="16" height="9" rx="2.5" fill="none" stroke="#F2EFE7" stroke-width="1.2"/><rect x="22" y="3" width="10" height="5" rx="1"/><rect x="37" y="4" width="2" height="3" rx="1"/></svg>
+      </div>
+
+      <div class="scroll">
+        <!-- NIGHT -->
+        <div class="night-zone grain" id="nz">
+          <div class="skybits" id="skybits">
+            <svg style="position:absolute;top:54px;right:-30px;opacity:.85" width="150" height="120" viewBox="0 0 150 120" fill="none">
+              <circle cx="85" cy="60" r="34" stroke="#D99C55" stroke-width="1.4"/>
+              <ellipse cx="85" cy="60" rx="62" ry="15" transform="rotate(-16 85 60)" stroke="#D99C55" stroke-width="1.2"/>
+              <path d="M20 18 l2 5 5 2 -5 2 -2 5 -2 -5 -5 -2 5 -2Z" fill="#F2EFE7"/>
+            </svg>
+            <svg style="position:absolute;top:120px;left:0;width:100%;opacity:.4" height="70" viewBox="0 0 390 70" preserveAspectRatio="none" fill="none">
+              <path d="M0 40 C 90 10, 180 65, 270 35 S 370 12, 390 40" stroke="#F2EFE7" stroke-opacity=".5" stroke-width="1"/>
+              <path d="M0 55 C 100 25, 200 78, 300 48" stroke="#F2EFE7" stroke-opacity=".25" stroke-width="1" stroke-dasharray="1 6"/>
+            </svg>
+          </div>
+
+          <div class="greet">
+            <div class="who">
+              <div class="sal ar">مساء الخير، سارة <span style="font-size:15px">✦</span></div>
+              <div class="sub">NIGHT 12 · CONSTELLATION 02</div>
+            </div>
+            <div class="streak">
+              <svg width="15" height="15" viewBox="0 0 15 15"><path d="M7.5 0 l1.7 5.8 5.8 1.7 -5.8 1.7 -1.7 5.8 -1.7 -5.8 -5.8 -1.7 5.8 -1.7Z" fill="#EFC183"/></svg>
+              12
+            </div>
+          </div>
+
+          <!-- STAR MAP -->
+          <div class="map">
+            <svg class="route" viewBox="0 0 346 300" fill="none" preserveAspectRatio="none">
+              <!-- travelled: solid; ahead: dotted -->
+              <path d="M40 250 C 90 210, 90 160, 160 150" stroke="#D99C55" stroke-width="1.4"/>
+              <path d="M160 150 C 235 140, 250 110, 250 78" stroke="#D99C55" stroke-opacity=".9" stroke-width="1.3" stroke-dasharray="1 6"/>
+              <path d="M250 78 C 250 50, 290 48, 305 42" stroke="#F2EFE7" stroke-opacity=".3" stroke-width="1.2" stroke-dasharray="1 6"/>
+              <path d="M70 90 l2.4 6.2 6.2 2.4 -6.2 2.4 -2.4 6.2 -2.4 -6.2 -6.2 -2.4 6.2 -2.4Z" fill="#F2EFE7" opacity=".8"/>
+              <path d="M28 156 L34 162 M34 156 L28 162" stroke="#F2EFE7" stroke-opacity=".5" stroke-width="1.4" stroke-linecap="round"/>
+            </svg>
+            <div class="stn" style="left:12%;top:83%">
+              <div class="disc grain" style="background:var(--mint);border-color:var(--mint-deep)">
+                <svg width="18" height="18" viewBox="0 0 18 18" fill="none" stroke="#0F332C" stroke-width="1.8" stroke-linecap="round"><path d="M3 9 l4 4 8 -8"/></svg>
+              </div><div class="nm ar">البداية</div>
+            </div>
+            <div class="stn" style="left:46%;top:50%">
+              <div class="disc grain" style="background:var(--sand);border-color:var(--sand-deep)">
+                <svg width="18" height="18" viewBox="0 0 18 18" fill="none" stroke="#3A3208" stroke-width="1.8" stroke-linecap="round"><path d="M3 9 l4 4 8 -8"/></svg>
+              </div><div class="nm ar">الأساسيات</div>
+            </div>
+            <div class="stn you" style="left:72%;top:26%">
+              <svg class="halo" viewBox="0 0 74 74" fill="none"><circle cx="37" cy="37" r="34" stroke="#EFC183" stroke-width="1.2" stroke-dasharray="2 6"/></svg>
+              <div class="disc grain" style="background:linear-gradient(135deg,#B37B3C,#EFC183 40%,#D99C55 62%,#8F5F2E);border-color:#EFC183;box-shadow:0 0 24px -2px rgba(217,156,85,.55)">
+                <svg width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="#241505" stroke-width="1.5"><circle cx="10" cy="10" r="4.2"/><ellipse cx="10" cy="10" rx="8.2" ry="2.7" transform="rotate(-16 10 10)"/></svg>
+              </div><div class="nm ar">أنت هنا</div>
+            </div>
+            <div class="stn ghost" style="left:88%;top:13%">
+              <div class="disc grain">
+                <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="#57524B" stroke-width="1.5"><rect x="3" y="7" width="10" height="7" rx="1.5"/><path d="M5 7 V5.5 a3 3 0 0 1 6 0 V7"/></svg>
+              </div><div class="nm ar">القادم</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- BRIDGE : planet-rise -->
+        <div class="bridge">
+          <svg viewBox="0 0 390 118" preserveAspectRatio="none" fill="none">
+            <rect x="0" y="0" width="390" height="118" fill="#121015"/>
+            <path d="M-30 190 A 240 240 0 0 1 420 190" fill="#DE8E85"/>
+            <path d="M-45 185 A 250 250 0 0 1 435 185" stroke="#EFC183" stroke-width="1.1" stroke-dasharray="1 6"/>
+            <path d="M-40 216 A 280 280 0 0 1 430 216" fill="#EDEAE2"/>
+          </svg>
+        </div>
+
+        <!-- PAPER -->
+        <div class="paper-zone grain">
+          <div class="sect-head">
+            <h2 class="ar">مهام اليوم</h2>
+            <a class="all" href="#">ALL TASKS →</a>
+          </div>
+          <div class="tasks">
+            <a class="task t-coral grain" href="#">
+              <span class="corner tl"></span><span class="corner br"></span>
+              <span class="ic"><svg width="22" height="22" viewBox="0 0 22 22" fill="none" stroke="#3E1713" stroke-width="1.6" stroke-linecap="round"><path d="M4 11 h14 M11 4 v14"/><circle cx="11" cy="11" r="9" stroke-dasharray="2 4"/></svg></span>
+              <span class="tx"><h3 class="ar">المعادلات التربيعية</h3><p class="ar">رياضيات · درس مباشر مع المعلّم</p></span>
+              <span class="meta">17:30<br>45 MIN</span>
+            </a>
+            <a class="task t-mint grain" href="#">
+              <span class="corner tl"></span><span class="corner br"></span>
+              <span class="ic"><svg width="22" height="22" viewBox="0 0 22 22" fill="none" stroke="#0F332C" stroke-width="1.6" stroke-linecap="round"><circle cx="11" cy="11" r="4"/><path d="M11 2 v3 M11 17 v3 M2 11 h3 M17 11 h3"/></svg></span>
+              <span class="tx"><h3 class="ar">دورة الماء في الطبيعة</h3><p class="ar">علوم · تجربة تفاعلية</p></span>
+              <span class="meta">19:00<br>30 MIN</span>
+            </a>
+            <a class="task t-sand grain" href="#">
+              <span class="corner tl"></span><span class="corner br"></span>
+              <span class="ic"><svg width="22" height="22" viewBox="0 0 22 22" fill="none" stroke="#3A3208" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M8 5 L3 11 L8 17 M14 5 L19 11 L14 17"/></svg></span>
+              <span class="tx"><h3 class="ar">حلقة التكرار for</h3><p class="ar">برمجة · تحدّي ذاتي</p></span>
+              <span class="meta">ANYTIME<br>20 MIN</span>
+            </a>
+            <a class="task t-done grain" href="#">
+              <span class="corner tl"></span><span class="corner br"></span>
+              <span class="ic" style="background:rgba(29,27,24,.08)"><svg width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="#57534B" stroke-width="1.8" stroke-linecap="round"><path d="M4 10 l4 4 8 -8"/></svg></span>
+              <span class="tx"><h3 class="ar">مفردات السفر</h3><p class="ar">لغة إنجليزية · مكتملة ✦</p></span>
+              <span class="meta" style="opacity:.5">DONE</span>
+            </a>
+          </div>
+
+          <svg class="zig" width="72" height="12" viewBox="0 0 72 12" fill="none" stroke="#C9C3B4" stroke-width="1.6" stroke-linecap="round"><path d="M2 9 L11 3 L20 9 L29 3 L38 9 L47 3 L56 9 L65 3 L70 6"/></svg>
+
+          <div class="sect-head" style="margin-top:20px">
+            <h2 class="ar">هذا الأسبوع</h2>
+          </div>
+          <div class="week">
+            <div class="d on"><span class="b"><svg width="11" height="11" viewBox="0 0 11 11"><path d="M5.5 0 l1.3 4.2 4.2 1.3 -4.2 1.3 -1.3 4.2 -1.3 -4.2 -4.2 -1.3 4.2 -1.3Z" fill="#EFC183"/></svg></span>SUN</div>
+            <div class="d on"><span class="b"><svg width="11" height="11" viewBox="0 0 11 11"><path d="M5.5 0 l1.3 4.2 4.2 1.3 -4.2 1.3 -1.3 4.2 -1.3 -4.2 -4.2 -1.3 4.2 -1.3Z" fill="#EFC183"/></svg></span>MON</div>
+            <div class="d on"><span class="b"><svg width="11" height="11" viewBox="0 0 11 11"><path d="M5.5 0 l1.3 4.2 4.2 1.3 -4.2 1.3 -1.3 4.2 -1.3 -4.2 -4.2 -1.3 4.2 -1.3Z" fill="#EFC183"/></svg></span>TUE</div>
+            <div class="d off"><span class="b"></span>WED</div>
+            <div class="d off"><span class="b"></span>THU</div>
+            <div class="d off"><span class="b"></span>FRI</div>
+            <div class="d off"><span class="b"></span>SAT</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- NAV -->
+      <div class="nav">
+        <a class="on" href="#">
+          <svg viewBox="0 0 22 22" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><path d="M3 17 C 7 7, 15 7, 19 15" stroke-dasharray="1 4"/><path d="M11 3 l1.4 3.6 3.6 1.4 -3.6 1.4 -1.4 3.6 -1.4 -3.6 -3.6 -1.4 3.6 -1.4Z" fill="currentColor" stroke="none"/></svg>
+          <span class="ar">رحلتي</span>
+        </a>
+        <a href="#">
+          <svg viewBox="0 0 22 22" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="3.5" y="4" width="15" height="14" rx="2"/><path d="M7.5 8 h7 M7.5 11.5 h7 M7.5 15 h4"/></svg>
+          <span class="ar">دروسي</span>
+        </a>
+        <a href="#">
+          <svg viewBox="0 0 22 22" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="11" cy="11" r="7.5"/><ellipse cx="11" cy="11" rx="13" ry="3.6" transform="rotate(-16 11 11)" stroke-opacity=".8"/></svg>
+          <span class="ar">الإنجازات</span>
+        </a>
+        <a href="#">
+          <svg viewBox="0 0 22 22" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><circle cx="11" cy="8" r="3.6"/><path d="M4.5 18.5 C 5.5 14.5, 16.5 14.5, 17.5 18.5"/></svg>
+          <span class="ar">حسابي</span>
+        </a>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+const nz=document.getElementById('skybits');
+for(let i=0;i<26;i++){
+  const s=document.createElement('span');s.className='star';
+  s.style.left=Math.random()*100+'%';s.style.top=Math.random()*100+'%';
+  s.style.transform=`scale(${.5+Math.random()*1.4})`;
+  s.style.animationDelay=Math.random()*4+'s';s.style.animationDuration=(3+Math.random()*4)+'s';
+  nz.appendChild(s);
+}
+</script>
+</body>
+</html>

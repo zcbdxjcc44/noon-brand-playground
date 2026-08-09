@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Proven Routes — Quick Reference</title>
+<style>
+  :root {
+    --void-300:#0a0f1a; --void-200:#10172a; --void-100:#1a2236;
+    --paper-100:#fbf8ef; --fg:#e8e4dc; --fg-muted:rgba(232,228,220,0.62);
+    --fg-subtle:rgba(232,228,220,0.42); --border:rgba(232,228,220,0.12);
+    --border-strong:rgba(232,228,220,0.22); --accent:#64D8AE;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    background: var(--void-300); color: var(--fg);
+    font-family: 'Vazirmatn', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    line-height: 1.5; padding: 40px 32px; -webkit-font-smoothing: antialiased;
+  }
+  .sheet { max-width: 1040px; margin: 0 auto; }
+  header { border-bottom: 1px solid var(--border-strong); padding-bottom: 20px; margin-bottom: 28px; }
+  h1 { font-family: 'Crimson Pro', Georgia, serif; font-size: 34px; font-weight: 600; letter-spacing: -0.5px; }
+  .sub { color: var(--fg-muted); font-size: 13px; margin-top: 4px; }
+  .meta { color: var(--fg-subtle); font-size: 11px; margin-top: 10px; font-family: 'JetBrains Mono', ui-monospace, monospace; }
+  .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 28px; }
+  section { margin-bottom: 28px; }
+  h2 {
+    font-size: 11px; text-transform: uppercase; letter-spacing: 1.4px;
+    color: var(--accent); font-weight: 600; margin-bottom: 14px;
+    display: flex; align-items: center; gap: 8px;
+  }
+  h2::before { content:''; width:6px; height:6px; background:var(--accent); transform:rotate(45deg); display:inline-block; }
+  .swatch-row { display:flex; align-items:center; gap:12px; padding:8px 0; border-bottom:1px solid var(--border); }
+  .swatch-row:last-child { border-bottom:none; }
+  .chip { width:34px; height:34px; border-radius:4px; flex-shrink:0; border:1px solid var(--border); }
+  .role { font-weight:600; font-size:13px; }
+  .role-desc { color:var(--fg-muted); font-size:12px; }
+  .role-meta { margin-left:auto; font-family:'JetBrains Mono',ui-monospace,monospace; font-size:11px; color:var(--fg-subtle); text-align:right; }
+  .card { background:var(--void-200); border:1px solid var(--border); border-radius:6px; padding:18px 20px; }
+  table { width:100%; border-collapse:collapse; font-size:12px; }
+  td { padding:5px 0; border-bottom:1px solid var(--border); vertical-align:top; }
+  tr:last-child td { border-bottom:none; }
+  td.k { font-family:'JetBrains Mono',ui-monospace,monospace; color:var(--accent); width:36%; }
+  td.v { color:var(--fg-muted); font-family:'JetBrains Mono',ui-monospace,monospace; }
+  .scale-strip { display:flex; align-items:flex-end; gap:6px; flex-wrap:wrap; margin-top:4px; }
+  .scale-box { background:var(--accent); opacity:0.28; border-radius:2px; position:relative; }
+  .scale-lbl { font-family:'JetBrains Mono',ui-monospace,monospace; font-size:9px; color:var(--fg-subtle); text-align:center; margin-top:3px; }
+  .type-row { display:flex; align-items:baseline; gap:14px; padding:9px 0; border-bottom:1px solid var(--border); }
+  .type-row:last-child { border-bottom:none; }
+  .type-name { font-size:12px; color:var(--fg-muted); width:110px; flex-shrink:0; font-family:'JetBrains Mono',ui-monospace,monospace; }
+  .serif { font-family:'Crimson Pro',Georgia,serif; }
+  .mono { font-family:'JetBrains Mono',ui-monospace,monospace; }
+  .note { font-size:11px; color:var(--fg-subtle); margin-top:12px; line-height:1.6; }
+  .full { grid-column: 1 / -1; }
+  .pill-row { display:flex; gap:8px; flex-wrap:wrap; }
+  .pill { font-size:11px; padding:4px 10px; border-radius:999px; border:1px solid var(--border-strong); color:var(--fg-muted); }
+  @media (max-width:720px){ .grid{grid-template-columns:1fr;} }
+  @media print { body{background:#fff;color:#111;} .card{background:#f7f4ec;} }
+</style>
+</head>
+<body>
+<div class="sheet">
+  <header>
+    <h1>Proven Routes — Quick Reference</h1>
+    <div class="sub">Noon Academy design system · tokens &amp; roles at a glance</div>
+    <div class="meta">@noon/design-system · v0.1.0 · source of truth: rn/tokens.ts</div>
+  </header>
+
+  <section class="full">
+    <h2>Color roles — use color to mean something</h2>
+    <div class="card">
+      <div class="swatch-row"><div class="chip" style="background:#64D8AE"></div><div><div class="role">Accent · Green</div><div class="role-desc">Actions, primary CTAs, confirmations</div></div><div class="role-meta">noon.400<br>#64D8AE</div></div>
+      <div class="swatch-row"><div class="chip" style="background:#c9a227"></div><div><div class="role">Signal · Gold</div><div class="role-desc">Journey, progress, waypoints</div></div><div class="role-meta">gold.400<br>#c9a227</div></div>
+      <div class="swatch-row"><div class="chip" style="background:#B08AF9"></div><div><div class="role">Iris · Purple <span style="color:#B08AF9">— voice tutor ONLY</span></div><div class="role-desc">Never reuse anywhere else</div></div><div class="role-meta">iris.400<br>#B08AF9</div></div>
+      <div class="swatch-row"><div class="chip" style="background:#C07A4E"></div><div><div class="role">Terra · Terracotta</div><div class="role-desc">Warmth, place, classroom</div></div><div class="role-meta">terra.400<br>#C07A4E</div></div>
+      <div class="swatch-row"><div class="chip" style="background:#c55a4e"></div><div><div class="role">Danger · Red</div><div class="role-desc">Errors, destructive actions</div></div><div class="role-meta">danger.400<br>#c55a4e</div></div>
+      <div class="swatch-row"><div class="chip" style="background:#E8A830"></div><div><div class="role">Warn · Amber</div><div class="role-desc">Caution, rare UI warnings</div></div><div class="role-meta">warn.400<br>#E8A830</div></div>
+    </div>
+    <div class="note">Design against the semantic tokens (<span class="mono">accent</span>, <span class="mono">signal</span>, <span class="mono">danger</span>…), not raw ramps. Ramps (<span class="mono">100–800</span>) exist to build tokens, not to style components.</div>
+  </section>
+
+  <div class="grid">
+    <section>
+      <h2>Themes</h2>
+      <div class="card">
+        <div class="swatch-row"><div class="chip" style="background:#0a0f1a"></div><div><div class="role">Void — dark (default)</div><div class="role-desc">Depth via brighter borders</div></div></div>
+        <div class="swatch-row"><div class="chip" style="background:#f2ece0;border-color:rgba(0,0,0,0.15)"></div><div><div class="role">Paper — light</div><div class="role-desc">Depth via real drop shadows</div></div></div>
+        <div class="note">Design both. The depth models differ, so a Void layout can break in Paper. Reference semantic bg/fg roles so themes flip correctly.</div>
+      </div>
+    </section>
+
+    <section>
+      <h2>Typography</h2>
+      <div class="card">
+        <div class="type-row"><span class="type-name">serif · headings</span><span class="serif" style="font-size:22px">Crimson Pro</span></div>
+        <div class="type-row"><span class="type-name">sans · body</span><span style="font-size:18px">Vazirmatn</span></div>
+        <div class="type-row"><span class="type-name">mono · data</span><span class="mono" style="font-size:16px">JetBrains Mono</span></div>
+        <div class="type-row"><span class="type-name">arabic</span><span style="font-size:16px">Noto Naskh Arabic</span></div>
+        <div class="note">Bilingual Arabic + Latin, RTL-aware. Design the Arabic version alongside the Latin — not as a translation pass.</div>
+      </div>
+    </section>
+
+    <section>
+      <h2>Type scale · weight · line-height</h2>
+      <div class="card">
+        <table>
+          <tr><td class="k">fs</td><td class="v">9 10 11 12 13 14 15 16 18 20 22 24 28 32 40 48</td></tr>
+          <tr><td class="k">fw</td><td class="v">300 400 500 600 700</td></tr>
+          <tr><td class="k">lh</td><td class="v">tight 1.05 · snug 1.2 · normal 1.5 · loose 1.7</td></tr>
+        </table>
+      </div>
+    </section>
+
+    <section>
+      <h2>Radius · heights · icons · motion</h2>
+      <div class="card">
+        <table>
+          <tr><td class="k">r</td><td class="v">0 · 2 · 4 · 6 · 8 · pill(999)</td></tr>
+          <tr><td class="k">h</td><td class="v">xs 24 · sm 32 · md 40 · lg 48 · xl 56</td></tr>
+          <tr><td class="k">icon</td><td class="v">xs 6 · sm 10 · md 14 · lg 18 · xl 20 · tab 22 · 2xl 28</td></tr>
+          <tr><td class="k">dur</td><td class="v">120 · 200 · 320 ms</td></tr>
+        </table>
+      </div>
+    </section>
+
+    <section class="full">
+      <h2>Spacing scale — 4px base grid (sp)</h2>
+      <div class="card">
+        <div class="scale-strip" id="spacing"></div>
+        <div class="note">Stay on the scale: 0·5=2, 1=4, 2=8, 3=12, 4=16, 5=20, 6=24, 7=32, 8=40, 9=48, 10=64, 11=80, 12=96. Need a new size? Add a step to the scale, don't use a one-off value.</div>
+      </div>
+    </section>
+
+    <section class="full">
+      <h2>Button — the component contract</h2>
+      <div class="card">
+        <div style="margin-bottom:12px"><span class="role-desc">Variants</span><div class="pill-row" style="margin-top:6px">
+          <span class="pill">primary</span><span class="pill">secondary</span><span class="pill">ghost</span><span class="pill">danger</span><span class="pill">danger-solid</span><span class="pill">signal</span>
+        </div></div>
+        <div style="margin-bottom:12px"><span class="role-desc">Sizes</span><div class="pill-row" style="margin-top:6px">
+          <span class="pill">sm · 32px</span><span class="pill">md · 40px (default)</span><span class="pill">lg · 48px</span>
+        </div></div>
+        <div><span class="role-desc">States</span><div class="pill-row" style="margin-top:6px">
+          <span class="pill">default</span><span class="pill">disabled (~0.4 opacity)</span><span class="pill">loading</span><span class="pill">fullWidth</span>
+        </div></div>
+        <div class="note">Every extended component follows this shape: named variants · three sizes on the height scale · standard state set. Icon-only → use IconButton.</div>
+      </div>
+    </section>
+
+    <section class="full">
+      <h2>Red flags — you've left the system if…</h2>
+      <div class="card">
+        <table>
+          <tr><td class="v" style="color:var(--fg-muted)">✕ A hex or px value that isn't in the token scale</td></tr>
+          <tr><td class="v" style="color:var(--fg-muted)">✕ Purple used for anything but the voice tutor</td></tr>
+          <tr><td class="v" style="color:var(--fg-muted)">✕ A layout that only works in one theme</td></tr>
+          <tr><td class="v" style="color:var(--fg-muted)">✕ A Latin-only design with no Arabic / RTL consideration</td></tr>
+        </table>
+      </div>
+    </section>
+  </div>
+</div>
+<script>
+  const sp = [2,4,8,12,16,20,24,32,40,48,64,80,96];
+  const labels = ['0·5','1','2','3','4','5','6','7','8','9','10','11','12'];
+  const el = document.getElementById('spacing');
+  sp.forEach((v,i)=>{
+    const wrap=document.createElement('div');
+    const box=document.createElement('div');
+    box.className='scale-box'; box.style.width=v+'px'; box.style.height=v+'px';
+    const lbl=document.createElement('div'); lbl.className='scale-lbl'; lbl.textContent=labels[i]+'·'+v;
+    wrap.appendChild(box); wrap.appendChild(lbl); el.appendChild(wrap);
+  });
+</script>
+</body>
+</html>

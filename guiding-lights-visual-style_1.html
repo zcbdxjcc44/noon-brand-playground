@@ -1,0 +1,692 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Guiding Lights — Visual Style V1</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;1,400&family=IBM+Plex+Sans+Arabic:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+/* ═══════════════════════════════════════════════════════════
+   GUIDING LIGHTS — V1
+   Sibling system to The Empty Quarter. Never merge the two.
+   Night sky = journey, wonder, progression.
+   Daylight paper = reading, content, doing.
+   ═══════════════════════════════════════════════════════════ */
+:root{
+  /* ---- NIGHT ---- */
+  --night:        #121015;  /* warm near-black canvas */
+  --night-raise:  #1A171E;  /* raised night surface   */
+  --night-line:   #2B2732;  /* hairlines on night     */
+  --starlight:    #F2EFE7;  /* star dots + fine white waves */
+  /* gold — the guiding voice. LINE first, foil fill second */
+  --gold:         #D99C55;
+  --gold-bright:  #EFC183;
+  --gold-deep:    #9C6A33;
+  --gold-foil:    linear-gradient(135deg,#B37B3C 0%,#EFC183 34%,#D99C55 55%,#8F5F2E 100%);
+  /* ---- DAYLIGHT ---- */
+  --plaster:      #EDEAE2;  /* paper ground */
+  --plaster-deep: #E2DED4;
+  --ink:          #1D1B18;
+  --ink-soft:     #57534B;
+  /* the four textured pastels — classification, never decoration */
+  --coral:        #DE8E85;
+  --mint:         #7BCFC0;
+  --sand:         #E5D96E;
+  --peri:         #6F7FDD;
+  --coral-deep:   #B9655C;
+  --mint-deep:    #3E9A8B;
+  --sand-deep:    #A99B31;
+  --peri-deep:    #4353AE;
+  /* type */
+  --sans:'Hanken Grotesk',sans-serif;
+  --arabic:'IBM Plex Sans Arabic',sans-serif;
+  --mono:ui-monospace,'SF Mono',Menlo,monospace;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{font-family:var(--sans);background:var(--night);color:var(--starlight);-webkit-font-smoothing:antialiased;overflow-x:hidden}
+.ar{font-family:var(--arabic)}
+
+/* grain — one texture, everywhere */
+.grain{position:relative;isolation:isolate}
+.grain::after{content:"";position:absolute;inset:0;pointer-events:none;z-index:1;opacity:.5;mix-blend-mode:overlay;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2'/%3E%3C/filter%3E%3Crect width='140' height='140' filter='url(%23n)' opacity='0.55'/%3E%3C/svg%3E")}
+.grain>*{position:relative;z-index:2}
+
+.wrap{max-width:1060px;margin:0 auto;padding:0 32px}
+section{padding:104px 0}
+
+/* ---------- headings / labels ---------- */
+.kicker{font-family:var(--mono);font-size:11px;letter-spacing:.28em;text-transform:uppercase;color:var(--gold);display:flex;align-items:center;gap:14px;margin-bottom:18px}
+.kicker::before{content:"";width:34px;height:1px;background:var(--gold)}
+.kicker .num{color:var(--gold-deep)}
+h2{font-size:clamp(30px,4vw,44px);font-weight:700;letter-spacing:-.02em;line-height:1.05;margin-bottom:14px}
+.lede{font-size:16.5px;line-height:1.65;color:#B6B0A4;max-width:600px;font-weight:400}
+.lede strong{color:var(--starlight);font-weight:600}
+.on-paper h2{color:var(--ink)}
+.on-paper .lede{color:var(--ink-soft)}
+.on-paper .lede strong{color:var(--ink)}
+.on-paper .kicker{color:var(--coral-deep)}
+.on-paper .kicker::before{background:var(--coral-deep)}
+
+/* ══════════ HERO ══════════ */
+.hero{min-height:92vh;display:flex;flex-direction:column;justify-content:center;position:relative;padding:80px 0 120px;overflow:hidden}
+.sky{position:absolute;inset:0;pointer-events:none}
+.sky .star{position:absolute;width:2px;height:2px;border-radius:50%;background:var(--starlight);animation:twinkle 4s ease-in-out infinite}
+@keyframes twinkle{0%,100%{opacity:.15}50%{opacity:.85}}
+.sky svg{position:absolute}
+.hero-title{font-size:clamp(52px,8.5vw,108px);font-weight:800;letter-spacing:-.035em;line-height:.98}
+.hero-title .g{background:var(--gold-foil);-webkit-background-clip:text;background-clip:text;color:transparent}
+.hero-sub{margin-top:26px;display:flex;gap:22px;align-items:baseline;flex-wrap:wrap}
+.hero-sub .ar-line{font-family:var(--arabic);font-size:21px;color:var(--gold);font-weight:500}
+.hero-sub .en-line{font-size:14px;color:#8F8A80;letter-spacing:.02em}
+.hero-meta{position:absolute;bottom:44px;left:0;right:0}
+.hero-meta .wrap{display:flex;justify-content:space-between;font-family:var(--mono);font-size:10.5px;letter-spacing:.22em;text-transform:uppercase;color:#6E6960}
+.saturn-wrap{position:absolute;right:-60px;top:50%;transform:translateY(-58%);width:520px;opacity:.9}
+@media(max-width:900px){.saturn-wrap{width:340px;right:-90px;opacity:.4}}
+
+/* dotted flowing wave lines */
+.waveband{position:absolute;left:0;right:0;pointer-events:none;opacity:.5}
+
+/* ══════════ PRINCIPLE STRIP ══════════ */
+.principles{display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background:var(--night-line);border-block:1px solid var(--night-line)}
+.principle{background:var(--night);padding:38px 34px}
+.principle .mark{width:44px;height:44px;margin-bottom:20px}
+.principle h3{font-size:17px;font-weight:600;margin-bottom:8px;letter-spacing:-.01em}
+.principle p{font-size:13.5px;line-height:1.6;color:#9A948A}
+@media(max-width:800px){.principles{grid-template-columns:1fr}}
+
+/* ══════════ SURFACES ══════════ */
+.surface-duo{display:grid;grid-template-columns:1fr 1fr;gap:26px;margin-top:52px}
+@media(max-width:800px){.surface-duo{grid-template-columns:1fr}}
+.surface-card{border-radius:20px;overflow:hidden;min-height:430px;display:flex;flex-direction:column;position:relative}
+.surface-card.night-c{background:var(--night-raise);border:1px solid var(--night-line)}
+.surface-card.day-c{background:var(--plaster)}
+.surface-card .art{flex:1;position:relative;overflow:hidden;min-height:250px}
+.surface-card .info{padding:26px 28px 30px;border-top:1px solid var(--night-line)}
+.surface-card.day-c .info{border-top:1px solid #D7D2C5}
+.surface-card h3{font-size:20px;font-weight:700;letter-spacing:-.01em;display:flex;align-items:baseline;gap:12px}
+.surface-card h3 .ar{font-size:16px;font-weight:500;color:var(--gold)}
+.surface-card.day-c h3{color:var(--ink)}
+.surface-card.day-c h3 .ar{color:var(--coral-deep)}
+.surface-card p{font-size:13.5px;line-height:1.62;margin-top:10px;color:#9A948A}
+.surface-card.day-c p{color:var(--ink-soft)}
+.usecase{margin-top:14px;display:flex;flex-wrap:wrap;gap:7px}
+.usecase span{font-family:var(--mono);font-size:10px;letter-spacing:.12em;text-transform:uppercase;padding:5px 10px;border-radius:100px;border:1px solid var(--night-line);color:#B6B0A4}
+.day-c .usecase span{border-color:#CFC9BA;color:var(--ink-soft)}
+.bridge-note{margin-top:26px;border:1px dashed var(--gold-deep);border-radius:16px;padding:24px 28px;display:flex;gap:20px;align-items:center}
+.bridge-note svg{flex-shrink:0}
+.bridge-note p{font-size:14px;line-height:1.6;color:#B6B0A4}
+.bridge-note strong{color:var(--gold-bright);font-weight:600}
+
+/* ══════════ PALETTE ══════════ */
+.pal-group{margin-top:48px}
+.pal-label{font-family:var(--mono);font-size:11px;letter-spacing:.24em;text-transform:uppercase;color:#8F8A80;margin-bottom:18px;display:flex;align-items:center;gap:12px}
+.pal-label::after{content:"";flex:1;height:1px;background:var(--night-line)}
+.on-paper .pal-label{color:var(--ink-soft)}
+.on-paper .pal-label::after{background:#D7D2C5}
+.chips{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:14px}
+.chip{border-radius:16px;padding:18px 16px 15px;min-height:150px;display:flex;flex-direction:column;justify-content:flex-end;position:relative;overflow:hidden}
+.chip .dot{position:absolute;top:14px;left:16px;width:26px;height:26px;border-radius:50%}
+.chip .nm{font-size:14px;font-weight:700;letter-spacing:-.01em}
+.chip .ar-nm{font-family:var(--arabic);font-size:11.5px;opacity:.75;margin-top:1px}
+.chip .hx{font-family:var(--mono);font-size:10.5px;opacity:.62;margin-top:7px;letter-spacing:.06em}
+.chip .role{font-size:11px;line-height:1.45;opacity:.78;margin-top:5px}
+.ratio-bar{margin-top:34px;display:flex;height:52px;border-radius:12px;overflow:hidden;font-family:var(--mono);font-size:9.5px;letter-spacing:.14em;text-transform:uppercase}
+.ratio-bar>div{display:flex;align-items:center;justify-content:center;white-space:nowrap;overflow:hidden}
+.pal-rule{margin-top:22px;font-size:13.5px;line-height:1.65;color:#9A948A;max-width:640px}
+.pal-rule strong{color:var(--gold-bright)}
+.on-paper .pal-rule{color:var(--ink-soft)}
+.on-paper .pal-rule strong{color:var(--coral-deep)}
+
+/* ══════════ LINE WORK ══════════ */
+.line-lab{display:grid;grid-template-columns:1.15fr .85fr;gap:26px;margin-top:50px}
+@media(max-width:860px){.line-lab{grid-template-columns:1fr}}
+.line-stage{background:var(--night-raise);border:1px solid var(--night-line);border-radius:20px;padding:30px;display:flex;align-items:center;justify-content:center;min-height:380px}
+.line-rules{display:flex;flex-direction:column;gap:1px;background:var(--night-line);border:1px solid var(--night-line);border-radius:20px;overflow:hidden}
+.line-rule{background:var(--night);padding:22px 26px;flex:1}
+.line-rule h4{font-size:13.5px;font-weight:600;color:var(--gold-bright);display:flex;gap:10px;align-items:center;margin-bottom:6px}
+.line-rule h4 .idx{font-family:var(--mono);font-size:10px;color:var(--gold-deep)}
+.line-rule p{font-size:12.5px;line-height:1.6;color:#9A948A}
+
+/* ══════════ GRAMMAR ══════════ */
+.glyph-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:14px;margin-top:48px}
+.glyph{background:var(--night-raise);border:1px solid var(--night-line);border-radius:16px;padding:22px 20px;text-align:center}
+.glyph .box{height:74px;display:flex;align-items:center;justify-content:center;margin-bottom:14px}
+.glyph h4{font-size:13px;font-weight:600}
+.glyph p{font-size:11.5px;line-height:1.5;color:#8F8A80;margin-top:5px}
+
+/* ══════════ TYPOGRAPHY ══════════ */
+.type-stage{margin-top:48px;display:grid;gap:1px;background:#D7D2C5;border:1px solid #D7D2C5;border-radius:20px;overflow:hidden}
+.type-row{background:var(--plaster);padding:34px 36px;display:grid;grid-template-columns:190px 1fr;gap:28px;align-items:baseline}
+@media(max-width:760px){.type-row{grid-template-columns:1fr;gap:8px}}
+.type-row .spec{font-family:var(--mono);font-size:10.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--ink-soft);line-height:1.9}
+.type-row .spec b{color:var(--coral-deep);font-weight:600;display:block}
+.type-row .sample{color:var(--ink)}
+
+/* ══════════ ICON COINS ══════════ */
+.coin-belt{margin-top:54px;position:relative;padding:70px 0}
+.coin-row{display:flex;justify-content:center;gap:clamp(18px,4vw,44px);flex-wrap:wrap;position:relative}
+.coin{width:104px;text-align:center}
+.coin .disc{width:88px;height:88px;margin:0 auto;border-radius:50%;position:relative;display:flex;align-items:center;justify-content:center;border:1.5px solid;transition:transform .35s cubic-bezier(.2,.9,.3,1.4)}
+.coin:hover .disc{transform:translateY(-7px) rotate(-4deg)}
+.coin .disc::before{content:"";position:absolute;inset:5px;border-radius:50%;border:1px dashed rgba(0,0,0,.25)}
+.coin .lbl{margin-top:12px;font-size:11.5px;font-weight:600;color:#B6B0A4}
+.coin .lbl .ar{display:block;font-size:10.5px;color:#7B766C;margin-top:2px;font-weight:400}
+
+/* ══════════ COMPONENTS ══════════ */
+.comp-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:24px;margin-top:50px}
+@media(max-width:820px){.comp-grid{grid-template-columns:1fr}}
+.comp{border-radius:20px;overflow:hidden;position:relative}
+.comp .tag{position:absolute;top:16px;right:18px;z-index:5;font-family:var(--mono);font-size:9.5px;letter-spacing:.18em;text-transform:uppercase;padding:4px 9px;border-radius:100px;background:rgba(18,16,21,.75);color:var(--gold-bright);border:1px solid var(--gold-deep)}
+/* note card */
+.notecard{background:var(--plaster);padding:34px;min-height:280px}
+.paper-note{background:#fff;position:relative;border-radius:4px;padding:26px 24px 22px;max-width:330px;margin:0 auto;box-shadow:0 14px 34px -12px rgba(29,27,24,.28);transform:rotate(-1.2deg)}
+.paper-note.coral-n{background:var(--coral)}
+.paper-note .corner{position:absolute;width:14px;height:14px;border:1.6px solid var(--ink);opacity:.85}
+.paper-note .corner.tl{top:10px;left:10px;border-right:none;border-bottom:none}
+.paper-note .corner.br{bottom:10px;right:10px;border-left:none;border-top:none}
+.paper-note .dots{position:absolute;right:14px;top:40px;width:38px;height:56px;opacity:.35;
+  background-image:radial-gradient(var(--ink) 1.1px,transparent 1.1px);background-size:9px 9px}
+.paper-note h4{font-family:var(--arabic);font-size:17px;font-weight:700;color:var(--ink);text-align:center;margin-top:36px}
+.paper-note p{font-family:var(--arabic);font-size:12px;line-height:1.85;color:rgba(29,27,24,.75);text-align:center;margin-top:8px}
+.paper-note .seal{width:44px;height:44px;border-radius:50%;background:var(--ink);margin:0 auto;display:flex;align-items:center;justify-content:center}
+/* buttons */
+.btn-stage{background:var(--night-raise);border:1px solid var(--night-line);padding:34px;display:flex;flex-direction:column;gap:16px;align-items:flex-start;justify-content:center;min-height:280px}
+.btn{font-family:var(--sans);font-size:14.5px;font-weight:600;letter-spacing:.01em;border-radius:100px;padding:13px 26px;cursor:pointer;border:none;display:inline-flex;align-items:center;gap:10px;transition:all .25s ease}
+.btn.primary{background:var(--gold-foil);color:#241505;box-shadow:0 6px 20px -6px rgba(217,156,85,.45)}
+.btn.primary:hover{transform:translateY(-2px);box-shadow:0 10px 26px -6px rgba(217,156,85,.6)}
+.btn.ghost{background:transparent;color:var(--gold-bright);border:1.5px solid var(--gold-deep)}
+.btn.ghost:hover{border-color:var(--gold);background:rgba(217,156,85,.08)}
+.btn.paper{background:var(--starlight);color:var(--ink)}
+.btn.quiet{background:transparent;color:#9A948A;padding:13px 6px}
+.btn.quiet:hover{color:var(--starlight)}
+/* progress orbit strip */
+.orbit-strip{background:var(--night-raise);border:1px solid var(--night-line);padding:0;min-height:280px;position:relative;overflow:hidden}
+/* chips paper */
+.chip-stage{background:var(--plaster);padding:34px;min-height:280px;display:flex;flex-direction:column;gap:18px;justify-content:center}
+.fieldrow{display:flex;gap:10px;flex-wrap:wrap}
+.pillchip{font-size:13px;font-weight:600;padding:9px 18px;border-radius:100px;border:1.5px solid transparent;cursor:pointer;transition:all .2s}
+.pillchip.c1{background:#F7E4E1;color:var(--coral-deep)}
+.pillchip.c2{background:#DDF2EE;color:var(--mint-deep)}
+.pillchip.c3{background:#F5F0CE;color:var(--sand-deep)}
+.pillchip.c4{background:#E2E6F9;color:var(--peri-deep)}
+.pillchip.sel{border-color:var(--ink);box-shadow:2px 2px 0 var(--ink)}
+.inputrow{background:#fff;border:1.5px solid #D7D2C5;border-radius:14px;padding:14px 18px;display:flex;align-items:center;gap:12px;max-width:360px}
+.inputrow input{border:none;outline:none;font-family:var(--sans);font-size:14px;background:transparent;flex:1;color:var(--ink)}
+
+/* ══════════ MOTION ══════════ */
+.motion-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-top:48px}
+@media(max-width:800px){.motion-grid{grid-template-columns:1fr}}
+.motion-card{background:var(--night-raise);border:1px solid var(--night-line);border-radius:16px;padding:26px;min-height:190px;display:flex;flex-direction:column;justify-content:flex-end;position:relative;overflow:hidden}
+.motion-card h4{font-size:14px;font-weight:600;color:var(--starlight)}
+.motion-card p{font-size:12px;line-height:1.55;color:#8F8A80;margin-top:5px}
+.motion-card .demo{position:absolute;top:22px;right:22px}
+@keyframes drift{from{transform:rotate(0)}to{transform:rotate(360deg)}}
+@keyframes dashspin{to{stroke-dashoffset:-100}}
+@keyframes rise{0%{transform:translateY(16px);opacity:0}100%{transform:translateY(0);opacity:1}}
+@media(prefers-reduced-motion:reduce){*,*::before,*::after{animation:none!important;transition:none!important}}
+
+/* ══════════ DON'T ══════════ */
+.dont-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:14px;margin-top:46px}
+@media(max-width:760px){.dont-grid{grid-template-columns:1fr}}
+.dont{border:1px solid var(--night-line);border-radius:16px;padding:22px 24px;display:flex;gap:16px;align-items:flex-start}
+.dont .x{font-family:var(--mono);color:var(--coral);font-size:15px;font-weight:700;flex-shrink:0;margin-top:1px}
+.dont p{font-size:13px;line-height:1.6;color:#9A948A}
+.dont p strong{color:var(--starlight);font-weight:600}
+
+footer{border-top:1px solid var(--night-line);padding:44px 0 60px}
+footer .wrap{display:flex;justify-content:space-between;flex-wrap:wrap;gap:14px;font-family:var(--mono);font-size:10.5px;letter-spacing:.2em;text-transform:uppercase;color:#6E6960}
+
+/* paper sections */
+.paper-section{background:var(--plaster);color:var(--ink)}
+</style>
+</head>
+<body>
+
+<!-- ═══════════ HERO ═══════════ -->
+<header class="hero grain">
+  <div class="sky" id="sky">
+    <!-- flowing dotted waves -->
+    <svg class="waveband" style="top:12%" width="100%" height="120" viewBox="0 0 1400 120" preserveAspectRatio="none" fill="none">
+      <path d="M0 70 C 220 20, 420 110, 700 60 S 1180 10, 1400 70" stroke="#F2EFE7" stroke-opacity=".35" stroke-width="1"/>
+      <path d="M0 95 C 260 50, 460 130, 740 85 S 1200 40, 1400 95" stroke="#F2EFE7" stroke-opacity=".18" stroke-width="1" stroke-dasharray="1 7"/>
+    </svg>
+    <svg class="waveband" style="bottom:16%" width="100%" height="140" viewBox="0 0 1400 140" preserveAspectRatio="none" fill="none">
+      <path d="M0 40 C 300 110, 560 10, 860 80 S 1260 130, 1400 60" stroke="#F2EFE7" stroke-opacity=".28" stroke-width="1"/>
+      <path d="M0 70 C 320 140, 600 40, 900 105 S 1290 150, 1400 90" stroke="#D99C55" stroke-opacity=".3" stroke-width="1" stroke-dasharray="1 6"/>
+    </svg>
+    <!-- crescent -->
+    <svg style="top:9%;left:56%" width="54" height="54" viewBox="0 0 54 54" fill="none">
+      <path d="M36 8 A 22 22 0 1 0 36 46 A 17 17 0 1 1 36 8 Z" fill="#F2EFE7"/>
+    </svg>
+    <!-- compass star -->
+    <svg style="top:16%;left:9%" width="66" height="66" viewBox="0 0 66 66" fill="none" stroke="#F2EFE7" stroke-width="1.4">
+      <path d="M33 4 L36 30 L62 33 L36 36 L33 62 L30 36 L4 33 L30 30 Z" fill="#F2EFE7" stroke="none"/>
+      <path d="M33 14 L33 52 M14 33 L52 33" stroke-opacity=".5" stroke-width=".8"/>
+    </svg>
+  </div>
+  <!-- saturn line art -->
+  <div class="saturn-wrap">
+    <svg viewBox="0 0 520 420" fill="none">
+      <defs>
+        <linearGradient id="foil" x1="0" y1="0" x2="1" y2="1">
+          <stop offset="0" stop-color="#B37B3C"/><stop offset=".38" stop-color="#EFC183"/>
+          <stop offset=".6" stop-color="#D99C55"/><stop offset="1" stop-color="#8F5F2E"/>
+        </linearGradient>
+      </defs>
+      <circle cx="260" cy="210" r="132" stroke="url(#foil)" stroke-width="3.5"/>
+      <ellipse cx="260" cy="210" rx="248" ry="62" transform="rotate(-16 260 210)" stroke="url(#foil)" stroke-width="3.5"/>
+      <ellipse cx="260" cy="210" rx="220" ry="50" transform="rotate(-16 260 210)" stroke="url(#foil)" stroke-width="2"/>
+      <ellipse cx="260" cy="210" rx="196" ry="41" transform="rotate(-16 260 210)" stroke="url(#foil)" stroke-width="1.2" stroke-opacity=".7"/>
+      <path d="M418 96 l3 8 8 3 -8 3 -3 8 -3 -8 -8 -3 8 -3 Z" fill="#F2EFE7"/>
+      <circle cx="96" cy="330" r="2" fill="#F2EFE7"/>
+    </svg>
+  </div>
+  <div class="wrap" style="position:relative;z-index:3">
+    <div class="kicker"><span class="num">NOON /</span> VISUAL SYSTEM · V1</div>
+    <h1 class="hero-title">Guiding<br><span class="g">Lights</span></h1>
+    <div class="hero-sub">
+      <span class="ar-line">أضواء تهديك في رحلة طلب العلم</span>
+      <span class="en-line">Seeking knowledge is a journey, navigated by stars.</span>
+    </div>
+  </div>
+  <div class="hero-meta"><div class="wrap"><span>Astrolabe · Journey route · Star map</span><span>Sibling of The Empty Quarter</span></div></div>
+</header>
+
+<!-- ═══════════ PRINCIPLES ═══════════ -->
+<div class="principles">
+  <div class="principle grain">
+    <svg class="mark" viewBox="0 0 44 44" fill="none" stroke="#D99C55" stroke-width="1.5">
+      <circle cx="22" cy="22" r="17"/><circle cx="22" cy="22" r="10" stroke-dasharray="2 4"/><circle cx="35" cy="10" r="3" fill="#D99C55" stroke="none"/>
+    </svg>
+    <h3>The night guides</h3>
+    <p>Dark sky is where wonder and way-finding live: heroes, milestones, progression maps. Gold is the voice that points the way — drawn as line, spent sparingly.</p>
+  </div>
+  <div class="principle grain">
+    <svg class="mark" viewBox="0 0 44 44" fill="none">
+      <rect x="6" y="8" width="32" height="28" rx="2" fill="#EDEAE2"/>
+      <path d="M11 13 h10 M11 18 h22 M11 23 h22 M11 28 h16" stroke="#1D1B18" stroke-width="1.5" stroke-opacity=".55"/>
+    </svg>
+    <h3>The paper carries</h3>
+    <p>Reading, answering and doing happen on chalky plaster paper. Four textured pastels classify content — coral, mint, sand, periwinkle — never as pure decoration.</p>
+  </div>
+  <div class="principle grain">
+    <svg class="mark" viewBox="0 0 44 44" fill="none" stroke="#F2EFE7" stroke-width="1.4">
+      <path d="M6 34 C 14 12, 30 12, 38 30" stroke-dasharray="1 5"/>
+      <path d="M22 8 l2 5 5 2 -5 2 -2 5 -2 -5 -5 -2 5 -2 Z" fill="#F2EFE7" stroke="none"/>
+      <circle cx="6" cy="34" r="2.4" fill="#D99C55" stroke="none"/>
+    </svg>
+    <h3>The journey is drawn</h3>
+    <p>Progress is a route between stars: dotted trails, orbit paths, badge coins earned at each station. Every screen knows where the traveller came from and what is next.</p>
+  </div>
+</div>
+
+<!-- ═══════════ SURFACES ═══════════ -->
+<section class="grain">
+  <div class="wrap">
+    <div class="kicker"><span class="num">01</span> SURFACES</div>
+    <h2>Two skies, one journey</h2>
+    <p class="lede">Guiding Lights is a <strong>dual-surface system</strong>. Night is the sky you navigate; daylight paper is the ground you work on. Screens may be all-night, all-paper, or stacked — but each band commits fully to its surface.</p>
+
+    <div class="surface-duo">
+      <div class="surface-card night-c grain">
+        <div class="art">
+          <svg width="100%" height="100%" viewBox="0 0 480 260" preserveAspectRatio="xMidYMid slice" fill="none">
+            <path d="M-10 200 C 90 140, 200 240, 300 170 S 470 90, 500 140" stroke="#F2EFE7" stroke-opacity=".3" stroke-width="1"/>
+            <path d="M40 60 L120 100 L210 52 L300 96" stroke="#D99C55" stroke-width="1.2" stroke-dasharray="1 5"/>
+            <circle cx="40" cy="60" r="3" fill="#D99C55"/><circle cx="120" cy="100" r="2.2" fill="#F2EFE7"/>
+            <circle cx="210" cy="52" r="2.2" fill="#F2EFE7"/><circle cx="300" cy="96" r="3.4" fill="#EFC183"/>
+            <path d="M382 40 l2.5 6.5 6.5 2.5 -6.5 2.5 -2.5 6.5 -2.5 -6.5 -6.5 -2.5 6.5 -2.5Z" fill="#F2EFE7"/>
+            <circle cx="150" cy="180" r="1.6" fill="#F2EFE7" opacity=".7"/><circle cx="330" cy="210" r="1.6" fill="#F2EFE7" opacity=".5"/>
+            <circle cx="430" cy="180" r="26" stroke="#D99C55" stroke-width="1.4"/>
+            <ellipse cx="430" cy="180" rx="44" ry="10" transform="rotate(-14 430 180)" stroke="#D99C55" stroke-width="1.2"/>
+          </svg>
+        </div>
+        <div class="info">
+          <h3>Night <span class="ar">الليل</span></h3>
+          <p>Warm near-black <b style="color:var(--gold-bright)">#121015</b> — never pure black. Starlight lines at low opacity, gold as the single guiding accent.</p>
+          <div class="usecase"><span>Heroes</span><span>Journey maps</span><span>Milestones</span><span>Celebrations</span><span>Covers</span></div>
+        </div>
+      </div>
+      <div class="surface-card day-c grain">
+        <div class="art" style="background:var(--plaster)">
+          <svg width="100%" height="100%" viewBox="0 0 480 260" preserveAspectRatio="xMidYMid slice" fill="none">
+            <path d="M-20 190 C 120 120, 300 230, 500 150 L500 280 L-20 280 Z" fill="#E5D96E" opacity=".9"/>
+            <path d="M-20 210 C 140 150, 320 250, 500 180" stroke="#1D1B18" stroke-opacity=".12" stroke-width="1"/>
+            <rect x="52" y="44" width="120" height="86" rx="3" fill="#DE8E85" transform="rotate(-3 112 87)"/>
+            <rect x="200" y="58" width="120" height="86" rx="3" fill="#7BCFC0" transform="rotate(2 260 101)"/>
+            <rect x="348" y="40" width="104" height="86" rx="3" fill="#6F7FDD" transform="rotate(-2 400 83)"/>
+          </svg>
+        </div>
+        <div class="info">
+          <h3>Daylight paper <span class="ar">النهار</span></h3>
+          <p>Chalky plaster <b style="color:var(--coral-deep)">#EDEAE2</b> with visible grain. Ink for words; the four pastels label, group, and sort content.</p>
+          <div class="usecase"><span>Lessons</span><span>Reading</span><span>Forms</span><span>Lists</span><span>Notes</span></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="bridge-note">
+      <svg width="72" height="40" viewBox="0 0 72 40" fill="none">
+        <path d="M4 40 A 32 32 0 0 1 68 40" fill="#DE8E85"/>
+        <path d="M0 40 A 36 36 0 0 1 72 40" stroke="#EFC183" stroke-width="1.2" stroke-dasharray="1 5" fill="none"/>
+      </svg>
+      <p><strong>The planet-rise is the bridge.</strong> When a screen moves between night and paper, the seam is a huge textured arc — coral rising over night, night cresting over paper. Never a hard straight cut between the two worlds.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════ PALETTE ═══════════ -->
+<section class="paper-section grain on-paper">
+  <div class="wrap">
+    <div class="kicker"><span class="num">02</span> PALETTE</div>
+    <h2>Gold speaks, pastels sort</h2>
+    <p class="lede">Two small families, strictly cast. On night, <strong>gold is the only voice</strong> — everything else is starlight. On paper, <strong>ink talks and the four pastels classify</strong>. Neither family borrows the other's job.</p>
+
+    <div class="pal-group">
+      <div class="pal-label">Night family — الليل</div>
+      <div class="chips">
+        <div class="chip grain" style="background:#121015;color:#F2EFE7;border:1px solid #2B2732">
+          <span class="dot" style="background:#121015;border:1px solid #3A3542"></span>
+          <span class="nm">Midnight</span><span class="ar-nm">منتصف الليل</span>
+          <span class="hx">#121015</span><span class="role">Canvas. Warm, never #000.</span>
+        </div>
+        <div class="chip grain" style="background:#1A171E;color:#F2EFE7;border:1px solid #2B2732">
+          <span class="dot" style="background:#1A171E;border:1px solid #3A3542"></span>
+          <span class="nm">Night raise</span><span class="ar-nm">سطح مرتفع</span>
+          <span class="hx">#1A171E</span><span class="role">Cards & rails on night.</span>
+        </div>
+        <div class="chip grain" style="background:linear-gradient(135deg,#B37B3C,#EFC183 40%,#D99C55 60%,#8F5F2E);color:#241505">
+          <span class="dot" style="background:#241505;opacity:.25"></span>
+          <span class="nm">Guiding gold</span><span class="ar-nm">ذهب الدليل</span>
+          <span class="hx">#D99C55 · foil</span><span class="role">Line first. Foil fill only on suns, seals, primary action.</span>
+        </div>
+        <div class="chip grain" style="background:#F2EFE7;color:#1D1B18">
+          <span class="dot" style="background:#1D1B18;opacity:.15"></span>
+          <span class="nm">Starlight</span><span class="ar-nm">ضوء النجوم</span>
+          <span class="hx">#F2EFE7</span><span class="role">Stars, waves, text on night.</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="pal-group">
+      <div class="pal-label">Daylight family — النهار</div>
+      <div class="chips">
+        <div class="chip grain" style="background:#EDEAE2;color:#1D1B18;border:1px solid #D7D2C5">
+          <span class="dot" style="background:#1D1B18;opacity:.12"></span>
+          <span class="nm">Plaster</span><span class="ar-nm">جص</span>
+          <span class="hx">#EDEAE2</span><span class="role">Paper ground. Always grained.</span>
+        </div>
+        <div class="chip grain" style="background:#DE8E85;color:#3E1713">
+          <span class="dot" style="background:#B9655C"></span>
+          <span class="nm">Coral</span><span class="ar-nm">مرجاني</span>
+          <span class="hx">#DE8E85</span><span class="role">Heat · milestones · planet-rise.</span>
+        </div>
+        <div class="chip grain" style="background:#7BCFC0;color:#0F332C">
+          <span class="dot" style="background:#3E9A8B"></span>
+          <span class="nm">Mint</span><span class="ar-nm">نعناعي</span>
+          <span class="hx">#7BCFC0</span><span class="role">Fresh starts · welcome bands.</span>
+        </div>
+        <div class="chip grain" style="background:#E5D96E;color:#3A3208">
+          <span class="dot" style="background:#A99B31"></span>
+          <span class="nm">Sand</span><span class="ar-nm">رملي</span>
+          <span class="hx">#E5D96E</span><span class="role">Practice · the wave ribbon.</span>
+        </div>
+        <div class="chip grain" style="background:#6F7FDD;color:#EDEAF9">
+          <span class="dot" style="background:#4353AE"></span>
+          <span class="nm">Periwinkle</span><span class="ar-nm">بنفسجي فاتح</span>
+          <span class="hx">#6F7FDD</span><span class="role">Depth · challenge · evening study.</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="ratio-bar" aria-hidden="true">
+      <div style="flex:5.2;background:#121015;color:#8F8A80">night 40%</div>
+      <div style="flex:5.2;background:#EDEAE2;color:#57534B;border-left:1px solid #D7D2C5">plaster 40%</div>
+      <div style="flex:1.6;background:#DE8E85;color:#3E1713">pastel 12%</div>
+      <div style="flex:1;background:linear-gradient(135deg,#B37B3C,#EFC183,#8F5F2E);color:#241505">gold 8%</div>
+    </div>
+    <p class="pal-rule"><strong>Casting rule:</strong> gold never appears on paper surfaces (its foil dies on plaster), and the pastels never appear on night at full field size — on night they shrink to coin fills and route stops. Text on pastels always uses the deep companion tone, never white.</p>
+  </div>
+</section>
+
+<!-- ═══════════ LINE WORK ═══════════ -->
+<section class="grain">
+  <div class="wrap">
+    <div class="kicker"><span class="num">03</span> LINE WORK</div>
+    <h2>Drawn by one hand</h2>
+    <p class="lede">All celestial drawing shares one pen: <strong>even weight, round caps, generous curves</strong>. It should feel like an astronomer's plate engraved in gold — precise but warm, never technical wireframe.</p>
+
+    <div class="line-lab">
+      <div class="line-stage grain">
+        <svg width="100%" viewBox="0 0 420 330" fill="none">
+          <defs>
+            <linearGradient id="foil2" x1="0" y1="0" x2="1" y2="1">
+              <stop offset="0" stop-color="#B37B3C"/><stop offset=".38" stop-color="#EFC183"/>
+              <stop offset=".6" stop-color="#D99C55"/><stop offset="1" stop-color="#8F5F2E"/>
+            </linearGradient>
+          </defs>
+          <!-- sun -->
+          <circle cx="110" cy="250" r="40" fill="url(#foil2)"/>
+          <g stroke="#D99C55" stroke-width="1.5" stroke-linecap="round">
+            <path d="M110 192 v-16 M110 308 v16 M52 250 h-16 M168 250 h16"/>
+            <path d="M69 209 l-11 -11 M151 209 l11 -11 M69 291 l-11 11 M151 291 l11 11" />
+            <path d="M83 200 q-6 -14 2 -22 M137 200 q6 -14 -2 -22" stroke-width="1.2"/>
+          </g>
+          <!-- orbit rings + moon -->
+          <circle cx="290" cy="120" r="78" stroke="#D99C55" stroke-width="1.5"/>
+          <circle cx="290" cy="120" r="58" stroke="#D99C55" stroke-width="1" stroke-dasharray="1 6"/>
+          <path d="M312 92 A 34 34 0 1 0 312 148 A 26 26 0 1 1 312 92 Z" fill="url(#foil2)"/>
+          <circle cx="368" cy="120" r="5" fill="#EFC183"/>
+          <circle cx="290" cy="42" r="2.6" fill="#F2EFE7"/>
+          <!-- constellation -->
+          <path d="M40 60 L110 96 L180 52" stroke="#F2EFE7" stroke-opacity=".8" stroke-width="1" stroke-dasharray="1 5"/>
+          <circle cx="40" cy="60" r="2.6" fill="#F2EFE7"/><circle cx="110" cy="96" r="2.2" fill="#F2EFE7"/>
+          <path d="M180 52 l2.6 6.8 6.8 2.6 -6.8 2.6 -2.6 6.8 -2.6 -6.8 -6.8 -2.6 6.8 -2.6Z" fill="#EFC183"/>
+        </svg>
+      </div>
+      <div class="line-rules">
+        <div class="line-rule"><h4><span class="idx">R1</span>One weight per plate</h4><p>Primary strokes 1.5px at 1×; secondary detail 1px. Never mix more than two weights in one drawing.</p></div>
+        <div class="line-rule"><h4><span class="idx">R2</span>Gold draws, starlight whispers</h4><p>Named objects (sun, moon, planet, astrolabe) are gold. Ambient sky — waves, stray stars, dotted trails — is starlight at 20–40% opacity.</p></div>
+        <div class="line-rule"><h4><span class="idx">R3</span>Foil is a reward</h4><p>The gradient foil fill marks what matters most: one sun, one seal, one earned badge per view. Everything else stays hollow line.</p></div>
+        <div class="line-rule"><h4><span class="idx">R4</span>Dashes mean movement</h4><p>Dotted strokes (1 on / 5–7 off) are reserved for routes, orbits and trails — things that travel. Static objects use solid line.</p></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════ ANNOTATION GRAMMAR ═══════════ -->
+<section class="grain" style="padding-top:0">
+  <div class="wrap">
+    <div class="kicker"><span class="num">04</span> ANNOTATION GRAMMAR</div>
+    <h2>Marks in the margin</h2>
+    <p class="lede">Small punctuation borrowed from the astronomer's notebook. They sit <strong>in margins and corners at 8–16px</strong>, in ink on paper or starlight on night — quiet field notes, never the headline.</p>
+    <div class="glyph-grid">
+      <div class="glyph"><div class="box">
+        <svg width="40" height="40" viewBox="0 0 40 40"><path d="M20 4 l3 13 13 3 -13 3 -3 13 -3 -13 -13 -3 13 -3Z" fill="#F2EFE7"/></svg>
+      </div><h4>Spark ✦</h4><p>Something noteworthy nearby. Max two per view.</p></div>
+      <div class="glyph"><div class="box">
+        <svg width="34" height="34" viewBox="0 0 34 34" stroke="#F2EFE7" stroke-width="2" stroke-linecap="round"><path d="M8 8 L26 26 M26 8 L8 26"/></svg>
+      </div><h4>Cross ×</h4><p>A visited waypoint; a plotted point on the map.</p></div>
+      <div class="glyph"><div class="box">
+        <svg width="52" height="52" viewBox="0 0 52 52" fill="none"><circle cx="26" cy="26" r="20" stroke="#F2EFE7" stroke-width="1.5" stroke-dasharray="2 6" stroke-linecap="round"/></svg>
+      </div><h4>Dashed halo</h4><p>Focus ring; a place not yet reached. Slowly rotates.</p></div>
+      <div class="glyph"><div class="box">
+        <svg width="46" height="46" viewBox="0 0 46 46" fill="none" stroke="#F2EFE7" stroke-width="2"><path d="M4 14 V4 h10 M32 4 h10 v10 M42 32 v10 h-10 M14 42 H4 v-10"/></svg>
+      </div><h4>Corner brackets</h4><p>Frames the pinned or selected. Full set of four, or TL+BR pair.</p></div>
+      <div class="glyph"><div class="box">
+        <svg width="52" height="40" viewBox="0 0 52 40"><g fill="#F2EFE7"><circle cx="6" cy="6" r="1.6"/><circle cx="19" cy="6" r="1.6"/><circle cx="32" cy="6" r="1.6"/><circle cx="45" cy="6" r="1.6"/><circle cx="6" cy="19" r="1.6"/><circle cx="19" cy="19" r="1.6"/><circle cx="32" cy="19" r="1.6"/><circle cx="45" cy="19" r="1.6"/><circle cx="6" cy="32" r="1.6"/><circle cx="19" cy="32" r="1.6"/><circle cx="32" cy="32" r="1.6"/><circle cx="45" cy="32" r="1.6"/></g></svg>
+      </div><h4>Dot field</h4><p>Texture patch behind cards and photos. 9px grid, ≤40% opacity.</p></div>
+      <div class="glyph"><div class="box">
+        <svg width="56" height="24" viewBox="0 0 56 24" fill="none" stroke="#F2EFE7" stroke-width="1.6" stroke-linecap="round"><path d="M2 16 L10 8 L18 16 L26 8 L34 16 L42 8 L50 16"/></svg>
+      </div><h4>Zigzag</h4><p>Hand-ruled divider on paper notes. Short runs only.</p></div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════ TYPOGRAPHY ═══════════ -->
+<section class="paper-section grain on-paper">
+  <div class="wrap">
+    <div class="kicker"><span class="num">05</span> TYPOGRAPHY</div>
+    <h2>One voice, two scripts</h2>
+    <p class="lede">Continuity with the wider Noon family: <strong>Hanken Grotesk</strong> for Latin, <strong>IBM Plex Sans Arabic</strong> for Arabic. Arabic is a first-class citizen — it leads on learner-facing surfaces, with Latin as the companion.</p>
+    <div class="type-stage">
+      <div class="type-row"><div class="spec"><b>Display / 800</b>Hanken Grotesk<br>−3.5% tracking · 0.98 lh</div><div class="sample" style="font-size:56px;font-weight:800;letter-spacing:-.035em;line-height:.98">Navigate by starlight</div></div>
+      <div class="type-row"><div class="spec"><b>Display AR / 700</b>IBM Plex Sans Arabic<br>1.3 lh</div><div class="sample ar" style="font-size:42px;font-weight:700;line-height:1.3">رحلتك تبدأ من هنا</div></div>
+      <div class="type-row"><div class="spec"><b>Title / 600</b>24px · −1% tracking</div><div class="sample" style="font-size:24px;font-weight:600;letter-spacing:-.01em">Your first constellation is complete</div></div>
+      <div class="type-row"><div class="spec"><b>Body / 400</b>16px · 1.65 lh</div><div class="sample" style="font-size:16px;line-height:1.65;max-width:560px">Every scholar once travelled from city to city with their curiosity, studying under starlight. The path may look different now, but the spirit is just as brave.</div></div>
+      <div class="type-row"><div class="spec"><b>Body AR / 400</b>15px · 1.9 lh</div><div class="sample ar" dir="rtl" style="font-size:15px;line-height:1.9;max-width:560px">تجربة صفية متميزة، مدعومة بالذكاء الاصطناعي، مستندة إلى خبرة تعليم أكثر من ٢٠ مليون طالب.</div></div>
+      <div class="type-row"><div class="spec"><b>Waymark / mono</b>10.5px · +22% tracking · caps</div><div class="sample" style="font-family:var(--mono);font-size:10.5px;letter-spacing:.22em;text-transform:uppercase;color:var(--ink-soft)">STATION 03 · <bdi class="ar">مهارات المستقبل</bdi> · 12 MIN</div></div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════ BADGE COINS ═══════════ -->
+<section class="grain">
+  <div class="wrap">
+    <div class="kicker"><span class="num">06</span> BADGE COINS</div>
+    <h2>Stations along the route</h2>
+    <p class="lede">Achievements are <strong>minted coins hung on orbit paths</strong> — textured pastel discs with an inner dashed ring and a simple line-drawn emblem. Earned coins get the gold foil; unearned coins stay as night-etched ghosts.</p>
+    <div class="coin-belt">
+      <svg style="position:absolute;inset:0;width:100%;height:100%" viewBox="0 0 1000 240" preserveAspectRatio="none" fill="none">
+        <path d="M-20 170 C 200 60, 420 220, 640 110 S 940 40, 1020 130" stroke="#D99C55" stroke-opacity=".45" stroke-width="1.2" stroke-dasharray="1 6"/>
+      </svg>
+      <div class="coin-row">
+        <div class="coin"><div class="disc grain" style="background:#1A171E;border-color:#2B2732;color:#57524B">
+          <svg width="34" height="34" viewBox="0 0 34 34" fill="none" stroke="#57524B" stroke-width="1.5"><circle cx="17" cy="17" r="9"/><path d="M17 2 v5 M17 27 v5 M2 17 h5 M27 17 h5"/></svg>
+        </div><div class="lbl">Locked<span class="ar">لم تُفتح بعد</span></div></div>
+        <div class="coin"><div class="disc grain" style="background:#DE8E85;border-color:#B9655C">
+          <svg width="36" height="36" viewBox="0 0 36 36" fill="none" stroke="#3E1713" stroke-width="1.6" stroke-linecap="round"><path d="M8 26 L24 10 M24 10 l-1 7 M24 10 l-7 1"/><circle cx="27" cy="25" r="3.4"/></svg>
+        </div><div class="lbl">Comet<span class="ar">المذنّب</span></div></div>
+        <div class="coin"><div class="disc grain" style="background:#E5D96E;border-color:#A99B31">
+          <svg width="34" height="34" viewBox="0 0 34 34" fill="none" stroke="#3A3208" stroke-width="1.6" stroke-linejoin="round"><path d="M19 3 L11 19 h6 L14 31 L25 14 h-7 Z"/></svg>
+        </div><div class="lbl">Spark<span class="ar">الشرارة</span></div></div>
+        <div class="coin"><div class="disc grain" style="background:#7BCFC0;border-color:#3E9A8B">
+          <svg width="34" height="34" viewBox="0 0 34 34" fill="none" stroke="#0F332C" stroke-width="1.6"><path d="M17 4 L20 14 L30 17 L20 20 L17 30 L14 20 L4 17 L14 14 Z" stroke-linejoin="round"/></svg>
+        </div><div class="lbl">Pole star<span class="ar">النجم القطبي</span></div></div>
+        <div class="coin"><div class="disc grain" style="background:linear-gradient(135deg,#B37B3C,#EFC183 40%,#D99C55 62%,#8F5F2E);border-color:#EFC183;box-shadow:0 0 28px -4px rgba(217,156,85,.55)">
+          <svg width="36" height="36" viewBox="0 0 36 36" fill="none" stroke="#241505" stroke-width="1.6"><circle cx="18" cy="18" r="7"/><ellipse cx="18" cy="18" rx="14" ry="4.5" transform="rotate(-16 18 18)"/></svg>
+        </div><div class="lbl" style="color:var(--gold-bright)">Voyager · earned<span class="ar">الرحّالة</span></div></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════ COMPONENTS ═══════════ -->
+<section class="grain" style="padding-top:20px">
+  <div class="wrap">
+    <div class="kicker"><span class="num">07</span> COMPONENTS</div>
+    <h2>The working parts</h2>
+    <p class="lede">Each component belongs to one surface. Paper pieces tilt slightly and cast soft shadow — pinned, not printed. Night pieces sit flat and glow only when earned.</p>
+
+    <div class="comp-grid">
+      <div class="comp notecard grain"><span class="tag">Paper note</span>
+        <div class="paper-note coral-n grain">
+          <span class="corner tl"></span><span class="corner br"></span><span class="dots"></span>
+          <div class="seal"><svg width="22" height="22" viewBox="0 0 22 22" fill="none" stroke="#EFC183" stroke-width="1.4"><circle cx="11" cy="11" r="5"/><ellipse cx="11" cy="11" rx="9.5" ry="3.2" transform="rotate(-16 11 11)"/></svg></div>
+          <h4>مهارات المستقبل</h4>
+          <p>نُنمّي مهارات الذكاء الاصطناعي لدى الطلاب، وندرّبهم على توظيفها في البرمجة وريادة الأعمال.</p>
+        </div>
+      </div>
+      <div class="comp btn-stage grain"><span class="tag">Actions · night</span>
+        <button class="btn primary">Begin the journey
+          <svg width="15" height="15" viewBox="0 0 15 15" fill="none" stroke="#241505" stroke-width="1.8" stroke-linecap="round"><path d="M2 7.5 h10 M8 3 l4.5 4.5 L8 12"/></svg>
+        </button>
+        <button class="btn ghost">View the star map</button>
+        <div style="display:flex;gap:14px;align-items:center">
+          <button class="btn paper">Continue</button>
+          <button class="btn quiet">Not now</button>
+        </div>
+      </div>
+      <div class="comp orbit-strip grain"><span class="tag">Progress orbit</span>
+        <svg width="100%" height="100%" viewBox="0 0 480 280" preserveAspectRatio="xMidYMid slice" fill="none" style="position:absolute;inset:0">
+          <path d="M-40 395 A 320 320 0 0 1 520 395" fill="#DE8E85"/>
+          <path d="M-55 385 A 330 330 0 0 1 535 385" stroke="#EFC183" stroke-width="1.2" stroke-dasharray="1 6" fill="none"/>
+          <path d="M-30 210 C 120 130, 320 250, 510 150" stroke="#D99C55" stroke-opacity=".5" stroke-width="1.2" stroke-dasharray="1 6"/>
+          <circle cx="96" cy="172" r="16" fill="#E5D96E"/><path d="M92 172 l3 3 6 -6" stroke="#3A3208" stroke-width="1.8" stroke-linecap="round"/>
+          <circle cx="234" cy="190" r="16" fill="#7BCFC0"/><path d="M230 190 l3 3 6 -6" stroke="#0F332C" stroke-width="1.8" stroke-linecap="round"/>
+          <g>
+            <circle cx="372" cy="176" r="19" fill="url(#foil2)"/>
+            <circle cx="372" cy="176" r="26" stroke="#EFC183" stroke-width="1.2" stroke-dasharray="2 5"/>
+          </g>
+          <text x="96" y="212" fill="#8F8A80" font-size="10" text-anchor="middle" font-family="ui-monospace" letter-spacing="1.5">ST.01</text>
+          <text x="234" y="230" fill="#8F8A80" font-size="10" text-anchor="middle" font-family="ui-monospace" letter-spacing="1.5">ST.02</text>
+          <text x="372" y="216" fill="#EFC183" font-size="10" text-anchor="middle" font-family="ui-monospace" letter-spacing="1.5">YOU</text>
+        </svg>
+      </div>
+      <div class="comp chip-stage grain"><span class="tag">Paper inputs</span>
+        <div class="fieldrow">
+          <span class="pillchip c1 sel">رياضيات</span>
+          <span class="pillchip c2">علوم</span>
+          <span class="pillchip c3">برمجة</span>
+          <span class="pillchip c4">لغة إنجليزية</span>
+        </div>
+        <div class="inputrow">
+          <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="#57534B" stroke-width="1.5"><circle cx="7" cy="7" r="5"/><path d="M11 11 l3.5 3.5" stroke-linecap="round"/></svg>
+          <input placeholder="Search the star map…">
+        </div>
+        <div style="font-family:var(--mono);font-size:10px;letter-spacing:.16em;text-transform:uppercase;color:var(--ink-soft)">Selected chip = ink border + 2px ink offset shadow</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════ MOTION ═══════════ -->
+<section class="grain" style="padding-top:10px">
+  <div class="wrap">
+    <div class="kicker"><span class="num">08</span> MOTION</div>
+    <h2>The sky breathes slowly</h2>
+    <p class="lede">Nothing darts. Celestial motion is <strong>slow, continuous, and easy to ignore</strong>; interface motion is a short soft rise. Respect <span style="font-family:var(--mono);font-size:13px">prefers-reduced-motion</span> everywhere.</p>
+    <div class="motion-grid">
+      <div class="motion-card grain"><div class="demo">
+        <svg width="44" height="44" viewBox="0 0 44 44" fill="none"><circle cx="22" cy="22" r="17" stroke="#D99C55" stroke-width="1.2" stroke-dasharray="2 6" style="animation:drift 24s linear infinite;transform-origin:center"/><circle cx="22" cy="5" r="3" fill="#EFC183" style="animation:drift 24s linear infinite;transform-origin:22px 22px"/></svg>
+        </div><h4>Orbit drift</h4><p>Halos and moons circle at 20–40s per revolution. Ambient only.</p></div>
+      <div class="motion-card grain"><div class="demo">
+        <svg width="44" height="44" viewBox="0 0 44 44"><path d="M22 8 l3.4 10.6 10.6 3.4 -10.6 3.4 -3.4 10.6 -3.4 -10.6 -10.6 -3.4 10.6 -3.4Z" fill="#F2EFE7" style="animation:twinkle 3.4s ease-in-out infinite"/></svg>
+        </div><h4>Twinkle</h4><p>Stars fade 15→85% opacity over 3–5s, offset so the sky never pulses in sync.</p></div>
+      <div class="motion-card grain"><div class="demo">
+        <div style="width:40px;height:40px;border-radius:10px;background:var(--plaster);animation:rise .6s cubic-bezier(.2,.8,.3,1) infinite alternate"></div>
+        </div><h4>Soft rise</h4><p>Content enters with 16px rise + fade, 350–500ms, staggered 60ms. No bounces on paper.</p></div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════ DON'T ═══════════ -->
+<section class="grain" style="padding-top:10px">
+  <div class="wrap">
+    <div class="kicker"><span class="num">09</span> KEEP IT TRUE</div>
+    <h2>What Guiding Lights refuses</h2>
+    <div class="dont-grid">
+      <div class="dont"><span class="x">✕</span><p><strong>No merging with Empty Quarter.</strong> No terracotta, no octagon/dune patterns, no EQ semantic roles. Sibling systems, separate wardrobes.</p></div>
+      <div class="dont"><span class="x">✕</span><p><strong>No neon, no sci-fi.</strong> This is the astronomer's night, not cyberspace. No electric greens, no glow-grids, no chrome.</p></div>
+      <div class="dont"><span class="x">✕</span><p><strong>No gold floods.</strong> Gold is line and rare foil rewards — never large filled panels, never body text, never on paper surfaces.</p></div>
+      <div class="dont"><span class="x">✕</span><p><strong>No flat untextured pastels.</strong> Every pastel field carries the grain. A smooth vector pastel belongs to another brand.</p></div>
+      <div class="dont"><span class="x">✕</span><p><strong>No hard seams between worlds.</strong> Night meets paper only through the planet-rise arc or a wave, never a straight edge.</p></div>
+      <div class="dont"><span class="x">✕</span><p><strong>No decorative Arabic.</strong> Arabic leads communication; it is never shrunk to an ornament under English.</p></div>
+    </div>
+  </div>
+</section>
+
+<footer class="grain">
+  <div class="wrap">
+    <span>Guiding Lights · V1 · Noon</span>
+    <span class="ar" style="letter-spacing:0;font-size:12px">أضواء الدرب</span>
+    <span>Night guides · Paper carries</span>
+  </div>
+</footer>
+
+<script>
+// scatter ambient stars in the hero
+const sky=document.getElementById('sky');
+for(let i=0;i<70;i++){
+  const s=document.createElement('span');s.className='star';
+  s.style.left=Math.random()*100+'%';s.style.top=Math.random()*100+'%';
+  const sc=.5+Math.random()*1.6;s.style.transform=`scale(${sc})`;
+  s.style.animationDelay=(Math.random()*4)+'s';s.style.animationDuration=(3+Math.random()*4)+'s';
+  sky.appendChild(s);
+}
+</script>
+</body>
+</html>

@@ -6,7 +6,7 @@
 <title>Presenter Opening — sequence directions</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Crimson+Pro:ital,wght@0,300;0,400;0,500;0,600;0,700;1,300;1,400&family=JetBrains+Mono:wght@400;500;600&family=Vazirmatn:wght@300;400;500;600;700&family=Noto+Naskh+Arabic:wght@400;500;600&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&family=IBM+Plex+Sans+Arabic:wght@300;400;500;600&display=swap" rel="stylesheet">
 <style>
   /* ──────────────────────────────────────────────────────────────────────
      CONTROL ATTRIBUTES — set on .app, all switchable via the control panel.
@@ -34,25 +34,32 @@
 
   /* ───── Noon tokens (void theme + terra warmth) ───── */
   :root {
-    --bg: #0a0f1a;
-    --bg-sunken: #060913;
-    --bg-raised: #10172a;
-    --bg-overlay: #1a2236;
-    --paper-100: #fbf8ef;
-    --fg: rgba(232, 228, 220, 1);
-    --fg-muted: rgba(232, 228, 220, 0.70);
-    --fg-subtle: rgba(232, 228, 220, 0.55);
-    --fg-faint: rgba(232, 228, 220, 0.35);
-    --border: rgba(232, 228, 220, 0.10);
-    --border-strong: rgba(232, 228, 220, 0.22);
-    --divider: rgba(232, 228, 220, 0.06);
-    --hover-overlay: rgba(232, 228, 220, 0.04);
-    --active-overlay: rgba(232, 228, 220, 0.08);
+    --bg: #26282E;
+    --bg-sunken: #1F2126;
+    --bg-raised: #2C2F36;
+    --bg-overlay: #30333B;
+    --paper-100: #F1EBDD;
+    --fg: rgba(241, 235, 221, 1);
+    --fg-muted: rgba(241, 235, 221, 0.70);
+    --fg-subtle: rgba(241, 235, 221, 0.55);
+    --fg-faint: rgba(241, 235, 221, 0.35);
+    --border: rgba(241, 235, 221, 0.10);
+    --border-strong: rgba(241, 235, 221, 0.22);
+    --divider: rgba(241, 235, 221, 0.06);
+    --hover-overlay: rgba(241, 235, 221, 0.04);
+    --active-overlay: rgba(241, 235, 221, 0.08);
     --accent: #64D8AE;
-    --signal: #c9a227;
-    --signal-bright: #e0b83a;
-    --signal-soft: rgba(201, 162, 39, 0.18);
-    --signal-glow: rgba(240, 207, 90, 0.5);
+    --signal: #A94E2A;
+    --signal-bright: #C6663F;
+    --signal-soft: rgba(169, 76, 42, 0.18);
+    --signal-glow: rgba(169, 76, 42, 0.5);
+    --water: #7C99B4;   /* progression / current position (on ink) */
+    --teal: #5E8C7F;    /* intelligence layer (on ink) */
+    --purple: #9D8CFF;  /* AI tutor voice (on ink) */
+    --terra: #BC5A37;   /* terracotta hero surface / teacher rim */
+    --deep-rust: #96431F;/* deepest warm accent */
+    --ember: #E8663A;   /* heat/urgency role — reserved, not decoration */
+    --cream: #F1EBDD;   /* warm oak survives on ink as type */
     --danger: #c55a4e;
     --danger-soft: rgba(197, 90, 78, 0.10);
     --danger-border: rgba(197, 90, 78, 0.40);
@@ -62,10 +69,10 @@
     --sp-2: 8px; --sp-3: 12px; --sp-4: 16px; --sp-5: 20px;
     --sp-6: 24px; --sp-7: 32px; --sp-8: 40px;
     --r-2: 4px; --r-3: 6px; --r-4: 8px; --r-pill: 999px;
-    --font-sans: 'Vazirmatn', system-ui, sans-serif;
-    --font-serif: 'Crimson Pro', Georgia, serif;
+    --font-sans: 'Hanken Grotesk', system-ui, sans-serif;
+    --font-serif: 'Hanken Grotesk', system-ui, sans-serif;
     --font-mono: 'JetBrains Mono', ui-monospace, monospace;
-    --font-arabic: 'Noto Naskh Arabic', serif;
+    --font-arabic: 'IBM Plex Sans Arabic', sans-serif;
   }
   * { box-sizing: border-box; }
   html, body { height: 100%; }
@@ -87,8 +94,8 @@
      BACKDROP — stars, north star, landscape (topo OR dunes)
      ────────────────────────────────────────────────────────────────────── */
   .sky-stars { position: absolute; inset: 0; pointer-events: none; z-index: 0;
-    filter: brightness(1.6) drop-shadow(0 0 1.5px rgba(240,207,90,0.85))
-                              drop-shadow(0 0 4px rgba(240,207,90,0.4));
+    filter: brightness(1.6) drop-shadow(0 0 1.5px rgba(169,76,42,0.85))
+                              drop-shadow(0 0 4px rgba(169,76,42,0.4));
     transition: opacity 600ms ease, filter 600ms ease;
   }
   .sky-stars .star { position: absolute; border-radius: 50%;
@@ -101,7 +108,7 @@
   /* glow tier */
   .app[data-bg-glow="off"] .sky-stars { filter: none; }
   .app[data-bg-glow="subtle"] .sky-stars {
-    filter: brightness(1.25) drop-shadow(0 0 1px rgba(240,207,90,0.45));
+    filter: brightness(1.25) drop-shadow(0 0 1px rgba(169,76,42,0.45));
   }
 
   .north-star {
@@ -112,15 +119,16 @@
   }
   .north-star > * { position: absolute; left: 50%; top: 50%; transform: translate(-50%,-50%); }
   .north-star__halo { border-radius: 50%; }
-  .north-star__halo--1 { width: 52px; height: 52px; background: rgba(201,162,39,0.06); }
-  .north-star__halo--2 { width: 32px; height: 32px; background: rgba(201,162,39,0.14); }
-  .north-star__halo--3 { width: 18px; height: 18px; background: rgba(201,162,39,0.30); }
-  .north-star__shimmer { background: rgba(232,184,58,0.55); }
+  .north-star__halo--1 { width: 52px; height: 52px; background: rgba(188,90,55,0.06); }
+  .north-star__halo--2 { width: 32px; height: 32px; background: rgba(188,90,55,0.14); }
+  .north-star__halo--3 { width: 18px; height: 18px; background: rgba(188,90,55,0.30); }
+  .north-star__shimmer { background: rgba(169,76,42,0.55); }
   .north-star__shimmer--h { width: 44px; height: 1px; }
   .north-star__shimmer--v { width: 1px;  height: 44px; }
-  .north-star__core { width: 7px; height: 7px; border-radius: 50%; background: rgba(240,207,90,1); }
+  .north-star__core { width: 7px; height: 7px; border-radius: 50%; background: rgba(169,76,42,1); }
   @keyframes star-twinkle { 0%,100% { opacity:.65 } 50% { opacity:1 } }
   .app[data-bg-northstar="off"] .north-star { display: none; }
+  .app[data-bg-stars="off"] .sky-stars { display: none; }
 
   /* ── Landscape: drifting dunes ── */
   .dunes {
@@ -284,7 +292,7 @@
     padding: 8px 16px;
     border: 1px solid var(--border);
     border-radius: var(--r-2);
-    background: rgba(10,15,26,0.6);
+    background: rgba(38,40,46,0.6);
     color: var(--fg-muted);
   }
   .mc-strip__dot {
@@ -355,14 +363,14 @@
   .mc-cross {
     position: absolute; inset: 0; pointer-events: none;
     background-image:
-      linear-gradient(to right, transparent calc(50% - 0.5px), rgba(232,228,220,0.04) calc(50% - 0.5px), rgba(232,228,220,0.04) calc(50% + 0.5px), transparent calc(50% + 0.5px)),
-      linear-gradient(to bottom, transparent calc(50% - 0.5px), rgba(232,228,220,0.04) calc(50% - 0.5px), rgba(232,228,220,0.04) calc(50% + 0.5px), transparent calc(50% + 0.5px));
+      linear-gradient(to right, transparent calc(50% - 0.5px), rgba(241,235,221,0.04) calc(50% - 0.5px), rgba(241,235,221,0.04) calc(50% + 0.5px), transparent calc(50% + 0.5px)),
+      linear-gradient(to bottom, transparent calc(50% - 0.5px), rgba(241,235,221,0.04) calc(50% - 0.5px), rgba(241,235,221,0.04) calc(50% + 0.5px), transparent calc(50% + 0.5px));
   }
   .mc-scanlines {
     position: absolute; inset: 0; pointer-events: none;
     background-image: repeating-linear-gradient(
       to bottom, transparent 0, transparent 2px,
-      rgba(232,228,220,0.018) 2px, rgba(232,228,220,0.018) 3px);
+      rgba(241,235,221,0.018) 2px, rgba(241,235,221,0.018) 3px);
   }
 
   /* ─── C · CINEMATIC ─── */
@@ -386,7 +394,7 @@
     color: var(--fg-muted);
     direction: rtl;
     letter-spacing: 0;
-    text-shadow: 0 0 32px rgba(232,228,220,0.18);
+    text-shadow: 0 0 32px rgba(241,235,221,0.18);
   }
   .cin-label__en {
     font-family: var(--font-mono);
@@ -411,8 +419,8 @@
     font-variant-numeric: tabular-nums;
     letter-spacing: -0.04em;
     text-shadow:
-      0 0 40px rgba(240,207,90,0.45),
-      0 0 120px rgba(240,207,90,0.22);
+      0 0 40px rgba(169,76,42,0.45),
+      0 0 120px rgba(169,76,42,0.22);
     will-change: transform, opacity;
   }
   /* Outgoing exits faster than incoming arrives, so the new digit doesn't
@@ -450,15 +458,15 @@
     left: 50%; bottom: 18vh; transform: translateX(-50%);
     width: 12%; height: 1px;
     background: linear-gradient(to right,
-      transparent 0%, rgba(240,207,90,0.6) 50%, transparent 100%);
-    box-shadow: 0 0 24px rgba(240,207,90,0.35);
+      transparent 0%, rgba(169,76,42,0.6) 50%, transparent 100%);
+    box-shadow: 0 0 24px rgba(169,76,42,0.35);
     opacity: 0;
   }
   /* Vignette + dimmed backdrop active only in cinematic mode */
   .vignette {
     position: absolute; inset: 0; z-index: 2; pointer-events: none;
     background: radial-gradient(ellipse at center,
-      transparent 30%, rgba(6, 9, 19, 0.45) 65%, rgba(6, 9, 19, 0.85) 100%);
+      transparent 30%, rgba(31, 33, 38, 0.45) 65%, rgba(31, 33, 38, 0.85) 100%);
     opacity: 0; transition: opacity 800ms ease;
   }
   /* Countdown dimming — applies to ALL countdown styles so the number is
@@ -535,7 +543,7 @@
   .sands-streak {
     width: 0; height: 1px;
     background: linear-gradient(to right,
-      transparent 0%, rgba(232,180,154,0.5) 30%, rgba(240,207,90,0.8) 50%,
+      transparent 0%, rgba(232,180,154,0.5) 30%, rgba(169,76,42,0.8) 50%,
       rgba(232,180,154,0.5) 70%, transparent 100%);
     transition: width 600ms cubic-bezier(.2,.7,.3,1), opacity 600ms ease;
   }
@@ -639,7 +647,7 @@
     font-size: 22px; font-weight: 500;
     color: var(--fg-muted);
     direction: rtl;
-    text-shadow: 0 0 24px rgba(232,228,220,0.14);
+    text-shadow: 0 0 24px rgba(241,235,221,0.14);
   }
   .cos-label__en {
     font-family: var(--font-mono);
@@ -681,7 +689,7 @@
      circumference (gold tick at 12, sparkle riding the arc, small portal
      at the opposite quadrant). The digit uses SVG <text> with
      dominant-baseline: central — same approach as the sands variant —
-     because CSS line-box centering on Crimson Pro drifts off-center as
+     because CSS line-box centering on Hanken Grotesk drifts off-center as
      the digit value changes (1 vs 10 occupy different visual extents).
      SVG baseline gives pixel-perfect optical centering for every digit. */
   .cos-hero {
@@ -714,7 +722,7 @@
     display: block;
     overflow: visible;
     pointer-events: none;
-    filter: drop-shadow(0 0 18px rgba(232, 228, 220, 0.08));
+    filter: drop-shadow(0 0 18px rgba(241, 235, 221, 0.08));
   }
   .cos-digit text {
     font-family: var(--font-serif);
@@ -737,7 +745,7 @@
   }
 
   /* Latin signature script at bottom — matches the references' flowing
-     handwritten footer. Italic Crimson Pro at weight 300 gives the
+     handwritten footer. Italic Hanken Grotesk at weight 300 gives the
      calligraphic feel without needing a script font load. */
   .cos-footer {
     position: absolute;
@@ -816,16 +824,16 @@
     border-radius: 50%;
     background-image: url('assets/teacher-ali.jpg.png');
     background-size: cover; background-position: center;
-    box-shadow: 0 0 0 1.5px rgba(232,228,220,0.20),
+    box-shadow: 0 0 0 1.5px rgba(241,235,221,0.20),
                 0 12px 32px rgba(0,0,0,0.45),
-                0 0 80px rgba(232,117,90,0.12);
+                0 0 80px rgba(188,90,55,0.12);
   }
   .teacher-circle::before {
     content: '';
     position: absolute; inset: -8px;
     border-radius: 50%;
-    border: 1.5px solid rgba(232,117,90,0.55);
-    box-shadow: 0 0 28px rgba(232,117,90,0.35);
+    border: 1.5px solid rgba(188,90,55,0.55);
+    box-shadow: 0 0 28px rgba(188,90,55,0.35);
     animation: rim-breath 3s ease-in-out infinite;
   }
   @keyframes rim-breath {
@@ -971,7 +979,7 @@
      fades with the parent. */
   .app[data-countdown="cosmos"][data-phase="teacher"] .cos-ring {
     border-color: var(--signal-bright);
-    box-shadow: 0 0 24px rgba(201,162,39,0.30);
+    box-shadow: 0 0 24px rgba(188,90,55,0.30);
     transition: border-color 320ms ease, box-shadow 320ms ease;
   }
   /* Cosmos's ring (~340px max) is smaller than teacher's 380px. The
@@ -1040,12 +1048,12 @@
     position: absolute; inset: 0;
     border-radius: inherit;
     background-size: cover; background-position: center;
-    box-shadow: 0 0 0 1.5px rgba(232,228,220,0.20),
+    box-shadow: 0 0 0 1.5px rgba(241,235,221,0.20),
                 0 12px 32px rgba(0,0,0,0.45);
     z-index: 1;
   }
   .member--classroom .member__photo {
-    box-shadow: 0 0 0 1px rgba(232,228,220,0.18),
+    box-shadow: 0 0 0 1px rgba(241,235,221,0.18),
                 0 8px 20px rgba(0,0,0,0.4);
   }
 
@@ -1054,14 +1062,14 @@
     content: '';
     position: absolute; inset: -5%;
     border-radius: 50%;
-    border: 1.5px dashed rgba(232,228,220,0.32);
+    border: 1.5px dashed rgba(241,235,221,0.32);
     pointer-events: none;
     z-index: 0;
   }
   /* teacher reuses the rim-breath animation from .teacher-circle::before */
   .member--teacher .member__circle::before {
-    border: 1.5px solid rgba(232,117,90,0.55);
-    box-shadow: 0 0 28px rgba(232,117,90,0.35);
+    border: 1.5px solid rgba(188,90,55,0.55);
+    box-shadow: 0 0 28px rgba(188,90,55,0.35);
     animation: rim-breath 3s ease-in-out infinite;
   }
 
@@ -1083,7 +1091,7 @@
     position: absolute;
     right: 4%; bottom: 4%;
     width: 30px; height: 30px;
-    background: rgba(10,15,26,0.85);
+    background: rgba(38,40,46,0.85);
     border-radius: 50%;
     border: 1px solid var(--border-strong);
     display: inline-flex; align-items: center; justify-content: center;
@@ -1126,7 +1134,7 @@
     --team-cloud:     #c9c4b8;  /* chalk-300 */
     --team-crystal:   #B08AF9;  /* iris */
     --team-fire:      #c55a4e;  /* danger */
-    --team-lightning: #e0b83a;  /* gold-300 */
+    --team-lightning: #D2A47A;  /* dune oak */
     --team-rainstorm: #6BA3FF;  /* blue-400 */
     --team-tornado:   #8e8a80;  /* chalk-400 */
     --team-tsunami:   #64D8AE;  /* noon-400 */
@@ -1598,8 +1606,8 @@
     width: 100%; max-width: 100%; max-height: 100%;
     border-radius: var(--r-4);
     background: var(--paper-100); overflow: hidden;
-    box-shadow: inset 0 0 0 1px rgba(10,15,26,0.10),
-                0 1px 0 rgba(232,228,220,0.04),
+    box-shadow: inset 0 0 0 1px rgba(38,40,46,0.10),
+                0 1px 0 rgba(241,235,221,0.04),
                 0 8px 32px rgba(0,0,0,0.35);
     display: flex; flex-direction: column;
     align-items: center; justify-content: center;
@@ -1608,31 +1616,31 @@
   .stage::before {
     content: ''; position: absolute; inset: 0;
     background-image:
-      linear-gradient(to right, rgba(10,15,26,0.045) 1px, transparent 1px),
-      linear-gradient(to bottom, rgba(10,15,26,0.045) 1px, transparent 1px);
+      linear-gradient(to right, rgba(38,40,46,0.045) 1px, transparent 1px),
+      linear-gradient(to bottom, rgba(38,40,46,0.045) 1px, transparent 1px);
     background-size: 24px 24px;
   }
   .stage::after {
     content: ''; position: absolute; inset: 0;
     background-image:
-      linear-gradient(to right, rgba(201,162,39,0.10) 1px, transparent 1px),
-      linear-gradient(to bottom, rgba(201,162,39,0.10) 1px, transparent 1px);
+      linear-gradient(to right, rgba(188,90,55,0.10) 1px, transparent 1px),
+      linear-gradient(to bottom, rgba(188,90,55,0.10) 1px, transparent 1px);
     background-size: 96px 96px;
   }
   .slide-eyebrow {
     position: relative; z-index: 1;
     font-family: var(--font-mono); font-size: 11px;
     letter-spacing: 0.32em; text-transform: uppercase;
-    color: rgba(10,15,26,0.55); margin-bottom: var(--sp-4);
+    color: rgba(38,40,46,0.55); margin-bottom: var(--sp-4);
   }
   .slide-title {
     position: relative; z-index: 1;
     font-family: var(--font-serif); font-size: 56px;
-    font-weight: 500; color: rgba(10,15,26,0.92);
+    font-weight: 500; color: rgba(38,40,46,0.92);
     line-height: 1.1; letter-spacing: -0.015em;
     max-width: 720px;
   }
-  .slide-title em { color: #c9a227; font-style: italic; }
+  .slide-title em { color: #BC5A37; font-style: italic; }
   .sidebar {
     display: flex; flex-direction: column; gap: var(--sp-4);
     /* min-height:0 lets the inner flex children (chat) actually shrink and
@@ -1661,19 +1669,19 @@
   }
   @keyframes focus-speak-breath {
     0%, 100% {
-      box-shadow: inset 0 0 0 1px rgba(232,117,90,0.55),
-                  0 0 0 1px rgba(232,117,90,0.18),
-                  0 0 18px rgba(232,117,90,0.22);
+      box-shadow: inset 0 0 0 1px rgba(188,90,55,0.55),
+                  0 0 0 1px rgba(188,90,55,0.18),
+                  0 0 18px rgba(188,90,55,0.22);
     }
     50% {
-      box-shadow: inset 0 0 0 1.5px rgba(232,117,90,0.85),
-                  0 0 0 1.5px rgba(232,117,90,0.40),
-                  0 0 32px rgba(232,117,90,0.45);
+      box-shadow: inset 0 0 0 1.5px rgba(188,90,55,0.85),
+                  0 0 0 1.5px rgba(188,90,55,0.40),
+                  0 0 32px rgba(188,90,55,0.45);
     }
   }
   .focus__overlay {
     position: absolute; inset: 0;
-    background: linear-gradient(to top, rgba(10,15,26,0.88) 0%, rgba(10,15,26,0) 50%);
+    background: linear-gradient(to top, rgba(38,40,46,0.88) 0%, rgba(38,40,46,0) 50%);
   }
   /* Teacher PiP — top-left. Default chrome is a neutral chalk frame;
      when teacher is speaker, a coral box-shadow breath takes over. */
@@ -1682,7 +1690,7 @@
     width: 56px; height: 56px; border-radius: var(--r-3);
     background: center/cover no-repeat url('assets/teacher-ali.jpg.png');
     background-position: center 20%;
-    box-shadow: 0 0 0 1.5px rgba(232,228,220,0.30),
+    box-shadow: 0 0 0 1.5px rgba(241,235,221,0.30),
                 0 4px 12px rgba(0,0,0,0.4);
     transition: box-shadow 600ms ease;
   }
@@ -1691,13 +1699,13 @@
   }
   @keyframes pip-speak-breath {
     0%, 100% {
-      box-shadow: 0 0 0 1.5px rgba(232,117,90,0.45),
-                  0 0 10px rgba(232,117,90,0.18),
+      box-shadow: 0 0 0 1.5px rgba(188,90,55,0.45),
+                  0 0 10px rgba(188,90,55,0.18),
                   0 4px 12px rgba(0,0,0,0.4);
     }
     50% {
-      box-shadow: 0 0 0 2.5px rgba(232,117,90,0.85),
-                  0 0 22px rgba(232,117,90,0.42),
+      box-shadow: 0 0 0 2.5px rgba(188,90,55,0.85),
+                  0 0 22px rgba(188,90,55,0.42),
                   0 4px 12px rgba(0,0,0,0.4);
     }
   }
@@ -1745,8 +1753,8 @@
     color: #E8755A; font-weight: 600;
   }
   .roster__item.is-speaking .roster__avatar {
-    border-color: rgba(232,117,90,0.55);
-    box-shadow: 0 0 14px rgba(232,117,90,0.35);
+    border-color: rgba(188,90,55,0.55);
+    box-shadow: 0 0 14px rgba(188,90,55,0.35);
   }
 
   /* ── Class chat — heading + flowing message cards ── */
@@ -1787,7 +1795,7 @@
     /* Fresh-message arrival animation */
     animation: msg-in 320ms cubic-bezier(.16,.8,.24,1) backwards;
   }
-  .msg.is-fresh { border-color: rgba(232,184,58,0.20); }
+  .msg.is-fresh { border-color: rgba(169,76,42,0.20); }
   @keyframes msg-in {
     from { opacity: 0; transform: translateY(8px); }
     to   { opacity: 1; transform: translateY(0); }
@@ -1866,7 +1874,7 @@
     display: none;
     margin-top: var(--sp-2);
     padding: var(--sp-3) var(--sp-4);
-    background: rgba(10,15,26,0.92);
+    background: rgba(38,40,46,0.92);
     backdrop-filter: blur(12px);
     -webkit-backdrop-filter: blur(12px);
     border: 1px solid var(--border);
@@ -1938,10 +1946,10 @@
   .cp-btn:hover { color: var(--fg); background: var(--active-overlay); border-color: var(--border-strong); }
   .cp-btn--primary {
     color: var(--signal-bright);
-    border-color: rgba(232,184,58,0.4);
+    border-color: rgba(169,76,42,0.4);
   }
   .cp-btn--primary:hover {
-    background: rgba(232,184,58,0.08);
+    background: rgba(169,76,42,0.08);
     color: var(--signal-bright);
   }
 </style>
@@ -1955,10 +1963,10 @@
      data-card-layout="row"
      data-duration="10"
      data-teacher-hold="5"
-     data-bg-stars="dense"
-     data-bg-glow="strong"
-     data-bg-northstar="on"
-     data-bg-landscape="lab-starry-sky">
+     data-bg-stars="off"
+     data-bg-glow="off"
+     data-bg-northstar="off"
+     data-bg-landscape="off">
 
   <!-- ── Backdrop: stars ── -->
   <div class="sky-stars" aria-hidden="true">
@@ -1986,32 +1994,32 @@
       <defs>
         <linearGradient id="dune-far" x1="0" x2="0" y1="0" y2="1">
           <stop offset="0%"   stop-color="rgba(212,149,110,0.04)"/>   <!-- terra hint -->
-          <stop offset="100%" stop-color="rgba(26,34,54,0.30)"/>      <!-- void-100 -->
+          <stop offset="100%" stop-color="rgba(44,47,54,0.30)"/>      <!-- void-100 -->
         </linearGradient>
       </defs>
       <path d="M0,240 L0,180 C160,160 320,120 480,130 C640,140 760,170 920,160 C1080,150 1220,110 1440,120 L1440,120 C1600,160 1760,120 1920,130 C2080,140 2200,170 2360,160 C2520,150 2660,110 2880,120 L2880,240 Z" fill="url(#dune-far)"/>
-      <path d="M0,180 C160,160 320,120 480,130 C640,140 760,170 920,160 C1080,150 1220,110 1440,120 C1600,160 1760,120 1920,130 C2080,140 2200,170 2360,160 C2520,150 2660,110 2880,120" fill="none" stroke="rgba(232,228,220,0.10)" stroke-width="0.6"/>
+      <path d="M0,180 C160,160 320,120 480,130 C640,140 760,170 920,160 C1080,150 1220,110 1440,120 C1600,160 1760,120 1920,130 C2080,140 2200,170 2360,160 C2520,150 2660,110 2880,120" fill="none" stroke="rgba(241,235,221,0.10)" stroke-width="0.6"/>
     </svg>
     <svg class="mid" viewBox="0 0 2880 240" preserveAspectRatio="none">
       <defs>
         <linearGradient id="dune-mid" x1="0" x2="0" y1="0" y2="1">
           <stop offset="0%"   stop-color="rgba(212,149,110,0.07)"/>   <!-- terra whisper -->
-          <stop offset="100%" stop-color="rgba(16,23,42,0.42)"/>      <!-- void-200 -->
+          <stop offset="100%" stop-color="rgba(38,40,46,0.42)"/>      <!-- void-200 -->
         </linearGradient>
       </defs>
       <path d="M0,240 L0,160 C200,110 400,80 600,110 C800,140 940,180 1200,150 C1340,135 1440,90 1440,90 L1440,90 C1640,110 1840,80 2040,110 C2240,140 2380,180 2640,150 C2780,135 2880,90 2880,90 L2880,240 Z" fill="url(#dune-mid)"/>
-      <path d="M0,160 C200,110 400,80 600,110 C800,140 940,180 1200,150 C1340,135 1440,90 1440,90 C1640,110 1840,80 2040,110 C2240,140 2380,180 2640,150 C2780,135 2880,90 2880,90" fill="none" stroke="rgba(232,228,220,0.18)" stroke-width="0.8"/>
-      <path d="M0,160 C200,110 400,80 600,110 C800,140 940,180 1200,150 C1340,135 1440,90 1440,90 C1640,110 1840,80 2040,110 C2240,140 2380,180 2640,150 C2780,135 2880,90 2880,90" fill="none" stroke="rgba(201,162,39,0.22)" stroke-width="0.5" stroke-dasharray="2 6" stroke-linecap="round"/>
+      <path d="M0,160 C200,110 400,80 600,110 C800,140 940,180 1200,150 C1340,135 1440,90 1440,90 C1640,110 1840,80 2040,110 C2240,140 2380,180 2640,150 C2780,135 2880,90 2880,90" fill="none" stroke="rgba(241,235,221,0.18)" stroke-width="0.8"/>
+      <path d="M0,160 C200,110 400,80 600,110 C800,140 940,180 1200,150 C1340,135 1440,90 1440,90 C1640,110 1840,80 2040,110 C2240,140 2380,180 2640,150 C2780,135 2880,90 2880,90" fill="none" stroke="rgba(188,90,55,0.22)" stroke-width="0.5" stroke-dasharray="2 6" stroke-linecap="round"/>
     </svg>
     <svg class="near" viewBox="0 0 2880 240" preserveAspectRatio="none">
       <defs>
         <linearGradient id="dune-near" x1="0" x2="0" y1="0" y2="1">
           <stop offset="0%"   stop-color="rgba(138,78,42,0.22)"/>      <!-- terra-600 trace -->
-          <stop offset="100%" stop-color="rgba(10,15,26,0.85)"/>       <!-- void-300 base -->
+          <stop offset="100%" stop-color="rgba(38,40,46,0.85)"/>       <!-- void-300 base -->
         </linearGradient>
       </defs>
       <path d="M0,240 L0,120 C160,80 360,40 560,80 C760,120 920,170 1200,140 C1380,120 1440,60 1440,60 L1440,60 C1600,80 1800,40 2000,80 C2200,120 2360,170 2640,140 C2820,120 2880,60 2880,60 L2880,240 Z" fill="url(#dune-near)"/>
-      <path d="M0,120 C160,80 360,40 560,80 C760,120 920,170 1200,140 C1380,120 1440,60 1440,60 C1600,80 1800,40 2000,80 C2200,120 2360,170 2640,140 C2820,120 2880,60 2880,60" fill="none" stroke="rgba(232,228,220,0.32)" stroke-width="0.9" filter="drop-shadow(0 0 3px rgba(232,228,220,0.14))"/>
+      <path d="M0,120 C160,80 360,40 560,80 C760,120 920,170 1200,140 C1380,120 1440,60 1440,60 C1600,80 1800,40 2000,80 C2200,120 2360,170 2640,140 C2820,120 2880,60 2880,60" fill="none" stroke="rgba(241,235,221,0.32)" stroke-width="0.9" filter="drop-shadow(0 0 3px rgba(241,235,221,0.14))"/>
     </svg>
   </div>
 
@@ -2080,7 +2088,7 @@
         </filter>
         <linearGradient id="sand-fill" x1="0" x2="0" y1="0" y2="1">
           <stop offset="0%"   stop-color="#f3cfb3"/>
-          <stop offset="45%"  stop-color="#e0b83a"/>
+          <stop offset="45%"  stop-color="#C6663F"/>
           <stop offset="100%" stop-color="#D4956E"/>
         </linearGradient>
       </defs>
@@ -2198,42 +2206,42 @@
 
         <!-- Faint diagonal trajectory line (BL → TR) -->
         <line x1="115" y1="870" x2="900" y2="120"
-              stroke="rgba(232,228,220,0.18)" stroke-width="0.8"
+              stroke="rgba(241,235,221,0.18)" stroke-width="0.8"
               stroke-dasharray="2 8" opacity="0.6"/>
 
         <!-- Station 1: bottom-left (smaller, quieter) -->
         <g transform="translate(165, 830)">
-          <use href="#cos-portal" width="32" height="32" x="-16" y="-16" color="rgba(232,228,220,0.55)"/>
+          <use href="#cos-portal" width="32" height="32" x="-16" y="-16" color="rgba(241,235,221,0.55)"/>
           <use href="#cos-sparkle-plus" width="14" height="14" x="-7" y="-7" color="#96BCFF" class="twinkle t2"/>
         </g>
         <g transform="translate(225, 740)">
-          <circle cx="0" cy="0" r="22" fill="#e0b83a" opacity="0.06"/>
-          <circle cx="0" cy="0" r="12" fill="#e0b83a" opacity="0.10"/>
-          <use href="#cos-sparkle-big" width="22" height="22" x="-11" y="-11" color="#e0b83a" class="twinkle t3"/>
+          <circle cx="0" cy="0" r="22" fill="#C6663F" opacity="0.06"/>
+          <circle cx="0" cy="0" r="12" fill="#C6663F" opacity="0.10"/>
+          <use href="#cos-sparkle-big" width="22" height="22" x="-11" y="-11" color="#C6663F" class="twinkle t3"/>
         </g>
         <circle cx="290" cy="685" r="3.5" fill="#6BA3FF" class="twinkle t4"/>
 
         <!-- Station 2: middle (sparse, the ring is the hero) -->
         <use href="#cos-sparkle-plus" width="12" height="12" x="434" y="549"
-             color="rgba(232,228,220,0.70)" class="twinkle"/>
+             color="rgba(241,235,221,0.70)" class="twinkle"/>
         <circle cx="560" cy="445" r="2" fill="#96BCFF" opacity="0.7" class="twinkle t5"/>
 
         <!-- Station 3: top-right (larger cluster, constellation halo) -->
         <g transform="translate(720, 290)">
-          <circle cx="0" cy="0" r="34" fill="#e0b83a" opacity="0.06"/>
-          <circle cx="0" cy="0" r="20" fill="#e0b83a" opacity="0.12"/>
-          <use href="#cos-sparkle-big" width="34" height="34" x="-17" y="-17" color="#e0b83a" class="twinkle t3"/>
+          <circle cx="0" cy="0" r="34" fill="#C6663F" opacity="0.06"/>
+          <circle cx="0" cy="0" r="20" fill="#C6663F" opacity="0.12"/>
+          <use href="#cos-sparkle-big" width="34" height="34" x="-17" y="-17" color="#C6663F" class="twinkle t3"/>
         </g>
         <g transform="translate(810, 215)">
-          <use href="#cos-portal" width="28" height="28" x="-14" y="-14" color="rgba(232,228,220,0.70)"/>
+          <use href="#cos-portal" width="28" height="28" x="-14" y="-14" color="rgba(241,235,221,0.70)"/>
         </g>
-        <circle cx="660" cy="345" r="4.5" fill="#c9a227" class="twinkle t2"/>
+        <circle cx="660" cy="345" r="4.5" fill="#BC5A37" class="twinkle t2"/>
         <circle cx="855" cy="170" r="2.5" fill="#6BA3FF" opacity="0.7" class="twinkle t4"/>
         <use href="#cos-sparkle-plus" width="14" height="14" x="756" y="361"
-             color="rgba(232,228,220,0.70)" class="twinkle t5"/>
+             color="rgba(241,235,221,0.70)" class="twinkle t5"/>
 
         <!-- Horizontal chart-tick lines paired with sparkles (image 2 reference) -->
-        <g fill="rgba(232,228,220,0.35)">
+        <g fill="rgba(241,235,221,0.35)">
           <circle cx="225" cy="740" r="0.6"/><circle cx="208" cy="740" r="0.6"/><circle cx="191" cy="740" r="0.6"/>
           <circle cx="174" cy="740" r="0.6"/><circle cx="157" cy="740" r="0.6"/>
           <circle cx="720" cy="290" r="0.6"/><circle cx="737" cy="290" r="0.6"/><circle cx="754" cy="290" r="0.6"/>
@@ -2251,15 +2259,15 @@
         <div class="cos-ring"></div>
         <svg class="cos-ring-deco" viewBox="-100 -100 200 200" aria-hidden="true">
           <!-- Gold tick at 12 o'clock — the journey signal -->
-          <line x1="0" y1="-99" x2="0" y2="-94" stroke="#e0b83a" stroke-width="1"/>
+          <line x1="0" y1="-99" x2="0" y2="-94" stroke="#C6663F" stroke-width="1"/>
           <!-- Sparkle riding the arc at ~30° from top -->
           <g transform="translate(49.5 -85.7)">
-            <circle cx="0" cy="0" r="6" fill="#e0b83a" opacity="0.10"/>
-            <use href="#cos-sparkle-plus" width="10" height="10" x="-5" y="-5" color="#e0b83a" class="twinkle t3"/>
+            <circle cx="0" cy="0" r="6" fill="#C6663F" opacity="0.10"/>
+            <use href="#cos-sparkle-plus" width="10" height="10" x="-5" y="-5" color="#C6663F" class="twinkle t3"/>
           </g>
           <!-- Tiny portal at ~210° (opposite quadrant) -->
           <g transform="translate(-49.5 85.7)">
-            <use href="#cos-portal" width="16" height="16" x="-8" y="-8" color="rgba(232,228,220,0.70)"/>
+            <use href="#cos-portal" width="16" height="16" x="-8" y="-8" color="rgba(241,235,221,0.70)"/>
           </g>
           <!-- Pinpoint blue dot at ~155° -->
           <circle cx="-90.6" cy="42" r="1.5" fill="#96BCFF" class="twinkle t5"/>
@@ -2841,7 +2849,7 @@
       // Serif weight 600 reads as a stout sand-built numeral; size scales
       // with frame height so this works at any prototype size.
       const size = Math.round(H * 0.78);
-      c.font = `600 ${size}px "Crimson Pro", Georgia, serif`;
+      c.font = `500 ${size}px "Hanken Grotesk", system-ui, sans-serif`;
       c.textAlign = 'center';
       c.textBaseline = 'middle';
       c.fillStyle = '#fff';
@@ -3784,7 +3792,7 @@
   function letterAvatar(letter) {
     const svg =
       '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">' +
-      '<text x="32" y="42" text-anchor="middle" font-family="Crimson Pro, Georgia, serif" ' +
+      '<text x="32" y="42" text-anchor="middle" font-family="Hanken Grotesk, system-ui, sans-serif" ' +
       'font-size="32" font-weight="600" fill="white">' + letter + '</text>' +
       '</svg>';
     return 'url("data:image/svg+xml;utf8,' + encodeURIComponent(svg) + '")';

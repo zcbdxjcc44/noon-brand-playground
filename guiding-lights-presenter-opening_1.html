@@ -1,0 +1,527 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Guiding Lights — Presenter Opening</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@400;500;600;700;800&family=IBM+Plex+Sans+Arabic:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+/* ═══════════════════════════════════════════════════════
+   GUIDING LIGHTS — PRESENTER OPENING · V1
+   Phases: teamup → countdown → teacher → slides → stage
+   Night carries the room. Gold guides. Colour is jewellery.
+   ═══════════════════════════════════════════════════════ */
+:root{
+  --night:#121015;--night-raise:#1A171E;--night-high:#221E29;--night-line:#2B2732;
+  --starlight:#F2EFE7;--dim:#8F8A80;--dimmer:#6E6960;
+  --gold:#D99C55;--gold-bright:#EFC183;--gold-deep:#9C6A33;
+  --gold-foil:linear-gradient(135deg,#B37B3C 0%,#EFC183 34%,#D99C55 55%,#8F5F2E 100%);
+  --plaster:#EDEAE2;--ink:#1D1B18;--ink-soft:#57534B;
+  --coral:#DE8E85;--mint:#7BCFC0;--sand:#E5D96E;--peri:#6F7FDD;
+  --coral-deep:#B9655C;--mint-deep:#3E9A8B;--sand-deep:#A99B31;--peri-deep:#4353AE;
+  --sans:'Hanken Grotesk',sans-serif;--arabic:'IBM Plex Sans Arabic',sans-serif;
+  --mono:ui-monospace,'SF Mono',Menlo,monospace;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+html,body{height:100%}
+body{font-family:var(--sans);background:var(--night);color:var(--starlight);overflow:hidden;-webkit-font-smoothing:antialiased}
+.ar{font-family:var(--arabic)}
+button{font-family:inherit;cursor:pointer}
+
+/* grain over everything */
+.grain-veil{position:fixed;inset:0;pointer-events:none;z-index:90;opacity:.45;mix-blend-mode:overlay;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2'/%3E%3C/filter%3E%3Crect width='140' height='140' filter='url(%23n)' opacity='0.5'/%3E%3C/svg%3E")}
+
+/* ambient sky */
+#sky{position:fixed;inset:0;pointer-events:none;z-index:0}
+#sky .star{position:absolute;width:2px;height:2px;border-radius:50%;background:var(--starlight);animation:tw 5s ease-in-out infinite}
+@keyframes tw{0%,100%{opacity:.1}50%{opacity:.65}}
+#sky .wave{position:absolute;left:0;right:0;opacity:.28}
+
+/* ── Topbar (slides phase only) ── */
+.topbar{position:fixed;top:0;left:0;right:0;z-index:40;display:none;align-items:center;justify-content:space-between;padding:14px 22px;background:linear-gradient(180deg,rgba(18,16,21,.92),rgba(18,16,21,0))}
+body[data-phase="slides"] .topbar{display:flex}
+.session-meta{display:flex;align-items:center;gap:16px}
+.time{display:flex;align-items:center;gap:8px;background:var(--night-raise);border:1px solid var(--night-line);border-radius:100px;padding:7px 14px;font-family:var(--mono);font-size:12.5px;letter-spacing:.08em;color:var(--gold-bright)}
+.time .spark{width:9px;height:9px;flex-shrink:0}
+.session-title{font-family:var(--arabic);font-size:15px;font-weight:600;color:var(--starlight)}
+.session-title .en{font-family:var(--mono);font-size:9.5px;letter-spacing:.18em;text-transform:uppercase;color:var(--dimmer);margin-inline-start:10px}
+.tb-controls{display:flex;gap:9px;align-items:center}
+.icon-btn{width:38px;height:38px;border-radius:50%;background:var(--night-raise);border:1px solid var(--night-line);color:var(--starlight);display:flex;align-items:center;justify-content:center;transition:all .2s}
+.icon-btn:hover{border-color:var(--gold-deep);color:var(--gold-bright)}
+.icon-btn .strike{visibility:hidden;stroke:var(--coral)}
+.icon-btn[aria-pressed="true"]{color:var(--dim);border-color:var(--night-line)}
+.icon-btn[aria-pressed="true"] .strike{visibility:visible}
+.avatar-chip{width:38px;height:38px;border-radius:50%;background:var(--night-high);border:1px solid var(--gold-deep);display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;color:var(--gold-bright)}
+
+/* ── Views ── */
+.view{position:fixed;inset:0;z-index:5;display:none}
+body[data-phase="teamup"]   .view-teamup{display:flex}
+body[data-phase="countdown"].cd-orbit-on   .view-cd-orbit{display:flex}
+body[data-phase="countdown"].cd-horizon-on .view-cd-horizon{display:flex}
+body[data-phase="teacher"]  .view-teacher{display:flex}
+body[data-phase="slides"]   .view-slides{display:flex}
+body[data-phase="stage"]    .view-stage{display:flex}
+
+/* ════════ TEAM-UP ════════ */
+.view-teamup{flex-direction:column;padding:34px 40px 120px;gap:22px}
+.tu-head{display:flex;align-items:baseline;justify-content:space-between;flex-wrap:wrap;gap:12px}
+.tu-title{display:flex;flex-direction:column;gap:6px}
+.tu-title .ar-t{font-family:var(--arabic);font-size:26px;font-weight:700}
+.tu-title .en-t{font-family:var(--mono);font-size:10px;letter-spacing:.24em;text-transform:uppercase;color:var(--dim)}
+.tu-counts{display:flex;gap:10px}
+.count-chip{display:flex;align-items:center;gap:8px;background:var(--night-raise);border:1px solid var(--night-line);border-radius:100px;padding:8px 16px;font-size:13px;font-weight:600;color:var(--starlight)}
+.count-chip .dot{width:8px;height:8px;border-radius:50%;background:var(--mint)}
+.count-chip .total{color:var(--dimmer);font-weight:500}
+.team-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:16px;align-content:start;flex:1;overflow:auto;padding-bottom:8px}
+.team-card{background:var(--night-raise);border:1px solid var(--night-line);border-radius:18px;padding:20px 20px 18px;position:relative;overflow:hidden}
+.team-card .tc-head{display:flex;align-items:center;gap:12px;margin-bottom:16px}
+.team-card .tc-coin{width:38px;height:38px;border-radius:50%;position:relative;display:flex;align-items:center;justify-content:center;border:1.4px solid}
+.team-card .tc-coin::before{content:"";position:absolute;inset:3px;border-radius:50%;border:1px dashed rgba(0,0,0,.3)}
+.team-card .tc-name{font-family:var(--arabic);font-size:16px;font-weight:700}
+.team-card .tc-sub{font-family:var(--mono);font-size:8.5px;letter-spacing:.2em;text-transform:uppercase;color:var(--dimmer);margin-top:2px}
+.team-card .tc-members{display:flex;flex-wrap:wrap;gap:10px}
+.member-pip{display:flex;flex-direction:column;align-items:center;gap:5px;width:56px}
+.member-pip .mp-c{width:40px;height:40px;border-radius:50%;background:var(--night-high);border:1px solid var(--night-line);display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;color:var(--starlight)}
+.member-pip .mp-n{font-size:9.5px;color:var(--dim);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:56px}
+.team-card .tc-route{position:absolute;top:14px;right:16px;opacity:.6}
+.tu-picking{display:flex;align-items:center;gap:14px;background:var(--night-raise);border:1px dashed var(--night-line);border-radius:14px;padding:12px 18px}
+.tu-picking .lbl{font-family:var(--mono);font-size:10px;letter-spacing:.16em;text-transform:uppercase;color:var(--dim)}
+.tu-picking .pips{display:flex;gap:8px}
+.tu-picking .mp-c{width:32px;height:32px;font-size:11px;animation:tw 3s ease-in-out infinite}
+
+/* ════════ COUNTDOWN · ORBIT ════════ */
+.view-cd-orbit{align-items:center;justify-content:center;flex-direction:column;gap:0}
+.cd-label{text-align:center;margin-bottom:34px}
+.cd-label .ar-l{font-family:var(--arabic);font-size:20px;font-weight:600;color:var(--starlight)}
+.cd-label .en-l{font-family:var(--mono);font-size:10px;letter-spacing:.3em;text-transform:uppercase;color:var(--dim);margin-top:8px}
+.orbit-wrap{position:relative;width:min(46vh,380px);aspect-ratio:1;display:flex;align-items:center;justify-content:center}
+.orbit-wrap svg{position:absolute;inset:0;width:100%;height:100%}
+.orbit-halo{animation:spin 40s linear infinite;transform-origin:center}
+@keyframes spin{to{transform:rotate(360deg)}}
+.orbit-num{font-size:clamp(90px,17vh,150px);font-weight:800;letter-spacing:-.04em;color:var(--starlight);font-variant-numeric:tabular-nums;line-height:1}
+.orbit-num.foil{background:var(--gold-foil);-webkit-background-clip:text;background-clip:text;color:transparent}
+.cd-sess{margin-top:38px;display:flex;align-items:center;gap:12px;font-family:var(--mono);font-size:10px;letter-spacing:.24em;text-transform:uppercase;color:var(--dimmer)}
+.cd-sess .d{width:5px;height:5px;border-radius:50%;background:var(--gold);opacity:.7}
+
+/* ════════ COUNTDOWN · HORIZON ════════ */
+.view-cd-horizon{align-items:center;justify-content:center;flex-direction:column}
+.hz-num{font-size:clamp(140px,34vh,300px);font-weight:800;letter-spacing:-.05em;color:var(--starlight);font-variant-numeric:tabular-nums;line-height:.9;position:relative;z-index:3}
+.hz-horizon{position:fixed;left:0;right:0;bottom:0;height:26vh;pointer-events:none;z-index:2}
+.hz-horizon svg{width:100%;height:100%}
+
+/* ════════ TEACHER SOLO ════════ */
+.view-teacher{align-items:center;justify-content:center;flex-direction:column;gap:30px}
+.teach-wrap{position:relative;width:min(40vh,320px);aspect-ratio:1;display:flex;align-items:center;justify-content:center}
+.teach-wrap .halo{position:absolute;inset:0;animation:spin 34s linear infinite;transform-origin:center}
+.teach-wrap .ring2{position:absolute;inset:7%}
+.teach-circle{width:76%;height:76%;border-radius:50%;background:var(--night-high);border:1px solid var(--gold-deep);display:flex;align-items:center;justify-content:center;overflow:hidden;box-shadow:0 0 60px -18px rgba(217,156,85,.45)}
+.teach-circle .init{font-family:var(--arabic);font-size:52px;font-weight:700;color:var(--gold-bright)}
+.teach-label{text-align:center}
+.teach-label .nm{font-family:var(--arabic);font-size:24px;font-weight:700}
+.teach-label .sb{font-family:var(--mono);font-size:10px;letter-spacing:.26em;text-transform:uppercase;color:var(--dim);margin-top:8px;display:flex;align-items:center;gap:9px;justify-content:center}
+.live-dot{width:7px;height:7px;border-radius:50%;background:var(--coral);animation:tw 2.4s ease-in-out infinite}
+
+/* ════════ SLIDES ════════ */
+.view-slides{padding:70px 22px 96px;gap:18px}
+.slide-col{flex:1;min-width:0;display:flex;align-items:center;justify-content:center}
+.slide-stage{width:100%;max-width:calc((100vh - 190px) * 16 / 9);aspect-ratio:16/9;background:var(--night-raise);border:1px solid var(--night-line);border-radius:18px;position:relative;overflow:hidden;box-shadow:0 40px 90px -40px rgba(0,0,0,.8)}
+.slide-stage svg.bg{position:absolute;inset:0;width:100%;height:100%}
+.slide-content{position:absolute;inset:0;display:flex;flex-direction:column;justify-content:center;align-items:flex-end;text-align:right;padding:7% 8%;z-index:3}
+.slide-kicker{font-family:var(--mono);font-size:clamp(8px,1vw,11px);letter-spacing:.28em;text-transform:uppercase;color:var(--gold);display:flex;align-items:center;gap:12px}
+.slide-kicker::after{content:"";width:30px;height:1px;background:var(--gold)}
+.slide-title{font-family:var(--arabic);font-size:clamp(28px,4.6vw,58px);font-weight:700;line-height:1.3;margin-top:2%;max-width:70%}
+.slide-sub{font-family:var(--arabic);font-size:clamp(12px,1.4vw,17px);color:var(--dim);margin-top:2.5%;line-height:1.9;max-width:55%}
+.slide-station{position:absolute;bottom:6%;inset-inline-start:8%;font-family:var(--mono);font-size:clamp(8px,1vw,10.5px);letter-spacing:.22em;text-transform:uppercase;color:var(--dimmer);z-index:4}
+/* right rail */
+.rail{width:264px;flex-shrink:0;display:flex;flex-direction:column;gap:14px;min-height:0}
+.rail-box{background:var(--night-raise);border:1px solid var(--night-line);border-radius:16px;padding:16px;display:flex;flex-direction:column;min-height:0}
+.rail-box h5{font-family:var(--mono);font-size:9px;letter-spacing:.22em;text-transform:uppercase;color:var(--dim);margin-bottom:12px;display:flex;justify-content:space-between;align-items:center}
+.roster{display:flex;flex-wrap:wrap;gap:8px}
+.rost{width:34px;height:34px;border-radius:50%;background:var(--night-high);border:1px solid var(--night-line);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:var(--starlight);position:relative;transition:border-color .3s}
+.rost.speaking{border-color:var(--gold);box-shadow:0 0 14px -4px rgba(217,156,85,.7)}
+.chat-box{flex:1}
+.chat-flow{flex:1;overflow:hidden;display:flex;flex-direction:column;justify-content:flex-end;gap:9px;min-height:120px}
+.chat-msg{display:flex;gap:9px;align-items:flex-start;animation:rise .5s cubic-bezier(.2,.8,.3,1)}
+@keyframes rise{from{transform:translateY(12px);opacity:0}to{transform:translateY(0);opacity:1}}
+.chat-msg .cm-a{width:24px;height:24px;border-radius:50%;background:var(--night-high);border:1px solid var(--night-line);font-size:8.5px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;color:var(--dim)}
+.chat-msg .cm-b{font-family:var(--arabic);font-size:11.5px;line-height:1.7;color:#C9C4B8;direction:rtl;text-align:right;flex:1}
+.chat-msg .cm-b b{color:var(--starlight);font-weight:600;margin-inline-end:6px}
+.chat-msg .cm-b .spark-r{color:var(--gold-bright)}
+
+/* ════════ STAGE ════════ */
+.view-stage{align-items:center;justify-content:center;gap:6vw;padding:40px}
+.st-member{display:flex;flex-direction:column;align-items:center;gap:16px}
+.st-member:has(.st-c-big){gap:30px}
+.st-circle{position:relative;display:flex;align-items:center;justify-content:center}
+.st-circle .halo{position:absolute;inset:-9%;animation:spin 38s linear infinite;transform-origin:center}
+.st-c-big{width:min(34vh,280px);aspect-ratio:1}
+.st-c-big .face{width:100%;height:100%;border-radius:50%;background:var(--night-high);border:1px solid var(--gold-deep);display:flex;align-items:center;justify-content:center;font-family:var(--arabic);font-size:44px;font-weight:700;color:var(--gold-bright);box-shadow:0 0 70px -22px rgba(217,156,85,.5)}
+.st-name{font-family:var(--arabic);font-size:19px;font-weight:700;text-align:center}
+.st-sub{font-family:var(--mono);font-size:9px;letter-spacing:.24em;text-transform:uppercase;color:var(--dim);margin-top:6px;text-align:center;display:flex;gap:8px;align-items:center;justify-content:center}
+.class-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:26px 34px}
+.st-c-small{width:min(15vh,124px);aspect-ratio:1;position:relative}
+.st-c-small .face{width:100%;height:100%;border-radius:50%;background:var(--night-high);border:1px solid var(--night-line);display:flex;align-items:center;justify-content:center;font-size:15px;font-weight:700;color:var(--dim)}
+.st-c-small .mute{position:absolute;bottom:2px;right:2px;width:24px;height:24px;border-radius:50%;background:var(--night-raise);border:1px solid var(--night-line);display:flex;align-items:center;justify-content:center;color:var(--coral)}
+.st-c-small .sname{margin-top:10px;font-size:11.5px;font-weight:600;color:var(--dim);text-align:center}
+
+/* ════════ CONTROL PANEL ════════ */
+.cp{position:fixed;left:20px;bottom:20px;z-index:60;width:274px}
+.cp-handle{display:flex;align-items:center;gap:9px;background:var(--night-raise);border:1px solid var(--night-line);border-radius:10px;padding:9px 14px;font-family:var(--mono);font-size:9.5px;letter-spacing:.2em;text-transform:uppercase;color:var(--dim);width:100%}
+.cp-handle:hover{color:var(--gold-bright);border-color:var(--gold-deep)}
+.cp-handle .spark{color:var(--gold)}
+.cp-tabs{display:flex;gap:4px;background:var(--night-raise);border:1px solid var(--night-line);border-radius:10px;padding:4px;margin-top:8px}
+.cp-tabs button{flex:1;background:transparent;border:none;border-radius:7px;padding:7px 4px;font-family:var(--mono);font-size:8.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--dimmer);transition:all .2s}
+.cp-tabs button:hover{color:var(--starlight)}
+.cp-tabs button.on{background:var(--night-high);color:var(--gold-bright);box-shadow:inset 0 0 0 1px var(--gold-deep)}
+.cp-panel{background:var(--night-raise);border:1px solid var(--night-line);border-radius:14px;margin-top:8px;padding:14px;display:none}
+.cp.open .cp-panel{display:block}
+.cp-section{font-family:var(--mono);font-size:8.5px;letter-spacing:.22em;text-transform:uppercase;color:var(--dimmer);margin:4px 0 8px}
+.cp-note{font-size:11px;line-height:1.6;color:var(--dim);margin-top:10px}
+.cp-go{width:100%;margin-top:12px;border:none;border-radius:100px;padding:11px;font-size:13px;font-weight:700;background:var(--gold-foil);color:#241505}
+.cp-go:hover{filter:brightness(1.06)}
+
+@media(prefers-reduced-motion:reduce){*,*::before,*::after{animation:none!important;transition:none!important}}
+@media(max-width:900px){.rail{display:none}.view-slides{padding:70px 16px 96px}}
+</style>
+</head>
+<body data-phase="teamup" class="cd-orbit-on">
+<svg width="0" height="0" style="position:absolute" aria-hidden="true"><defs>
+  <linearGradient id="foil" x1="0" y1="0" x2="1" y2="1">
+    <stop offset="0" stop-color="#B37B3C"/><stop offset=".38" stop-color="#EFC183"/>
+    <stop offset=".6" stop-color="#D99C55"/><stop offset="1" stop-color="#8F5F2E"/>
+  </linearGradient>
+</defs></svg>
+
+<div id="sky">
+  <svg class="wave" style="top:16%" width="100%" height="90" viewBox="0 0 1600 90" preserveAspectRatio="none" fill="none">
+    <path d="M0 50 C 260 15, 520 80, 820 45 S 1380 10, 1600 50" stroke="#F2EFE7" stroke-opacity=".3" stroke-width="1"/>
+    <path d="M0 70 C 300 35, 560 100, 860 65" stroke="#F2EFE7" stroke-opacity=".14" stroke-width="1" stroke-dasharray="1 6"/>
+  </svg>
+  <svg style="position:absolute;top:8%;right:6%;opacity:.75" width="120" height="96" viewBox="0 0 120 96" fill="none">
+    <circle cx="66" cy="48" r="27" stroke="#D99C55" stroke-width="1.3"/>
+    <ellipse cx="66" cy="48" rx="50" ry="12" transform="rotate(-16 66 48)" stroke="#D99C55" stroke-width="1.1"/>
+  </svg>
+  <svg style="position:absolute;bottom:12%;left:5%;opacity:.8" width="44" height="44" viewBox="0 0 44 44" fill="none">
+    <path d="M30 6 A 18 18 0 1 0 30 38 A 14 14 0 1 1 30 6 Z" fill="#F2EFE7" opacity=".8"/>
+  </svg>
+</div>
+<div class="grain-veil"></div>
+
+<!-- ── Topbar (slides only) ── -->
+<header class="topbar">
+  <div class="session-meta">
+    <div class="time">
+      <svg class="spark" viewBox="0 0 10 10"><path d="M5 0 l1.2 3.8 3.8 1.2 -3.8 1.2 -1.2 3.8 -1.2 -3.8 -3.8 -1.2 3.8 -1.2Z" fill="#EFC183"/></svg>
+      <span id="timer">00:00</span>
+    </div>
+    <span class="session-title ar">المعادلات التربيعية<span class="en">MATH · STATION 03</span></span>
+  </div>
+  <div class="tb-controls">
+    <button class="icon-btn" id="mic" aria-pressed="false" aria-label="Toggle microphone">
+      <svg width="17" height="17" viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
+        <rect x="6.5" y="2" width="5" height="9" rx="2.5"/><path d="M3.5 8.5a5.5 5.5 0 0 0 11 0"/>
+        <line x1="9" y1="14" x2="9" y2="16.5"/><line x1="6.5" y1="16.5" x2="11.5" y2="16.5"/>
+        <line class="strike" x1="2.5" y1="2.5" x2="15.5" y2="15.5"/>
+      </svg>
+    </button>
+    <button class="icon-btn" id="cam" aria-pressed="false" aria-label="Toggle camera">
+      <svg width="17" height="17" viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
+        <rect x="1.5" y="4.5" width="10" height="9" rx="2"/><path d="M11.5 8 L16.5 5.5 v7 L11.5 10"/>
+        <line class="strike" x1="2.5" y1="2.5" x2="15.5" y2="15.5"/>
+      </svg>
+    </button>
+    <div class="avatar-chip ar">س</div>
+  </div>
+</header>
+
+<!-- ════════ TEAM-UP ════════ -->
+<div class="view view-teamup">
+  <div class="tu-head">
+    <div class="tu-title">
+      <span class="ar-t">تجمّع القوافل</span>
+      <span class="en-t">TEAM-UP · THE CARAVANS GATHER</span>
+    </div>
+    <div class="tu-counts">
+      <span class="count-chip"><span class="dot"></span><span id="tuN">0</span><span class="total">/ 24 here</span></span>
+      <span class="count-chip"><span id="tuT">0</span>&nbsp;teams</span>
+    </div>
+  </div>
+  <div class="team-grid" id="teamGrid"></div>
+  <div class="tu-picking" id="tuPicking">
+    <span class="lbl" id="tuPickLbl">STILL CHOOSING A CARAVAN</span>
+    <div class="pips" id="tuPickPips"></div>
+  </div>
+</div>
+
+<!-- ════════ COUNTDOWN · ORBIT ════════ -->
+<div class="view view-cd-orbit">
+  <div class="cd-label">
+    <div class="ar-l">يبدأ الدرس بعد</div>
+    <div class="en-l">CLASS BEGINS IN</div>
+  </div>
+  <div class="orbit-wrap">
+    <svg viewBox="0 0 200 200" fill="none" class="orbit-halo">
+      <circle cx="100" cy="100" r="96" stroke="#EFC183" stroke-width="1" stroke-dasharray="2 7" stroke-opacity=".8"/>
+      <circle cx="100" cy="4" r="3" fill="#EFC183"/>
+    </svg>
+    <svg viewBox="0 0 200 200" fill="none">
+      <circle cx="100" cy="100" r="86" stroke="#2B2732" stroke-width="1.5"/>
+      <circle id="orbitArc" cx="100" cy="100" r="86" stroke="url(#foil)" stroke-width="2.5" stroke-linecap="round"
+        stroke-dasharray="540.3" stroke-dashoffset="0" transform="rotate(-90 100 100)"/>
+    </svg>
+    <div class="orbit-num" id="orbitNum">10</div>
+  </div>
+  <div class="cd-sess"><span>MATH · STATION 03</span><span class="d"></span><span>أ. سارة العتيبي</span><span class="d"></span><span>24 TRAVELLERS</span></div>
+</div>
+
+<!-- ════════ COUNTDOWN · HORIZON ════════ -->
+<div class="view view-cd-horizon">
+  <div class="cd-label">
+    <div class="ar-l">يبدأ الدرس بعد</div>
+    <div class="en-l">CLASS BEGINS IN</div>
+  </div>
+  <div class="hz-num" id="hzNum">10</div>
+  <div class="hz-horizon">
+    <svg viewBox="0 0 1600 260" preserveAspectRatio="none" fill="none">
+      <path d="M-60 480 A 1050 1050 0 0 1 1660 480" fill="#EDEAE2" opacity=".97" id="hzDome"/>
+      <path d="M-66 468 A 1056 1056 0 0 1 1666 468" stroke="#DE8E85" stroke-width="2.4"/>
+      <path d="M-72 444 A 1062 1062 0 0 1 1672 444" stroke="#EFC183" stroke-width="1.1" stroke-dasharray="1 7"/>
+      <circle cx="320" cy="150" r="2" fill="#F2EFE7" opacity=".6"/>
+      <path d="M1240 120 l2.4 6.4 6.4 2.4 -6.4 2.4 -2.4 6.4 -2.4 -6.4 -6.4 -2.4 6.4 -2.4Z" fill="#F2EFE7" opacity=".8"/>
+    </svg>
+  </div>
+</div>
+
+<!-- ════════ TEACHER SOLO ════════ -->
+<div class="view view-teacher">
+  <div class="teach-wrap">
+    <svg class="halo" viewBox="0 0 200 200" fill="none">
+      <circle cx="100" cy="100" r="97" stroke="#EFC183" stroke-width="1" stroke-dasharray="2 8" stroke-opacity=".85"/>
+      <circle cx="100" cy="3" r="2.6" fill="#EFC183"/>
+    </svg>
+    <svg class="ring2" viewBox="0 0 200 200" fill="none">
+      <circle cx="100" cy="100" r="98" stroke="#D99C55" stroke-opacity=".35" stroke-width="1"/>
+    </svg>
+    <div class="teach-circle"><span class="init">س</span></div>
+  </div>
+  <div class="teach-label">
+    <div class="nm ar">أ. سارة العتيبي</div>
+    <div class="sb"><span class="live-dot"></span> TEACHER · LIVE</div>
+  </div>
+</div>
+
+<!-- ════════ SLIDES ════════ -->
+<div class="view view-slides">
+  <div class="slide-col">
+    <div class="slide-stage">
+      <svg class="bg" preserveAspectRatio="xMidYMid slice" viewBox="0 0 1600 900" fill="none">
+        <!-- whisper star chart (left half — content lives right) -->
+        <path d="M170 620 L280 500 L420 570 L550 430" stroke="#F2EFE7" stroke-opacity=".22" stroke-width="1.2" stroke-dasharray="1 6"/>
+        <circle cx="170" cy="620" r="2.6" fill="#F2EFE7" opacity=".55"/><circle cx="420" cy="570" r="2.2" fill="#F2EFE7" opacity=".45"/>
+        <path d="M550 430 l3 8 8 3 -8 3 -3 8 -3 -8 -8 -3 8 -3Z" fill="#EFC183"/>
+        <circle cx="360" cy="230" r="105" stroke="#D99C55" stroke-width="1.8"/>
+        <ellipse cx="360" cy="230" rx="190" ry="46" transform="rotate(-16 360 230)" stroke="#D99C55" stroke-width="1.4"/>
+        <ellipse cx="360" cy="230" rx="165" ry="36" transform="rotate(-16 360 230)" stroke="#D99C55" stroke-width="1" stroke-opacity=".6"/>
+        <circle cx="1270" cy="160" r="1.8" fill="#F2EFE7" opacity=".5"/>
+        <circle cx="1000" cy="700" r="1.8" fill="#F2EFE7" opacity=".4"/>
+        <!-- horizon -->
+        <path d="M-60 1180 A 1500 1500 0 0 1 1660 1180" fill="#EDEAE2" opacity=".97"/>
+        <path d="M-66 1168 A 1506 1506 0 0 1 1666 1168" stroke="#DE8E85" stroke-width="2.6"/>
+        <path d="M-72 1146 A 1512 1512 0 0 1 1672 1146" stroke="#EFC183" stroke-width="1.2" stroke-dasharray="1 7"/>
+      </svg>
+      <div class="slide-content">
+        <div class="slide-kicker">MATH · CONSTELLATION 02</div>
+        <h1 class="slide-title" dir="rtl" lang="ar">المعادلات التربيعية</h1>
+        <p class="slide-sub" dir="rtl" lang="ar">من بغداد إلى الأندلس — كيف حلّ الخوارزمي أول معادلة تربيعية في التاريخ؟</p>
+      </div>
+      <div class="slide-station">STATION 03 · 45 MIN · بيت الحكمة</div>
+    </div>
+  </div>
+  <aside class="rail">
+    <div class="rail-box">
+      <h5>TRAVELLERS <span id="rosterN" style="color:var(--gold-bright)">24</span></h5>
+      <div class="roster" id="roster"></div>
+    </div>
+    <div class="rail-box chat-box">
+      <h5>CLASS CHAT <svg width="10" height="10" viewBox="0 0 10 10"><path d="M5 0 l1.2 3.8 3.8 1.2 -3.8 1.2 -1.2 3.8 -1.2 -3.8 -3.8 -1.2 3.8 -1.2Z" fill="#D99C55"/></svg></h5>
+      <div class="chat-flow" id="chatFlow"></div>
+    </div>
+  </aside>
+</div>
+
+<!-- ════════ STAGE ════════ -->
+<div class="view view-stage">
+  <div class="st-member">
+    <div class="st-circle st-c-big">
+      <svg class="halo" viewBox="0 0 200 200" fill="none">
+        <circle cx="100" cy="100" r="97" stroke="#EFC183" stroke-width="1" stroke-dasharray="2 8" stroke-opacity=".8"/>
+        <circle cx="100" cy="3" r="2.4" fill="#EFC183"/>
+      </svg>
+      <div class="face ar">س</div>
+    </div>
+    <div>
+      <div class="st-name ar">أ. سارة العتيبي</div>
+      <div class="st-sub"><span class="live-dot"></span> TEACHER · LIVE</div>
+    </div>
+  </div>
+  <div class="class-grid">
+    <div class="st-member"><div class="st-circle st-c-small"><div class="face">A</div></div><div class="sname">Classroom A</div></div>
+    <div class="st-member"><div class="st-circle st-c-small"><div class="face">B</div>
+      <span class="mute"><svg width="11" height="11" viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="6.5" y="2" width="5" height="9" rx="2.5"/><line x1="2.5" y1="2.5" x2="15.5" y2="15.5"/></svg></span>
+    </div><div class="sname">Classroom B</div></div>
+    <div class="st-member"><div class="st-circle st-c-small"><div class="face">C</div>
+      <span class="mute"><svg width="11" height="11" viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="6.5" y="2" width="5" height="9" rx="2.5"/><line x1="2.5" y1="2.5" x2="15.5" y2="15.5"/></svg></span>
+    </div><div class="sname">Classroom C</div></div>
+    <div class="st-member"><div class="st-circle st-c-small"><div class="face">D</div></div><div class="sname">Classroom D</div></div>
+  </div>
+</div>
+
+<!-- ════════ CONTROL PANEL ════════ -->
+<aside class="cp" id="cp">
+  <button class="cp-handle" id="cpHandle"><span class="spark">✦</span> SEQUENCE CONTROLS</button>
+  <div class="cp-tabs" id="phaseTabs">
+    <button data-phase="teamup" class="on">Team-up</button>
+    <button data-phase="countdown">Count</button>
+    <button data-phase="teacher">Teacher</button>
+    <button data-phase="slides">Slides</button>
+    <button data-phase="stage">Stage</button>
+  </div>
+  <div class="cp-panel">
+    <div class="cp-section">Countdown style</div>
+    <div class="cp-tabs" style="margin-top:0" id="cdTabs">
+      <button data-cd="orbit" class="on">A · Orbit</button>
+      <button data-cd="horizon">B · Horizon</button>
+    </div>
+    <div class="cp-note">Orbit: the dashed halo counts the seconds as a gold arc. Horizon: the numeral waits above the rising paper dome — foil fills at 3·2·1.</div>
+    <button class="cp-go" id="goBtn">✦ &nbsp;Begin the journey</button>
+  </div>
+</aside>
+
+<script>
+/* ---------- ambient stars ---------- */
+const sky=document.getElementById('sky');
+for(let i=0;i<60;i++){const s=document.createElement('span');s.className='star';
+  s.style.left=Math.random()*100+'%';s.style.top=Math.random()*100+'%';
+  s.style.transform=`scale(${.5+Math.random()*1.5})`;
+  s.style.animationDelay=Math.random()*5+'s';s.style.animationDuration=(3.5+Math.random()*4)+'s';
+  sky.appendChild(s);}
+
+/* ---------- data ---------- */
+const TEAMS=[
+  {ar:'قافلة الشمال',en:'POLE STAR',color:'var(--coral)',deep:'#B9655C',members:['Layla C.','Yousef B.','Aisha A.','Omar K.','Sara M.']},
+  {ar:'قافلة الثريا',en:'PLEIADES',color:'var(--mint)',deep:'#3E9A8B',members:['Hassan T.','Noura F.','Ali R.','Dana S.']},
+  {ar:'قافلة الجدي',en:'CAPRICORN',color:'var(--sand)',deep:'#A99B31',members:['Majed W.','Reem H.','Khalid N.','Lina O.','Fahad J.']},
+  {ar:'قافلة السماك',en:'ARCTURUS',color:'var(--peri)',deep:'#4353AE',members:['Ziad P.','Hala Q.','Tariq E.','Jana V.']}
+];
+const PICKING=['Nasser','Mona'];
+const CHAT=[
+  ['ل','ليان','جاهزين! ✦'],['ع','عمر','السلام عليكم أستاذة سارة'],
+  ['ن','نورة','أخيراً درس الخوارزمي 🌙'],['خ','خالد','فريق الثريا جاهز'],
+  ['ر','ريم','هل نحتاج الدفتر اليوم؟'],['م','ماجد','قافلة الجدي وصلت ✦'],
+  ['د','دانة','الواجب كان ممتع'],['ح','حسن','يلا نبدأ!'],
+];
+
+/* ---------- team-up render ---------- */
+const grid=document.getElementById('teamGrid');
+let joined=0, total=TEAMS.reduce((a,t)=>a+t.members.length,0)+PICKING.length;
+TEAMS.forEach((t,ti)=>{
+  const card=document.createElement('div');card.className='team-card';
+  card.innerHTML=`
+    <svg class="tc-route" width="60" height="30" viewBox="0 0 60 30" fill="none">
+      <path d="M4 24 C 20 8, 40 22, 56 6" stroke="#D99C55" stroke-opacity=".5" stroke-width="1" stroke-dasharray="1 5"/>
+      <circle cx="4" cy="24" r="2" fill="#D99C55" fill-opacity=".7"/>
+    </svg>
+    <div class="tc-head">
+      <div class="tc-coin" style="background:${t.color};border-color:${t.deep}">
+        <svg width="15" height="15" viewBox="0 0 15 15"><path d="M7.5 1 l1.5 5 5 1.5 -5 1.5 -1.5 5 -1.5 -5 -5 -1.5 5 -1.5Z" fill="${t.deep}"/></svg>
+      </div>
+      <div><div class="tc-name ar">${t.ar}</div><div class="tc-sub">${t.en} · ${t.members.length} TRAVELLERS</div></div>
+    </div>
+    <div class="tc-members">${t.members.map(m=>`
+      <div class="member-pip"><div class="mp-c">${m[0]}</div><div class="mp-n">${m}</div></div>`).join('')}
+    </div>`;
+  grid.appendChild(card);
+});
+const pickPips=document.getElementById('tuPickPips');
+PICKING.forEach(p=>{const d=document.createElement('div');d.className='mp-c';d.textContent=p[0];d.style.cssText='width:32px;height:32px;border-radius:50%;background:var(--night-high);border:1px solid var(--night-line);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:var(--dim)';pickPips.appendChild(d);});
+document.getElementById('tuPickLbl').textContent=PICKING.length+' STILL CHOOSING A CARAVAN';
+/* animate join count */
+let jc=0;const jt=setInterval(()=>{jc++;document.getElementById('tuN').textContent=jc;
+  document.getElementById('tuT').textContent=Math.min(4,Math.ceil(jc/5));
+  if(jc>=22){clearInterval(jt);}},260);
+
+/* ---------- roster ---------- */
+const roster=document.getElementById('roster');
+const allNames=TEAMS.flatMap(t=>t.members).concat(PICKING);
+allNames.forEach(n=>{const d=document.createElement('div');d.className='rost';d.textContent=n[0];d.title=n;roster.appendChild(d);});
+setInterval(()=>{ if(document.body.dataset.phase!=='slides')return;
+  document.querySelectorAll('.rost.speaking').forEach(e=>e.classList.remove('speaking'));
+  const r=roster.children[Math.floor(Math.random()*roster.children.length)];
+  if(r)r.classList.add('speaking');},2600);
+
+/* ---------- chat firehose ---------- */
+const flow=document.getElementById('chatFlow');let ci=0;
+setInterval(()=>{ if(document.body.dataset.phase!=='slides')return;
+  const [a,n,m]=CHAT[ci++%CHAT.length];
+  const d=document.createElement('div');d.className='chat-msg';
+  d.innerHTML=`<span class="cm-a ar">${a}</span><span class="cm-b ar"><b>${n}</b>${m.replace('✦','<span class="spark-r">✦</span>')}</span>`;
+  flow.appendChild(d);
+  while(flow.children.length>6)flow.removeChild(flow.firstChild);
+},2200);
+
+/* ---------- phases ---------- */
+const body=document.body;
+const phaseTabs=document.getElementById('phaseTabs');
+function setPhase(p){
+  body.dataset.phase=p;
+  phaseTabs.querySelectorAll('button').forEach(b=>b.classList.toggle('on',b.dataset.phase===p));
+  if(p==='countdown')startCountdown();else stopCountdown();
+  if(p==='slides')startTimer();
+}
+phaseTabs.addEventListener('click',e=>{const b=e.target.closest('button');if(b)setPhase(b.dataset.phase);});
+document.getElementById('cpHandle').addEventListener('click',()=>document.getElementById('cp').classList.toggle('open'));
+document.getElementById('goBtn').addEventListener('click',()=>{document.getElementById('cp').classList.remove('open');setPhase('countdown');});
+
+/* countdown style tabs */
+const cdTabs=document.getElementById('cdTabs');
+cdTabs.addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;
+  cdTabs.querySelectorAll('button').forEach(x=>x.classList.toggle('on',x===b));
+  body.classList.toggle('cd-orbit-on',b.dataset.cd==='orbit');
+  body.classList.toggle('cd-horizon-on',b.dataset.cd==='horizon');
+});
+
+/* ---------- countdown ---------- */
+const CIRC=2*Math.PI*86;let cdT=null,cdN=10;
+const orbitNum=document.getElementById('orbitNum'),orbitArc=document.getElementById('orbitArc'),hzNum=document.getElementById('hzNum');
+function renderCd(){
+  orbitNum.textContent=cdN;hzNum.textContent=cdN;
+  orbitArc.style.strokeDashoffset=CIRC*(1-cdN/10);
+  const foil=cdN<=3&&cdN>0;
+  orbitNum.classList.toggle('foil',foil);
+  hzNum.style.background=foil?'linear-gradient(135deg,#B37B3C,#EFC183 40%,#D99C55 62%,#8F5F2E)':'none';
+  hzNum.style.webkitBackgroundClip=foil?'text':'';hzNum.style.backgroundClip=foil?'text':'';
+  hzNum.style.color=foil?'transparent':'var(--starlight)';
+}
+function startCountdown(){stopCountdown();cdN=10;renderCd();
+  cdT=setInterval(()=>{cdN--;
+    if(cdN<0){stopCountdown();setPhase('teacher');setTimeout(()=>{if(body.dataset.phase==='teacher')setPhase('slides');},2600);return;}
+    renderCd();},1000);}
+function stopCountdown(){if(cdT){clearInterval(cdT);cdT=null;}}
+
+/* ---------- timer ---------- */
+let t0=null,tT=null;
+function startTimer(){if(tT)return;t0=t0||Date.now();
+  tT=setInterval(()=>{const s=Math.floor((Date.now()-t0)/1000);
+    document.getElementById('timer').textContent=String(Math.floor(s/60)).padStart(2,'0')+':'+String(s%60).padStart(2,'0');},1000);}
+
+/* ---------- hash boot: #phase=slides&cd=horizon ---------- */
+const h=new URLSearchParams(location.hash.slice(1));
+if(h.get('cd')==='horizon'){body.classList.remove('cd-orbit-on');body.classList.add('cd-horizon-on');
+  cdTabs.querySelectorAll('button').forEach(x=>x.classList.toggle('on',x.dataset.cd==='horizon'));}
+if(h.get('phase'))setPhase(h.get('phase'));
+if(h.get('n')){cdN=parseInt(h.get('n'));stopCountdown();renderCd();}
+</script>
+</body>
+</html>

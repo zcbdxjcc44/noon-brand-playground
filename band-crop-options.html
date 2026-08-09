@@ -1,0 +1,154 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>EQ cover · band vs illustration — options</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@400;600;700&family=JetBrains+Mono:wght@500&family=IBM+Plex+Sans+Arabic:wght@500;600;700&display=swap" rel="stylesheet">
+<style>
+  body{margin:0;background:#1F2126;color:#F1EBDD;font-family:'Hanken Grotesk',sans-serif;padding:48px 40px 90px}
+  h1{font-size:26px;font-weight:600;margin:0 0 6px}
+  .sub{color:rgba(241,235,221,.6);font-size:14px;margin-bottom:36px;max-width:80ch;line-height:1.6}
+  .grid{display:grid;grid-template-columns:1fr 1fr;gap:34px 28px;max-width:1560px}
+  .frame{position:relative;width:100%;aspect-ratio:16/9;overflow:hidden;border-radius:8px;
+    border:1px solid rgba(241,235,221,.12);box-shadow:0 18px 50px rgba(0,0,0,.45)}
+  .stage{position:absolute;top:0;left:0;width:1920px;height:1080px;transform-origin:0 0;overflow:hidden;
+    background:#B65534;font-family:'IBM Plex Sans Arabic',sans-serif}
+  figcaption{padding:12px 4px 0}
+  figcaption b{font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:.2em;color:#D2A47A}
+  figcaption p{margin:4px 0 0;font-size:13px;color:rgba(241,235,221,.6);line-height:1.55}
+  figure{margin:0}
+  /* cover anatomy */
+  .etch{position:absolute;inset:0;
+    -webkit-mask-image:radial-gradient(120% 115% at 72% 40%, transparent 30%, rgba(0,0,0,.5) 60%, #000 85%);
+    mask-image:radial-gradient(120% 115% at 72% 40%, transparent 30%, rgba(0,0,0,.5) 60%, #000 85%)}
+  .etch svg{stroke:rgba(246,240,228,.13);fill:none}
+  .band{position:absolute;left:0;top:0;bottom:0;background:#232529;display:flex;justify-content:center;padding-top:64px}
+  .band .subject{writing-mode:vertical-rl;color:#B7CEDD;font-size:40px;font-weight:600;letter-spacing:.06em}
+  .seam{position:absolute;top:0;bottom:0;width:2px;
+    background:linear-gradient(to bottom,#B26440 0%,#D2A47A 18%,#F6F0E4 38%,#DDC09A 60%,#B26440 88%,#8A3F26 100%);
+    box-shadow:0 0 14px rgba(221,192,154,.4)}
+  .title{position:absolute;right:110px;top:250px;width:1100px;text-align:right;direction:rtl;
+    color:#F6F0E4;font-size:78px;line-height:1.45;font-weight:700}
+  .rule{position:absolute;right:110px;top:700px;width:220px;height:4px;border-radius:2px;
+    background:linear-gradient(105deg,#B26440 0%,#DDC09A 22%,#F6F0E4 50%,#DDC09A 78%,#B26440 100%);
+    box-shadow:0 0 10px rgba(221,192,154,.4)}
+  .brand{position:absolute;right:110px;bottom:56px;display:flex;align-items:baseline;gap:12px;direction:ltr}
+  .brand .noon{font-family:'Hanken Grotesk',sans-serif;font-weight:700;font-size:32px;letter-spacing:-.03em;color:#F6F0E4}
+  .brand .tracks{font-family:'JetBrains Mono',monospace;font-size:12px;letter-spacing:.3em;color:rgba(246,240,228,.5)}
+  .ill{position:absolute;inset:0;pointer-events:none}
+</style></head>
+<body>
+<h1>Cover band × illustration — four resolutions</h1>
+<p class="sub">The problem: the orbit and the planet's flank currently vanish under the 240px ink band, reading as an
+accidental crop. Each panel below is the full v10 material (flat core, luminance edge-grain). Differences are only
+band width and stacking order.</p>
+
+<div class="grid" id="grid"></div>
+
+<svg width="0" height="0" style="position:absolute">
+  <defs>
+    <g id="khatam-t">
+      <rect x="-62" y="-62" width="124" height="124"/>
+      <rect x="-62" y="-62" width="124" height="124" transform="rotate(45)"/>
+      <rect x="-7" y="-7" width="14" height="14" transform="rotate(45)"/>
+    </g>
+  </defs>
+</svg>
+
+<script>
+function mk(a){return function(){a|=0;a=a+0x6D2B79F5|0;var t=Math.imul(a^a>>>15,1|a);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296}}
+function dots(arr){return arr.map(d=>'M'+(d[0]-d[2]).toFixed(2)+','+d[1].toFixed(2)+'a'+d[2].toFixed(2)+','+d[2].toFixed(2)+' 0 1,0 '+(2*d[2]).toFixed(2)+',0a'+d[2].toFixed(2)+','+d[2].toFixed(2)+' 0 1,0 -'+(2*d[2]).toFixed(2)+',0').join('')}
+function dotPaths(b){let s='';for(const k of b){if(k.arr.length)s+='<path d="'+dots(k.arr)+'" fill="'+k.fill+'" fill-opacity="'+k.o+'"/>';}return s}
+// v10 edge grain (approved recipe)
+function edgeGrain(cx,cy,r,seed,n){
+  const R=mk(seed);
+  const DKS='rgb(210,164,122)',LTS='rgb(246,240,228)',BODY='rgb(221,192,154)';
+  const T=[];const push=(f,o)=>{T.push({arr:[],fill:f,o});return T.length-1;};
+  const dk=[push(DKS,.55),push(DKS,.38),push(DKS,.22),push(DKS,.12)];
+  const lt=[push(LTS,.45),push(LTS,.30),push(LTS,.18),push(LTS,.10)];
+  const bd=[push(BODY,.85),push(BODY,.55),push(BODY,.28),push(BODY,.10)];
+  const dx=[push(DKS,.35),push(DKS,.18)];
+  for(let i=0;i<n;i++){
+    const a=R()*2*Math.PI, inside=R()<0.85;
+    const d=inside?8*Math.pow(R(),1.8):-4*Math.pow(R(),2.2);
+    const rad=r-d;
+    const x=cx+Math.cos(a)*rad,y=cy+Math.sin(a)*rad;
+    const sz=0.12+R()*0.18;
+    let ti;
+    if(inside){const band=Math.min(3,Math.floor(d/2));ti=R()<0.55?dk[band]:lt[band];}
+    else{const od=-d,band=Math.min(3,Math.floor(od/1));ti=R()<0.75?bd[Math.min(3,band)]:dx[od<2?0:1];}
+    T[ti].arr.push([x,y,sz]);}
+  return dotPaths(T);
+}
+function interior(cx,cy,r,seed,n){
+  const R=mk(seed);
+  const b=[{arr:[],fill:'rgb(210,164,122)',o:0.15},{arr:[],fill:'rgb(246,240,228)',o:0.12}];
+  for(let i=0;i<n;i++){const a=R()*2*Math.PI,rr=(r-9)*Math.sqrt(R());
+    b[R()<0.5?0:1].arr.push([cx+Math.cos(a)*rr,cy+Math.sin(a)*rr,0.10+R()*0.15]);}
+  return dotPaths(b);
+}
+function halo(cx,cy,r,seed,n){
+  const R=mk(seed);
+  const b=[{arr:[],fill:'rgb(221,192,154)',o:0.45},{arr:[],fill:'rgb(221,192,154)',o:0.25},
+           {arr:[],fill:'rgb(246,240,228)',o:0.35},{arr:[],fill:'rgb(246,240,228)',o:0.2}];
+  for(let i=0;i<n;i++){const a=R()*2*Math.PI,d=r+12+Math.pow(R(),1.7)*80;
+    const x=cx+Math.cos(a)*d,y=cy+Math.sin(a)*d*0.92;
+    const near=(d-r)<46;const sz=R()<0.1?0.9+R()*0.6:0.35+R()*0.6;
+    b[(R()<0.55?0:2)+(near?0:1)].arr.push([x,y,sz]);}
+  return dotPaths(b);
+}
+const spark=(x,y,s,o)=>'<path transform="translate('+x+','+y+') scale('+s+')" d="M 0,-24 L 7,-7 L 24,0 L 7,7 L 0,24 L -7,7 L -24,0 L -7,-7 Z" fill="rgba(246,240,228,'+o+')"/>';
+function planetSVG(){
+  return '<svg width="1920" height="1080" style="position:absolute;inset:0">'
+  +'<defs><linearGradient id="foil" gradientUnits="userSpaceOnUse" x1="200" y1="345" x2="260" y2="315"><stop offset="0" stop-color="#F6F0E4"/><stop offset="0.55" stop-color="#DDC09A"/><stop offset="1" stop-color="#B26440"/></linearGradient></defs>'
+  +'<g transform="translate(110,0)">'
+  +'<g transform="rotate(-16 250 845)"><ellipse cx="250" cy="845" rx="265" ry="84" fill="none" stroke="rgba(94,36,18,0.35)" stroke-width="3"/></g>'
+  +'<circle cx="250" cy="830" r="120" fill="#DDC09A"/>'
+  +edgeGrain(250,830,120,8,15000)
+  +interior(250,830,118,9,150)
+  +'<g transform="rotate(-16 250 845)">'
+  +'<path d="M -15,845 A 265,84 0 0 0 515,845" fill="none" stroke="rgba(246,240,228,0.85)" stroke-width="3.5"/>'
+  +'<path d="M 25,873 A 265,84 0 0 1 3,830" fill="none" stroke="url(#foil)" stroke-width="4" stroke-linecap="round"/>'
+  +'</g>'
+  +spark(430,657,1,0.85)+spark(140,666,0.55,0.6)+spark(452,1015,0.6,0.9)
+  +halo(250,830,120,17,36)
+  +'</g></svg>';
+}
+function khatam(){
+  let out='';
+  for(let row=0,y=-100;y<1200;y+=196,row++)
+    for(let x=-150+(row%2?98:0);x<2100;x+=196)
+      out+='<use href="#khatam-t" x="'+x+'" y="'+y+'"/>';
+  return '<div class="etch"><svg width="1920" height="1080"><g stroke-width="1.1">'+out+'</g></svg></div>';
+}
+const OPTS=[
+ {id:'A',band:240,over:false,label:'A · CURRENT',note:'Illustration behind the 240px band — orbit amputated at the seam; planet kisses the band edge. This is the problem.'},
+ {id:'B',band:240,over:true,label:'B · ILLUSTRATION OVER THE BAND',note:'Same layout; artwork stacked above band + seam. The orbit sweeps across the ink and the planet occludes the seam — cropping becomes intentional layering.'},
+ {id:'C',band:132,over:false,label:'C · SLIM BAND (132px)',note:'Band slimmed to the HTML study’s width; illustration stays behind but now clears it almost entirely. Lighter cover, changes template anatomy.'},
+ {id:'D',band:132,over:true,label:'D · SLIM BAND + OVER',note:'Both moves combined — maximum breathing room, plus the layering. The band becomes a quiet margin the scene passes over.'}
+];
+const grid=document.getElementById('grid');
+grid.innerHTML=OPTS.map(o=>{
+  const ill='<div class="ill" style="z-index:'+(o.over?5:1)+'">'+planetSVG()+'</div>';
+  return '<figure>'
+  +'<div class="frame"><div class="stage" data-fit>'
+  + khatam()
+  + ill
+  +'<div class="band" style="width:'+o.band+'px;z-index:3"><div class="subject">علوم</div></div>'
+  +'<div class="seam" style="left:'+(o.band-1)+'px;z-index:4"></div>'
+  +'<div class="title" style="z-index:2">العنوان: مهمتي في الحياة ليست مجرد البقاء على قيد الحياة</div>'
+  +'<div class="rule" style="z-index:2"></div>'
+  +'<div class="brand" style="z-index:2"><span class="tracks">TRACKS</span><span class="noon">noon</span></div>'
+  +'</div></div>'
+  +'<figcaption><b>'+o.label+'</b><p>'+o.note+'</p></figcaption>'
+  +'</figure>';
+}).join('');
+function fit(){
+  document.querySelectorAll('.frame').forEach(f=>{
+    const s=f.querySelector('.stage');
+    if(s) s.style.transform='scale('+(f.clientWidth/1920)+')';
+  });
+}
+addEventListener('resize',fit);fit();
+</script>
+</body></html>
