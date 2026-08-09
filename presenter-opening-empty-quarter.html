@@ -27,8 +27,12 @@
        data-sound       = on | off  (synthesized countdown ticks + arrival
                           chime — no audio assets)
        data-slide       = tag | band | hex  (slide style — Figma corner-tag
-                          cover, saffron side-band cover, or the 12-slide
-                          chemistry deck (16060:988) with click navigation)
+                          cover; saffron side-band cover with its own image
+                          deck (assets/slides-band/); or the 12-slide
+                          chemistry deck (assets/slides-chemistry/). Both
+                          decks: click right half = next, left = previous;
+                          cover-NN.png = subject covers to the left,
+                          NN.png = content pages to the right)
        data-card-style  = plain | crest  (team-up card: original sidebar vs
                           facet-banner crest in the team's family color)
 
@@ -1408,8 +1412,9 @@
     direction: rtl;
     color: #26282E;
   }
-  .dslide.is-active { display: block; animation: dslide-in 240ms ease; }
-  @keyframes dslide-in { from { opacity: 0; } to { opacity: 1; } }
+  /* slide changes are an instant cut — a fade-in would expose whatever
+     sits beneath the incoming slide for a frame (the band cover flash) */
+  .dslide.is-active { display: block; }
   .dslide--cream   { background: #EFE7DC; }
   .dslide--saffron { background: #DDBA62; }
   .dslide::before {
@@ -1550,6 +1555,14 @@
   .deck-logo__mark { width: 3.6cqw; height: 1.65cqw; display: block; }
   .deck-logo span { font-family: var(--font-sans); font-size: 0.8cqw; color: rgba(38,40,46,.6); }
   /* nav zones — right half next, left half previous */
+  /* band-style mini deck — image slides around the native band cover */
+  .band-deck { position: absolute; inset: 0; }
+  .band-deck .bslide {
+    position: absolute; inset: 0;
+    display: none;
+    background: #EFE7DC;
+  }
+  .band-deck .bslide.is-active { display: block; }
   /* Pixel-perfect mode: if a Figma PNG export exists at
      assets/slides-chemistry/NN.png it covers the native rebuild of that
      slide; missing files simply fall back to the native version. */
@@ -2328,6 +2341,16 @@
 
           <!-- Title -->
           <p class="slide-cover-title" dir="rtl" lang="ar">العنوان: مهمتي في الحياة ليست مجرد البقاء على قيد الحياة</p>
+
+          <!-- Band deck — assets/slides-band/: cover-NN.png before the
+               native band cover, NN.png content pages after it. Same
+               split-zone navigation as the chemistry deck. -->
+          <div class="band-deck slide-v2" id="bandDeck">
+            <div class="deck-nav">
+              <button class="deck-nav__zone deck-nav__zone--prev" aria-label="Previous slide"></button>
+              <button class="deck-nav__zone deck-nav__zone--next" aria-label="Next slide"></button>
+            </div>
+          </div>
 
           <!-- Subject tag — saffron with a folded rust corner -->
           <svg class="slide-tag slide-v1" viewBox="0 0 250 90" role="img" aria-label="كيمياء">
@@ -3901,29 +3924,89 @@
        clicking the left zone browses the other subjects' covers
        (cover-01 is the first one you reach, cover-02 the next, and so
        on). Files are probed in order until the first gap. */
-    (function probeCovers(n) {
+    (function () {
       const name = k => 'assets/slides-chemistry/cover-' + String(k).padStart(2, '0') + '.png';
-      function finish(count) {
-        if (count < 1) return;
-        for (let k = 1; k <= count; k++) {
+      const found = [];
+      let pending = 12;
+      function finish() {
+        found.sort((a, b) => a - b);
+        if (!found.length) return;
+        // ascending insert-at-front leaves the lowest number nearest the cover
+        found.forEach(k => {
           const sec = document.createElement('section');
           sec.className = 'dslide';
           const im = document.createElement('img');
           im.className = 'ds-shot';
+          im.decoding = 'sync';
           im.src = name(k);
           im.alt = '';
           sec.appendChild(im);
           deck.insertBefore(sec, deck.firstElementChild);
-        }
+        });
         slides = Array.from(deck.querySelectorAll('.dslide'));
-        show(cur + count);   // hold on the chemistry cover as the default
+        show(cur + found.length);   // hold on the chemistry cover
       }
-      if (n > 12) { finish(n - 1); return; }
-      const probe = new Image();
-      probe.onload  = () => probeCovers(n + 1);
-      probe.onerror = () => finish(n - 1);
-      probe.src = name(n);
-    })(1);
+      for (let n = 1; n <= 12; n++) {
+        const probe = new Image();
+        probe.onload  = () => { found.push(n); if (--pending === 0) finish(); };
+        probe.onerror = () => {                if (--pending === 0) finish(); };
+        probe.src = name(n);
+      }
+    })();
+  })();
+
+  /* ── Band-style mini deck — the native band cover is the anchor.
+     cover-01.png… sit to its LEFT (other subjects), 01.png… to its
+     RIGHT (content pages). Probed sequentially until the first gap. ── */
+  (function () {
+    const wrap = document.getElementById('bandDeck');
+    if (!wrap) return;
+    const nav = wrap.querySelector('.deck-nav');
+    const DIR = 'assets/slides-band/';
+    const nn = k => String(k).padStart(2, '0') + '.png';
+    // gap-tolerant: every number up to the cap is checked in parallel and
+    // whatever exists is used, in order — 03.png without 01/02 still works
+    function probe(prefix, cap, done) {
+      const found = [];
+      let pending = cap;
+      for (let n = 1; n <= cap; n++) {
+        const im = new Image();
+        im.onload  = () => { found.push(n); if (--pending === 0) done(found.sort((a, b) => a - b)); };
+        im.onerror = () => {                if (--pending === 0) done(found.sort((a, b) => a - b)); };
+        im.src = DIR + prefix + nn(n);
+      }
+    }
+    probe('cover-', 12, covers => probe('', 30, pages => {
+      if (covers.length === 0 && pages.length === 0) return;
+      const sections = [];   // virtual order: [highest cover … cover-01, native, pages ascending]
+      function makeSection(src) {
+        const sec = document.createElement('div');
+        sec.className = 'bslide';
+        const im = document.createElement('img');
+        im.className = 'ds-shot';
+        im.decoding = 'sync';
+        im.src = src; im.alt = '';
+        sec.appendChild(im);
+        wrap.insertBefore(sec, nav);
+        return sec;
+      }
+      covers.slice().reverse().forEach(k => sections.push(makeSection(DIR + 'cover-' + nn(k))));
+      sections.push(null);   // the native band cover — no overlay
+      pages.forEach(j => sections.push(makeSection(DIR + nn(j))));
+      let cur = covers.length;   // open on the native cover
+      function show(i) {
+        cur = Math.max(0, Math.min(sections.length - 1, i));
+        sections.forEach((sec, k) => { if (sec) sec.classList.toggle('is-active', k === cur); });
+      }
+      nav.querySelector('.deck-nav__zone--next').addEventListener('click', () => show(cur + 1));
+      nav.querySelector('.deck-nav__zone--prev').addEventListener('click', () => show(cur - 1));
+      document.addEventListener('keydown', e => {
+        if (app.dataset.phase !== 'slides' || app.dataset.slide !== 'band') return;
+        if (e.key === 'ArrowRight') show(cur + 1);
+        if (e.key === 'ArrowLeft')  show(cur - 1);
+      });
+      show(cur);
+    }));
   })();
 
   // Drive chat + speaker lifecycles from phase changes — start when slides
