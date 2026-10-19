@@ -6,7 +6,7 @@
 <title>Presenter Opening — sequence directions</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Crimson+Pro:ital,wght@0,300;0,400;0,500;0,600;0,700;1,300;1,400&family=JetBrains+Mono:wght@400;500;600&family=Vazirmatn:wght@300;400;500;600;700&family=Noto+Naskh+Arabic:wght@400;500;600&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Readex+Pro:wght@200;300;400;500&family=Doto:wght@500;700&family=Crimson+Pro:ital,wght@0,300;0,400;0,500;0,600;0,700;1,300;1,400&family=JetBrains+Mono:wght@400;500;600&family=Vazirmatn:wght@300;400;500;600;700&family=Noto+Naskh+Arabic:wght@400;500;600&display=swap" rel="stylesheet">
 <style>
   /* ──────────────────────────────────────────────────────────────────────
      CONTROL ATTRIBUTES — set on .app, all switchable via the control panel.
@@ -16,38 +16,41 @@
        data-phase       = teamup | countdown | teacher | slides | stage
                           (teamup is the new opener — manual Start advances
                            to countdown. stage is opt-in only.)
-       data-mode        = team | solo  (solo skips team grid, shows attendance)
-       data-card-layout = row | stacked  (team card: icon+name on the left
-                                          with members right-grid, or icon+name
-                                          on top with members flex-wrapped below)
-       data-duration    = 5 | 10 | 15   (countdown seconds)
-       data-teacher-hold= 2 | 3 | 5     (seconds the teacher-solo is held)
+       FIXED, no longer switchable from the panel. The attributes stay on
+       .app because the CSS and the sequence still read them; they are
+       settings OF the prototype now rather than controls IN it.
+       data-mode         team   (solo mode + attendance grid unreachable)
+       data-card-layout  row    (the stacked team card is likewise inert)
+       data-duration     10     seconds of countdown
+       data-teacher-hold 5      seconds the teacher-solo is held
 
      BACKGROUND
        data-bg-stars    = sparse | medium | dense
        data-bg-glow     = off | subtle | strong
        data-bg-northstar= off | on
-       data-bg-landscape= off | dunes |
+       data-bg-landscape= off | dunes |     (a lab-* preset takes the canvas
+                          over completely — the three settings above then do
+                          nothing until it is set back to off)
                           lab-starry-sky | lab-winding-desert | lab-flat-desert |
                           lab-topographic-void | lab-caravan-lights | lab-tectonic-drift
      ────────────────────────────────────────────────────────────────────── */
 
   /* ───── Noon tokens (void theme + terra warmth) ───── */
   :root {
-    --bg: #0a0f1a;
-    --bg-sunken: #060913;
-    --bg-raised: #10172a;
-    --bg-overlay: #1a2236;
-    --paper-100: #fbf8ef;
-    --fg: rgba(232, 228, 220, 1);
-    --fg-muted: rgba(232, 228, 220, 0.70);
-    --fg-subtle: rgba(232, 228, 220, 0.55);
-    --fg-faint: rgba(232, 228, 220, 0.35);
-    --border: rgba(232, 228, 220, 0.10);
-    --border-strong: rgba(232, 228, 220, 0.22);
-    --divider: rgba(232, 228, 220, 0.06);
-    --hover-overlay: rgba(232, 228, 220, 0.04);
-    --active-overlay: rgba(232, 228, 220, 0.08);
+    --bg: #161A21;
+    --bg-sunken: #0D1016;
+    --bg-raised: #26282E;
+    --bg-overlay: #2F333B;
+    --paper-100: #FFFFFF;
+    --fg: rgba(241, 235, 221, 1);
+    --fg-muted: rgba(241, 235, 221, 0.70);
+    --fg-subtle: rgba(241, 235, 221, 0.55);
+    --fg-faint: rgba(241, 235, 221, 0.35);
+    --border: rgba(241, 235, 221, 0.10);
+    --border-strong: rgba(241, 235, 221, 0.22);
+    --divider: rgba(241, 235, 221, 0.06);
+    --hover-overlay: rgba(241, 235, 221, 0.04);
+    --active-overlay: rgba(241, 235, 221, 0.08);
     --accent: #64D8AE;
     --signal: #c9a227;
     --signal-bright: #e0b83a;
@@ -56,9 +59,13 @@
     --danger: #c55a4e;
     --danger-soft: rgba(197, 90, 78, 0.10);
     --danger-border: rgba(197, 90, 78, 0.40);
-    --sand-300: #D4956E;
-    --sand-200: #E8B49A;
-    --sand-100: #f3cfb3;
+    /* GUIDING LIGHTS · the desert tokens moved onto the gold family. Sands and
+       grain stay as non-default variants, but they no longer introduce three
+       colours from outside the palette. Gold is already the signal for TIME,
+       which is exactly what these two are counting. */
+    --sand-300: #c9a227;  /* was #D4956E — now gold-400 */
+    --sand-200: #e0b83a;  /* was #E8B49A — now gold-300 */
+    --sand-100: #f0cf5a;  /* was #f3cfb3 — now gold-200 */
     --sp-2: 8px; --sp-3: 12px; --sp-4: 16px; --sp-5: 20px;
     --sp-6: 24px; --sp-7: 32px; --sp-8: 40px;
     --r-2: 4px; --r-3: 6px; --r-4: 8px; --r-pill: 999px;
@@ -107,7 +114,8 @@
   .north-star {
     position: absolute; left: 86.11%; top: 13%;
     width: 0; height: 0; pointer-events: none; z-index: 0;
-    animation: star-twinkle 8s ease-in-out infinite;
+    /* GUIDING LIGHTS R14 — twinkle removed. The sky holds still; movement
+       belongs to the route, never to the stars. */
     transition: opacity 600ms ease;
   }
   .north-star > * { position: absolute; left: 50%; top: 50%; transform: translate(-50%,-50%); }
@@ -119,7 +127,6 @@
   .north-star__shimmer--h { width: 44px; height: 1px; }
   .north-star__shimmer--v { width: 1px;  height: 44px; }
   .north-star__core { width: 7px; height: 7px; border-radius: 50%; background: rgba(240,207,90,1); }
-  @keyframes star-twinkle { 0%,100% { opacity:.65 } 50% { opacity:1 } }
   .app[data-bg-northstar="off"] .north-star { display: none; }
 
   /* ── Landscape: drifting dunes ── */
@@ -146,6 +153,12 @@
     to   { transform: translateX(-50%); }
   }
   .app[data-bg-landscape="dunes"] .dunes { display: block; }
+  /* CONTOURS — the bg-lab topographic preset, inline. The lab version is an
+     iframe that takes the whole canvas and switches the built-in sky off;
+     this one is a layer, so R13 still holds: stars may sit under contours. */
+  .contours { position: absolute; inset: 0; z-index: 0; pointer-events: none;
+    width: 100%; height: 100%; display: none; }
+  .app[data-bg-landscape="contours"] .contours { display: block; }
   /* When dunes are active, ease the stars back so they don't fight the warmth */
   .app[data-bg-landscape="dunes"] .sky-stars { opacity: 0.85; }
 
@@ -159,11 +172,37 @@
     background: var(--bg);
   }
   .app[data-bg-landscape^="lab-"] .bg-lab-frame { display: block; }
+  /* DETACHED COPY GUARD — if this file is opened away from its folder (e.g. a
+     copy downloaded out of a chat), assets/ and noon-bg-lab.html do not
+     resolve. The lab iframe then paints the browser's blank error document
+     over the whole canvas, which reads as "the background is broken". When
+     that is detected we hide the iframe and let the built-in star field own
+     the screen, which needs no external files. See the probe in the JS. */
+  .app[data-detached="yes"] .bg-lab-frame { display: none !important; }
+  .app[data-detached="yes"] .sky-stars,
+  .app[data-detached="yes"] .north-star { display: block !important; }
+  .detached-note {
+    position: fixed; right: 16px; bottom: 16px; z-index: 40;
+    display: none; align-items: center; gap: 8px;
+    padding: 8px 12px; border-radius: var(--r-3);
+    border: 1px solid var(--border); background: var(--bg-raised);
+    font-family: var(--font-sans); font-size: 11.5px; color: var(--fg-subtle);
+    max-width: 340px; line-height: 1.5;
+  }
+  .app[data-detached="yes"] .detached-note { display: flex; }
+  .detached-note b { color: var(--fg); font-weight: 600; }
   /* When a lab preset is active, hide every built-in backdrop element so the
      lab owns the canvas. Same approach presenter-screen.html uses. */
   .app[data-bg-landscape^="lab-"] .sky-stars,
   .app[data-bg-landscape^="lab-"] .north-star,
   .app[data-bg-landscape^="lab-"] .dunes { display: none; }
+  /* ...which means Stars / Star glow / North star control nothing at all
+     while a lab preset is up: the iframe is painting its own sky over them.
+     That silently looked like three broken controls, so the rows now dim to
+     say so. They stay clickable — the setting is remembered and takes hold
+     the moment the landscape goes back to Off. */
+  .app[data-bg-landscape^="lab-"] .cp-row--sky { opacity: 0.4; }
+  .cp-row--sky { transition: opacity 200ms ease; }
 
   /* Landscape layers compete with the chat for visual attention in the
      slides phase — fade them out so the messages stay legible. Stars + north
@@ -194,10 +233,6 @@
     border: 1px solid var(--border); border-radius: var(--r-2);
     background: var(--hover-overlay);
   }
-  .time__diamond {
-    width: 8px; height: 8px; background: var(--signal-bright);
-    transform: rotate(45deg); box-shadow: 0 0 10px var(--signal-soft);
-  }
   .time__value {
     font-family: var(--font-mono); font-size: 14px; letter-spacing: 0.04em;
     color: var(--fg); font-variant-numeric: tabular-nums; min-width: 44px;
@@ -207,6 +242,10 @@
     color: var(--fg-muted); letter-spacing: -0.005em;
   }
   .session-title em { font-style: italic; color: var(--fg); margin-right: 4px; }
+  /* The slide counter is gone from the topbar. The deck itself is the
+     progress indicator; a numeral beside the session title was telling the
+     teacher something the slides already tell the room. The onChange hook
+     that fed it is null-guarded, so it simply finds nothing now. */
   .me-avatar {
     width: 40px; height: 40px; border-radius: 50%;
     background: var(--accent); display: inline-flex;
@@ -284,7 +323,7 @@
     padding: 8px 16px;
     border: 1px solid var(--border);
     border-radius: var(--r-2);
-    background: rgba(10,15,26,0.6);
+    background: rgba(22,26,33,0.6);
     color: var(--fg-muted);
   }
   .mc-strip__dot {
@@ -355,14 +394,14 @@
   .mc-cross {
     position: absolute; inset: 0; pointer-events: none;
     background-image:
-      linear-gradient(to right, transparent calc(50% - 0.5px), rgba(232,228,220,0.04) calc(50% - 0.5px), rgba(232,228,220,0.04) calc(50% + 0.5px), transparent calc(50% + 0.5px)),
-      linear-gradient(to bottom, transparent calc(50% - 0.5px), rgba(232,228,220,0.04) calc(50% - 0.5px), rgba(232,228,220,0.04) calc(50% + 0.5px), transparent calc(50% + 0.5px));
+      linear-gradient(to right, transparent calc(50% - 0.5px), rgba(241,235,221,0.04) calc(50% - 0.5px), rgba(241,235,221,0.04) calc(50% + 0.5px), transparent calc(50% + 0.5px)),
+      linear-gradient(to bottom, transparent calc(50% - 0.5px), rgba(241,235,221,0.04) calc(50% - 0.5px), rgba(241,235,221,0.04) calc(50% + 0.5px), transparent calc(50% + 0.5px));
   }
   .mc-scanlines {
     position: absolute; inset: 0; pointer-events: none;
     background-image: repeating-linear-gradient(
       to bottom, transparent 0, transparent 2px,
-      rgba(232,228,220,0.018) 2px, rgba(232,228,220,0.018) 3px);
+      rgba(241,235,221,0.018) 2px, rgba(241,235,221,0.018) 3px);
   }
 
   /* ─── C · CINEMATIC ─── */
@@ -386,7 +425,7 @@
     color: var(--fg-muted);
     direction: rtl;
     letter-spacing: 0;
-    text-shadow: 0 0 32px rgba(232,228,220,0.18);
+    text-shadow: 0 0 32px rgba(241,235,221,0.18);
   }
   .cin-label__en {
     font-family: var(--font-mono);
@@ -445,15 +484,11 @@
     from { opacity: 0; width: 0; }
     to   { opacity: 1; width: 56px; }
   }
-  .cin-horizon {
-    position: absolute;
-    left: 50%; bottom: 18vh; transform: translateX(-50%);
-    width: 12%; height: 1px;
-    background: linear-gradient(to right,
-      transparent 0%, rgba(240,207,90,0.6) 50%, transparent 100%);
-    box-shadow: 0 0 24px rgba(240,207,90,0.35);
-    opacity: 0;
-  }
+  /* GUIDING LIGHTS — the horizon shimmer is retired. A horizon is a desert
+     idea and belongs to Empty Quarter; Guiding Lights has a sky, a terrain
+     and a route, and no horizon line. The element stays in the DOM (the
+     cinema engine still widens it) but never becomes visible. */
+  .cin-horizon { display: none; }
   /* Vignette + dimmed backdrop active only in cinematic mode */
   .vignette {
     position: absolute; inset: 0; z-index: 2; pointer-events: none;
@@ -465,21 +500,55 @@
      never fighting a bright landscape. Dims the dunes + stars + north star
      and turns on the radial-vignette overlay. Selector is keyed on phase
      only (used to be cinema-only). */
-  .app[data-phase="countdown"] .vignette   { opacity: 1; }
+  /* GUIDING LIGHTS — the vignette is a radial gradient scrim, and the system
+     has no gradient in its vocabulary. It is now opt-in via data-bg-vignette
+     and defaults to OFF; with the rete on, the disc is doing the work the
+     vignette used to do. Toggle it in the control panel to compare. */
+  .app[data-bg-vignette="on"][data-phase="countdown"] .vignette { opacity: 1; }
   .app[data-phase="countdown"] .sky-stars  { opacity: 0.45; }
   .app[data-phase="countdown"] .north-star { opacity: 0.5; }
   .app[data-phase="countdown"] .dunes      { opacity: 0.5; }
-  /* The faint horizon shimmer is a cinema-only flourish, so keep its
-     reveal scoped to the cinema style. */
-  .app[data-countdown="cinema"][data-phase="countdown"] .cin-horizon { opacity: 1; }
+
+  /* ──────────────────────────────────────────────────────────────────────
+     THE RETE — Guiding Lights §10, ceremonial surfaces only.
+
+       data-rete = off | field
+
+     The bounded-disc version (fixed plate, counter-rotating rete, star
+     pointers, counting rim) was tried and cut: too much geometry behind a
+     very large digit. What is left is the FIELD reading — concentric rings
+     and a few radials centred on the numeral, running off every edge, one
+     slow revolution. You never see the whole instrument, only the part of
+     it you are standing inside.
+
+     Signal at .14, per the guide. It sits UNDER whatever ground is set
+     rather than replacing it — the field is faint enough to share.
+     ────────────────────────────────────────────────────────────────────── */
+  .rete {
+    position: absolute; inset: 0; z-index: 1;
+    width: 100%; height: 100%;
+    pointer-events: none; overflow: visible;
+    opacity: 0; transition: opacity 700ms ease;
+  }
+  .app[data-rete="off"] .rete { display: none; }
+  /* Ceremonial only — the rete appears for the countdown and nowhere else. */
+  .app[data-countdown="cinema"][data-phase="countdown"] .rete { opacity: 1; }
+  .rete .rete-spin {
+    animation: rete-orbit 40s linear infinite;
+    transform-box: fill-box; transform-origin: center;
+  }
+  @keyframes rete-orbit { from { transform: rotate(0); } to { transform: rotate(360deg); } }
 
   /* ─── D · DRIFTING SANDS ─── */
   .cd-sands { flex-direction: column; gap: var(--sp-6); }
   .sands-label { display: flex; flex-direction: column; align-items: center; gap: 6px; }
   .sands-label__ar {
     font-family: var(--font-arabic); font-size: 18px; font-weight: 500;
-    color: var(--sand-200); direction: rtl;
-    text-shadow: 0 0 16px rgba(232,180,154,0.3);
+    /* GUIDING LIGHTS — was --sand-200. On the gold family that made a second
+       gold voice competing with the numeral, so the label steps back to the
+       neutral the cinema variant already uses. */
+    color: var(--fg-muted); direction: rtl;
+    text-shadow: 0 0 20px rgba(241,235,221,0.16);
   }
   .sands-label__en {
     font-family: var(--font-mono); font-size: 10px;
@@ -508,7 +577,7 @@
     position: absolute; inset: -80px;
     border-radius: 50%;
     background: radial-gradient(circle,
-      rgba(232,180,154,0.22) 0%, rgba(212,149,110,0.10) 35%, transparent 70%);
+      rgba(240,207,90,0.22) 0%, rgba(201,162,39,0.10) 35%, transparent 70%);
     pointer-events: none;
     animation: sands-halo 5s ease-in-out infinite;
   }
@@ -535,8 +604,8 @@
   .sands-streak {
     width: 0; height: 1px;
     background: linear-gradient(to right,
-      transparent 0%, rgba(232,180,154,0.5) 30%, rgba(240,207,90,0.8) 50%,
-      rgba(232,180,154,0.5) 70%, transparent 100%);
+      transparent 0%, rgba(240,207,90,0.5) 30%, rgba(240,207,90,0.8) 50%,
+      rgba(240,207,90,0.5) 70%, transparent 100%);
     transition: width 600ms cubic-bezier(.2,.7,.3,1), opacity 600ms ease;
   }
   .sands-streak.is-active { opacity: 1; }
@@ -547,14 +616,14 @@
   .sands-mark {
     width: 6px; height: 6px;
     border-radius: 50%;
-    background: rgba(212,149,110,0.18);
-    border: 1px solid rgba(212,149,110,0.35);
+    background: rgba(201,162,39,0.18);
+    border: 1px solid rgba(201,162,39,0.35);
     transition: background 320ms ease, box-shadow 320ms ease, border-color 320ms ease;
   }
   .sands-mark.is-filled {
     background: var(--sand-100);
     border-color: var(--sand-200);
-    box-shadow: 0 0 10px rgba(232,180,154,0.6);
+    box-shadow: 0 0 10px rgba(240,207,90,0.6);
   }
   /* Ambient grain canvas — visible only in sands mode */
   .grain-canvas {
@@ -569,8 +638,11 @@
   .grn-label { display: flex; flex-direction: column; align-items: center; gap: 6px; }
   .grn-label__ar {
     font-family: var(--font-arabic); font-size: 18px; font-weight: 500;
-    color: var(--sand-200); direction: rtl;
-    text-shadow: 0 0 16px rgba(232,180,154,0.3);
+    /* GUIDING LIGHTS — was --sand-200. On the gold family that made a second
+       gold voice competing with the numeral, so the label steps back to the
+       neutral the cinema variant already uses. */
+    color: var(--fg-muted); direction: rtl;
+    text-shadow: 0 0 20px rgba(241,235,221,0.16);
   }
   .grn-label__en {
     font-family: var(--font-mono); font-size: 10px;
@@ -588,8 +660,8 @@
     position: absolute; inset: -40px;
     border-radius: 50%;
     background: radial-gradient(circle,
-      rgba(232,180,154,0.16) 0%,
-      rgba(212,149,110,0.08) 35%,
+      rgba(240,207,90,0.16) 0%,
+      rgba(201,162,39,0.08) 35%,
       transparent 70%);
     pointer-events: none;
     animation: sands-halo 5s ease-in-out infinite;
@@ -603,14 +675,14 @@
   .grn-mark {
     width: 6px; height: 6px;
     border-radius: 50%;
-    background: rgba(212,149,110,0.18);
-    border: 1px solid rgba(212,149,110,0.35);
+    background: rgba(201,162,39,0.18);
+    border: 1px solid rgba(201,162,39,0.35);
     transition: background 320ms ease, box-shadow 320ms ease, border-color 320ms ease;
   }
   .grn-mark.is-filled {
     background: var(--sand-100);
     border-color: var(--sand-200);
-    box-shadow: 0 0 10px rgba(232,180,154,0.6);
+    box-shadow: 0 0 10px rgba(240,207,90,0.6);
   }
 
   /* ─── F · COSMOS ─── Editorial Cosmos · diagonal spine
@@ -639,7 +711,7 @@
     font-size: 22px; font-weight: 500;
     color: var(--fg-muted);
     direction: rtl;
-    text-shadow: 0 0 24px rgba(232,228,220,0.14);
+    text-shadow: 0 0 24px rgba(241,235,221,0.14);
   }
   .cos-label__en {
     font-family: var(--font-mono);
@@ -666,15 +738,9 @@
     pointer-events: none;
     z-index: 3;
   }
-  .cos-spine .twinkle { animation: cos-twinkle 6s ease-in-out infinite; }
-  .cos-spine .twinkle.t2 { animation-delay: 1.2s; animation-duration: 7.4s; }
-  .cos-spine .twinkle.t3 { animation-delay: 2.6s; animation-duration: 6.8s; }
-  .cos-spine .twinkle.t4 { animation-delay: 0.4s; animation-duration: 5.4s; }
-  .cos-spine .twinkle.t5 { animation-delay: 3.2s; animation-duration: 7s;   }
-  @keyframes cos-twinkle {
-    0%, 100% { opacity: 1; }
-    50%      { opacity: 0.4; }
-  }
+  /* GUIDING LIGHTS R14 — the cosmos spine's five staggered twinkles are gone
+     for the same reason the north star's is. The markup keeps its .twinkle /
+     .t2–.t5 classes so nothing else has to change; they simply do nothing. */
 
   /* Hero — digit + decorated ring at center.
      Hero is the geometric anchor; ring fills it; decorations ride the
@@ -714,7 +780,7 @@
     display: block;
     overflow: visible;
     pointer-events: none;
-    filter: drop-shadow(0 0 18px rgba(232, 228, 220, 0.08));
+    filter: drop-shadow(0 0 18px rgba(241, 235, 221, 0.08));
   }
   .cos-digit text {
     font-family: var(--font-serif);
@@ -816,31 +882,29 @@
     border-radius: 50%;
     background-image: url('assets/teacher-ali.jpg.png');
     background-size: cover; background-position: center;
-    box-shadow: 0 0 0 1.5px rgba(232,228,220,0.20),
+    box-shadow: 0 0 0 1.5px rgba(241,235,221,0.20),
                 0 12px 32px rgba(0,0,0,0.45),
-                0 0 80px rgba(232,117,90,0.12);
+                0 0 80px rgba(100,216,174,0.12);
   }
+  /* THE LIVE RIM — noon.400, not coral. The role table reads
+     "noon.400 · primary action, LIVE, complete", and gold is spoken for by
+     journey and time, so a speaking rim can only be green. That leaves the
+     guide's coral reservation unused: update §05 when it is next touched. */
   .teacher-circle::before {
     content: '';
     position: absolute; inset: -8px;
     border-radius: 50%;
-    border: 1.5px solid rgba(232,117,90,0.55);
-    box-shadow: 0 0 28px rgba(232,117,90,0.35);
+    border: 1.5px solid rgba(100,216,174,0.55);
+    box-shadow: 0 0 28px rgba(100,216,174,0.35);
     animation: rim-breath 3s ease-in-out infinite;
   }
   @keyframes rim-breath {
     0%,100% { transform: scale(0.985); opacity: 0.85; }
     50%     { transform: scale(1.02);  opacity: 1; }
   }
-  .teacher-circle::after {
-    content: '';
-    position: absolute;
-    top: -22px; left: 50%;
-    width: 14px; height: 14px;
-    background: var(--signal-bright);
-    transform: translateX(-50%) rotate(45deg);
-    box-shadow: 0 0 14px var(--signal-soft);
-  }
+  /* The teacher-solo phase had its own copy of the same gold diamond. Gone
+     for the same reason: the breathing rim already says live. */
+  .teacher-circle::after { content: none; }
   /* Anchored to viewport center + circle radius + 32px gap so the label
      always sits directly below the circle, regardless of label height.
      This keeps the circle itself precisely at viewport center for the
@@ -1040,12 +1104,12 @@
     position: absolute; inset: 0;
     border-radius: inherit;
     background-size: cover; background-position: center;
-    box-shadow: 0 0 0 1.5px rgba(232,228,220,0.20),
+    box-shadow: 0 0 0 1.5px rgba(241,235,221,0.20),
                 0 12px 32px rgba(0,0,0,0.45);
     z-index: 1;
   }
   .member--classroom .member__photo {
-    box-shadow: 0 0 0 1px rgba(232,228,220,0.18),
+    box-shadow: 0 0 0 1px rgba(241,235,221,0.18),
                 0 8px 20px rgba(0,0,0,0.4);
   }
 
@@ -1054,36 +1118,29 @@
     content: '';
     position: absolute; inset: -5%;
     border-radius: 50%;
-    border: 1.5px dashed rgba(232,228,220,0.32);
+    border: 1.5px dashed rgba(241,235,221,0.32);
     pointer-events: none;
     z-index: 0;
   }
   /* teacher reuses the rim-breath animation from .teacher-circle::before */
   .member--teacher .member__circle::before {
-    border: 1.5px solid rgba(232,117,90,0.55);
-    box-shadow: 0 0 28px rgba(232,117,90,0.35);
+    border: 1.5px solid rgba(100,216,174,0.55);
+    box-shadow: 0 0 28px rgba(100,216,174,0.35);
     animation: rim-breath 3s ease-in-out infinite;
   }
 
-  /* gold waypoint diamond — anchored above the rim */
-  .member__waypoint {
-    position: absolute;
-    top: calc(-5% - 6px); left: 50%;
-    width: 12px; height: 12px;
-    background: var(--signal-bright);
-    transform: translateX(-50%) rotate(45deg);
-    box-shadow: 0 0 14px var(--signal-soft);
-    z-index: 2;
-  }
-  .member--classroom .member__waypoint { top: calc(-5% - 5px); width: 10px; height: 10px; }
-  .member--teacher .member__waypoint   { top: calc(-5% - 7px); width: 14px; height: 14px; }
+  /* The gold diamond above the teacher's camera is gone. It is the base's
+     WAYPOINT — a landmark marking where a route stops — and the breathing
+     rim already says who is live, so the diamond was decorating a state that
+     was fully described without it. Same reasoning as the timer's. */
+  .member__waypoint { display: none; }
 
   /* mute pip — small dark circle bottom-right */
   .member__mute {
     position: absolute;
     right: 4%; bottom: 4%;
     width: 30px; height: 30px;
-    background: rgba(10,15,26,0.85);
+    background: rgba(22,26,33,0.85);
     border-radius: 50%;
     border: 1px solid var(--border-strong);
     display: inline-flex; align-items: center; justify-content: center;
@@ -1123,14 +1180,14 @@
      accent / signal / danger.
      ────────────────────────────────────────────────────────────────────── */
   :root {
-    --team-cloud:     #c9c4b8;  /* chalk-300 */
-    --team-crystal:   #B08AF9;  /* iris */
-    --team-fire:      #c55a4e;  /* danger */
-    --team-lightning: #e0b83a;  /* gold-300 */
-    --team-rainstorm: #6BA3FF;  /* blue-400 */
-    --team-tornado:   #8e8a80;  /* chalk-400 */
-    --team-tsunami:   #64D8AE;  /* noon-400 */
-    --team-volcano:   #C07A4E;  /* terra-400 */
+    --team-cloud:     #B7CEDD;  /* sky 300 — subject family */
+    --team-crystal:   #AC7F97;  /* plum — subject family */
+    --team-fire:      #C98A87;  /* rose — subject family */
+    --team-lightning: #DDBA62;  /* saffron — subject family */
+    --team-rainstorm: #86A7BE;  /* sky — subject family */
+    --team-tornado:   #C6CCAA;  /* sage 300 — subject family */
+    --team-tsunami:   #9FAA7D;  /* sage — subject family */
+    --team-volcano:   #E7B9B4;  /* rose 300 — subject family */
   }
 
   .teamup-view {
@@ -1163,7 +1220,8 @@
     height: 30px;
     padding: 0 14px 0 12px;
     border-radius: var(--r-pill);
-    background: var(--bg-overlay);
+    /* Same reasoning as .team-card — edge, not fill. */
+    background: transparent;
     border: 1px solid var(--border);
     font-family: var(--font-sans);
     font-size: 12px;
@@ -1225,8 +1283,13 @@
      member avatars in a 3-column grid. */
   .team-card {
     position: relative;
-    background: var(--bg-raised);
-    border: 1px solid var(--border);
+    /* GUIDING LIGHTS · depth on void is made by a BRIGHTER BORDER, never by a
+       lighter fill. --bg-raised is #26282E, a navy step up from the ground,
+       and three of these tiled across the lobby was what made the screen read
+       cold and heavy. The card is now the ground itself with a brighter edge
+       drawn on it, which is what the guide specifies. */
+    background: transparent;
+    border: 1px solid var(--border-strong);
     border-radius: var(--r-4);
     padding: var(--sp-4) var(--sp-5);
     overflow: hidden;
@@ -1235,8 +1298,11 @@
     align-items: stretch;
     min-height: 0;
   }
-  /* per-team accent strip at top */
-  .team-card::before {
+  /* Per-team accent rail. OFF by default — the mark already carries the
+     team's colour, and three saturated rails across the lobby was one of the
+     things making the screen loud. data-rail="on" brings it back. */
+  .team-card::before { content: none; }
+  .app[data-rail="on"] .team-card::before {
     content: ''; position: absolute;
     top: 0; left: 0; right: 0; height: 2px;
     background: var(--team-color, var(--accent));
@@ -1266,12 +1332,26 @@
        members on the right — no drift as more rows of members appear. */
     justify-content: flex-start;
   }
+  /* THE TEAM MARK — four ways to draw the same team, all four built into
+     every card so switching is a CSS flip rather than a re-render.
+       art     the shipped full-colour illustration
+       coin    §07: flat family colour, grain, one inset hairline, ink emblem
+       tinted  the base's avatar convention — 13% fill, 35% border, emblem in
+               the family colour. Quietest, and it matches the member circles.
+       line    no disc at all. The UI-icon rule minus its node: a team is not
+               a UI icon, so there is nothing meaningful for a node to mark. */
   .team-card__icon {
     width: 76px; height: 76px;
     flex-shrink: 0;
-    object-fit: contain;
     margin-bottom: 6px;
+    display: flex; align-items: center; justify-content: center;
   }
+  .team-card__icon img { width: 100%; height: 100%; object-fit: contain; }
+  .tm { display: none; line-height: 0; }
+  .app[data-team-mark="art"]    .tm--art,
+  .app[data-team-mark="coin"]   .tm--coin,
+  .app[data-team-mark="tinted"] .tm--tinted,
+  .app[data-team-mark="line"]   .tm--line { display: block; }
   .team-card__name {
     font-family: var(--font-serif);
     font-size: 22px;
@@ -1282,12 +1362,10 @@
     max-width: 100%;
     text-overflow: ellipsis; overflow: hidden; white-space: nowrap;
   }
-  .team-card__count {
-    font-family: var(--font-mono);
-    font-size: 11px;
-    color: var(--fg-muted);
-    letter-spacing: 0.06em;
-  }
+  /* Hidden: the row of faces beside the name already says how many there
+     are, and a numeral repeating it is the kind of thing that adds up.
+     The element and its JS updates stay, so it is one line to bring back. */
+  .team-card__count { display: none; }
 
   /* ── Stacked layout — icon + name on top, members flex-wrapped below ───
      Engaged via [data-card-layout="stacked"] on .app */
@@ -1365,28 +1443,35 @@
      lands on the students who still need a team. ─────────────────────────── */
   .teamup__picking {
     flex-shrink: 0;
-    background: var(--bg-overlay);
-    border: 1px solid var(--border);
-    border-radius: var(--r-4);
-    padding: var(--sp-3) var(--sp-4);
+    /* No panel behind the waiting list. The board made it read as a tray
+       bolted to the bottom of the screen; without it the students still
+       picking sit on the same void as the teams, which is what they are —
+       the same room, just not sorted yet. The gold label carries the
+       grouping on its own. Zero side padding so the pills line up with the
+       left edge of the team cards above. */
+    padding: var(--sp-2) 0 0;
     display: flex; flex-direction: column;
     gap: var(--sp-3);
     overflow: hidden;
-    /* Lock the panel height so it doesn't shrink/grow as pills come and go
-       (fits label + 1 row of 28px pills + padding + gap) */
-    height: 92px;
+    /* Lock the panel height so it doesn't shrink/grow as pills come and go.
+       Sized for label + one row of 58px pills + padding + gap — the pills grew
+       when the waiting students were given the same avatar as teamed ones,
+       and lost the 12px of panel padding when the board came off. */
+    height: 102px;
   }
+  /* Gold is the signal colour — spending it on a line of running commentary
+     made the quietest information on the screen the loudest thing on it. */
   .teamup__picking-label {
     display: flex; align-items: center; gap: 8px;
     font-family: var(--font-sans);
     font-size: 13px;
-    font-weight: 500;
-    color: var(--signal-bright);
+    font-weight: 400;
+    color: var(--fg-muted);
     letter-spacing: -0.005em;
   }
   .teamup__picking-label svg {
     width: 16px; height: 16px;
-    color: var(--signal);
+    color: var(--fg-faint);
   }
   .teamup__picking-list {
     display: flex; flex-wrap: nowrap;
@@ -1394,14 +1479,18 @@
     overflow: hidden;
     min-width: 0;
   }
+  /* A student waiting is the same student, at the same size, as one already
+     in a team — only the container differs. Circle and name therefore match
+     .member-pill exactly (48px / 11px); the gold pill is what says "still
+     picking", not a smaller avatar. */
   .picking-pill {
-    display: inline-flex; align-items: center; gap: 10px;
-    padding: 4px 12px 4px 4px;
+    display: inline-flex; align-items: center; gap: 11px;
+    padding: 4px 18px 4px 4px;
     border-radius: var(--r-pill);
     background: var(--bg-raised);
     border: 1px solid color-mix(in srgb, var(--signal) 25%, transparent);
     font-family: var(--font-sans);
-    font-size: 12px;
+    font-size: 11px;                    /* matches .member-pill__name */
     font-weight: 500;
     color: var(--fg);
     letter-spacing: -0.005em;
@@ -1411,13 +1500,13 @@
                 color 280ms ease, opacity 280ms ease, box-shadow 280ms ease;
   }
   .picking-pill__circle {
-    width: 28px; height: 28px;
+    width: 48px; height: 48px;          /* matches .member-pill__circle */
     border-radius: 50%;
     background: var(--bg-overlay);
     border: 1.5px solid color-mix(in srgb, var(--fg) 25%, transparent);
     display: inline-flex; align-items: center; justify-content: center;
     font-family: var(--font-sans);
-    font-size: 12px; font-weight: 600;
+    font-size: 18px; font-weight: 600;  /* matches .member-pill__circle */
     color: var(--fg);
     flex-shrink: 0;
     transition: background-color 280ms ease, border-color 280ms ease,
@@ -1448,7 +1537,9 @@
     padding: var(--sp-5);
   }
 
-  /* ── Floating Start CTA ──────────────────────────────────────────────── */
+  /* ── Floating Start CTA ── RETIRED. The lobby advances itself now, so
+     nothing below is applied to anything. Kept, not deleted, because it is
+     the whole button if it is ever wanted back. ─────────────────────────── */
   .teamup__start {
     position: absolute;
     right: var(--sp-5); bottom: var(--sp-5);
@@ -1487,7 +1578,6 @@
     white-space: nowrap;
     pointer-events: none;
   }
-  /* Start sits above picking strip area */
 
   /* ── Entrance animations — cascade in as the lobby fills ────────────── */
   @keyframes teamup-pop {
@@ -1520,7 +1610,6 @@
     opacity: 0;
     max-height: 0;
     padding-top: 0; padding-bottom: 0;
-    border-color: transparent;
     pointer-events: none;
   }
   /* Empty-state grid fades when scenario flips to having teams */
@@ -1598,18 +1687,40 @@
     width: 100%; max-width: 100%; max-height: 100%;
     border-radius: var(--r-4);
     background: var(--paper-100); overflow: hidden;
-    box-shadow: inset 0 0 0 1px rgba(10,15,26,0.10),
-                0 1px 0 rgba(232,228,220,0.04),
+    box-shadow: inset 0 0 0 1px rgba(22,26,33,0.10),
+                0 1px 0 rgba(241,235,221,0.04),
                 0 8px 32px rgba(0,0,0,0.35);
+  }
+  /* THE SLIDE DECK — slide-deck.js mounts here.
+
+     .slide-native is the authored slide, and it is NOT part of any deck: it
+     is the fallback, shown only when no exports are loaded (data-deck="off",
+     or a folder with nothing in it yet). It used to be mounted as the deck's
+     anchor, which put the same page in the middle of every deck — once each
+     style has its own folder that is just a repeated slide.
+
+     The layout lives here rather than on .stage so that hiding it hides the
+     authored slide alone, not the paper it sits on. */
+  .slide-native {
+    position: absolute; inset: 0; z-index: 1;
     display: flex; flex-direction: column;
     align-items: center; justify-content: center;
     padding: 64px; text-align: center;
   }
+  /* An exported slide is a whole 16:9 artwork — the paper grids underneath
+     would print straight through it. ::after in particular paints ABOVE the
+     deck images, since a pseudo-element is a child in painting order. */
+  .stage[data-slide="image"]::before,
+  .stage[data-slide="image"]::after { display: none; }
+  .stage[data-slide="image"] { background: var(--bg-sunken); }
+  /* .slide-native sits at z-index 1, above the deck images — so it has to be
+     taken out of the flow entirely when a deck is showing, not just dimmed. */
+  .stage[data-slide="image"] .slide-native { display: none; }
   .stage::before {
     content: ''; position: absolute; inset: 0;
     background-image:
-      linear-gradient(to right, rgba(10,15,26,0.045) 1px, transparent 1px),
-      linear-gradient(to bottom, rgba(10,15,26,0.045) 1px, transparent 1px);
+      linear-gradient(to right, rgba(22,26,33,0.045) 1px, transparent 1px),
+      linear-gradient(to bottom, rgba(22,26,33,0.045) 1px, transparent 1px);
     background-size: 24px 24px;
   }
   .stage::after {
@@ -1623,12 +1734,12 @@
     position: relative; z-index: 1;
     font-family: var(--font-mono); font-size: 11px;
     letter-spacing: 0.32em; text-transform: uppercase;
-    color: rgba(10,15,26,0.55); margin-bottom: var(--sp-4);
+    color: rgba(22,26,33,0.55); margin-bottom: var(--sp-4);
   }
   .slide-title {
     position: relative; z-index: 1;
     font-family: var(--font-serif); font-size: 56px;
-    font-weight: 500; color: rgba(10,15,26,0.92);
+    font-weight: 500; color: rgba(22,26,33,0.92);
     line-height: 1.1; letter-spacing: -0.015em;
     max-width: 720px;
   }
@@ -1661,19 +1772,19 @@
   }
   @keyframes focus-speak-breath {
     0%, 100% {
-      box-shadow: inset 0 0 0 1px rgba(232,117,90,0.55),
-                  0 0 0 1px rgba(232,117,90,0.18),
-                  0 0 18px rgba(232,117,90,0.22);
+      box-shadow: inset 0 0 0 1px rgba(100,216,174,0.55),
+                  0 0 0 1px rgba(100,216,174,0.18),
+                  0 0 18px rgba(100,216,174,0.22);
     }
     50% {
-      box-shadow: inset 0 0 0 1.5px rgba(232,117,90,0.85),
-                  0 0 0 1.5px rgba(232,117,90,0.40),
-                  0 0 32px rgba(232,117,90,0.45);
+      box-shadow: inset 0 0 0 1.5px rgba(100,216,174,0.85),
+                  0 0 0 1.5px rgba(100,216,174,0.40),
+                  0 0 32px rgba(100,216,174,0.45);
     }
   }
   .focus__overlay {
     position: absolute; inset: 0;
-    background: linear-gradient(to top, rgba(10,15,26,0.88) 0%, rgba(10,15,26,0) 50%);
+    background: linear-gradient(to top, rgba(22,26,33,0.88) 0%, rgba(22,26,33,0) 50%);
   }
   /* Teacher PiP — top-left. Default chrome is a neutral chalk frame;
      when teacher is speaker, a coral box-shadow breath takes over. */
@@ -1682,7 +1793,7 @@
     width: 56px; height: 56px; border-radius: var(--r-3);
     background: center/cover no-repeat url('assets/teacher-ali.jpg.png');
     background-position: center 20%;
-    box-shadow: 0 0 0 1.5px rgba(232,228,220,0.30),
+    box-shadow: 0 0 0 1.5px rgba(241,235,221,0.30),
                 0 4px 12px rgba(0,0,0,0.4);
     transition: box-shadow 600ms ease;
   }
@@ -1691,13 +1802,13 @@
   }
   @keyframes pip-speak-breath {
     0%, 100% {
-      box-shadow: 0 0 0 1.5px rgba(232,117,90,0.45),
-                  0 0 10px rgba(232,117,90,0.18),
+      box-shadow: 0 0 0 1.5px rgba(100,216,174,0.45),
+                  0 0 10px rgba(100,216,174,0.18),
                   0 4px 12px rgba(0,0,0,0.4);
     }
     50% {
-      box-shadow: 0 0 0 2.5px rgba(232,117,90,0.85),
-                  0 0 22px rgba(232,117,90,0.42),
+      box-shadow: 0 0 0 2.5px rgba(100,216,174,0.85),
+                  0 0 22px rgba(100,216,174,0.42),
                   0 4px 12px rgba(0,0,0,0.4);
     }
   }
@@ -1742,11 +1853,11 @@
     transition: color 200ms ease;
   }
   .roster__item.is-speaking .roster__name {
-    color: #E8755A; font-weight: 600;
+    color: #64D8AE; font-weight: 600;
   }
   .roster__item.is-speaking .roster__avatar {
-    border-color: rgba(232,117,90,0.55);
-    box-shadow: 0 0 14px rgba(232,117,90,0.35);
+    border-color: rgba(100,216,174,0.55);
+    box-shadow: 0 0 14px rgba(100,216,174,0.35);
   }
 
   /* ── Class chat — heading + flowing message cards ── */
@@ -1780,14 +1891,16 @@
     display: flex; gap: var(--sp-3);
     align-items: flex-start;
     padding: var(--sp-3) var(--sp-3);
-    background: var(--hover-overlay);
-    border: 1px solid transparent;
+    /* Chat cards get the same treatment: on void a card is an edge, not a
+       tinted panel. is-fresh still lifts the border to gold. */
+    background: transparent;
+    border: 1px solid var(--border);
     border-radius: var(--r-4);
     transition: background 200ms ease, border-color 200ms ease;
     /* Fresh-message arrival animation */
     animation: msg-in 320ms cubic-bezier(.16,.8,.24,1) backwards;
   }
-  .msg.is-fresh { border-color: rgba(232,184,58,0.20); }
+  .msg.is-fresh { border-color: rgba(124,153,180,0.45); }
   @keyframes msg-in {
     from { opacity: 0; transform: translateY(8px); }
     to   { opacity: 1; transform: translateY(0); }
@@ -1861,12 +1974,31 @@
     transition: color 160ms ease, background 160ms ease;
   }
   .cp-handle:hover { color: var(--fg); background: var(--bg-raised); }
+  /* The handle and the Skip-to tabs share one always-visible bar, so the
+     phase control stays reachable with the panel folded — it is the one
+     control you reach for constantly while reviewing. */
+  .cp-bar { display: flex; align-items: center; gap: var(--sp-2); flex-wrap: wrap; }
+  .cp-bar .cp-tabs {
+    background: rgba(22,26,33,0.92);
+    backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
+  }
+  .cp-bar__label {
+    font-family: var(--font-mono); font-size: 9px;
+    text-transform: uppercase; letter-spacing: 0.18em;
+    color: var(--fg-faint);
+  }
+  /* A second group in the bar, shown only for the phase it belongs to. The
+     deck picker is the one control you reach for while actually presenting,
+     so it comes out of the panel and sits next to Skip-to — but only once
+     there are slides on screen, or it is just clutter. */
+  .cp-bar__group { display: none; align-items: center; gap: var(--sp-2); }
+  .app[data-phase="slides"] .cp-bar__group--deck { display: flex; }
   .cp-diamond { width: 6px; height: 6px; background: var(--signal-bright); transform: rotate(45deg); }
   .cp-panel {
     display: none;
     margin-top: var(--sp-2);
     padding: var(--sp-3) var(--sp-4);
-    background: rgba(10,15,26,0.92);
+    background: rgba(22,26,33,0.92);
     backdrop-filter: blur(12px);
     -webkit-backdrop-filter: blur(12px);
     border: 1px solid var(--border);
@@ -1945,6 +2077,162 @@
     color: var(--signal-bright);
   }
 </style>
+<style id="proven-routes-sync">
+  /* ── Synced to the Proven Routes guide (Oct 2026) ── */
+  /* 2 · star field: the original Proven Routes sky (chalk, constellations), low density, on every screen */
+  .sky-stars{filter:none!important}
+  .sky-stars .star{display:none}
+  .pr-sky{position:absolute;inset:0;width:100%;height:100%;display:block}
+  /* 3 · labels: sentence case in Vazirmatn — mono is for numbers only (developer controls untouched) */
+  .cin-label__en,.sands-label__en,.grn-label__en,.cos-label__en,.cos-footer__lesson,.cos-meta,.teacher-label__sub,
+  .member__sub,.teamup__start-hint,.slide-eyebrow,.focus__sub,.chat__title,.mc-readout,.mc-number__unit{
+    font-family:var(--font-sans)!important;text-transform:none!important;letter-spacing:.01em!important;padding-left:0!important}
+  .cin-label__en{font-size:18px}
+  /* 4 · own avatar: tinted initials, not an action-green fill */
+  .me-avatar{background:rgba(241,235,221,.08);color:var(--fg);border:1px solid rgba(241,235,221,.28)}
+  /* 6 · numeral glow, lighter */
+  .cin-num,.cin-digit{text-shadow:0 0 24px rgba(240,207,90,.22),0 0 72px rgba(240,207,90,.08)!important}
+  /* 8 · students still arriving is not an error: neutral dot */
+  .count-chip--students .count-chip__dot{background:rgba(241,235,221,.45)}
+  /* 10 · newest chat message: water, the current item */
+  .msg__fresh-dot{background:#7C99B4;box-shadow:0 0 6px rgba(124,153,180,.35)}
+  /* 11 · muted / camera off is heat (clay), not danger */
+  .member__mute{color:#E8663A}
+  .icon-btn[aria-pressed="true"]{background:rgba(232,102,58,.10);border-color:rgba(232,102,58,.35);color:#E8663A}
+  /* team cards: a veil of the ground colour over the sky, like the countdown dimming —
+     stars never run behind names. Still the ground colour, so depth stays a border, not a lighter fill. */
+  /* floating sands, borrowed from the Empty Quarter presenter: the drifting gold grains also play behind the cinema countdown */
+  .app[data-countdown="cinema"][data-phase="countdown"] .grain-canvas{opacity:1}
+  /* khatam behind the countdown (replaces the astrolabe ring) */
+  .khatam{position:absolute;left:50%;top:50%;width:88vh;height:88vh;margin:-44vh 0 0 -44vh;pointer-events:none;z-index:2;opacity:0;transition:opacity 900ms ease}
+  .app[data-countdown="mission"] .khatam{display:none}
+  .app[data-phase="countdown"] .khatam{opacity:1}
+  .khatam__outer,.khatam__inner{position:absolute;inset:0;transform-origin:50% 50%}
+  .khatam__outer{animation:khatam-turn 150s linear infinite}
+  .khatam__inner{animation:khatam-turn-ccw 210s linear infinite}
+  @keyframes khatam-turn{from{transform:rotate(0deg)}to{transform:rotate(360deg)}}
+  @keyframes khatam-turn-ccw{from{transform:rotate(0deg)}to{transform:rotate(-360deg)}}
+  @media (prefers-reduced-motion:reduce){.khatam__outer,.khatam__inner{animation:none}}
+  /* quieter sky */
+  .pr-sky{opacity:.55}
+  .team-card{background:rgba(22,26,33,.88);-webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px)}
+</style>
+<style id="precision-futurism">
+  /* ── Precision Futurism · Oct 2026 ──
+     Spatial, not decorative. One focal point per screen. Lines carry meaning:
+     terrain/structure stay still and faint, the route is gold, and only the
+     SIGNAL (luminous white) glows or moves — one per screen.
+     White = where you are now. Water = what you chose. Green = live (a dot). */
+  :root{
+    --font-display:'Readex Pro','Vazirmatn',system-ui,sans-serif;
+    --font-dot:'Doto','JetBrains Mono',ui-monospace,monospace;
+    --pf-white:#FFFFFF;
+    --pf-halo:rgba(255,255,255,.30);
+    --pf-hair:rgba(241,235,221,.10);
+    --pf-hair-2:rgba(241,235,221,.18);
+    --pf-clay:#E8663A;
+    --pf-live:#64D8AE;
+  }
+  @keyframes pf-pulse{0%,100%{--pf-a:.18}50%{--pf-a:.36}}
+
+  /* type: display + numerals in Readex Pro; serif leaves the interface */
+  .session-title{font-family:var(--font-sans)!important;font-size:14px;color:var(--fg-muted)}
+  .team-card__name,.member--teacher .member__name,.focus__name{font-family:var(--font-display)!important;font-weight:300!important;letter-spacing:-.01em}
+  .member--teacher .member__name{font-size:26px}
+  /* live = a green dot + a dot-matrix status label, nothing else is green */
+  .time{gap:10px!important}
+  .pf-live{display:inline-flex;align-items:center;gap:7px;padding-right:10px;border-right:1px solid var(--pf-hair-2);font-family:var(--font-dot);font-weight:700;font-size:12px;letter-spacing:.14em;color:var(--fg-muted)}
+  .pf-live i{width:7px;height:7px;border-radius:50%;background:var(--pf-live);box-shadow:0 0 8px rgba(100,216,174,.55)}
+
+  /* ── 1 · Countdown — the ring IS the countdown ── */
+  .cin-digit{font-family:var(--font-display)!important;font-weight:200!important;font-size:40vh!important;color:#F1EBDD!important;letter-spacing:-.05em!important;
+    text-shadow:none!important}
+  .cin-underline,.cin-horizon{display:none!important}
+  .app[data-countdown="cinema"] .khatam{display:none!important}           /* drawn static in the ring canvas */
+  .app[data-countdown="cinema"][data-phase="countdown"] .grain-canvas{opacity:0!important} /* grains now flow into the ring */
+  .pf-ring{position:absolute;inset:0;width:100%;height:100%;pointer-events:none;z-index:2;opacity:0;transition:opacity 700ms ease}
+  .app[data-countdown="cinema"][data-phase="countdown"] .pf-ring{opacity:1}
+
+  /* ── 2 · Team up — rows on a hairline, not boxes ── */
+  .team-card{border:0!important;border-top:1px solid var(--pf-hair)!important;border-radius:0!important}
+  .team-card::after{content:none!important}
+  .member-pill__circle{background:transparent!important;border:1px solid var(--pf-hair-2)!important;font-weight:500!important;
+    transition:box-shadow .45s ease,transform .45s cubic-bezier(.2,.7,.3,1)}
+  /* the student who has just landed is "where you are now" */
+  .team-card__members{padding:8px 6px 0;overflow:visible!important}
+  .team-card{overflow:visible!important}
+  .member-pill.pf-now .member-pill__circle{border-color:transparent!important;color:#fff;transform:scale(1.06);
+    box-shadow:0 0 0 3px #161A21,0 0 0 5px #fff,0 0 22px 5px rgba(255,255,255,.28)}
+  .member-pill.pf-now .member-pill__name{color:#fff}
+
+  /* ── 3 · Slide view — one white ring on whoever speaks ── */
+  .focus{overflow:visible!important;background:none!important;box-shadow:none!important;animation:none!important}
+  .focus::before{content:"";position:absolute;inset:0;border-radius:inherit;background:url('assets/classroom-a.jpg') center/cover;z-index:0}
+  .focus>*{z-index:1}
+  .focus__overlay{border-radius:inherit}
+  .focus::after{content:"";position:absolute;inset:-6px;border-radius:calc(var(--r-4) + 6px);border:3px solid #fff;opacity:0;transition:opacity .45s ease;pointer-events:none;z-index:2}
+  .focus[data-speaker="classroom"]::after{opacity:1;animation:pf-frame 3.2s ease-in-out infinite}
+  .focus__pip{animation:none;box-shadow:0 0 0 1px rgba(255,255,255,.35),0 4px 12px rgba(0,0,0,.4);transition:box-shadow .45s ease,transform .45s ease}
+  .focus[data-speaker="teacher"] .focus__pip{transform:scale(1.06);animation:pf-pip 3.2s ease-in-out infinite!important}
+  @keyframes pf-frame{0%,100%{box-shadow:0 0 22px 3px rgba(255,255,255,.18)}50%{box-shadow:0 0 40px 10px rgba(255,255,255,.36)}}
+  @keyframes pf-pip{0%,100%{box-shadow:0 0 0 3px #161A21,0 0 0 6px #fff,0 0 18px 3px rgba(255,255,255,.18)}50%{box-shadow:0 0 0 3px #161A21,0 0 0 6px #fff,0 0 34px 9px rgba(255,255,255,.36)}}
+  .roster{border-top:1px solid var(--pf-hair)!important;border-bottom:1px solid var(--pf-hair)!important}
+  .roster__avatar{border:1px solid var(--pf-hair-2)!important}
+  .roster__item.is-speaking .roster__name{color:#fff!important;font-weight:500!important}
+  .roster__item.is-speaking .roster__avatar{box-shadow:none!important}
+  /* chat is a list on hairlines; the newest carries a water dot */
+  .messages{gap:0!important}
+  .msg{border:0!important;border-top:1px solid var(--pf-hair)!important;border-radius:0!important;padding:14px 4px!important}
+  .msg__avatar{border:1px solid var(--pf-hair-2)!important}
+
+  /* ── 4 · Stage view — the ring moves with the speaker ── */
+  .member__circle::before{content:none!important}
+  .member__photo,.member--classroom .member__photo{box-shadow:0 0 0 1px var(--pf-hair-2);transition:box-shadow .45s ease,opacity .45s ease}
+  .member__circle{transition:transform .45s cubic-bezier(.2,.7,.3,1)}
+  .stage-view .member:not(.pf-on) .member__photo{opacity:.82}
+  .stage-view .member.pf-on .member__circle{transform:scale(1.04)}
+  .stage-view .member.pf-on .member__photo{animation:pf-spk 3.2s ease-in-out infinite}
+  .member--classroom.pf-on .member__photo{animation-name:pf-spk-s}
+  .stage-view .member.pf-on .member__name{color:#fff}
+  @keyframes pf-spk{0%,100%{box-shadow:0 0 0 8px #161A21,0 0 0 11px #fff,0 0 30px 6px rgba(255,255,255,.18)}50%{box-shadow:0 0 0 8px #161A21,0 0 0 11px #fff,0 0 54px 14px rgba(255,255,255,.36)}}
+  @keyframes pf-spk-s{0%,100%{box-shadow:0 0 0 5px #161A21,0 0 0 8px #fff,0 0 22px 4px rgba(255,255,255,.18)}50%{box-shadow:0 0 0 5px #161A21,0 0 0 8px #fff,0 0 40px 10px rgba(255,255,255,.36)}}
+  /* muted is a small clay dot, not an icon badge; the speaker is never muted */
+  .member__mute{width:14px!important;height:14px!important;right:9%!important;bottom:9%!important;background:var(--pf-clay)!important;border:0!important;box-shadow:0 0 0 3px #161A21}
+  .member__mute svg{display:none}
+  .member.pf-on .member__mute{opacity:0}
+
+
+  /* ── Teacher solo — the countdown ring hands over to the teacher ── */
+  .teacher-circle{box-shadow:0 0 0 1px var(--pf-hair-2),0 12px 32px rgba(0,0,0,.45)!important}
+  .teacher-circle::before{inset:-10px!important;border:3px solid #fff!important;box-shadow:0 0 26px 4px rgba(255,255,255,.18);animation:pf-solo 3.2s ease-in-out infinite!important}
+  @keyframes pf-solo{0%,100%{box-shadow:0 0 26px 4px rgba(255,255,255,.18)}50%{box-shadow:0 0 52px 14px rgba(255,255,255,.36)}}
+  .teacher-label__name{font-family:var(--font-display)!important;font-weight:300;font-size:30px!important;color:#fff!important}
+  .teacher-solo .teacher-label .teacher-label__sub{display:inline-flex;align-items:center;gap:8px;font-family:var(--font-dot)!important;font-weight:700;font-size:12px!important;letter-spacing:.14em!important;text-transform:uppercase!important;color:var(--fg-muted)!important}
+  .teacher-label__sub::before{content:"";width:7px;height:7px;border-radius:50%;background:var(--pf-live);box-shadow:0 0 8px rgba(100,216,174,.55)}
+
+  /* ── Team up — a title and a status read-out, not chips ── */
+  .teamup-view{padding-left:64px!important;padding-right:64px!important}
+  .teamup__counts{justify-content:space-between;align-items:flex-end;padding-top:28px;margin-bottom:28px}
+  .pf-tu-title{margin:0;font-family:var(--font-display);font-weight:200;font-size:76px;line-height:1;letter-spacing:-.02em;color:#F1EBDD}
+  .pf-tu-meta{display:flex;flex-direction:column;align-items:flex-end;gap:6px;font-family:var(--font-dot);font-weight:700;font-size:14px;letter-spacing:.14em;text-transform:uppercase;color:var(--fg-subtle)}
+  .pf-tu-meta .count-chip{height:auto;padding:0;border:0!important;background:none!important;font:inherit;letter-spacing:inherit;color:var(--fg-muted)}
+  .pf-tu-meta .count-chip__dot{display:none}
+  .pf-tu-meta .count-chip__total{color:var(--fg-muted);margin:0}
+  .pf-tu-meta b{font-weight:inherit;color:#F1EBDD}
+  /* still picking: same avatar as a teamed student, on a dashed hairline — not placed yet */
+  .teamup__picking{border-top:1px solid var(--pf-hair);padding-top:16px!important;height:118px!important}
+  .teamup__picking-label{font-family:var(--font-dot)!important;font-weight:700;font-size:12px!important;letter-spacing:.14em;text-transform:uppercase;color:var(--fg-subtle)!important}
+  .teamup__picking-label svg{display:none}
+  .teamup__picking-list{gap:8px!important}
+  .picking-pill,.picking-pill.is-absent{flex-direction:column;gap:6px!important;width:72px;padding:0!important;background:none!important;border:0!important;
+    font-size:11px!important;font-weight:400!important;color:var(--fg-muted)!important;box-shadow:none!important}
+  .picking-pill__circle,.picking-pill.is-absent .picking-pill__circle{background:transparent!important;border:1px dashed rgba(241,235,221,.32)!important;font-weight:500!important;color:var(--fg)!important}
+  .picking-pill.is-absent{opacity:.4!important}
+
+  @media (prefers-reduced-motion:reduce){
+    .focus::after,.focus__pip,.member__photo,.teacher-circle::before{animation:none!important}
+  }
+</style>
 </head>
 <body>
 
@@ -1955,13 +2243,19 @@
      data-card-layout="row"
      data-duration="10"
      data-teacher-hold="5"
-     data-bg-stars="dense"
+     data-bg-stars="medium"
      data-bg-glow="strong"
-     data-bg-northstar="on"
-     data-bg-landscape="lab-starry-sky">
+     data-bg-northstar="off"
+     data-bg-vignette="off"
+     data-rete="off"
+     data-deck="chemistry"
+     data-team-mark="art"
+     data-rail="off"
+     data-bg-landscape="off">
 
   <!-- ── Backdrop: stars ── -->
   <div class="sky-stars" aria-hidden="true">
+    <canvas class="pr-sky" id="prSky"></canvas>
     <div class="stars-bright"></div>
     <div class="stars-medium"></div>
     <div class="stars-dim"></div>
@@ -1990,7 +2284,7 @@
         </linearGradient>
       </defs>
       <path d="M0,240 L0,180 C160,160 320,120 480,130 C640,140 760,170 920,160 C1080,150 1220,110 1440,120 L1440,120 C1600,160 1760,120 1920,130 C2080,140 2200,170 2360,160 C2520,150 2660,110 2880,120 L2880,240 Z" fill="url(#dune-far)"/>
-      <path d="M0,180 C160,160 320,120 480,130 C640,140 760,170 920,160 C1080,150 1220,110 1440,120 C1600,160 1760,120 1920,130 C2080,140 2200,170 2360,160 C2520,150 2660,110 2880,120" fill="none" stroke="rgba(232,228,220,0.10)" stroke-width="0.6"/>
+      <path d="M0,180 C160,160 320,120 480,130 C640,140 760,170 920,160 C1080,150 1220,110 1440,120 C1600,160 1760,120 1920,130 C2080,140 2200,170 2360,160 C2520,150 2660,110 2880,120" fill="none" stroke="rgba(241,235,221,0.10)" stroke-width="0.6"/>
     </svg>
     <svg class="mid" viewBox="0 0 2880 240" preserveAspectRatio="none">
       <defs>
@@ -2000,18 +2294,18 @@
         </linearGradient>
       </defs>
       <path d="M0,240 L0,160 C200,110 400,80 600,110 C800,140 940,180 1200,150 C1340,135 1440,90 1440,90 L1440,90 C1640,110 1840,80 2040,110 C2240,140 2380,180 2640,150 C2780,135 2880,90 2880,90 L2880,240 Z" fill="url(#dune-mid)"/>
-      <path d="M0,160 C200,110 400,80 600,110 C800,140 940,180 1200,150 C1340,135 1440,90 1440,90 C1640,110 1840,80 2040,110 C2240,140 2380,180 2640,150 C2780,135 2880,90 2880,90" fill="none" stroke="rgba(232,228,220,0.18)" stroke-width="0.8"/>
+      <path d="M0,160 C200,110 400,80 600,110 C800,140 940,180 1200,150 C1340,135 1440,90 1440,90 C1640,110 1840,80 2040,110 C2240,140 2380,180 2640,150 C2780,135 2880,90 2880,90" fill="none" stroke="rgba(241,235,221,0.18)" stroke-width="0.8"/>
       <path d="M0,160 C200,110 400,80 600,110 C800,140 940,180 1200,150 C1340,135 1440,90 1440,90 C1640,110 1840,80 2040,110 C2240,140 2380,180 2640,150 C2780,135 2880,90 2880,90" fill="none" stroke="rgba(201,162,39,0.22)" stroke-width="0.5" stroke-dasharray="2 6" stroke-linecap="round"/>
     </svg>
     <svg class="near" viewBox="0 0 2880 240" preserveAspectRatio="none">
       <defs>
         <linearGradient id="dune-near" x1="0" x2="0" y1="0" y2="1">
           <stop offset="0%"   stop-color="rgba(138,78,42,0.22)"/>      <!-- terra-600 trace -->
-          <stop offset="100%" stop-color="rgba(10,15,26,0.85)"/>       <!-- void-300 base -->
+          <stop offset="100%" stop-color="rgba(22,26,33,0.85)"/>       <!-- void-300 base -->
         </linearGradient>
       </defs>
       <path d="M0,240 L0,120 C160,80 360,40 560,80 C760,120 920,170 1200,140 C1380,120 1440,60 1440,60 L1440,60 C1600,80 1800,40 2000,80 C2200,120 2360,170 2640,140 C2820,120 2880,60 2880,60 L2880,240 Z" fill="url(#dune-near)"/>
-      <path d="M0,120 C160,80 360,40 560,80 C760,120 920,170 1200,140 C1380,120 1440,60 1440,60 C1600,80 1800,40 2000,80 C2200,120 2360,170 2640,140 C2820,120 2880,60 2880,60" fill="none" stroke="rgba(232,228,220,0.32)" stroke-width="0.9" filter="drop-shadow(0 0 3px rgba(232,228,220,0.14))"/>
+      <path d="M0,120 C160,80 360,40 560,80 C760,120 920,170 1200,140 C1380,120 1440,60 1440,60 C1600,80 1800,40 2000,80 C2200,120 2360,170 2640,140 C2820,120 2880,60 2880,60" fill="none" stroke="rgba(241,235,221,0.32)" stroke-width="0.9" filter="drop-shadow(0 0 3px rgba(241,235,221,0.14))"/>
     </svg>
   </div>
 
@@ -2023,17 +2317,42 @@
   <!-- Ambient grain canvas — visible only in sands mode -->
   <canvas class="grain-canvas" id="grain"></canvas>
 
-  <!-- Vignette — cinematic only -->
+  <!-- Vignette — opt-in, off by default (see data-bg-vignette) -->
   <div class="vignette" aria-hidden="true"></div>
+
+  <!-- ── The astrolabe rete — Guiding Lights §10, drawn by buildRete() ──
+       A backdrop layer, not part of the countdown markup, so it stacks
+       cleanly under the numeral (rete z-1 · vignette z-2 · countdown z-3). -->
+  <!-- Topographic ground, drawn by buildContours() -->
+  <svg class="contours" id="contours" viewBox="0 0 1600 900"
+       preserveAspectRatio="xMidYMid slice" aria-hidden="true"></svg>
+
+  <!-- Khatam — the geometric ornament behind the countdown, borrowed from the Empty Quarter presenter.
+       Square + diamond interlock, line only, never filled; two layers turning slowly in opposite directions. -->
+  <div class="khatam" aria-hidden="true">
+    <svg class="khatam__outer" viewBox="-100 -100 200 200">
+      <g fill="none" stroke="#F1EBDD" stroke-opacity=".11" stroke-width=".45">
+        <rect x="-52" y="-52" width="104" height="104"/>
+        <polygon points="0,-73.5 73.5,0 0,73.5 -73.5,0"/>
+      </g>
+    </svg>
+    <svg class="khatam__inner" viewBox="-100 -100 200 200">
+      <g fill="none" stroke="#F1EBDD" stroke-opacity=".07" stroke-width=".32">
+        <rect x="-30" y="-30" width="60" height="60"/>
+        <polygon points="0,-42.4 42.4,0 0,42.4 -42.4,0"/>
+      </g>
+    </svg>
+  </div>
+  <svg class="rete" id="rete" viewBox="0 0 1600 900"
+       preserveAspectRatio="xMidYMid slice" aria-hidden="true"></svg>
 
   <!-- ── Topbar (visible in slides phase only) ── -->
   <header class="topbar">
     <div class="session-meta">
       <div class="time">
-        <span class="time__diamond" aria-hidden="true"></span>
         <span class="time__value" id="timer">00:00</span>
       </div>
-      <span class="session-title"><em>Algebra II</em> · Quadratic functions, lesson 3</span>
+      <span class="session-title">Ratios, Percentages &amp; Equations</span>
     </div>
 
     <div class="controls">
@@ -2074,14 +2393,18 @@
     <!-- Shared SVG defs (sand-grain filter + gradient) — used by sands countdown -->
     <svg width="0" height="0" aria-hidden="true" style="position:absolute;">
       <defs>
+        <filter id="coin-grain" x="0" y="0" width="100%" height="100%">
+          <feTurbulence type="fractalNoise" baseFrequency="0.85" numOctaves="3" stitchTiles="stitch" result="cn"/>
+          <feColorMatrix in="cn" type="saturate" values="0"/>
+        </filter>
         <filter id="sand-grain" x="-20%" y="-20%" width="140%" height="140%">
           <feTurbulence type="fractalNoise" baseFrequency="0.7" numOctaves="2" seed="3" result="noise"/>
           <feDisplacementMap in="SourceGraphic" in2="noise" scale="3"/>
         </filter>
         <linearGradient id="sand-fill" x1="0" x2="0" y1="0" y2="1">
-          <stop offset="0%"   stop-color="#f3cfb3"/>
-          <stop offset="45%"  stop-color="#e0b83a"/>
-          <stop offset="100%" stop-color="#D4956E"/>
+          <stop offset="0%"   stop-color="#f0cf5a"/>   <!-- gold-200 -->
+          <stop offset="45%"  stop-color="#e0b83a"/>   <!-- gold-300 -->
+          <stop offset="100%" stop-color="#c9a227"/>   <!-- gold-400 -->
         </linearGradient>
       </defs>
     </svg>
@@ -2093,7 +2416,7 @@
 
       <div class="mc-strip">
         <span class="mc-strip__dot"></span>
-        <span class="mc-strip__title"><em>Algebra II</em> · Quadratic functions, lesson 3</span>
+        <span class="mc-strip__title">Ratios, Percentages &amp; Equations</span>
       </div>
 
       <div class="mc-readout mc-readout--tl">
@@ -2132,7 +2455,6 @@
       <!-- Bilingual label sits up top, away from the massive numeric in the
            middle of the stage. Same wording as Sands / Grain for continuity. -->
       <div class="cin-label">
-        <div class="cin-label__ar">الحصة تبدأ</div>
         <div class="cin-label__en">Class begins in</div>
       </div>
       <div class="cin-horizon" id="cinHorizon"></div>
@@ -2143,7 +2465,6 @@
     <!-- ── Countdown E — Grain (numerals made of sand particles) ── -->
     <div class="countdown cd-grain">
       <div class="grn-label">
-        <div class="grn-label__ar">الحصة تبدأ</div>
         <div class="grn-label__en">Class begins in</div>
       </div>
       <div class="grn-canvas-wrap">
@@ -2155,7 +2476,6 @@
     <!-- ── Countdown D — Drifting Sands ── -->
     <div class="countdown cd-sands">
       <div class="sands-label">
-        <div class="sands-label__ar">الحصة تبدأ</div>
         <div class="sands-label__en">Class begins in</div>
       </div>
       <div class="sands-numeral" id="sandsNumeral">
@@ -2175,7 +2495,6 @@
     <div class="countdown cd-cosmos">
       <!-- Bilingual label at the top, matching cinema / sands / grain phrasing -->
       <div class="cos-label">
-        <div class="cos-label__ar">الحصة تبدأ</div>
         <div class="cos-label__en">Class begins in</div>
       </div>
 
@@ -2198,12 +2517,12 @@
 
         <!-- Faint diagonal trajectory line (BL → TR) -->
         <line x1="115" y1="870" x2="900" y2="120"
-              stroke="rgba(232,228,220,0.18)" stroke-width="0.8"
+              stroke="rgba(241,235,221,0.18)" stroke-width="0.8"
               stroke-dasharray="2 8" opacity="0.6"/>
 
         <!-- Station 1: bottom-left (smaller, quieter) -->
         <g transform="translate(165, 830)">
-          <use href="#cos-portal" width="32" height="32" x="-16" y="-16" color="rgba(232,228,220,0.55)"/>
+          <use href="#cos-portal" width="32" height="32" x="-16" y="-16" color="rgba(241,235,221,0.55)"/>
           <use href="#cos-sparkle-plus" width="14" height="14" x="-7" y="-7" color="#96BCFF" class="twinkle t2"/>
         </g>
         <g transform="translate(225, 740)">
@@ -2215,7 +2534,7 @@
 
         <!-- Station 2: middle (sparse, the ring is the hero) -->
         <use href="#cos-sparkle-plus" width="12" height="12" x="434" y="549"
-             color="rgba(232,228,220,0.70)" class="twinkle"/>
+             color="rgba(241,235,221,0.70)" class="twinkle"/>
         <circle cx="560" cy="445" r="2" fill="#96BCFF" opacity="0.7" class="twinkle t5"/>
 
         <!-- Station 3: top-right (larger cluster, constellation halo) -->
@@ -2225,15 +2544,15 @@
           <use href="#cos-sparkle-big" width="34" height="34" x="-17" y="-17" color="#e0b83a" class="twinkle t3"/>
         </g>
         <g transform="translate(810, 215)">
-          <use href="#cos-portal" width="28" height="28" x="-14" y="-14" color="rgba(232,228,220,0.70)"/>
+          <use href="#cos-portal" width="28" height="28" x="-14" y="-14" color="rgba(241,235,221,0.70)"/>
         </g>
         <circle cx="660" cy="345" r="4.5" fill="#c9a227" class="twinkle t2"/>
         <circle cx="855" cy="170" r="2.5" fill="#6BA3FF" opacity="0.7" class="twinkle t4"/>
         <use href="#cos-sparkle-plus" width="14" height="14" x="756" y="361"
-             color="rgba(232,228,220,0.70)" class="twinkle t5"/>
+             color="rgba(241,235,221,0.70)" class="twinkle t5"/>
 
         <!-- Horizontal chart-tick lines paired with sparkles (image 2 reference) -->
-        <g fill="rgba(232,228,220,0.35)">
+        <g fill="rgba(241,235,221,0.35)">
           <circle cx="225" cy="740" r="0.6"/><circle cx="208" cy="740" r="0.6"/><circle cx="191" cy="740" r="0.6"/>
           <circle cx="174" cy="740" r="0.6"/><circle cx="157" cy="740" r="0.6"/>
           <circle cx="720" cy="290" r="0.6"/><circle cx="737" cy="290" r="0.6"/><circle cx="754" cy="290" r="0.6"/>
@@ -2259,7 +2578,7 @@
           </g>
           <!-- Tiny portal at ~210° (opposite quadrant) -->
           <g transform="translate(-49.5 85.7)">
-            <use href="#cos-portal" width="16" height="16" x="-8" y="-8" color="rgba(232,228,220,0.70)"/>
+            <use href="#cos-portal" width="16" height="16" x="-8" y="-8" color="rgba(241,235,221,0.70)"/>
           </g>
           <!-- Pinpoint blue dot at ~155° -->
           <circle cx="-90.6" cy="42" r="1.5" fill="#96BCFF" class="twinkle t5"/>
@@ -2275,7 +2594,7 @@
       <!-- Latin signature footer -->
       <div class="cos-footer">
         <div class="cos-footer__latin">aspicientes stellas</div>
-        <div class="cos-footer__lesson">Algebra II · Lesson 3 · Chapter 7</div>
+        <div class="cos-footer__lesson">Ratios, Percentages &amp; Equations</div>
       </div>
 
       <!-- Cartographic corner meta -->
@@ -2299,7 +2618,7 @@
       <div class="teamup__counts">
         <span class="count-chip count-chip--students" id="tuStudents">
           <span class="count-chip__dot"></span>
-          <span id="tuStudentsN">0</span><span class="count-chip__total"> / 24</span> here
+          <span id="tuStudentsN">0</span><span class="count-chip__total"> / 24</span>
         </span>
         <span class="count-chip count-chip--teams" id="tuTeams">
           <span id="tuTeamsN">0</span> teams
@@ -2321,19 +2640,20 @@
         </div>
       </div>
 
-      <button class="teamup__start" id="tuStart" aria-label="Start class">
-        <span class="teamup__start-hint" id="tuStartHint">when you're ready</span>
-        Start class
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
-      </button>
+      <!-- The Start button is gone: the lobby advances itself 2s after the
+           last student settles into a team. Nothing to press. -->
     </div>
 
     <!-- ── Slide view ── -->
     <div class="slide-area">
       <div class="stage-wrap">
-        <section class="stage">
-          <div class="slide-eyebrow">Lesson 3 · Chapter 7</div>
-          <h1 class="slide-title">Quadratic functions <em>— the vertex form</em></h1>
+        <section class="stage" id="stage">
+          <!-- The anchor slide: authored markup, not an export. The deck
+               keeps it in the middle of the order and opens on it. -->
+          <div class="slide-native" id="slideNative">
+            <div class="slide-eyebrow">Lesson 3 · Chapter 7</div>
+            <h1 class="slide-title">Quadratic functions <em>— the vertex form</em></h1>
+          </div>
         </section>
       </div>
       <aside class="sidebar">
@@ -2417,11 +2737,36 @@
     </div>
   </main>
 
+  <!-- Shown only when the detached-copy guard fires (see detachedGuard) -->
+  <div class="detached-note" role="status">
+    <span>This copy is open away from its project folder, so photos and the
+    lab backdrop can&rsquo;t load. Open <b>presenter-opening.html</b> from
+    <b>Noon brand Playground</b> for the full thing.</span>
+  </div>
+
   <!-- ── Control panel ── -->
   <aside class="controls-panel" id="cp" aria-label="Sequence controls">
-    <button class="cp-handle" id="cpHandle">
-      <span class="cp-diamond"></span> Sequence controls
-    </button>
+    <div class="cp-bar">
+      <button class="cp-handle" id="cpHandle">
+        <span class="cp-diamond"></span> Sequence controls
+      </button>
+      <span class="cp-bar__label">Skip to</span>
+      <div class="cp-tabs" data-attr="data-phase">
+        <button data-value="teamup">Team-up</button>
+        <button data-value="countdown">Count</button>
+        <button data-value="teacher">Teacher</button>
+        <button data-value="slides">Slides</button>
+        <button data-value="stage">Stage</button>
+      </div>
+      <span class="cp-bar__group cp-bar__group--deck">
+        <span class="cp-bar__label">Deck</span>
+        <div class="cp-tabs" data-attr="data-deck">
+          <button data-value="gl">GL</button>
+          <button data-value="chemistry">Chem</button>
+          <button data-value="band">Band</button>
+        </div>
+      </span>
+    </div>
     <div class="cp-panel">
 
       <div class="cp-section">Countdown style</div>
@@ -2435,50 +2780,51 @@
         </div>
       </div>
 
+      <div class="cp-row">
+        <span>Rete <span style="opacity:.5">· cinema</span></span>
+        <div class="cp-tabs" data-attr="data-rete">
+          <button data-value="off">Off</button>
+          <button data-value="field">Field</button>
+        </div>
+      </div>
+      <div class="cp-row">
+        <span>Vignette</span>
+        <div class="cp-tabs" data-attr="data-bg-vignette">
+          <button data-value="off">Off</button>
+          <button data-value="on">On</button>
+        </div>
+      </div>
+
       <div class="cp-section">Sequence</div>
+
       <div class="cp-row">
-        <span>Skip to</span>
-        <div class="cp-tabs" data-attr="data-phase">
-          <button data-value="teamup">Team-up</button>
-          <button data-value="countdown">Count</button>
-          <button data-value="teacher">Teacher</button>
-          <button data-value="slides">Slides</button>
-          <button data-value="stage">Stage</button>
+        <span>Slide deck</span>
+        <div class="cp-tabs" data-attr="data-deck">
+          <button data-value="gl">GL</button>
+          <button data-value="chemistry">Chem</button>
+          <button data-value="band">Band</button>
+        </div>
+      </div>
+
+      <div class="cp-row">
+        <span>Team mark</span>
+        <div class="cp-tabs" data-attr="data-team-mark">
+          <button data-value="art">Art</button>
+          <button data-value="coin">Coin</button>
+          <button data-value="tinted">Tinted</button>
+          <button data-value="line">Line</button>
         </div>
       </div>
       <div class="cp-row">
-        <span>Mode</span>
-        <div class="cp-tabs" data-attr="data-mode">
-          <button data-value="team">Team</button>
-          <button data-value="solo">Solo</button>
-        </div>
-      </div>
-      <div class="cp-row">
-        <span>Card layout</span>
-        <div class="cp-tabs" data-attr="data-card-layout">
-          <button data-value="row">Side</button>
-          <button data-value="stacked">Stacked</button>
-        </div>
-      </div>
-      <div class="cp-row">
-        <span>Duration</span>
-        <div class="cp-tabs" data-attr="data-duration">
-          <button data-value="5">5s</button>
-          <button data-value="10">10s</button>
-          <button data-value="15">15s</button>
-        </div>
-      </div>
-      <div class="cp-row">
-        <span>Teacher hold</span>
-        <div class="cp-tabs" data-attr="data-teacher-hold">
-          <button data-value="2">2s</button>
-          <button data-value="3">3s</button>
-          <button data-value="5">5s</button>
+        <span>Team rail</span>
+        <div class="cp-tabs" data-attr="data-rail">
+          <button data-value="off">Off</button>
+          <button data-value="on">On</button>
         </div>
       </div>
 
       <div class="cp-section">Backdrop</div>
-      <div class="cp-row">
+      <div class="cp-row cp-row--sky">
         <span>Stars</span>
         <div class="cp-tabs" data-attr="data-bg-stars">
           <button data-value="sparse">Sparse</button>
@@ -2486,7 +2832,7 @@
           <button data-value="dense">Dense</button>
         </div>
       </div>
-      <div class="cp-row">
+      <div class="cp-row cp-row--sky">
         <span>Star glow</span>
         <div class="cp-tabs" data-attr="data-bg-glow">
           <button data-value="off">Off</button>
@@ -2494,7 +2840,7 @@
           <button data-value="strong">Strong</button>
         </div>
       </div>
-      <div class="cp-row">
+      <div class="cp-row cp-row--sky">
         <span>North star</span>
         <div class="cp-tabs" data-attr="data-bg-northstar">
           <button data-value="off">Off</button>
@@ -2505,6 +2851,7 @@
         <span>Landscape · built-in</span>
         <div class="cp-tabs" data-attr="data-bg-landscape">
           <button data-value="off">Off</button>
+          <button data-value="contours">Contours</button>
           <button data-value="dunes">Dunes</button>
         </div>
       </div>
@@ -2529,6 +2876,7 @@
   </aside>
 </div>
 
+<script src="slide-deck.js"></script>
 <script>
   /* ──────────────────────────────────────────────────────────────────────
      STAR FIELD — rendered once, shown according to data-bg-stars
@@ -2597,20 +2945,29 @@
     }
     seed();
 
-    function tick() {
+    // Time-based motion: grains move by elapsed time, not by frame count, so a
+    // heavy frame (the numeral swap) can never make the sand pause or slow down.
+    let last = performance.now();
+    function tick(now) {
+      now = now || performance.now();
+      const dt = Math.min(4, Math.max(0.25, (now - last) / 16.667));
+      last = now;
       ctx.clearRect(0, 0, W, H);
-      windPulse *= 0.94;
+      windPulse *= Math.pow(0.94, dt);
       for (const g of grains) {
         const wind = 1 + windPulse * 6;
-        g.x += g.vx * wind;
-        g.y += g.vy + (Math.random() - 0.5) * 0.15;
+        g.x += g.vx * wind * dt;
+        g.y += (g.vy + (Math.random() - 0.5) * 0.15) * dt;
         if (g.x > W + 6) g.x = -6;
         if (g.x < -6)    g.x = W + 6;
         if (g.y > H + 6) g.y -= H + 12;
         if (g.y < -6)    g.y += H + 12;
-        const r = Math.round(212 + (240-212) * g.mix);
-        const gg= Math.round(149 + (207-149) * g.mix);
-        const b = Math.round(110 + (90-110)  * g.mix);
+        // GUIDING LIGHTS — the blend now runs gold-400 → gold-200 instead of
+        // sand → gold, so the drifting particles sit in the same family as
+        // the star field they are drifting through.
+        const r = Math.round(201 + (240-201) * g.mix);
+        const gg= Math.round(162 + (207-162) * g.mix);
+        const b = Math.round(39  + (90 - 39) * g.mix);
         ctx.beginPath();
         ctx.fillStyle = `rgba(${r},${gg},${b},${g.a})`;
         ctx.arc(g.x, g.y, g.r, 0, Math.PI * 2);
@@ -2923,10 +3280,10 @@
         // Sub-pixel jitter — gives the settled state a "live" granular shimmer
         p.x += (Math.random() - 0.5) * 0.18;
         p.y += (Math.random() - 0.5) * 0.18;
-        // Sand→gold color blend per-particle (set once in init, stable)
-        const r = (212 + (240 - 212) * p.mix) | 0;
-        const g = (149 + (207 - 149) * p.mix) | 0;
-        const b = (110 + (90  - 110) * p.mix) | 0;
+        // GUIDING LIGHTS — gold-400 → gold-200 per-particle (set once in init)
+        const r = (201 + (240 - 201) * p.mix) | 0;
+        const g = (162 + (207 - 162) * p.mix) | 0;
+        const b = (39  + (90  -  39) * p.mix) | 0;
         ctx.beginPath();
         ctx.fillStyle = `rgba(${r},${g},${b},${p.a})`;
         ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
@@ -3007,6 +3364,88 @@
     grain:   ENGINE_grain,
     cosmos:  ENGINE_cosmos,
   };
+
+  /* ──────────────────────────────────────────────────────────────────────
+     THE RETE — Guiding Lights §10
+
+     The field reading: concentric rings centred on the numeral running off
+     every edge, crossed by four radials, one revolution every 40s. Signal
+     at .14. Built once on a 1600×900 viewBox and sliced to fill.
+
+     Deliberately small — the disc version with its plate, star pointers and
+     counting rim was more instrument than the digit could carry.
+     ────────────────────────────────────────────────────────────────────── */
+  /* ──────────────────────────────────────────────────────────────────────
+     THE TOPOGRAPHIC GROUND
+
+     The bg-lab "Topographic · Void" preset drawn inline: 14 levels, stroke
+     0.8, peak .46 falling to base .06, falloff 1.5. The opacities are then
+     scaled to about half, because the preset was tuned as a canvas in its
+     own right and this is a ground with a lobby on top of it.
+     ────────────────────────────────────────────────────────────────────── */
+  (function buildContours() {
+    const el = document.getElementById('contours');
+    if (!el) return;
+    const W = 1600, H = 900, LEVELS = 14, DIM = 0.5;
+    const peaks = [[0.20, 0.26, 46, 1.0, 1.0], [0.62, 0.74, 52, 2.3, 1.15], [0.92, 0.30, 38, 4.1, 0.85]];
+    let s = '';
+    for (const [px, py, base, seed, k] of peaks) {
+      const cx = px * W, cy = py * H;
+      for (let L = 0; L < LEVELS; L++) {
+        const t = L / (LEVELS - 1);
+        const op = ((0.46 - (0.46 - 0.06) * Math.pow(t, 1 / 1.5)) * DIM).toFixed(3);
+        const rr0 = base + t * base * 7.4 * k;
+        let d = '';
+        for (let a = 0; a <= 360; a += 6) {
+          const rad = a * Math.PI / 180;
+          const wob = 1 + 0.20 * Math.sin(3 * rad + seed)
+                        + 0.13 * Math.cos(5 * rad + seed * 1.7)
+                        + 0.07 * Math.sin(7 * rad + seed * 0.6);
+          const rr = rr0 * wob;
+          d += (a === 0 ? 'M' : 'L') + (cx + Math.cos(rad) * rr * 1.55).toFixed(1)
+             + ',' + (cy + Math.sin(rad) * rr).toFixed(1) + ' ';
+        }
+        s += `<path d="${d}Z" fill="none" stroke="#f5f1e8" stroke-opacity="${op}" stroke-width="0.8"/>`;
+      }
+    }
+    el.innerHTML = s;
+  })();
+
+  (function buildRete() {
+    const CX = 800, CY = 450, SIG = '#c9a227';
+    const el = document.getElementById('rete');
+    if (!el) return;
+
+    // R0 is the clear radius — nothing is drawn inside it. The innermost ring
+    // is a room the countdown sits in rather than a pattern running under it.
+    // 260 was chosen against the digit: 56vh at line-height 1 gives a glyph
+    // roughly ±160 tall and ±205 wide at its worst ("10"), and 260 clears
+    // both while still sitting below .cin-label at 11vh.
+    const R0 = 260;
+
+    let rings = '';
+    for (let r = R0; r <= 1180; r += 128) rings += `<circle cx="0" cy="0" r="${r}"/>`;
+
+    // Four radials, not six — the rings carry the form, the radials only
+    // need to say the field has an origin. Each is drawn as two segments so
+    // none of them crosses the clear centre.
+    let rads = '';
+    for (let a = 0; a < 180; a += 45) {
+      const rad = a * Math.PI / 180, L = 1280;
+      const cx = Math.cos(rad), cy = Math.sin(rad);
+      rads += `<line x1="${(-cx*L).toFixed(1)}" y1="${(-cy*L).toFixed(1)}"`
+            + ` x2="${(-cx*R0).toFixed(1)}" y2="${(-cy*R0).toFixed(1)}"/>`
+            + `<line x1="${(cx*R0).toFixed(1)}" y1="${(cy*R0).toFixed(1)}"`
+            + ` x2="${(cx*L).toFixed(1)}" y2="${(cy*L).toFixed(1)}"/>`;
+    }
+
+    el.innerHTML =
+      `<g transform="translate(${CX},${CY})" fill="none" stroke="${SIG}"
+          stroke-opacity=".14" stroke-width="1">
+         <g class="rete-spin">${rads}</g>
+         <g>${rings}</g>
+       </g>`;
+  })();
 
   /* ──────────────────────────────────────────────────────────────────────
      SEQUENCE CONDUCTOR — reads attrs off .app, drives the engines + phases
@@ -3105,15 +3544,83 @@
      Mode toggle: team (default) vs solo (attendance grid).
      ────────────────────────────────────────────────────────────────────── */
   const TEAM_POOL = [
-    { id: 'cloud',     name: 'Cloud',     avatar: 'assets/teams/Cloud.svg',     color: 'var(--team-cloud)' },
-    { id: 'crystal',   name: 'Crystal',   avatar: 'assets/teams/Crystal.svg',   color: 'var(--team-crystal)' },
-    { id: 'fire',      name: 'Fire',      avatar: 'assets/teams/Fire.svg',      color: 'var(--team-fire)' },
-    { id: 'lightning', name: 'Lightning', avatar: 'assets/teams/Lightening.svg',color: 'var(--team-lightning)' },
-    { id: 'rainstorm', name: 'Rainstorm', avatar: 'assets/teams/Rainstorm.svg', color: 'var(--team-rainstorm)' },
-    { id: 'tornado',   name: 'Tornado',   avatar: 'assets/teams/Tornado.svg',   color: 'var(--team-tornado)' },
-    { id: 'tsunami',   name: 'Tsunami',   avatar: 'assets/teams/Tsunami.svg',   color: 'var(--team-tsunami)' },
-    { id: 'volcano',   name: 'Volcano',   avatar: 'assets/teams/Volcano.svg',   color: 'var(--team-volcano)' },
+    { id: 'cloud',     name: 'Cloud',     avatar: 'assets/teams/Cloud.svg',     color: 'var(--team-cloud)',     hex: '#B7CEDD' },
+    { id: 'crystal',   name: 'Crystal',   avatar: 'assets/teams/Crystal.svg',   color: 'var(--team-crystal)',   hex: '#AC7F97' },
+    { id: 'fire',      name: 'Fire',      avatar: 'assets/teams/Fire.svg',      color: 'var(--team-fire)',      hex: '#C98A87' },
+    { id: 'lightning', name: 'Lightning', avatar: 'assets/teams/Lightening.svg',color: 'var(--team-lightning)', hex: '#DDBA62' },
+    { id: 'rainstorm', name: 'Rainstorm', avatar: 'assets/teams/Rainstorm.svg', color: 'var(--team-rainstorm)', hex: '#86A7BE' },
+    { id: 'tornado',   name: 'Tornado',   avatar: 'assets/teams/Tornado.svg',   color: 'var(--team-tornado)',   hex: '#C6CCAA' },
+    { id: 'tsunami',   name: 'Tsunami',   avatar: 'assets/teams/Tsunami.svg',   color: 'var(--team-tsunami)',   hex: '#9FAA7D' },
+    { id: 'volcano',   name: 'Volcano',   avatar: 'assets/teams/Volcano.svg',   color: 'var(--team-volcano)',   hex: '#E7B9B4' },
   ];
+
+  /* ──────────────────────────────────────────────────────────────────────
+     THE TEAM MARK
+
+     Emblems authored on a 24 grid — the same paths the style guide uses, so
+     the three drawn treatments differ only in presentation, never in what
+     the mark is. teamMark() returns all four variants; CSS shows one, keyed
+     on data-team-mark, so switching costs no re-render.
+
+     The line variant carries NO gold node. The node is the §08 UI-icon rule
+     — "one node, placed by meaning" — and a team is an identity, not a
+     control: there is no meaningful point on it for a node to mark.
+     ────────────────────────────────────────────────────────────────────── */
+  const TEAM_EM = {
+    cloud:'<path d="M7.2,16.6 h9.9 a3.6,3.6 0 0 0 .3,-7.2 a5.2,5.2 0 0 0 -9.8,-1.5 a3.9,3.9 0 0 0 -.4,8.7 Z"/>',
+    crystal:'<path d="M7,4.4 h10 L21,10 L12,20.6 L3,10 Z"/><path d="M3,10 H21 M7,4.4 L9.6,10 L12,20.6 M17,4.4 L14.4,10 L12,20.6"/>',
+    fire:'<path d="M12,21 c-3.7,0 -6.2,-2.5 -6.2,-6 c0,-4.6 4.4,-5.9 4.4,-9.9 c0,-1 -.3,-1.9 -.8,-2.5 c4.6,1.4 8.8,6.1 8.8,12.4 c0,3.5 -2.5,6 -6.2,6 Z"/><path d="M12,21 c-1.9,0 -3.1,-1.3 -3.1,-3 c0,-2.3 3.1,-3.1 3.1,-6.2 c1.9,1.5 3.1,3.7 3.1,6.2 c0,1.7 -1.2,3 -3.1,3 Z"/>',
+    lightning:'<path d="M13.4,2.6 L5.2,13.4 h5.9 L9.9,21.4 L18.9,10 h-5.9 Z"/>',
+    rainstorm:'<path d="M7.4,13.4 h9.4 a3.3,3.3 0 0 0 .3,-6.6 a4.9,4.9 0 0 0 -9.2,-1.4 a3.6,3.6 0 0 0 -.5,8 Z"/><path d="M8.6,16.6 L7.4,20.6 M12.6,16.6 L11.4,20.6 M16.6,16.6 L15.4,20.6"/>',
+    tornado:'<path d="M3.6,4.4 H20.4 M5.8,8.6 H18.2 M8,12.8 H16 M10,17 H14.6 M11.4,21 H13.2"/>',
+    tsunami:'<path d="M2.2,16.4 c3.4,-3.4 5.2,-11 11.4,-11 c4,0 6.9,3 6.9,6.6 c0,3 -2.4,5.1 -5,5.1 c-2.3,0 -4.1,-1.7 -4.1,-3.8 c0,-1.7 1.3,-3 3,-3"/><path d="M2.2,20.8 h19.6"/>',
+    volcano:'<path d="M2.4,20.6 h19.2 M5,20.6 L9.6,10.6 h4.8 L19,20.6"/><path d="M12.4,9.6 C11.7,7.8 13.7,7.2 13.5,5.6"/><circle cx="15.7" cy="3.9" r="2.1"/>',
+  };
+  const MARK_SIZE = 72;
+  let _tmUid = 0;
+  function _hex2rgb(h){h=h.replace('#','');return [parseInt(h.slice(0,2),16),parseInt(h.slice(2,4),16),parseInt(h.slice(4,6),16)];}
+  function _lighten(hex,amt){
+    return '#' + _hex2rgb(hex).map(v => Math.round(v+(255-v)*amt).toString(16).padStart(2,'0')).join('');
+  }
+  function teamMark(team) {
+    const em = TEAM_EM[team.id] || '', hex = team.hex, S = MARK_SIZE;
+    const c = S/2, r = S/2, inset = Math.max(2, Math.round(S*0.13)), uid = ++_tmUid;
+
+    // coin — solid face, grain, one inset hairline, ink emblem
+    const scA = S/24*0.40, offA = c - 12*scA;
+    const coin = `<svg width="${S}" height="${S}" viewBox="0 0 ${S} ${S}">
+      <circle cx="${c}" cy="${c}" r="${r}" fill="${hex}"/>
+      <clipPath id="tmc${uid}"><circle cx="${c}" cy="${c}" r="${r}"/></clipPath>
+      <g clip-path="url(#tmc${uid})" style="mix-blend-mode:overlay">
+        <rect width="${S}" height="${S}" fill="#fff" filter="url(#coin-grain)" opacity=".34"/></g>
+      <circle cx="${c}" cy="${c}" r="${r-inset}" fill="none" stroke="${_lighten(hex,.38)}"
+              stroke-opacity=".9" stroke-width="1"/>
+      <g transform="translate(${offA},${offA}) scale(${scA})" fill="none" stroke="#12161f"
+         stroke-opacity=".86" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">${em}</g></svg>`;
+
+    // tinted — 13% fill, 35% border, emblem in the family colour
+    const scB = S/24*0.44, offB = c - 12*scB;
+    const tinted = `<svg width="${S}" height="${S}" viewBox="0 0 ${S} ${S}">
+      <circle cx="${c}" cy="${c}" r="${r-1}" fill="${hex}" fill-opacity=".13"
+              stroke="${hex}" stroke-opacity=".35" stroke-width="1"/>
+      <g transform="translate(${offB},${offB}) scale(${scB})" fill="none" stroke="${hex}"
+         stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round">${em}</g></svg>`;
+
+    // line — no disc, no node
+    const scC = S/24*0.92, offC = (S - 24*scC)/2;
+    const line = `<svg width="${S}" height="${S}" viewBox="0 0 ${S} ${S}">
+      <g transform="translate(${offC},${offC}) scale(${scC})" fill="none" stroke="${hex}"
+         stroke-opacity=".9" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">${em}</g></svg>`;
+
+    const el = document.createElement('span');
+    el.className = 'team-card__icon';
+    el.innerHTML =
+      `<span class="tm tm--art"><img src="${team.avatar}" alt=""></span>` +
+      `<span class="tm tm--coin">${coin}</span>` +
+      `<span class="tm tm--tinted">${tinted}</span>` +
+      `<span class="tm tm--line">${line}</span>`;
+    return el;
+  }
 
   const FIRST_NAMES = ['Aisha','Yousef','Layla','Omar','Maya','Khalid','Sara','Hassan','Noor','Tariq','Fatima','Ibrahim','Reem','Mostafa','Salma','Yara','Ali','Hala','Mariam','Ziad','Lina','Mohammed','Hana','Karim','Nadia','Faris','Dalia','Rakan','Saad','Jana','Adam','Lubna','Ahmed','Bushra','Tarek','Hadi','Eman','Walid','Asma','Rashed','Mira','Amal','Sami','Dana','Khaled','Rami','Lara','Bilal','Hind','Nour','Said','Maya','Tamer','Salwa','Ramy','Lara','Joud','Ramzi','Hala','Wael'];
   const LAST_INITIALS = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
@@ -3216,9 +3723,7 @@
       // sidebar — icon + name + count stacked vertically on the left
       const sidebar = document.createElement('div');
       sidebar.className = 'team-card__sidebar';
-      const icon = document.createElement('img');
-      icon.className = 'team-card__icon';
-      icon.src = team.avatar; icon.alt = '';
+      const icon = teamMark(team);
       const nameEl = document.createElement('span');
       nameEl.className = 'team-card__name';
       nameEl.textContent = team.name;
@@ -3457,9 +3962,7 @@
     // own moment; --i would just hide them behind a 70ms × idx delay.
     const sidebar = document.createElement('div');
     sidebar.className = 'team-card__sidebar';
-    const icon = document.createElement('img');
-    icon.className = 'team-card__icon';
-    icon.src = team.avatar; icon.alt = '';
+    const icon = teamMark(team);
     const nameEl = document.createElement('span');
     nameEl.className = 'team-card__name';
     nameEl.textContent = team.name;
@@ -3672,19 +4175,96 @@
     const lastT = ops.length ? ops[ops.length - 1].at : 0;
     const endId = setTimeout(() => { teamupCycleArmed = false; }, lastT + 600);
     teamupTimers.push(endId);
+
+    // AUTO-ADVANCE — two seconds after the room has finished assembling, the
+    // lobby hands over to the countdown on its own. The pause is the beat
+    // where the teacher sees the finished grid; any shorter and the last
+    // team's pop animation is still running when the screen changes.
+    const goId = setTimeout(() => {
+      if (app.dataset.phase === 'teamup') jumpToPhase('countdown');
+    }, lastT + 2000);
+    teamupTimers.push(goId);
   }
 
-  // Wire Start button → jump to countdown
-  const startBtnEl = document.getElementById('tuStart');
-  if (startBtnEl) {
-    startBtnEl.addEventListener('click', () => jumpToPhase('countdown'));
-  }
 
   // Initial render
   renderTeamup();
 
   // (Removed demo-state MutationObserver — mode + phase changes are wired
   // through cp-tabs handler / jumpToPhase directly.)
+
+  /* ──────────────────────────────────────────────────────────────────────
+     THE SLIDE DECK
+
+     slide-deck.js discovers PNG exports by filename — no manifest. Adding a
+     slide is dropping NN.png (content page) or cover-NN.png (alternate
+     cover) into the folder and reloading.
+
+     A deck is only its own exports — the authored slide is not mounted into
+     it. #slideNative stands in when there is nothing to show (data-deck
+     "off", or a folder still empty) and is hidden the moment a deck loads.
+
+     Order is [covers descending][pages ascending] and the deck opens on the
+     FIRST CONTENT PAGE. Finding that index without an anchor to count from
+     is why covers are probed here before mounting: pages begin exactly at
+     covers.length. The extra probe is a handful of cached image requests.
+
+     Right half of the stage = next, left half = previous, arrow keys the
+     same — but only while the slides phase is up, or the deck would eat
+     arrow presses during the countdown.
+
+     data-deck = gl | chemistry | band   (control panel · Slide deck)
+
+     "off" is still honoured by the code but is no longer offered: the
+     authored slide is a fallback for an empty folder, not a style to pick.
+     ────────────────────────────────────────────────────────────────────── */
+  const DECKS = {
+    // The presenter's own deck. Empty until exports are dropped in, and an
+    // empty folder is harmless: discovery finds nothing, the click zones are
+    // removed, and the authored slide is simply all there is.
+    gl:        { dir: 'assets/slides-gl/',        pages: 20, covers: 8 },
+    // Kept for comparison — these two belong to earlier explorations.
+    chemistry: { dir: 'assets/slides-chemistry/', pages: 20, covers: 8 },
+    band:      { dir: 'assets/slides-band/',      pages: 20, covers: 8 },
+  };
+  const stageEl = document.getElementById('stage');
+  const countEl = document.getElementById('slideCount');
+  let deckCtl = null;
+
+  function mountDeck() {
+    if (deckCtl) { deckCtl.destroy(); deckCtl = null; }
+    if (stageEl) stageEl.removeAttribute('data-slide');
+    if (countEl) { countEl.classList.remove('is-on'); countEl.textContent = ''; }
+
+    const cfg = DECKS[app.dataset.deck];
+    if (!cfg || typeof SlideDeck === 'undefined') return;
+
+    SlideDeck.probe(cfg.dir, 'cover-', '.png', cfg.covers).then(covers =>
+      SlideDeck.mount(stageEl, {
+        dir: cfg.dir,
+        pages: cfg.pages,
+        covers: cfg.covers,
+        // Keys belong to whichever view is on screen. Without this the deck
+        // would advance while the countdown or the lobby is up.
+        isActive: () => app.dataset.phase === 'slides',
+        onChange: (i, total, src) => {
+          // The paper grids and the authored slide are for the empty state —
+          // an exported 16:9 artwork brings its own ground.
+          stageEl.setAttribute('data-slide', src ? 'image' : 'native');
+          if (!countEl) return;
+          countEl.textContent = String(i + 1).padStart(2, '0') + ' / ' + String(total).padStart(2, '0');
+          countEl.classList.add('is-on');
+        }
+      }).then(c => {
+        deckCtl = c;
+        // Nothing exported yet: leave the authored slide standing, and don't
+        // let the counter read "01 / 00".
+        if (!c.count()) return;
+        c.go(covers.length);   // the first content page
+      })
+    ).catch(() => { /* folder missing or file opened detached — stay native */ });
+  }
+  mountDeck();
 
   /* ──────────────────────────────────────────────────────────────────────
      CONTROL PANEL WIRING
@@ -3703,6 +4283,24 @@
   function syncPhaseControl() {
     syncAttrGroups('data-phase');
   }
+
+  /* ──────────────────────────────────────────────────────────────────────
+     DETACHED COPY GUARD
+
+     Probe one small sibling asset. If it fails to load, this file is not
+     sitting next to its folder, so neither assets/ nor noon-bg-lab.html
+     will resolve — and the lab iframe would otherwise render the browser's
+     blank error page across the entire canvas. An <img> error event fires
+     reliably for a missing file:// resource, which fetch() and iframe
+     contentDocument checks do not (opaque origins).
+     ────────────────────────────────────────────────────────────────────── */
+  (function detachedGuard() {
+    const probe = new Image();
+    probe.onerror = () => {
+      document.getElementById('app').dataset.detached = 'yes';
+    };
+    probe.src = 'assets/noon-logo.svg';
+  })();
 
   // Lab iframe: lazy-load when first lab-* preset picked, then keep src current.
   const labFrame = document.getElementById('bgLabFrame');
@@ -3740,21 +4338,15 @@
         syncAttrGroups(attr);
 
         // Behaviors per control
-        if (attr === 'data-countdown') {
+        if (attr === 'data-deck') {
+          mountDeck();
+        } else if (attr === 'data-countdown') {
           // restart the sequence with the new style — unless we're holding
           // in team-up, in which case just update the setting silently so
           // the change takes effect when the teacher clicks Start.
           if (app.dataset.phase !== 'teamup') startSequence();
         } else if (attr === 'data-phase') {
           jumpToPhase(value);
-        } else if (attr === 'data-duration' || attr === 'data-teacher-hold') {
-          // changing durations restarts the sequence so the new timing applies
-          if (app.dataset.phase !== 'teamup') startSequence();
-        } else if (attr === 'data-mode') {
-          // Mode toggle while in team-up — restart the cycle in the new mode
-          // (team-grid → attendance-grid or vice versa). Otherwise just stash
-          // the setting for the next time team-up loads.
-          if (app.dataset.phase === 'teamup') startTeamupCycle();
         }
         // bg-* changes are purely CSS — no JS restart needed
         // (lab iframe sync handled by MutationObserver on data-bg-landscape)
@@ -3852,11 +4444,14 @@
     nameRow.className = 'msg__name';
     nameRow.appendChild(document.createTextNode(s.name));
 
+    // No timestamp. In a live class every message is "just now" until it
+    // isn't, and the relative label was three words of noise per card. The
+    // freshness dot stays — that is a state, not a clock.
     const time = document.createElement('span');
     time.className = 'msg__time';
     const dot = document.createElement('span');
     dot.className = 'msg__fresh-dot';
-    time.append(dot, document.createTextNode(label));
+    time.append(dot);
     nameRow.appendChild(time);
 
     const text = document.createElement('div');
@@ -3983,6 +4578,111 @@
   } else {
     startSequence();
   }
+</script>
+<script>
+/* Proven Routes star field — ported from rn/StarsDynamic.tsx (still frame), low density */
+(function(){
+  function rng(seed){let s=seed>>>0;return()=>{s=(s*1664525+1013904223)>>>0;return s/4294967296}}
+  function starsDS(ctx,W,H,o){
+    o=Object.assign({density:1,halo:1,lines:1,fill:'#161A21',seed:7,ink:'232,228,220'},o||{});
+    const r=rng(o.seed),TAU=Math.PI*2,INK=o.ink,B=12;
+    if(o.fill){ctx.fillStyle=o.fill;ctx.fillRect(0,0,W,H)}
+    const size=m=>0.30+2.30*Math.exp(-m*0.50), alpha=m=>Math.min(0.95,0.18+0.78*Math.exp(-m*0.55));
+    const P=[],buckets=Array.from({length:B},()=>[]);
+    const count=Math.floor((W*H)/380*o.density);
+    for(let i=0;i<count;i++){const x=r()*W,y=r()*H,mag=Math.pow(r(),0.45)*7.5,st={x,y,r:size(mag),a:alpha(mag),mag};P.push(st);buckets[Math.min(B-1,Math.floor(st.a*B))].push(st)}
+    const mst=stars=>{const inT=new Set([0]),E=[];while(inT.size<stars.length){let bi=-1,bj=-1,bd=1e9;for(const a of inT)for(let b=0;b<stars.length;b++){if(inT.has(b))continue;const d=Math.hypot(stars[b].x-stars[a].x,stars[b].y-stars[a].y);if(d<bd){bd=d;bi=a;bj=b}}if(bj<0)break;E.push([stars[bi],stars[bj]]);inT.add(bj)}return E};
+    const halos=[],clusters=[],bright=P.filter(p=>p.mag<2.2);
+    if(bright.length>=8){const cols=3,rows=2,seeds=[];
+      for(let ro=0;ro<rows;ro++)for(let c=0;c<cols;c++){const reg=bright.filter(q=>q.x>=c/cols*W&&q.x<(c+1)/cols*W&&q.y>=ro/rows*H&&q.y<(ro+1)/rows*H);if(!reg.length)continue;reg.sort((a,b)=>a.mag-b.mag);seeds.push(reg[0])}
+      for(const sd of seeds){const k=3+Math.floor(r()*3);const pool=bright.filter(q=>q!==sd).map(q=>({q,d:Math.hypot(q.x-sd.x,q.y-sd.y)})).sort((a,b)=>a.d-b.d).slice(0,k*2).filter(()=>r()>0.30).slice(0,k).map(z=>z.q);
+        if(!pool.length)continue;const stars=[sd,...pool];clusters.push(mst(stars));for(const q of stars){halos.push([q.x,q.y,q.r*4.5,.07]);halos.push([q.x,q.y,q.r*10,.025])}}}
+    const spikes=[...P].sort((a,b)=>a.mag-b.mag).slice(0,8);
+    if(o.lines>0){ctx.lineWidth=0.7;ctx.lineCap='round';for(const E of clusters)for(const[a,b]of E){const pk=0.34*o.lines*Math.exp(-Math.hypot(b.x-a.x,b.y-a.y)/320);if(pk<.005)continue;const g=ctx.createLinearGradient(a.x,a.y,b.x,b.y);g.addColorStop(0,`rgba(${INK},0)`);g.addColorStop(.18,`rgba(${INK},${pk*.85})`);g.addColorStop(.5,`rgba(${INK},${pk})`);g.addColorStop(.82,`rgba(${INK},${pk*.85})`);g.addColorStop(1,`rgba(${INK},0)`);ctx.strokeStyle=g;ctx.beginPath();ctx.moveTo(a.x,a.y);ctx.lineTo(b.x,b.y);ctx.stroke()}}
+    if(o.halo>0){for(const[x,y,rr,ba]of halos){const a=ba*o.halo;const g=ctx.createRadialGradient(x,y,0,x,y,rr);g.addColorStop(0,`rgba(${INK},${a})`);g.addColorStop(.55,`rgba(${INK},${a*.35})`);g.addColorStop(1,`rgba(${INK},0)`);ctx.fillStyle=g;ctx.beginPath();ctx.arc(x,y,rr,0,TAU);ctx.fill()}
+      ctx.lineWidth=0.5;for(const q of spikes){const len=q.r*9,pk=0.22*o.halo;let g=ctx.createLinearGradient(q.x,q.y-len,q.x,q.y+len);g.addColorStop(0,`rgba(${INK},0)`);g.addColorStop(.5,`rgba(${INK},${pk})`);g.addColorStop(1,`rgba(${INK},0)`);ctx.strokeStyle=g;ctx.beginPath();ctx.moveTo(q.x,q.y-len);ctx.lineTo(q.x,q.y+len);ctx.stroke();
+        g=ctx.createLinearGradient(q.x-len,q.y,q.x+len,q.y);g.addColorStop(0,`rgba(${INK},0)`);g.addColorStop(.5,`rgba(${INK},${pk})`);g.addColorStop(1,`rgba(${INK},0)`);ctx.strokeStyle=g;ctx.beginPath();ctx.moveTo(q.x-len,q.y);ctx.lineTo(q.x+len,q.y);ctx.stroke()}}
+    for(let bi=0;bi<B;bi++){const bk=buckets[bi];if(!bk.length)continue;ctx.fillStyle=`rgba(${INK},${((bi+.5)/B).toFixed(3)})`;ctx.beginPath();for(const q of bk){ctx.moveTo(q.x+q.r,q.y);ctx.arc(q.x,q.y,q.r,0,TAU)}ctx.fill()}
+  }
+
+  function paint(){const cv=document.getElementById('prSky');if(!cv)return;const r=cv.getBoundingClientRect();if(!r.width)return;
+    const d=Math.min(window.devicePixelRatio||1,2);cv.width=r.width*d;cv.height=r.height*d;const ctx=cv.getContext('2d');ctx.setTransform(d,0,0,d,0,0);
+    starsDS(ctx,r.width,r.height,{density:0.12,lines:0.45,seed:11,fill:null});}
+  let t;window.addEventListener('resize',()=>{clearTimeout(t);t=setTimeout(paint,200)});
+  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',paint);else paint();
+})();
+</script>
+<script id="precision-futurism-js">
+(function(){
+  const app=document.getElementById('app');
+  const REDUCED=window.matchMedia&&matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  /* live chip in the topbar */
+  const st=document.querySelector('.session-title');
+  const tm=document.querySelector('.time');if(tm&&!tm.querySelector('.pf-live')){const s=document.createElement('span');s.className='pf-live';s.innerHTML='<i></i>LIVE';tm.prepend(s)}
+
+
+  /* team-up header: big title left, dot-matrix read-out right */
+  (function(){const c=document.querySelector('.teamup__counts');if(!c||c.querySelector('.pf-tu-title'))return;
+    const s=document.getElementById('tuStudents'),t=document.getElementById('tuTeams');
+    const h=document.createElement('h2');h.className='pf-tu-title';h.textContent='Team up';
+    const m=document.createElement('div');m.className='pf-tu-meta';
+    m.append(s,t);if(s){const j=document.createElement('span');j.textContent=' joined';s.append(j)}
+    c.prepend(h);c.append(m)})();
+
+  /* ── Countdown ring: white depleting arc, static hairline khatam, horizon, grains pulled in ── */
+  const cd=document.querySelector('.cd-cinema'), stage=document.getElementById('cinStage');
+  const cv=document.createElement('canvas');cv.className='pf-ring';cv.setAttribute('aria-hidden','true');
+  (cd&&cd.parentNode?cd.parentNode:document.body).insertBefore(cv,cd);
+  let C,W,H,dpr=Math.min(window.devicePixelRatio||1,2),dust=[],grains=[];
+  function fit(){W=window.innerWidth;H=window.innerHeight;cv.width=W*dpr;cv.height=H*dpr;C=cv.getContext('2d');C.setTransform(dpr,0,0,dpr,0,0);
+    dust=Array.from({length:30},()=>({x:Math.random()*W,y:Math.random()*H,s:Math.random()*1.1+.3,a:.12+Math.random()*.3}));
+    grains=Array.from({length:150},()=>spawn(true))}
+  function R(){return H*.33}
+  function spawn(init){const ang=Math.random()*Math.PI*2,d=R()*(1.2+Math.random()*(init?1.7:1.5)+(init?0:.2));return{a:ang,d,sp:.15+Math.random()*.35,sz:.5+Math.random()*1.1,al:.25+Math.random()*.5,mix:Math.random()}}
+  window.addEventListener('resize',fit);fit();
+  let lastSec=null,changedAt=performance.now(),last=performance.now();
+  function centre(){const r=stage.getBoundingClientRect();return [r.left+r.width/2,r.top+r.height/2]}
+  function draw(now){
+    requestAnimationFrame(draw);
+    const dt=Math.min(4,Math.max(.25,(now-last)/16.667));last=now;
+    if(!(app.dataset.countdown==='cinema'&&app.dataset.phase==='countdown')){lastSec=null;return}
+    const total=+app.dataset.duration||10;
+    const digs=stage.querySelectorAll('.cin-digit:not(.is-leaving)');const cur=digs.length?parseInt(digs[digs.length-1].textContent,10):total;
+    if(cur!==lastSec){lastSec=cur;changedAt=now}
+    const left=Math.max(0,cur-Math.min(1,(now-changedAt)/1000));
+    const frac=Math.max(0,Math.min(1,left/total));
+    const [cx,cy]=centre(),r=R();
+    C.clearRect(0,0,W,H);
+    for(const s of dust){C.fillStyle=`rgba(241,235,221,${s.a})`;C.beginPath();C.arc(s.x,s.y,s.s,0,7);C.fill()}
+    C.strokeStyle='rgba(241,235,221,.08)';C.lineWidth=1;C.beginPath();C.moveTo(0,cy+.5);C.lineTo(cx-r-22,cy+.5);C.moveTo(cx+r+22,cy+.5);C.lineTo(W,cy+.5);C.stroke();
+    C.save();C.translate(cx,cy);C.strokeStyle='rgba(241,235,221,.06)';C.lineWidth=.7;const k=r*1.22;C.strokeRect(-k*.71,-k*.71,k*1.42,k*1.42);C.beginPath();C.moveTo(0,-k);C.lineTo(k,0);C.lineTo(0,k);C.lineTo(-k,0);C.closePath();C.stroke();C.restore();
+    C.strokeStyle='rgba(241,235,221,.10)';C.lineWidth=1;C.beginPath();C.arc(cx,cy,r,0,7);C.stroke();
+    const a0=-Math.PI/2,a1=a0+frac*Math.PI*2;
+    if(frac>0.002){C.save();C.strokeStyle='#fff';C.lineCap='round';C.shadowColor='rgba(255,255,255,.55)';C.shadowBlur=16;C.lineWidth=2.5;C.beginPath();C.arc(cx,cy,r,a0,a1);C.stroke();C.restore();
+      C.save();C.fillStyle='#fff';C.shadowColor='rgba(255,255,255,.85)';C.shadowBlur=12;C.beginPath();C.arc(cx+Math.cos(a1)*r,cy+Math.sin(a1)*r,3.2,0,7);C.fill();C.restore()}
+    const pull=.4+1.6*(1-frac);
+    for(const g of grains){if(!REDUCED)g.d-=g.sp*pull*dt;if(g.d<=r)Object.assign(g,spawn(false));
+      const x=cx+Math.cos(g.a)*g.d,y=cy+Math.sin(g.a)*g.d*.92,fade=Math.min(1,(g.d-r)/(r*.35));
+      const rr=Math.round(201+39*g.mix),gg=Math.round(162+45*g.mix),bb=Math.round(39+51*g.mix);
+      C.fillStyle=`rgba(${rr},${gg},${bb},${(g.al*fade).toFixed(3)})`;C.beginPath();C.arc(x,y,g.sz,0,7);C.fill()}
+  }
+  requestAnimationFrame(draw);
+
+  /* ── Team up: the newest arrival carries the white ring until the next one lands ── */
+  const grid=document.getElementById('tuGrid');let nowT=null;
+  if(grid)new MutationObserver(ms=>{let added=null;for(const m of ms)for(const n of m.addedNodes){if(n.nodeType!==1)continue;if(n.classList.contains('member-pill'))added=n;else{const q=n.querySelectorAll&&n.querySelectorAll('.member-pill');if(q&&q.length===1)added=q[0]}}
+    if(!added)return;grid.querySelectorAll('.pf-now').forEach(e=>e.classList.remove('pf-now'));added.classList.add('pf-now');clearTimeout(nowT);nowT=setTimeout(()=>added.classList.remove('pf-now'),2600)}).observe(grid,{childList:true,subtree:true});
+
+  /* ── Stage view: one ring, it follows the speaker ── */
+  const members=[...document.querySelectorAll('.stage-view .member')];
+  const order=[0,1,0,3,0,2];let oi=0,spT=null;
+  function setSpk(i){members.forEach((m,j)=>m.classList.toggle('pf-on',j===i))}
+  function runStage(){clearInterval(spT);oi=0;setSpk(0);spT=setInterval(()=>{oi=(oi+1)%order.length;setSpk(order[oi])},4000)}
+  setSpk(0);
+  new MutationObserver(()=>{if(app.dataset.phase==='stage')runStage();else{clearInterval(spT);setSpk(0)}}).observe(app,{attributes:true,attributeFilter:['data-phase']});
+  if(app.dataset.phase==='stage')runStage();
+})();
 </script>
 </body>
 </html>
